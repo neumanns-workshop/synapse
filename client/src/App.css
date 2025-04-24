@@ -1,0 +1,548 @@
+/* === Base & Typography === */
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #1a1d21; /* Slightly softer dark background */
+  color: #e0e0e0; /* Lighter grey text for better contrast */
+  line-height: 1.6;
+}
+
+#root {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+h1 {
+  color: #88a4ff; /* Lighter, slightly desaturated blue */
+  font-weight: 600;
+  margin-bottom: 0.2rem; /* Reduce bottom margin */
+  /* Add max-width and center */
+  max-width: 600px; 
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Style for the subtitle */
+h2.subtitle {
+  color: #aaa; /* Lighter grey */
+  font-size: 1.1em; /* Smaller than h1 */
+  font-weight: 400; /* Lighter weight */
+  margin-top: -0.3rem; /* Pull up slightly */
+  margin-bottom: 1.5rem; /* Restore original bottom margin */
+  max-width: 600px; /* Match h1 width */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h3 {
+  color: #61dafb; /* Keep React blue for subheadings */
+  margin-bottom: 0.8rem;
+  font-weight: 500;
+}
+
+strong {
+ color: #ffffff; /* Make strong text white for emphasis */
+ font-weight: 600; /* Slightly bolder */
+}
+
+/* === General Button Styling === */
+button {
+  font-size: 0.95em; /* Slightly smaller base size */
+  padding: 0.7em 1.4em; /* Adjust padding */
+  margin: 0.5em;
+  cursor: pointer;
+  border-radius: 6px; /* Slightly less rounded */
+  border: 1px solid #444; /* Visible border */
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #333842; /* Cooler grey button */
+  transition: border-color 0.2s, background-color 0.2s, transform 0.1s;
+  color: #e0e0e0;
+}
+button:hover {
+  background-color: #404552;
+  border-color: #7a8bff; /* Use accent color on hover */
+}
+button:active {
+  transform: scale(0.98); /* Subtle press effect */
+}
+button:focus,
+button:focus-visible {
+  outline: 2px solid #7a8bff; /* Thinner outline */
+  outline-offset: 2px;
+}
+button:disabled {
+  background-color: #2a2d33;
+  border-color: #444;
+  color: #777;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* === Game Specific Styles === */
+.game-container {
+  margin-top: 1.5rem;
+  /* Removed background-color, padding, border-radius, box-shadow for minimal look */
+}
+
+/* Settings Area Styling */
+.settings-area {
+  margin-bottom: 20px;
+  padding: 10px;
+  /* background-color: rgba(255, 255, 255, 0.03); */ /* Optional subtle background */
+  /* border-radius: 6px; */
+}
+
+.settings-area label {
+  margin-right: 10px;
+  color: #ccc;
+}
+
+/* Style the select dropdown */
+#k-select {
+  font-size: 0.95em;
+  padding: 0.5em 1em;
+  margin: 0.5em 0; /* Adjust margin */
+  cursor: pointer;
+  border-radius: 6px; 
+  border: 1px solid #444; 
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #333842; /* Match button background */
+  color: #e0e0e0; /* Match button text */
+  appearance: none; /* Remove default system appearance */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  /* Add custom dropdown arrow */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23CCCCCC%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: right 0.7em top 50%;
+  background-size: 0.65em auto;
+  padding-right: 2.5em; /* Make space for arrow */
+}
+
+#k-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.info-button {
+  position: absolute;
+  top: 20px; /* Adjust position */
+  right: 20px;
+  z-index: 10;
+  background-color: #4a5060; /* Distinct utility button color */
+  border: 1px solid #666;
+  padding: 0.5em 1em; /* Smaller padding */
+  font-size: 0.9em;
+}
+.info-button:hover {
+  background-color: #5a6070;
+  border-color: #888;
+}
+
+.info-box {
+  border: 1px solid #444;
+  padding: 20px;
+  margin: 25px 0;
+  background-color: #2c313a; /* Match game container background more closely */
+  text-align: left;
+  border-radius: 8px;
+  line-height: 1.7;
+  color: #ccc; /* Slightly dimmer text for info */
+}
+
+.info-box h3 {
+  margin-top: 0;
+  color: #61dafb;
+  border-bottom: 1px solid #444; /* Separator */
+  padding-bottom: 0.5rem;
+}
+
+.info-box strong {
+    color: #e0e0e0;
+}
+
+.error-message {
+  color: #ff7b7b; /* Slightly softer red */
+  margin: 15px 0;
+  font-weight: 500; /* Less intense than bold */
+  padding: 10px;
+  background-color: rgba(255, 100, 100, 0.1);
+  border: 1px solid #ff7b7b;
+  border-radius: 4px;
+}
+
+/* Style for the new status info wrapper above the graph */
+.graph-status-info {
+  padding: 10px;
+  text-align: center; /* Center ALL text */
+  margin-top: 1.5rem; 
+  margin-bottom: 1rem; 
+  max-width: 500px; /* Match options-buttons width */
+  margin-left: auto;  
+  margin-right: auto; 
+}
+
+.graph-status-info p {
+  margin: 0.4rem 0;
+  /* REMOVED: text-align: center; (Handled by parent now) */
+}
+
+.graph-status-info strong {
+  color: #a0c8ff;
+  font-weight: 600;
+}
+
+.graph-status-info p.moves-info {
+  margin: 0.4rem 0 1.2rem 0; /* INCREASED bottom margin */
+  text-align: center; 
+  font-size: 1.1em; 
+  color: #ccc; 
+}
+
+.player-move-count {
+  font-weight: 700; /* Bold */
+  color: #fff; /* White */
+}
+
+.optimal-move-count {
+  font-weight: 600; /* Semi-bold */
+  color: #a0c8ff; /* Light blue (match graph path?) */
+}
+
+.player-path {
+  font-size: 0.9em; 
+  color: #999; 
+  /* REMOVED: text-align: left; (Inherits center now) */
+  /* Keep other styles like margin, word-wrap */
+  margin: 10px 0 0 0;
+  word-wrap: break-word;
+  line-height: 1.5;
+  padding-top: 10px;
+}
+
+.player-path strong {
+    color: #bbb;
+    font-weight: 500;
+    margin-right: 5px;
+}
+
+.options-container {
+  margin-top: 0; 
+  padding-top: 0;
+  text-align: center; /* Ensure content (grid/button) is centered */
+}
+
+.options-container h3 {
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.options-buttons {
+  /* Change from flex to grid */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Create 3 equal columns */
+  /* flex-wrap: wrap; REMOVED */
+  justify-content: center; /* Center the grid container if needed, or remove */
+  justify-items: center; /* Center items within grid cells */
+  align-items: center;   /* Vertically center items */
+  gap: 15px; /* Adjust gap as needed for grid */
+  margin-bottom: 15px;
+  max-width: 500px; /* Add max-width to prevent excessive stretching */
+  margin-left: auto;  /* Center the grid block */
+  margin-right: auto; /* Center the grid block */
+}
+
+.neighbor-button {
+  min-width: 110px; /* Slightly larger minimum width */
+  border-width: 2px; /* Make border thicker for gradient visibility */
+  border-color: transparent; /* Start transparent */
+  /* Background color applied inline */
+  color: #111; /* Darker text for contrast on light HSL */
+  font-weight: 600;
+  transition: transform 0.1s ease-out, border-color 0.2s;
+}
+
+.neighbor-button:hover {
+    transform: translateY(-2px); /* Add slight lift on hover */
+    border-color: rgba(255, 255, 255, 0.7); /* Highlight border on hover */
+    /* Keep inline background color */
+}
+
+.give-up-button {
+  margin-top: 20px;
+  background-color: #7f1d1d; /* Slightly different dark red */
+  border-color: #9f2d2d;
+  color: #f0e0e0;
+}
+.give-up-button:hover {
+  background-color: #9f2d2d;
+  border-color: #b93b3b;
+}
+
+/* === Result Sections (Won/Gave Up) === */
+.won-section,
+.gave-up-section {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #2a2d33;
+  border-radius: 6px;
+  border: 1px solid #3a3f47;
+}
+
+.won-section h2 {
+  color: #78ff9a; /* Brighter green */
+  font-size: 1.6em;
+  margin-bottom: 1rem;
+}
+
+.gave-up-section h3 {
+  color: #ffab7a; /* Brighter salmon */
+  margin-top: 0;
+  font-size: 1.4em;
+  margin-bottom: 1rem;
+}
+
+.optimal-path {
+  font-style: normal; /* Remove italic */
+  color: #b0e0ff; /* Light blue for optimal path */
+  background-color: #303848; /* Subtle background highlight */
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 10px 0;
+  display: inline-block; /* Fit content */
+  word-wrap: break-word;
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+
+.path-toggle-container {
+  margin: 20px 0 10px 0;
+  padding-top: 15px;
+  border-top: 1px dashed #444; /* Separator */
+}
+
+.path-toggle-container button {
+  margin-left: 5px;
+  margin-right: 5px;
+  background-color: #4a5060; /* Match info button */
+  border-color: #666;
+  font-size: 0.9em;
+}
+.path-toggle-container button:hover {
+   background-color: #5a6070;
+   border-color: #888;
+}
+
+.path-toggle-container button:disabled {
+  background-color: #3a3f47; /* Darker disabled */
+  border-color: #555;
+  color: #888;
+  opacity: 0.8;
+}
+
+/* === Graph Visualization Styling === */
+.graph-visualization-container {
+  margin: 25px 0;
+}
+
+/* Added style for the wrapper div inside GraphVisualization.jsx */
+.graph-svg-wrapper {
+  /* Add any specific styles for the SVG container div if needed */
+  position: relative; /* Example: if needed for tooltips etc. */
+}
+
+/* Style for the SVG container itself (assuming one exists in GraphVisualization) */
+.graph-visualization svg {
+  /* Ensuring border is removed */
+  border: none !important;
+  background-color: none; /* Explicitly no background */
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  min-height: 300px; /* Reduced min height slightly? Adjust as needed */
+  /* Add cursor style if nodes become interactive */
+  /* cursor: pointer; */
+}
+
+/* === D3 Graph Element Styles === */
+
+/* Default Link Style */
+.graph-link {
+  stroke: #555;
+  stroke-opacity: 0.6;
+  stroke-width: 1.5px; /* Slightly thicker default */
+}
+
+/* Player Path Link Style */
+.player-path-link {
+  stroke: #a0c8ff; /* Match status info strong color */
+  stroke-opacity: 0.9;
+  stroke-width: 2.5px;
+}
+
+/* Optimal Path Link Style */
+.optimal-path-link {
+  stroke: #ffab7a; /* Match gave up h3 color */
+  stroke-opacity: 0.9;
+  stroke-width: 2.5px;
+  stroke-dasharray: 5, 3; /* Dashed line */
+}
+
+/* Suggested Path Link Style */
+.suggested-path-link {
+  stroke: #d4a0ff; /* Light purple/violet */
+  stroke-opacity: 0.9;
+  stroke-width: 2.5px;
+  stroke-dasharray: 2, 4; /* Different dash/dot pattern */
+}
+
+/* Dimmed Link Style (e.g., player path when optimal shown) */
+.graph-link.dimmed {
+  stroke: #777; /* Dim the stroke color */
+  stroke-opacity: 0.5;
+}
+
+/* Default Node Style */
+.graph-node {
+  fill: #61dafb; /* Default: React blue */
+  stroke: #1a1d21; /* Match background for contrast */
+  stroke-width: 1.5px;
+  transition: r 0.3s ease, fill 0.3s ease;
+  cursor: pointer; /* Add pointer cursor */
+}
+
+/* --- Path Node Styles (Define BEFORE specific types) --- */
+
+/* Nodes on player path */
+.graph-node.player-path-node {
+    fill: #a0c8ff; /* Lighter blue for path nodes */
+}
+
+/* Nodes on optimal path (visible in optimal/both modes) */
+.graph-node.optimal-path-node {
+    fill: #ffab7a; /* Light salmon for optimal path nodes */
+}
+
+/* Nodes on suggested path (visible in suggested mode) */
+.graph-node.suggested-path-node {
+    fill: #d4a0ff; /* Match suggested link color */
+}
+
+/* --- Specific Node Type Styles (Define AFTER path styles) --- */
+
+/* Start Node Style */
+.graph-node.start {
+  fill: #78ff9a; /* Brighter green (match Won text) */
+  r: 7px; /* Make start/end slightly larger */
+}
+
+/* End Node Style */
+.graph-node.end {
+  fill: #ff7b7b; /* Softer red (match Error msg) */
+  r: 7px; /* Make start/end slightly larger */
+}
+
+/* Current Node Style (when playing) */
+.graph-node.current {
+  fill: #ffd700; /* Gold */
+  r: 8px; /* Make current node largest */
+  stroke: #fff; /* White stroke for highlight */
+  stroke-width: 2px;
+}
+
+/* Current Node Style (when gave up & suggested shown) */
+.graph-node.current-gave-up {
+  fill: #aa80cc; /* Darker purple? Or keep gold? */
+  r: 8px; /* Keep large size */
+  stroke: #eee; 
+  stroke-width: 1.5px;
+}
+
+/* Node Hover Effect (Optional) */
+.graph-node:hover {
+  /* Example: slightly larger radius or different stroke */
+  /* r: 9px; */
+  /* stroke: #fff; */
+}
+
+/* Label Style */
+.graph-label {
+  fill: #ffffff; /* Change to white for max visibility */
+  font-size: 8px; /* INCREASED FONT SIZE */
+  font-family: sans-serif;
+  pointer-events: none;
+  text-anchor: start;
+  dominant-baseline: middle;
+}
+
+/* Specific label adjustments if needed */
+.graph-node.current + .graph-label { /* Style label for current node */
+  /* fill: #fff; */
+  /* font-weight: bold; */
+}
+
+/* Style for suggested path text in Gave Up section */
+.suggested-path-text {
+  font-style: italic;
+  color: #d4a0ff; /* Match suggested link color */
+  background-color: #303848; /* Match optimal path background? */
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin: 10px 0;
+  display: inline-block; 
+  word-wrap: break-word;
+  font-size: 0.95em;
+  line-height: 1.5;
+}
+
+/* === Text Color Classes === */
+.start-word-text {
+  color: #78ff9a; /* Match start node fill */
+  font-weight: 600;
+}
+
+.end-word-text {
+  color: #ff7b7b; /* Match end node fill */
+  font-weight: 600;
+}
+
+.current-word-text {
+  color: #ffd700; /* Match current node fill */
+  font-weight: 600;
+}
+
+/* Style for highlighted word in path text */
+.highlighted-path-word {
+  background-color: rgba(255, 255, 255, 0.15); /* Subtle highlight */
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-weight: 700; /* Make highlighted bolder */
+}
+
+/* Ensure color overrides highlight background if needed */
+.start-word-text.highlighted-path-word {
+  /* color: #fff; */ /* Optional: Change text color too */
+}
+.current-word-text.highlighted-path-word {
+  /* color: #000; */ /* Optional: Change text color too */
+}
+.end-word-text.highlighted-path-word {
+  /* color: #fff; */ /* Optional: Change text color too */
+}
+
+/* Style for path arrow */
+.path-arrow {
+  color: #777; /* Dim arrow color */
+  margin: 0 0.2em; /* Add slight space around arrow */
+}
+
+/* Remove default Vite styles (already commented out previously) */
