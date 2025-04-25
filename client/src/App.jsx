@@ -375,7 +375,7 @@ function App() {
             <Game />
           </main>
           <footer className="app-footer"> {/* Added footer */}
-            Copyright © 2025 Jared Neumann. Licensed under the <a href="/LICENSE" target="_blank" rel="noopener noreferrer">GPLv3</a>.
+            Copyright © 2025 Jared Neumann. Licensed under the <a href="https://github.com/neumanns-workshop/synapse/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPLv3</a>. | v1.0.0 Alpha
           </footer>
         </div>
       </GameProvider>
