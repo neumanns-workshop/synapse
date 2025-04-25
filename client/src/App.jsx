@@ -3,6 +3,9 @@ import './App.css';
 import { GraphDataProvider, useGraphData } from './context/GraphDataContext';
 // Import GameProvider and useGame hook
 import { GameProvider, useGame, GameStatus } from './context/GameContext';
+// Import Tooltip and its CSS
+import { Tooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 // Removed unused import
 // import { findShortestPath } from './utils/graphUtils'; 
 // Import the new component
@@ -152,14 +155,14 @@ function Game() {
       {displayError && <p className="error-message">Error: {displayError}</p>}
 
       {/* Visualization Container (Graph Only) */}
-      {(status === GameStatus.PLAYING || status === GameStatus.GAVE_UP) && graphData && (
+      {(status === GameStatus.PLAYING || status === GameStatus.GAVE_UP || status === GameStatus.WON) && graphData && (
         <div className="graph-container">
           <GraphVisualization pathDisplayMode={pathDisplay} onNodeClick={handleNodeClick} /> 
          </div>
       )}
 
         {/* Status Info (Path) */}
-      {(status === GameStatus.PLAYING || status === GameStatus.GAVE_UP) && graphData && (
+      {(status === GameStatus.PLAYING || status === GameStatus.GAVE_UP || status === GameStatus.WON) && graphData && (
         <div className="graph-status-info">
           {/* Player Path Rendering */}
           <div className="player-path">
@@ -229,12 +232,21 @@ function Game() {
                 // Append the optimality explanation if applicable
                 tooltipText += optimalityTooltip;
 
+              // Prepare tooltip content for HTML rendering
+              const tooltipHtml = tooltipText.replace(/\n/g, '<br />');
+
               return (
                 <React.Fragment key={word + index}> 
                   {(index > 0) && <span className="path-arrow">{' → '}</span>} 
                   <span 
                     className={wordClass.trim()} 
-                      title={tooltipText} // Use combined tooltip text
+                    // Remove title attribute
+                    // title={tooltipText} 
+                    // Add react-tooltip attributes
+                    data-tooltip-id="path-word-tooltip"
+                    data-tooltip-html={tooltipHtml}
+                    data-tooltip-delay-show={300} // Optional: slight delay
+                    data-tooltip-delay-hide={100}
                   >
                     {word}
                   </span>
@@ -295,10 +307,43 @@ function Game() {
       {/* Won State Display */}
       {status === GameStatus.WON && gameReport && (
         <div className="won-section game-report-section">
-          <h2>You Won!</h2>
-          <p><strong>Player Path:</strong> {playerPath.join(' -> ')}</p>
-          {/* --- Render Report --- */}
+          <h3>You Won!</h3>
+          
+          <p>Optimal Path ({optimalPathLength ?? 'N/A'} moves):</p>
+          <p className="optimal-path">{optimalPath.join(' -> ')}</p>
+
+          <div style={{ marginTop: '10px' }}>
+             <p>Currently Suggested Path:</p>
+             <p className="suggested-path-text" style={{ fontStyle: 'italic' }}>N/A (Game Won)</p>
+          </div>
+          
           <GameReportDisplay report={gameReport} />
+
+          <div className="path-toggle-container">
+            Show on Graph:
+            <button 
+              onClick={() => togglePathDisplay('player')} 
+              className={pathDisplay.player ? 'path-button-active' : ''}
+              title="Show or hide the path you took through the word space"
+            >
+              Player
+            </button>
+            <button 
+              onClick={() => togglePathDisplay('optimal')} 
+              className={pathDisplay.optimal ? 'path-button-active' : ''}
+              title="Show or hide the optimal path from start to end"
+            >
+              Optimal
+            </button>
+            <button
+              onClick={() => togglePathDisplay('suggested')} 
+              disabled={true}
+              className={pathDisplay.suggested ? 'path-button-active' : ''}
+              title="Suggested path is not applicable after winning"
+            >
+              Currently Suggested
+            </button>
+          </div>
         </div>
       )}
 
@@ -306,7 +351,7 @@ function Game() {
       {status === GameStatus.GAVE_UP && optimalPath && gameReport && (
         <div className="gave-up-section game-report-section">
           <h3>You Gave Up!</h3>
-          {/* Display Optimal Path */}
+          
           <p>Optimal Path ({optimalPathLength ?? 'N/A'} moves):</p>
           <p className="optimal-path">{optimalPath.join(' -> ')}</p>
 
@@ -378,6 +423,8 @@ function App() {
             Copyright © 2025 Jared Neumann. Licensed under the <a href="https://github.com/neumanns-workshop/synapse/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPLv3</a>. | v1.0.0 Alpha
           </footer>
         </div>
+        {/* Add Tooltip component instance with clickable prop */}
+        <Tooltip id="path-word-tooltip" clickable={true} />
       </GameProvider>
     </GraphDataProvider>
   );

@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-04-25
+
+### Added
+-   Enriched core word list (`raw_data/words.txt`) with ~1000 additional words.
+-   Tooltip support for touch devices on neighbor selection buttons (`react-tooltip` with `clickable` prop).
+
+### Changed
+-   Updated data generation scripts (`generate_embeddings_ollama.py`) to read from plain text word list (`words.txt`) instead of JSON.
+-   Regenerated all game data files (`embeddings.pkl`, `tsne_coordinates.json`, `graph.json`, `definitions.json`) based on the enriched word list.
+-   Made "Win" screen layout consistent with "Give Up" screen (shows graph visualization, player path, optimal path, and path toggle buttons).
+
+### Fixed
+-   Ensured optimal path text display is consistent between "Win" and "Give Up" screens (shown once explicitly after the title).
+-   Corrected centering of "You Won!" title text to match "You Gave Up!" title.
+-   Resolved issue where tooltips on neighbor buttons were not reliably appearing on touch devices due to immediate `onClick` action.
+
+
 ## [1.0.0] - 2025-04-25
 
 ### Added

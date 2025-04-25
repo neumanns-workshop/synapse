@@ -46,6 +46,17 @@ function GameReportDisplay({ report }) {
         </li>
       </ul>
 
+      {/* --- Remove Display Optimal Path --- */}
+      {/* 
+      {report.optimalPath && report.optimalPath.length > 0 && (
+        <div className=\"optimal-path-display\">
+          <h5>Optimal Path ({report.optimalPath.length - 1} moves):</h5>
+          <p>{report.optimalPath.join(' → ')}</p>
+        </div>
+      )}
+      */}
+      {/* --- End Remove Display Optimal Path --- */}
+
       {/* Show optimal choices if any exist - REMOVED HEADER */}
       {optimalMovesMade.length > 0 && (
         <div className="optimal-moves-made">

@@ -44,17 +44,34 @@ function NeighborSelection({
           const tooltipText = definitionsList.length > 0
             ? definitionsList.map((def, i) => `${i + 1}. ${def}`).join('\n')
             : 'No definition found'; // Fallback message
+          const tooltipHtml = tooltipText.replace(/\n/g, '<br />'); // Use HTML version
 
           return (
+            // Revert: Put attributes back on button, remove container/span
             <button
               key={neighborWord}
-              onClick={() => onSelectWord(neighborWord)} // Use the passed handler
-              style={getButtonStyle(index, neighborOptions.length)} // Use the local style function
+              onClick={() => onSelectWord(neighborWord)}
+              style={getButtonStyle(index, neighborOptions.length)}
               className="option-button"
-              title={tooltipText} // Add the title attribute for the tooltip
+              // Add tooltip attributes back to button
+              data-tooltip-id="path-word-tooltip" 
+              data-tooltip-html={tooltipHtml}
+              data-tooltip-delay-show={300} 
+              data-tooltip-delay-hide={100}
             >
               {neighborWord}
             </button>
+            /* Remove info span container */
+            /*
+            <div key={neighborWord} className="neighbor-button-container">
+              <button ... >
+                {neighborWord}
+              </button>
+              <span ... >
+                (?)
+              </span>
+            </div>
+            */
           );
         })}
       </div>

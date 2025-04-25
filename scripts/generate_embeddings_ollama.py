@@ -7,7 +7,8 @@ import time
 import numpy as np
 
 # --- Configuration ---
-WORDS_PATH = os.path.join("raw_data", "ENGLISH_LEMMATIZED.json")
+# WORDS_PATH = os.path.join("raw_data", "ENGLISH_LEMMATIZED.json") # Old path
+WORDS_PATH = os.path.join("raw_data", "words.txt") # New path
 OUTPUT_DIR = "raw_data"
 OUTPUT_PATH = os.path.join(OUTPUT_DIR, "embeddings.pkl")
 OLLAMA_API_URL = "http://localhost:11434/api/embeddings"
@@ -57,14 +58,19 @@ def generate_embeddings():
     """Loads words, fetches embeddings from Ollama, and saves them to a pickle file."""
     print(f"Loading words from {WORDS_PATH}...")
     try:
-        with open(WORDS_PATH, 'r') as f:
-            words = json.load(f)
+        # with open(WORDS_PATH, 'r') as f: # Old JSON loading
+        #     words = json.load(f)
+        with open(WORDS_PATH, 'r') as f: # New text file loading
+             words = [line.strip() for line in f if line.strip()] # Read lines, strip whitespace, ignore empty lines
         print(f"Loaded {len(words)} words.")
     except FileNotFoundError:
         print(f"Error: Words file not found at {WORDS_PATH}", file=sys.stderr)
         sys.exit(1)
-    except json.JSONDecodeError:
-        print(f"Error: Could not decode JSON from {WORDS_PATH}", file=sys.stderr)
+    # except json.JSONDecodeError: # No longer needed for plain text
+    #     print(f"Error: Could not decode JSON from {WORDS_PATH}", file=sys.stderr)
+    #     sys.exit(1)
+    except Exception as e: # Generic catch for other file reading errors
+        print(f"Error: Could not read words file {WORDS_PATH}: {e}", file=sys.stderr)
         sys.exit(1)
 
     embeddings_dict = {}
