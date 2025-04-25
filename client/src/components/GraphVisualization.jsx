@@ -123,7 +123,7 @@ function renderNodes(nodeGroup, nodesToRender, {
     );
 }
 
-function renderLabelsAndCollide(labelGroup, nodesToRender, {
+function renderLabelsAndCollide(labelGroup, nodesToRender, { 
   startWord, endWord, currentWord, status, suggestedPathFromCurrent
 }) {
     const labelsToRender = nodesToRender.filter(d => 

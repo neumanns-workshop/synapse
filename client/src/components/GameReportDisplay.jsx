@@ -53,13 +53,13 @@ function GameReportDisplay({ report }) {
           <ul>
             {optimalMovesMade.map((move, idx) => {
               // Check if this move was part of the original optimal path
-              const isOnOriginalOptimalPath = report.optimalPath && report.optimalPath.includes(move.playerChose) &&
+              const isOnOriginalOptimalPath = report.optimalPath && report.optimalPath.includes(move.playerChose) && 
                                           report.optimalPath.includes(move.playerPosition) &&
                                           report.optimalPath.indexOf(move.playerChose) === report.optimalPath.indexOf(move.playerPosition) + 1;
-
+              
               // Determine which class to use for the chosen word AND the star
               const choiceClass = isOnOriginalOptimalPath ? "optimal-choice-word global-optimal-choice" : "optimal-choice-word local-optimal-choice";
-
+              
               return (
                 <li key={idx}>
                   At <span className="player-position">{move.playerPosition}</span> you chose <span className={choiceClass}>{move.playerChose}</span> <span className={choiceClass}>★</span>
@@ -89,9 +89,9 @@ function GameReportDisplay({ report }) {
                 : "optimal-choice-word local-optimal-choice";
 
               return (
-                <li key={idx}>
+              <li key={idx}>
                   At <span className="player-position">{move.playerPosition}</span> you chose <span className="player-choice">{move.playerChose}</span>, optimal was <span className={optimalChoiceClass}>{move.optimalChoice}</span>
-                </li>
+              </li>
               );
             })}
           </ul>

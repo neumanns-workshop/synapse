@@ -70,7 +70,7 @@ export function generateGameReport(nodes, playerPath, optimalPath, optimalMovesM
     }
   }
   const averageSimilarity = playerMoves > 0 ? totalSimilarity / playerMoves : null;
-
+        
   // Calculate player distance IF not already passed in correctly
   // If playerSemanticDistance is passed, use it directly.
   // const calculatedPlayerDistance = calculatePathSemanticDistance(nodes, playerPath);
@@ -93,7 +93,7 @@ export function generateGameReport(nodes, playerPath, optimalPath, optimalMovesM
     repositioningMoves,
     optimalChoiceHistory: optimalChoices, // Include the history
     optimalPath: optimalPath // Include optimal path for report display logic
-  };
+    };
 
   return report;
 }

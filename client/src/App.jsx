@@ -135,52 +135,52 @@ function Game() {
   // Render based on Game Status
   return (
     <>
-      <div className="game-container">
+    <div className="game-container">
 
         {/* Container for Start Button & About Button (when idle/finished) */}
-        {(status === GameStatus.IDLE || status === GameStatus.WON || status === GameStatus.GAVE_UP || status === GameStatus.ERROR) && (
+      {(status === GameStatus.IDLE || status === GameStatus.WON || status === GameStatus.GAVE_UP || status === GameStatus.ERROR) && (
           <div className="start-controls-container">
-            <button onClick={handleStartGame} disabled={isGameLoading}>
+        <button onClick={handleStartGame} disabled={isGameLoading}>
               {isGameLoading ? 'Loading...' : 'New Game'}
-            </button>
+        </button>
             {aboutButton} {/* Render About button here */}
           </div>
-        )}
+      )}
 
-        {/* Graph loading/error messages */}
+      {/* Graph loading/error messages */}
         {isGraphLoading && <p>Loading graph data...</p>}
-        {displayError && <p className="error-message">Error: {displayError}</p>}
+      {displayError && <p className="error-message">Error: {displayError}</p>}
 
-        {/* Visualization Container (Graph Only) */}
-        {(status === GameStatus.PLAYING || status === GameStatus.GAVE_UP) && graphData && (
-          <div className="graph-container">
-            <GraphVisualization pathDisplayMode={pathDisplay} onNodeClick={handleNodeClick} />
-          </div>
-        )}
+      {/* Visualization Container (Graph Only) */}
+      {(status === GameStatus.PLAYING || status === GameStatus.GAVE_UP) && graphData && (
+        <div className="graph-container">
+          <GraphVisualization pathDisplayMode={pathDisplay} onNodeClick={handleNodeClick} /> 
+         </div>
+      )}
 
         {/* Status Info (Path) */}
-        {(status === GameStatus.PLAYING || status === GameStatus.GAVE_UP) && graphData && (
-          <div className="graph-status-info">
-            {/* Player Path Rendering */}
-            <div className="player-path">
-              {/* Render Player Path */}
-              {playerPath.map((word, index) => {
-                let wordClass = '';
-                const isFirst = index === 0;
-                const isLast = index === playerPath.length - 1;
+      {(status === GameStatus.PLAYING || status === GameStatus.GAVE_UP) && graphData && (
+        <div className="graph-status-info">
+          {/* Player Path Rendering */}
+          <div className="player-path">
+            {/* Render Player Path */}
+            {playerPath.map((word, index) => {
+              let wordClass = '';
+              const isFirst = index === 0;
+              const isLast = index === playerPath.length - 1;
 
-                if (isLast && status === GameStatus.PLAYING) {
-                  wordClass = 'current-word-text';
-                } else if (isLast && status === GameStatus.WON) {
-                  wordClass = 'end-word-text';
-                } else if (isFirst) {
-                  wordClass = 'start-word-text';
-                }
-
-                if (word === highlightedWord) {
+              if (isLast && status === GameStatus.PLAYING) {
+                wordClass = 'current-word-text';
+              } else if (isLast && status === GameStatus.WON) {
+                wordClass = 'end-word-text';
+              } else if (isFirst) {
+                wordClass = 'start-word-text'; 
+              }
+              
+              if (word === highlightedWord) {
                   wordClass += ' highlighted-path-word';
-                }
-
+              }
+              
                 // --- Determine Optimality and Modify Tooltip --- 
                 let isOnOriginalOptimalPath = false;
                 let optimalityTooltip = '';
@@ -192,21 +192,21 @@ function Game() {
                   // Check based on game status (report available vs. live game)
                   if (gameReport?.optimalChoiceHistory) {
                     moveData = gameReport.optimalChoiceHistory.find(
-                      choice => choice.playerPosition === prevPosition && choice.playerChose === word
-                    );
+                  choice => choice.playerPosition === prevPosition && choice.playerChose === word
+                );
                   } else if (status === GameStatus.PLAYING && optimalChoices) {
                     moveData = optimalChoices.find(
-                      choice => choice.playerPosition === prevPosition && choice.playerChose === word
-                    );
+                  choice => choice.playerPosition === prevPosition && choice.playerChose === word
+                );
                   }
-
+                
                   // If optimal move data exists
-                  if (moveData && moveData.playerChose === moveData.optimalChoice) {
+                if (moveData && moveData.playerChose === moveData.optimalChoice) {
                     // Check if it was on the original path
                     isOnOriginalOptimalPath = optimalPath.includes(word) &&
-                                              optimalPath.includes(prevPosition) &&
-                                              optimalPath.indexOf(word) === optimalPath.indexOf(prevPosition) + 1;
-
+                                                  optimalPath.includes(prevPosition) &&
+                                                  optimalPath.indexOf(word) === optimalPath.indexOf(prevPosition) + 1;
+                  
                     // Assign class and tooltip text
                     wordClass += ' optimal-choice-word';
                     if (isOnOriginalOptimalPath) {
@@ -215,148 +215,148 @@ function Game() {
                     } else {
                       wordClass += ' local-optimal-choice';
                       optimalityTooltip = "\n\n(Purple: Optimal move from the previous word)";
-                    }
-                  }
+                }
+              }
                 }
                 // --- End Optimality Check --- 
 
-                // Fetch and format definitions for the tooltip
-                const definitionsList = definitionsData && definitionsData[word] ? definitionsData[word] : [];
+              // Fetch and format definitions for the tooltip
+              const definitionsList = definitionsData && definitionsData[word] ? definitionsData[word] : [];
                 let tooltipText = definitionsList.length > 0
-                  ? definitionsList.map((def, i) => `${i + 1}. ${def}`).join('\n')
+                ? definitionsList.map((def, i) => `${i + 1}. ${def}`).join('\n')
                   : 'No definition found';
                 
                 // Append the optimality explanation if applicable
                 tooltipText += optimalityTooltip;
 
-                return (
-                  <React.Fragment key={word + index}>
-                    {(index > 0) && <span className="path-arrow">{' → '}</span>}
-                    <span
-                      className={wordClass.trim()}
-                      title={tooltipText} // Use combined tooltip text
-                    >
-                      {word}
-                    </span>
-                  </React.Fragment>
-                );
-              })}
-              
-              {/* Add trailing arrow and Target Word if not won and not already at target */}
-              {status === GameStatus.PLAYING && endWord && definitionsData && currentWord !== endWord && (
-                <>
-                  <span className="path-arrow">{' → '}</span>
+              return (
+                <React.Fragment key={word + index}> 
+                  {(index > 0) && <span className="path-arrow">{' → '}</span>} 
                   <span 
-                    className="path-dots"
-                    title={`Optimal path length: ${optimalRemainingLength} moves remaining`}
+                    className={wordClass.trim()} 
+                      title={tooltipText} // Use combined tooltip text
                   >
-                    {/* Generate N dots where N is optimalRemainingLength */}
-                    {Array.from({ length: Math.min(optimalRemainingLength || 0, 10) }, (_, i) => 
-                      <span 
-                        key={i} 
-                        className={moveAccuracy !== null && moveAccuracy < 100 ? "path-dot possible-path-dot" : "path-dot optimal-path-dot"}
-                      >
-                        .
-                      </span>
-                    )}
+                    {word}
                   </span>
-                  <span className="path-arrow">{' → '}</span>
-                  {(() => {
-                    const definitionsList = definitionsData[endWord] || [];
-                    const tooltipText = definitionsList.length > 0
-                      ? definitionsList.map((def, i) => `${i + 1}. ${def}`).join('\n')
-                      : 'No definition found';
-                    return (
-                      <span 
-                        className="end-word-text" 
-                        title={tooltipText + "\n\nThis is your target word."}
-                      >
-                        {endWord}
-                      </span>
-                    );
-                  })()}
-                </>
-              )}
-            </div>
+                </React.Fragment>
+              );
+            })}
+            
+            {/* Add trailing arrow and Target Word if not won and not already at target */}
+            {status === GameStatus.PLAYING && endWord && definitionsData && currentWord !== endWord && (
+              <>
+                <span className="path-arrow">{' → '}</span>
+                <span 
+                  className="path-dots"
+                  title={`Optimal path length: ${optimalRemainingLength} moves remaining`}
+                >
+                  {/* Generate N dots where N is optimalRemainingLength */}
+                  {Array.from({ length: Math.min(optimalRemainingLength || 0, 10) }, (_, i) => 
+                    <span 
+                      key={i} 
+                      className={moveAccuracy !== null && moveAccuracy < 100 ? "path-dot possible-path-dot" : "path-dot optimal-path-dot"}
+                    >
+                      .
+                    </span>
+                  )}
+                </span>
+                <span className="path-arrow">{' → '}</span>
+                {(() => {
+                  const definitionsList = definitionsData[endWord] || [];
+                  const tooltipText = definitionsList.length > 0
+                    ? definitionsList.map((def, i) => `${i + 1}. ${def}`).join('\n')
+                    : 'No definition found';
+                  return (
+                    <span 
+                      className="end-word-text" 
+                      title={tooltipText + "\n\nThis is your target word."}
+                    >
+                      {endWord}
+                    </span>
+                  );
+                })()}
+              </>
+            )}
           </div>
-        )}
+        </div>
+      )}
 
         {/* Render NeighborSelection with actions when Playing */}
-        {status === GameStatus.PLAYING && (
-          <NeighborSelection
+      {status === GameStatus.PLAYING && (
+          <NeighborSelection 
             neighborOptions={neighborOptions}
             definitionsData={definitionsData}
             onSelectWord={handleSelectWord}
             onGiveUp={handleGiveUp}
             actions={aboutButton} /* Pass About button as action */
           />
-        )}
+      )}
 
-        {/* Won State Display */}
-        {status === GameStatus.WON && gameReport && (
-          <div className="won-section game-report-section">
-            <h2>You Won!</h2>
-            <p><strong>Player Path:</strong> {playerPath.join(' -> ')}</p>
-            {/* --- Render Report --- */}
-            <GameReportDisplay report={gameReport} />
-          </div>
-        )}
+      {/* Won State Display */}
+      {status === GameStatus.WON && gameReport && (
+        <div className="won-section game-report-section">
+          <h2>You Won!</h2>
+          <p><strong>Player Path:</strong> {playerPath.join(' -> ')}</p>
+          {/* --- Render Report --- */}
+          <GameReportDisplay report={gameReport} />
+        </div>
+      )}
 
-        {/* Gave Up State Display */}
-        {status === GameStatus.GAVE_UP && optimalPath && gameReport && (
-          <div className="gave-up-section game-report-section">
-            <h3>You Gave Up!</h3>
-            {/* Display Optimal Path */}
-            <p>Optimal Path ({optimalPathLength ?? 'N/A'} moves):</p>
-            <p className="optimal-path">{optimalPath.join(' -> ')}</p>
+      {/* Gave Up State Display */}
+      {status === GameStatus.GAVE_UP && optimalPath && gameReport && (
+        <div className="gave-up-section game-report-section">
+          <h3>You Gave Up!</h3>
+          {/* Display Optimal Path */}
+          <p>Optimal Path ({optimalPathLength ?? 'N/A'} moves):</p>
+          <p className="optimal-path">{optimalPath.join(' -> ')}</p>
 
-            {/* Conditionally display Suggested Path */}
-            {suggestedPathFromCurrentLength !== null && suggestedPathFromCurrent.length > 0 && (
-              <div style={{ marginTop: '10px' }}> {/* Add some space */}
-                <p>Currently Suggested Path ({suggestedPathFromCurrentLength} moves):</p>
-                {/* Add a class for styling this path text */}
-                <p className="suggested-path-text">{suggestedPathFromCurrent.join(' -> ')}</p>
-              </div>
-            )}
-            {suggestedPathFromCurrentLength === null && currentWord !== startWord && (
-              <p style={{ fontStyle: 'italic', marginTop: '10px' }}>No path found from your current location ({currentWord}) to the end word.</p>
-            )}
-
-            {/* --- Render Report --- */}
-            <GameReportDisplay report={gameReport} />
-
-            {/* Replace Path Display Toggle Buttons with multiselect */}
-            <div className="path-toggle-container">
-              Show on Graph:
-              <button 
-                onClick={() => togglePathDisplay('player')} 
-                className={pathDisplay.player ? 'path-button-active' : ''}
-                title="Show or hide the path you took through the word space"
-              >
-                Player
-              </button>
-              <button 
-                onClick={() => togglePathDisplay('optimal')} 
-                className={pathDisplay.optimal ? 'path-button-active' : ''}
-                title="Show or hide the optimal path from start to end"
-              >
-                Optimal
-              </button>
-              <button
-                onClick={() => togglePathDisplay('suggested')}
-                disabled={suggestedPathFromCurrentLength === null}
-                className={pathDisplay.suggested ? 'path-button-active' : ''}
-                title={suggestedPathFromCurrentLength === null ? 
-                  "No suggested path available" : 
-                  "Show or hide the suggested path from your current position to the end"}
-              >
-                Currently Suggested
-              </button>
+          {/* Conditionally display Suggested Path */}
+          {suggestedPathFromCurrentLength !== null && suggestedPathFromCurrent.length > 0 && (
+            <div style={{ marginTop: '10px' }}> {/* Add some space */}
+              <p>Currently Suggested Path ({suggestedPathFromCurrentLength} moves):</p>
+              {/* Add a class for styling this path text */}
+              <p className="suggested-path-text">{suggestedPathFromCurrent.join(' -> ')}</p>
             </div>
-          </div>
-        )}
+          )}
+          {suggestedPathFromCurrentLength === null && currentWord !== startWord && (
+            <p style={{ fontStyle: 'italic', marginTop: '10px' }}>No path found from your current location ({currentWord}) to the end word.</p>
+          )}
 
-      </div>
+          {/* --- Render Report --- */}
+          <GameReportDisplay report={gameReport} />
+
+          {/* Replace Path Display Toggle Buttons with multiselect */}
+          <div className="path-toggle-container">
+            Show on Graph:
+            <button 
+              onClick={() => togglePathDisplay('player')} 
+              className={pathDisplay.player ? 'path-button-active' : ''}
+              title="Show or hide the path you took through the word space"
+            >
+              Player
+            </button>
+            <button 
+              onClick={() => togglePathDisplay('optimal')} 
+              className={pathDisplay.optimal ? 'path-button-active' : ''}
+              title="Show or hide the optimal path from start to end"
+            >
+              Optimal
+            </button>
+            <button
+              onClick={() => togglePathDisplay('suggested')}
+              disabled={suggestedPathFromCurrentLength === null}
+              className={pathDisplay.suggested ? 'path-button-active' : ''}
+              title={suggestedPathFromCurrentLength === null ? 
+                "No suggested path available" : 
+                "Show or hide the suggested path from your current position to the end"}
+            >
+              Currently Suggested
+            </button>
+          </div>
+        </div>
+      )}
+
+    </div>
       {/* Render the InfoBox Modal Content conditionally OUTSIDE game-container for positioning */}
       <InfoBox showInfo={showInfo} handleClose={() => setShowInfo(false)} />
     </>
@@ -372,7 +372,7 @@ function App() {
           <h1>Synapse</h1> {/* Re-added title */}
           <h2 className="subtitle">Semantic Pathways</h2> {/* Re-added subtitle */}
           <main className="app-content"> {/* Added main content area */}
-            <Game />
+          <Game />
           </main>
           <footer className="app-footer"> {/* Added footer */}
             Copyright © 2025 Jared Neumann. Licensed under the <a href="https://github.com/neumanns-workshop/synapse/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPLv3</a>. | v1.0.0 Alpha

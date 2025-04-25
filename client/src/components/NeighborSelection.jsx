@@ -61,8 +61,8 @@ function NeighborSelection({
       {/* New container for bottom row buttons */}
       <div className="action-buttons-row">
         <button onClick={onGiveUp} className="give-up-button">
-          Give Up
-        </button>
+        Give Up
+      </button>
         {/* Render any passed-in action buttons */}
         {actions}
       </div>
