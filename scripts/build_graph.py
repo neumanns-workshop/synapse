@@ -32,14 +32,33 @@ def build_graph(k_neighbors):
     with open(EMBEDDINGS_PATH, 'rb') as f:
         embeddings_dict = pickle.load(f)
     print(f"Loaded embeddings for {len(embeddings_dict)} words.")
+
+    # --- Filter Words ---
+    # Define words to filter (offensive words, words without definitions, etc.)
+    words_to_remove = {
+        "negro", # Offensive word
+        # Words without definitions found in WordNet (identified by generate_definitions.py)
+        'albeit', 
+        'etc', 
+        'reconfigure', 
+        'tong', 
+        'via', 
+        'whereas', 
+        'whereby'
+    }
+
+    removed_count = 0
+    # Iterate through a copy of the keys because we are modifying the dictionary
+    for word in list(embeddings_dict.keys()): 
+        if word in words_to_remove:
+            del embeddings_dict[word]
+            removed_count += 1
+            # print(f"Removed word '{word}' from embeddings dictionary.") # Optional: uncomment for verbose output
     
-    # --- Add Filter --- 
-    offensive_word = "negro"
-    if offensive_word in embeddings_dict:
-        del embeddings_dict[offensive_word]
-        print(f"Removed offensive word '{offensive_word}' from embeddings dictionary.")
+    if removed_count > 0:
+        print(f"Removed {removed_count} specified words from embeddings dictionary.")
         print(f"Embeddings dictionary now contains {len(embeddings_dict)} words.")
-    # --- End Filter --- 
+    # --- End Filter ---
 
     print(f"Loading t-SNE coordinates from {TSNE_COORDS_PATH}...")
     try:

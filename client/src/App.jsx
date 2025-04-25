@@ -18,7 +18,7 @@ function getButtonStyle(rank, totalOptions) {
   const hue = 200; // Blueish
   const saturation = 50; // Moderate saturation
   const darkestLightness = 50; // Darkest end for rank 0
-  const lightestLightness = 85; // Lightest end for last rank
+  const lightestLightness = 70; // Lightest end for last rank (Reduced from 85 for better contrast)
   // Interpolate lightness based on normalized rank (0 -> darkest, 1 -> lightest)
   const lightness = darkestLightness + (normalizedRank * (lightestLightness - darkestLightness));
 
@@ -29,21 +29,26 @@ function getButtonStyle(rank, totalOptions) {
 
 // Main Game Component
 function Game() {
-  // Get state/actions from GameContext (no selectedK/changeK)
+  // Get state/actions from GameContext
   const {
     status, startWord, endWord, currentWord, playerPath, 
-    optimalPath, optimalPathLength, 
+    optimalPath, 
+    optimalPathLength, // Overall Best
+    optimalRemainingLength, // Current Possible
     suggestedPathFromCurrent, suggestedPathFromCurrentLength, 
-    error: gameError, // Game specific error
-    isLoading: isGameLoading, // Use loading state from context
-    graphError, // Use graph error from context
+    error: gameError, 
+    moveAccuracy, 
+    gameReport, 
+    isLoading: isGameLoading, 
+    graphError, 
     startGame: startGameAction, 
     selectWord: selectWordAction, 
     giveUp: giveUpAction
+    // Remove unused state like optimalDistance, playerSemanticDistance, optimalMovesMade if not displayed
   } = useGame();
 
-  // Get graph data from GraphDataContext (still needed for neighbors)
-  const { graphData, isLoading: isGraphLoading } = useGraphData(); 
+  // Get graph data AND definitions data from GraphDataContext
+  const { graphData, definitionsData, isLoading: isGraphLoading } = useGraphData(); 
 
   // Combine game error and graph error for display
   const displayError = gameError || graphError;
@@ -84,7 +89,7 @@ function Game() {
           startGameAction(graphData.nodes);
       } else {
           console.error("Cannot start game, graph data not loaded");
-      }
+  }
   };
   
   const handleSelectWord = (word) => {
@@ -100,7 +105,7 @@ function Game() {
           giveUpAction(graphData.nodes);
       } else {
           console.error("Cannot give up, graph data not loaded");
-      }
+  }
   };
 
   // Get neighbors for the current word when playing
@@ -109,7 +114,7 @@ function Game() {
     : {};
 
   const neighborOptions = Object.entries(currentNeighbors)
-    .sort(([, simA], [, simB]) => simB - simA);
+     .sort(([, simA], [, simB]) => simB - simA);
 
   if (isGraphLoading) {
     return <p>Loading graph data...</p>;
@@ -130,36 +135,18 @@ function Game() {
       {/* Info Box */} 
       {showInfo && (
         <div className="info-box">
-          <h3>How to Play Synapse</h3>
+          <h3>Charting your Synaptic Course</h3>
           <p>
-            <strong>Goal:</strong> Navigate from the <span className="start-word-text">Start</span> word 
-            to the <span className="end-word-text">End</span> word using the fewest moves.
+            <strong>Goal:</strong> Discover a semantic pathway from the <span className='start-word-text'>Start</span> word to the <span className='end-word-text'>End</span> word via related words in the fewest moves.
           </p>
           <p>
-            <strong>Gameplay:</strong> Click on one of the available neighbor words 
-            (arranged in the 2x3 grid). These are the words most semantically similar 
-            to your <span className="current-word-text">Current</span> word.
+            <strong>How:</strong> Click a neighbor word. Use <strong>Hover Definitions</strong> (reveals word meanings) & <strong>Button Color</strong> (darker = more similar) to guide your choice towards the target.
           </p>
           <p>
-             <strong>Similarity Hint:</strong> The background color of the neighbor buttons indicates 
-             similarity; darker blue means a stronger semantic connection (higher similarity score). 
-             Use this hint to choose words that might lead you closer to the target.
+            <strong>Track:</strong> Follow your path below the graph. Track your <strong>Moves</strong> against the overall <strong>Best</strong> score and the currently <strong>Possible</strong> score (hover over labels for details).
           </p>
           <p>
-            <strong>Tracking Progress:</strong> Below the graph, you can see your current move count 
-            compared to the optimal number of moves required (<span className="optimal-move-count">Optimal</span>). 
-            Your path taken so far is also displayed.
-          </p>
-          <p>
-            <strong>Graph Visualization:</strong> The graph shows the positions of relevant words 
-            (based on t-SNE embeddings). Your path is traced with lines. Click nodes on the graph 
-            to highlight the corresponding word in the path text.
-          </p>
-          <p>
-            <strong>Giving Up:</strong> If you get stuck, press "Give Up". You'll see the 
-            <span className="optimal-path-text">Optimal Path</span> from the start word, 
-            and potentially a <span className="suggested-path-text">Suggested Path</span> from your current location. 
-            Use the toggle buttons to switch between viewing paths on the graph.
+            <strong>Stuck?</strong> "Give Up" shows the <span className='optimal-path-text'>Optimal Path</span>, possibly a <span className='suggested-path-text'>Suggested Path</span>, and a game analysis.
           </p>
         </div>
       )}
@@ -180,26 +167,58 @@ function Game() {
         <div className="graph-visualization-container">
           {/* Pass handleNodeClick down */}
           <GraphVisualization pathDisplayMode={pathDisplayMode} onNodeClick={handleNodeClick} /> 
-        </div>
+         </div>
       )}
 
-      {/* Status Info (Moves & Path) - MOVED HERE, BELOW GRAPH */}
+      {/* Status Info (Moves & Path) */}
       {(status === GameStatus.PLAYING || status === GameStatus.GAVE_UP) && graphData && (
-        // Remove status-block-active class if not needed
         <div className="graph-status-info">
-          {/* REMOVED Start/End/Current <p> tags AGAIN */}
-          
-          {/* Keep Moves */}
-          { status === GameStatus.PLAYING && 
+          {/* Combined Moves and Target Info */}
+          { status === GameStatus.PLAYING && (
             <p className="moves-info">
-              {`Moves: `}
-              <span className="player-move-count">{playerPath.length - 1}</span>
-              {` (Optimal: `} {/* Use template literal */} 
-              <span className="optimal-move-count">{optimalPathLength ?? 'N/A'}</span>
-              {`)`}
+              {/* Target Word */}
+              {endWord && definitionsData && (
+                <>
+                  <span title="The destination word.">
+                    {'Target: '}
+                    {
+                      (() => {
+                        const definitionsList = definitionsData[endWord] || [];
+                        const tooltipText = definitionsList.length > 0
+                          ? definitionsList.map((def, i) => `${i + 1}. ${def}`).join('\n')
+                          : 'No definition found';
+                        return (
+                          <span className="end-word-text" title={tooltipText}>
+                            {endWord}
+                          </span>
+                        );
+                      })()
+                    }
+                  </span>
+                  {' | '} 
+                </>
+              )}
+              {/* Moves Info */}
+              <span title="Your current number of moves.">
+                {'Moves: '}
+                <span className="player-move-count">{playerPath.length - 1}</span>
+              </span>
+              {' | '}
+              {/* Possible Score from Current */}
+              <span title="The lowest possible moves remaining from your current word.">
+                {'Possible in: '}
+                <span className="optimal-move-count">{optimalRemainingLength ?? 'N/A'}</span>
+              </span>
+              {' | '} {/* Separator before Accuracy */} 
+              {/* Always display Accuracy section */} 
+              <span title="Accuracy of your moves compared to the optimal path from each step.">
+                {'Accuracy: '}
+                {/* Display placeholder or actual value */} 
+                {moveAccuracy === null ? '--%' : `${moveAccuracy.toFixed(1)}%`}
+              </span>
             </p> 
-          }
-          {/* Keep modified player path rendering */}
+          )}
+          {/* Player Path Rendering */}
           <div className="player-path">
             {playerPath.map((word, index) => {
               let wordClass = '';
@@ -219,10 +238,19 @@ function Game() {
                 wordClass += ' highlighted-path-word'; // Append class
               }
 
+              // Fetch and format definitions for the tooltip
+              const definitionsList = definitionsData && definitionsData[word] ? definitionsData[word] : [];
+              const tooltipText = definitionsList.length > 0
+                ? definitionsList.map((def, i) => `${i + 1}. ${def}`).join('\n')
+                : 'No definition found'; // Fallback message
+
               return (
                 <React.Fragment key={word + index}> 
                   {(index > 0) && <span className="path-arrow">{' -> '}</span>} 
-                  <span className={wordClass.trim()}> {/* Use trim to avoid leading space */} 
+                  <span 
+                    className={wordClass.trim()} 
+                    title={tooltipText} // Add tooltip here
+                  >
                     {word}
                   </span>
                 </React.Fragment>
@@ -233,21 +261,27 @@ function Game() {
       )}
 
       {/* Options & Give Up Button (Now below status info) */}
-      {status === GameStatus.PLAYING && graphData && (
+      {status === GameStatus.PLAYING && graphData && definitionsData && (
         <div className="options-container">
           <div className="options-buttons">
             {neighborOptions.map(([neighborWord], index) => {
-              const buttonStyle = getButtonStyle(index, neighborOptions.length);
+              // Get definitions for the neighbor word
+              const definitionsList = definitionsData[neighborWord] || []; // Default to empty list
+              // Format definitions for tooltip
+              const tooltipText = definitionsList.length > 0
+                ? definitionsList.map((def, i) => `${i + 1}. ${def}`).join('\n')
+                : 'No definition found'; // Fallback message
+
               return (
-                 <button
-                   key={neighborWord}
-                   // Use handleSelectWord wrapper
-                   onClick={() => handleSelectWord(neighborWord)}
-                   className="neighbor-button"
-                   style={buttonStyle}
-                 >
-                   {neighborWord}
-                 </button>
+                <button
+                  key={neighborWord}
+                  onClick={() => handleSelectWord(neighborWord)}
+                  style={getButtonStyle(index, neighborOptions.length)} // Use the existing style function
+                  className="option-button"
+                  title={tooltipText} // Add the title attribute for the tooltip
+                >
+                  {neighborWord}
+                </button>
               );
             })}
           </div>
@@ -258,17 +292,18 @@ function Game() {
       )}
 
       {/* Won State Display */}
-      {status === GameStatus.WON && (
-        <div className="won-section">
+      {status === GameStatus.WON && gameReport && (
+        <div className="won-section game-report-section">
           <h2>You Won!</h2>
           <p><strong>Player Path:</strong> {playerPath.join(' -> ')}</p>
-          <p>Moves: {playerPath.length - 1} (Optimal: {optimalPathLength ?? 'N/A'})</p>
+          {/* --- Render Report --- */}
+          <GameReportDisplay report={gameReport} />
         </div>
       )}
 
       {/* Gave Up State Display */}
-      {status === GameStatus.GAVE_UP && optimalPath && (
-        <div className="gave-up-section">
+      {status === GameStatus.GAVE_UP && optimalPath && gameReport && (
+        <div className="gave-up-section game-report-section">
           <h3>You Gave Up!</h3>
           {/* Display Optimal Path */}
           <p>Optimal Path ({optimalPathLength ?? 'N/A'} moves):</p>
@@ -286,25 +321,43 @@ function Game() {
             <p style={{ fontStyle: 'italic', marginTop: '10px' }}>No path found from your current location ({currentWord}) to the end word.</p>
           )}
 
+          {/* --- Render Report --- */}
+          <GameReportDisplay report={gameReport} />
+
           {/* Path Display Toggle Buttons */}
           <div className="path-toggle-container">
-            Show:
+            Show on Graph:
             <button onClick={() => setPathDisplayMode('player')} disabled={pathDisplayMode === 'player'}>
-              Player Path
+              Player
             </button>
             <button onClick={() => setPathDisplayMode('optimal')} disabled={pathDisplayMode === 'optimal'}>
-              Optimal Path
+              Optimal
             </button>
-            {/* Add Suggested Path button, disable if no suggested path exists */}
-            <button 
-              onClick={() => setPathDisplayMode('suggested')} 
+            <button
+              onClick={() => setPathDisplayMode('suggested')}
               disabled={pathDisplayMode === 'suggested' || suggestedPathFromCurrentLength === null}
-              title={suggestedPathFromCurrentLength === null ? "No suggested path available from your current location" : "Show suggested path from current location"}
+              title={suggestedPathFromCurrentLength === null ? "No suggested path available" : "Show suggested path"}
             >
-              Suggested Path
+              Suggested
             </button>
-            <button onClick={() => setPathDisplayMode('both')} disabled={pathDisplayMode === 'both'}>
-              Both (Player/Optimal)
+            <button onClick={() => setPathDisplayMode('player_optimal')} disabled={pathDisplayMode === 'player_optimal'}>
+              Player / Optimal
+            </button>
+            {/* Add Player/Suggested Button */}
+            <button
+              onClick={() => setPathDisplayMode('player_suggested')}
+              disabled={pathDisplayMode === 'player_suggested' || suggestedPathFromCurrentLength === null}
+              title={suggestedPathFromCurrentLength === null ? "No suggested path available" : "Show Player vs Suggested paths"}
+            >
+              Player / Suggested
+            </button>
+             {/* Add Optimal/Suggested Button */}
+            <button
+              onClick={() => setPathDisplayMode('optimal_suggested')}
+              disabled={pathDisplayMode === 'optimal_suggested' || suggestedPathFromCurrentLength === null}
+              title={suggestedPathFromCurrentLength === null ? "No suggested path available" : "Show Optimal vs Suggested paths"}
+            >
+              Optimal / Suggested
             </button>
           </div>
         </div>
@@ -314,18 +367,47 @@ function Game() {
   );
 }
 
+// --- New Component for Displaying Game Report --- 
+function GameReportDisplay({ report }) {
+  if (!report) return null;
+
+  // Helper to format paired values
+  const formatPairedValue = (playerVal, optimalVal, precision = 0) => {
+    const playerStr = typeof playerVal === 'number' ? playerVal.toFixed(precision) : 'N/A';
+    const optimalStr = typeof optimalVal === 'number' ? optimalVal.toFixed(precision) : 'N/A';
+    return `${playerStr} (Optimal: ${optimalStr})`;
+  };
+
+  return (
+    <div className="game-report">
+      <h4>Game Analysis</h4>
+      <ul>
+        <li>Moves: {formatPairedValue(report.playerMoves, report.optimalMoves)}</li>
+        <li>Accuracy: {report.accuracy?.toFixed(1) ?? 'N/A'}% ({report.optimalMovesMade} / {report.playerMoves} optimal steps)</li>
+        <li>Semantic Distance: {formatPairedValue(report.playerDistance, report.optimalDistance, 2)}</li>
+        <li>Avg. Similarity / Move: {report.averageSimilarity?.toFixed(3) ?? 'N/A'}</li>
+        <li>"Greedy" Moves (Most Similar): {report.greedyMoves} / {report.playerMoves}</li>
+        <li title="Moves where the chosen word appeared further from the target (based on graph layout), but enabled a potentially closer move next.">
+          Repositioning Moves: {report.repositioningMoves} / {report.playerMoves}
+        </li>
+      </ul>
+    </div>
+  );
+}
+// --- End New Component ---
+
 function App() {
   return (
     // Remove props from providers
     <GameProvider>
-      <GraphDataProvider>
+    <GraphDataProvider>
         <div className="App">
           <h1>Synapse</h1>
           <h2 className="subtitle">Semantic Pathways</h2>
-          <Game /> 
+          <Game />
         </div>
       </GraphDataProvider>
-    </GameProvider>
+      </GameProvider>
   );
 }
 

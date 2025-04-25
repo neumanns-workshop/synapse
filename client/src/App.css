@@ -150,12 +150,14 @@ button:disabled {
 .info-box {
   border: 1px solid #444;
   padding: 20px;
-  margin: 25px 0;
-  background-color: #2c313a; /* Match game container background more closely */
+  margin: 25px auto; /* Changed margin to auto for centering */
+  background-color: #2c313a; 
   text-align: left;
   border-radius: 8px;
   line-height: 1.7;
-  color: #ccc; /* Slightly dimmer text for info */
+  color: #ccc; 
+  max-width: 500px; /* Add max-width to match graph-status-info */
+  box-sizing: border-box; /* Include padding/border in element's total width/height */
 }
 
 .info-box h3 {
@@ -182,12 +184,13 @@ button:disabled {
 /* Style for the new status info wrapper above the graph */
 .graph-status-info {
   padding: 10px;
-  text-align: center; /* Center ALL text */
+  text-align: center; 
   margin-top: 1.5rem; 
   margin-bottom: 1rem; 
-  max-width: 500px; /* Match options-buttons width */
+  max-width: 500px; /* Existing max-width */
   margin-left: auto;  
   margin-right: auto; 
+  box-sizing: border-box; /* Add box-sizing for consistency */
 }
 
 .graph-status-info p {
@@ -237,7 +240,11 @@ button:disabled {
 .options-container {
   margin-top: 0; 
   padding-top: 0;
-  text-align: center; /* Ensure content (grid/button) is centered */
+  text-align: center; 
+  max-width: 500px; /* Add max-width */
+  margin-left: auto; /* Add centering */
+  margin-right: auto; /* Add centering */
+  box-sizing: border-box; /* Add box-sizing for consistency */
 }
 
 .options-container h3 {
@@ -311,13 +318,14 @@ button:disabled {
 }
 
 .optimal-path {
-  font-style: normal; /* Remove italic */
-  color: #b0e0ff; /* Light blue for optimal path */
-  background-color: #303848; /* Subtle background highlight */
-  padding: 8px 12px;
-  border-radius: 4px;
-  margin: 10px 0;
-  display: inline-block; /* Fit content */
+  /* REMOVED font-style: normal; */
+  font-style: italic; /* Added back italic style */
+  color: #b0e0ff; /* Keep light blue for optimal path */
+  /* REMOVED background-color: #303848; */
+  /* REMOVED padding: 8px 12px; */
+  /* REMOVED border-radius: 4px; */
+  margin: 10px 0; /* Keep vertical margin */
+  /* REMOVED display: inline-block; */
   word-wrap: break-word;
   font-size: 0.95em;
   line-height: 1.5;
@@ -494,14 +502,16 @@ button:disabled {
 .suggested-path-text {
   font-style: italic;
   color: #d4a0ff; /* Match suggested link color */
-  background-color: #303848; /* Match optimal path background? */
-  padding: 8px 12px;
-  border-radius: 4px;
-  margin: 10px 0;
-  display: inline-block; 
+  margin: 10px 0; /* Keep vertical margin */
   word-wrap: break-word;
   font-size: 0.95em;
   line-height: 1.5;
+}
+
+/* Add style for Optimal Path text reference */
+.optimal-path-text {
+  font-style: italic;
+  color: #b0e0ff; /* Match optimal path color */
 }
 
 /* === Text Color Classes === */
@@ -546,3 +556,198 @@ button:disabled {
 }
 
 /* Remove default Vite styles (already commented out previously) */
+
+/* --- Game Report Styling --- */
+.game-report-section {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #282c34; /* Darker background */
+  border-radius: 8px;
+  border: 1px solid #444a54;
+  color: #abb2bf; /* Lighter text */
+  text-align: left; /* Align text left */
+}
+
+.game-report h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #61afef; /* Blueish accent for title */
+  text-align: center;
+  border-bottom: 1px solid #444a54;
+  padding-bottom: 10px;
+}
+
+.game-report ul {
+  list-style: none; /* Remove default bullets */
+  padding-left: 0; /* Remove default padding */
+  margin-bottom: 0; /* Remove default margin */
+}
+
+.game-report li {
+  margin-bottom: 8px; /* Space between list items */
+  line-height: 1.5;
+}
+
+.game-report li::before { /* Optional: Custom bullet or marker */
+  /* Example: content: "\2022"; color: #61afef; margin-right: 8px; */
+}
+
+.won-section h2 {
+  color: #98c379; /* Green for win title */
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.gave-up-section h3 {
+  color: #e06c75; /* Reddish for gave up title */
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.game-report-section p {
+    margin-bottom: 10px; /* Space below path paragraphs */
+}
+
+/* Add specific class for player path text in report */
+.player-path-report-text {
+    font-weight: bold;
+    /* Add any other styling specific to player path in report */
+}
+
+/* --- Path Toggle Buttons --- */
+.path-toggle-container {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #444a54;
+  text-align: center; /* Center the buttons */
+}
+
+.path-toggle-container button {
+  margin: 0 5px; /* Space between buttons */
+  padding: 8px 12px;
+  background-color: #3a3f4b; /* Slightly lighter than report bg */
+  color: #abb2bf;
+  border: 1px solid #4f5666;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.path-toggle-container button:hover:not(:disabled) {
+  background-color: #4f5666;
+}
+
+.path-toggle-container button:disabled {
+  background-color: #61afef; /* Highlight selected/active button */
+  color: #282c34;
+  cursor: default;
+  opacity: 1; /* Ensure disabled doesn't fade */
+}
+
+/* === Responsive Design Adjustments === */
+
+/* Medium Screens / Tablets (e.g., < 768px) */
+@media (max-width: 768px) {
+  #root {
+    padding: 1rem; /* Reduce overall padding */
+  }
+
+  h1 {
+    font-size: 2em; /* Slightly smaller title */
+  }
+
+  h2.subtitle {
+    font-size: 1em;
+  }
+
+  .options-buttons {
+    grid-template-columns: repeat(2, 1fr); /* Switch to 2 columns */
+    max-width: 400px; /* Adjust max-width */
+    gap: 12px;
+  }
+
+  .neighbor-button {
+      min-width: 100px; /* Allow slightly smaller buttons */
+  }
+
+  .graph-status-info {
+    max-width: 100%; /* Allow full width */
+  }
+
+  .info-box {
+      margin-left: 0;
+      margin-right: 0;
+  }
+
+  /* Allow path toggle buttons to wrap */
+  .path-toggle-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px; /* Add gap for wrapped buttons */
+  }
+  .path-toggle-container button {
+      margin: 0; /* Remove horizontal margin if using gap */
+  }
+}
+
+/* Small Screens / Phones (e.g., < 480px) */
+@media (max-width: 480px) {
+  #root {
+    padding: 0.5rem; /* Further reduce padding */
+  }
+
+  h1 {
+    font-size: 1.8em;
+  }
+
+  h2.subtitle {
+    font-size: 0.9em;
+  }
+
+  .options-buttons {
+    grid-template-columns: repeat(1, 1fr); /* Switch to 1 column */
+    max-width: 250px; /* Adjust max-width for single column */
+    gap: 10px;
+  }
+
+  .neighbor-button {
+     width: 100%; /* Make buttons full width in single column */
+     min-width: unset; /* Remove min-width */
+     padding: 0.8em 1em; /* Adjust padding */
+  }
+
+  .give-up-button {
+      width: 80%; /* Make give up button wider */
+      margin-top: 15px;
+  }
+
+  .graph-svg-wrapper svg {
+      min-height: 250px; /* Allow graph to be smaller vertically */
+  }
+
+  .game-report-section {
+      padding: 10px;
+  }
+  .game-report h4 {
+      font-size: 1.1em;
+  }
+  .game-report li {
+      font-size: 0.9em;
+  }
+
+  .path-toggle-container button {
+      font-size: 0.85em; /* Slightly smaller text */
+      padding: 6px 10px;
+  }
+
+  .info-button {
+      top: 10px;
+      right: 10px;
+      padding: 0.4em 0.8em;
+  }
+
+  .info-box {
+      padding: 15px;
+  }
+}

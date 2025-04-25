@@ -9,44 +9,66 @@ export const GraphDataProvider = ({ children }) => {
   // Remove selectedK usage
 
   const [graphData, setGraphData] = useState(null);
+  const [definitionsData, setDefinitionsData] = useState(null); // Add state for definitions
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchGraphData = async () => {
-      // Remove check for selectedK
-
+    const fetchGameData = async () => { // Rename function for clarity
       setIsLoading(true);
       setError(null);
       setGraphData(null);
-      // Hardcode path to default data
-      const dataPath = `/data/graph.json`; 
-      console.log(`Fetching graph data from: ${dataPath}`);
+      setDefinitionsData(null);
+
+      // Define paths
+      const graphDataPath = `/data/graph.json`;
+      const definitionsDataPath = `/data/definitions.json`;
+      console.log(`Fetching graph data from: ${graphDataPath}`);
+      console.log(`Fetching definitions data from: ${definitionsDataPath}`);
 
       try {
-        const response = await fetch(dataPath);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status} for path ${dataPath}`);
+        // Fetch both files in parallel
+        const [graphResponse, definitionsResponse] = await Promise.all([
+          fetch(graphDataPath),
+          fetch(definitionsDataPath)
+        ]);
+
+        // Check both responses
+        if (!graphResponse.ok) {
+          throw new Error(`HTTP error! status: ${graphResponse.status} for path ${graphDataPath}`);
         }
-        const data = await response.json();
-        setGraphData(data);
+        if (!definitionsResponse.ok) {
+          throw new Error(`HTTP error! status: ${definitionsResponse.status} for path ${definitionsDataPath}`);
+        }
+
+        // Parse JSON from both responses
+        const [graphJson, definitionsJson] = await Promise.all([
+          graphResponse.json(),
+          definitionsResponse.json()
+        ]);
+
+        // Set state for both
+        setGraphData(graphJson);
+        setDefinitionsData(definitionsJson);
+
       } catch (e) {
-        console.error("Error fetching graph data:", e);
-        setError(`Failed to load graph data. Please try refreshing.`); // Simplified error
+        console.error("Error fetching game data:", e);
+        setError(`Failed to load game data. Please try refreshing.`); // Updated error message
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchGraphData();
+    fetchGameData(); // Call the renamed function
 
     return () => {};
   // Run only once on mount
-  }, []); 
+  }, []);
 
   // Value provided to consuming components
   const value = {
     graphData,
+    definitionsData, // Expose definitions data
     isLoading,
     error,
   };

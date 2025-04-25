@@ -7,20 +7,31 @@ import { useGame, GameStatus } from '../context/GameContext';
 function getNodeClass(word, { startWord, endWord, currentWord, playerPath, optimalPath, suggestedPathFromCurrent, status, pathDisplayMode }) {
   let classes = ['graph-node'];
   const inPlayerPath = playerPath.includes(word);
-  const inOptimalPath = status === GameStatus.GAVE_UP && optimalPath.includes(word);
-  const inSuggestedPath = status === GameStatus.GAVE_UP && suggestedPathFromCurrent.includes(word);
+  const inOptimalPath = optimalPath.includes(word);
+  const inSuggestedPath = suggestedPathFromCurrent.includes(word);
 
   if (word === startWord) classes.push('start');
   if (word === endWord) classes.push('end');
   if (word === currentWord && status === GameStatus.PLAYING) classes.push('current');
 
+  // Apply path classes based on mode for GAVE_UP state
   if (status === GameStatus.GAVE_UP) {
-    if (inPlayerPath && (pathDisplayMode === 'player' || pathDisplayMode === 'both')) classes.push('player-path-node');
-    if (inOptimalPath && (pathDisplayMode === 'optimal' || pathDisplayMode === 'both')) classes.push('optimal-path-node');
-    if (inSuggestedPath && pathDisplayMode === 'suggested') classes.push('suggested-path-node');
+    if (inPlayerPath && (pathDisplayMode === 'player' || pathDisplayMode === 'player_optimal' || pathDisplayMode === 'player_suggested')) {
+      classes.push('player-path-node');
+    }
+    if (inOptimalPath && (pathDisplayMode === 'optimal' || pathDisplayMode === 'player_optimal' || pathDisplayMode === 'optimal_suggested')) {
+      classes.push('optimal-path-node');
+    }
+    if (inSuggestedPath && (pathDisplayMode === 'suggested' || pathDisplayMode === 'player_suggested' || pathDisplayMode === 'optimal_suggested')) {
+      classes.push('suggested-path-node');
+    }
 
-    if (word === currentWord && pathDisplayMode === 'suggested') classes.push('current-gave-up');
-  } else if (status === GameStatus.PLAYING) {
+    // Specific styling for current node when suggested path is active
+    if (word === currentWord && (pathDisplayMode === 'suggested' || pathDisplayMode === 'player_suggested' || pathDisplayMode === 'optimal_suggested')) {
+      classes.push('current-gave-up'); // Potentially overrides other fills if CSS is specific
+    }
+  } else if (status === GameStatus.PLAYING || status === GameStatus.WON) {
+    // Apply player path styling during play or on win screen
     if (inPlayerPath) classes.push('player-path-node');
   }
 
@@ -30,11 +41,13 @@ function getNodeClass(word, { startWord, endWord, currentWord, playerPath, optim
 // Helper function to determine link class based on its status
 function getLinkClass(linkData, { status, pathDisplayMode }) {
   let classes = ['graph-link'];
+  // Just apply the base class for the type. CSS handles the visual distinction.
   if (linkData.type === 'player') {
     classes.push('player-path-link');
-    if (status === GameStatus.GAVE_UP && pathDisplayMode === 'both') {
-      classes.push('dimmed');
-    }
+    // REMOVED Dimming logic: rely on distinct path styles
+    // if (status === GameStatus.GAVE_UP && pathDisplayMode === 'player_optimal') {
+    //   classes.push('dimmed');
+    // }
   } else if (linkData.type === 'optimal') {
     classes.push('optimal-path-link');
   } else if (linkData.type === 'suggested') {
@@ -91,16 +104,36 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
     if (status === GameStatus.PLAYING) {
         visibleNodeIds = new Set([startWord, endWord, currentWord, ...playerPath].filter(Boolean));
     } else if (status === GameStatus.GAVE_UP) {
+        // Base nodes for gave up state
+        const baseNodes = new Set([startWord, endWord].filter(Boolean));
+        playerPath.forEach(word => baseNodes.add(word)); // Always include player path nodes initially?
+
         if (pathDisplayMode === 'player') {
-            visibleNodeIds = new Set([startWord, endWord, ...playerPath].filter(Boolean));
+            playerPath.forEach(word => visibleNodeIds.add(word));
         } else if (pathDisplayMode === 'optimal') {
-            visibleNodeIds = new Set([startWord, endWord, ...optimalPath].filter(Boolean));
+            optimalPath.forEach(word => visibleNodeIds.add(word));
         } else if (pathDisplayMode === 'suggested') {
             // Also include current word when suggested path is shown
-            visibleNodeIds = new Set([startWord, endWord, currentWord, ...suggestedPathFromCurrent].filter(Boolean));
-        } else { // 'both' or default
-            visibleNodeIds = new Set([startWord, endWord, ...playerPath, ...optimalPath].filter(Boolean));
+            suggestedPathFromCurrent.forEach(word => visibleNodeIds.add(word));
+            if (currentWord) visibleNodeIds.add(currentWord); // Ensure current is visible
+        } else if (pathDisplayMode === 'player_optimal') { // Changed from 'both'
+            playerPath.forEach(word => visibleNodeIds.add(word));
+            optimalPath.forEach(word => visibleNodeIds.add(word));
+        } else if (pathDisplayMode === 'player_suggested') {
+            playerPath.forEach(word => visibleNodeIds.add(word));
+            suggestedPathFromCurrent.forEach(word => visibleNodeIds.add(word));
+            if (currentWord) visibleNodeIds.add(currentWord); // Ensure current is visible
+        } else if (pathDisplayMode === 'optimal_suggested') {
+            optimalPath.forEach(word => visibleNodeIds.add(word));
+            suggestedPathFromCurrent.forEach(word => visibleNodeIds.add(word));
+            if (currentWord) visibleNodeIds.add(currentWord); // Ensure current is visible
+        } else { // Default (could be player? or player_optimal?)
+            playerPath.forEach(word => visibleNodeIds.add(word));
+            optimalPath.forEach(word => visibleNodeIds.add(word));
         }
+        // Always ensure start and end words are visible
+        if (startWord) visibleNodeIds.add(startWord);
+        if (endWord) visibleNodeIds.add(endWord);
     } else if (status === GameStatus.WON) {
         // Show Start, End, and the full player path upon winning
         visibleNodeIds = new Set([startWord, endWord, ...playerPath].filter(Boolean));
@@ -152,12 +185,16 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
     }
     // Filter links based on pathDisplayMode *before* binding
     const linksToRender = links.filter(link => {
-        if (status !== GameStatus.GAVE_UP) return link.type === 'player'; // Only player path if playing
+        if (status !== GameStatus.GAVE_UP) return link.type === 'player'; // Only player path if playing or won
+        // Handle GAVE_UP states
         if (pathDisplayMode === 'player') return link.type === 'player';
         if (pathDisplayMode === 'optimal') return link.type === 'optimal';
         if (pathDisplayMode === 'suggested') return link.type === 'suggested';
-        if (pathDisplayMode === 'both') return link.type === 'player' || link.type === 'optimal';
-        return false; // Should not happen
+        if (pathDisplayMode === 'player_optimal') return link.type === 'player' || link.type === 'optimal';
+        if (pathDisplayMode === 'player_suggested') return link.type === 'player' || link.type === 'suggested';
+        if (pathDisplayMode === 'optimal_suggested') return link.type === 'optimal' || link.type === 'suggested';
+
+        return false; // Default: should not happen if mode is set correctly
     });
 
     // 2. Calculate viewBox (use nodesToRender for bounds)
@@ -175,7 +212,10 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
         minX = -50; maxX = 50; minY = -50; maxY = 50; // Example default
     }
 
-    const padding = 30;
+    // Make padding responsive
+    const currentSvgWidth = svgRef.current?.clientWidth || 500; // Get current SVG width or default
+    const padding = currentSvgWidth < 480 ? 15 : 30; // Use smaller padding on small screens
+
     const width = (maxX - minX) + 2 * padding;
     const height = (maxY - minY) + 2 * padding;
     const svgWidth = width > 0 ? width : 100; // Ensure non-zero width
@@ -247,12 +287,14 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
                 .call(exit => exit.transition().duration(500).attr('r', 0).remove())
       );
 
-    // -- Render Labels (Only Start, Current/End, SuggestedStart) --
+    // -- Render Labels (Only Start, Current(if different from Start), End, SuggestedStart) --
     const labelsToRender = nodesToRender.filter(d => 
         d.id === startWord || 
         d.id === endWord || 
-        (d.id === currentWord && status === GameStatus.PLAYING) || 
-        (pathDisplayMode === 'suggested' && d.id === suggestedPathFromCurrent[0])
+        (d.id === currentWord && status === GameStatus.PLAYING && currentWord !== startWord) || // Only show current if it's moved
+        (pathDisplayMode === 'suggested' && d.id === suggestedPathFromCurrent[0]) ||
+        (pathDisplayMode === 'player_suggested' && d.id === suggestedPathFromCurrent[0]) || // Label start of suggested
+        (pathDisplayMode === 'optimal_suggested' && d.id === suggestedPathFromCurrent[0])   // Label start of suggested
     );
 
     const labelSelection = labelGroup
@@ -261,90 +303,83 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
         .join(
             enter => enter.append('text')
                         .attr('class', 'graph-label')
-                        .attr('x', d => d.x + 10)
+                        .attr('x', d => d.x + 12)
                         .attr('y', d => d.y + 3)
                         .text(d => d.id),
-                        // Ensure labels start visible before collision check
-                        // .style('opacity', 1), // Default opacity is 1
             update => update
-                      .style('opacity', 1) // Reset opacity on update
+                      .style('opacity', 1)
                       .call(update => update.transition().duration(500)
-                          .attr('x', d => d.x + 10)
+                          .attr('x', d => d.x + 12)
                           .attr('y', d => d.y + 3)), 
             exit => exit.remove()
         );
         
     // --- Collision Detection & Hiding --- 
-    labelSelection.attr('opacity', 1); // Ensure all potentially visible labels start visible
+    // Restore collision detection logic
+    // /*
+    labelSelection.attr('opacity', 1); // Ensure all labels are initially visible before checking
 
-    const labelNodes = labelSelection.nodes(); // Get the actual DOM nodes
-    const labelData = labelSelection.data(); // Get the associated data
-    const hiddenLabels = new Set(); // Keep track of labels we've decided to hide
+    const labelNodes = labelSelection.nodes();
+    const labelBoxes = labelNodes.map(node => node.getBBox());
+    const hiddenLabels = new Set();
 
-    function checkOverlap(rect1, rect2) {
-        // Add some padding to the check to avoid labels barely touching
-        const padding = 2;
-        return !(
-            rect1.right < rect2.left + padding ||
-            rect1.left > rect2.right - padding ||
-            rect1.bottom < rect2.top + padding ||
-            rect1.top > rect2.bottom - padding
-        );
-    }
-
+    // Define priority for labels (higher value = less likely to be hidden)
     function getPriority(nodeData) {
         const word = nodeData.id;
-        // Highest priority: Current node during play OR End node when won
-        if (word === currentWord && status === GameStatus.PLAYING) return 4; 
-        if (word === endWord && status === GameStatus.WON) return 4; // Give End node top priority on win
         
-        // Next priority: Start node
-        if (word === startWord) return 3;
+        // Highest priority: Current node (only shown when != start)
+        if (word === currentWord && status === GameStatus.PLAYING && currentWord !== startWord) return 5; 
+
+        // Next highest priority: Start and End nodes
+        if (word === endWord) return 4; 
+        if (word === startWord) return 4; 
         
-        // Lower priority: End node (when not won - e.g., during play/gave up)
-        if (word === endWord) return 2;
+        // Lower priority: Start of suggested path
+        if (pathDisplayMode === 'suggested' && word === suggestedPathFromCurrent[0]) return 2; 
         
-        // Lowest static label priority: Start of suggested path
-        if (pathDisplayMode === 'suggested' && word === suggestedPathFromCurrent[0]) return 1; 
-        
-        return 0; // Should not happen for filtered static labels
+        return 0; // Default/fallback
     }
+    
+    // Simple Axis-Aligned Bounding Box (AABB) collision detection
+    // Sort labels by priority (descending) then y-coordinate (ascending) for consistent hiding
+    const sortedIndices = labelNodes.map((_, i) => i).sort((a, b) => {
+        const priorityA = getPriority(labelSelection.data()[a]);
+        const priorityB = getPriority(labelSelection.data()[b]);
+        if (priorityB !== priorityA) {
+            return priorityB - priorityA; // Higher priority first
+        }
+        // Tie-breaker: lower y-coordinate first (top-most on screen)
+        return labelBoxes[a].y - labelBoxes[b].y; 
+    });
 
-    if (labelNodes.length > 1) {
-        const bboxes = labelNodes.map(node => node.getBBox());
+    for (let i = 0; i < sortedIndices.length; i++) {
+        const index1 = sortedIndices[i];
+        if (hiddenLabels.has(index1)) continue; // Skip if already hidden
 
-        for (let i = 0; i < labelNodes.length; i++) {
-            if (hiddenLabels.has(i)) continue; // Skip if already hidden
+        const box1 = labelBoxes[index1];
 
-            for (let j = i + 1; j < labelNodes.length; j++) {
-                if (hiddenLabels.has(j)) continue; // Skip if other label is already hidden
+        for (let j = i + 1; j < sortedIndices.length; j++) {
+            const index2 = sortedIndices[j];
+            if (hiddenLabels.has(index2)) continue;
 
-                if (checkOverlap(bboxes[i], bboxes[j])) {
-                    const priorityI = getPriority(labelData[i]);
-                    const priorityJ = getPriority(labelData[j]);
+            const box2 = labelBoxes[index2];
 
-                    if (priorityI > priorityJ) {
-                        d3.select(labelNodes[j]).attr('opacity', 0);
-                        hiddenLabels.add(j);
-                    } else if (priorityJ > priorityI) {
-                        d3.select(labelNodes[i]).attr('opacity', 0);
-                        hiddenLabels.add(i);
-                        break; // Move to the next i, as current i is hidden
-                    } else {
-                        // Same priority, hide the one lower down (higher y value)?
-                        if (bboxes[i].y > bboxes[j].y) {
-                             d3.select(labelNodes[j]).attr('opacity', 0);
-                             hiddenLabels.add(j);
-                        } else {
-                             d3.select(labelNodes[i]).attr('opacity', 0);
-                             hiddenLabels.add(i);
-                             break; // Move to next i
-                        }
-                    }
-                }
+            // Check for overlap (AABB)
+            const overlap = !(box1.x + box1.width < box2.x || 
+                              box1.x > box2.x + box2.width || 
+                              box1.y + box1.height < box2.y || 
+                              box1.y > box2.y + box2.height);
+
+            if (overlap) {
+                // Hide the label with lower priority (which will be index2 due to sorting)
+                 hiddenLabels.add(index2);
             }
         }
     }
+
+    // Apply visibility based on collision results
+    labelSelection.style('opacity', (_, i) => hiddenLabels.has(i) ? 0 : 1);
+    // */ 
     // --- End Collision Detection ---
 
   // Dependency array: Re-run D3 code when these change

@@ -12,8 +12,12 @@ export const GameStatus = {
 };
 
 // Path length constraints
-const MIN_PATH_MOVES = 2;
-const MAX_PATH_MOVES = 15;
+const MIN_PATH_MOVES = 3;
+const MAX_PATH_MOVES = 8;
+// Add minimum visual distance constraint (t-SNE/PCA units)
+const MIN_COORD_DISTANCE_SQUARED = 30 * 30;
+// Add minimum node degree constraint
+const MIN_NODE_DEGREE = 2;
 
 // Create the context
 const GameContext = createContext(null);
@@ -35,9 +39,94 @@ export const GameProvider = ({ children }) => {
   const [suggestedPathFromCurrent, setSuggestedPathFromCurrent] = useState([]);
   const [suggestedPathFromCurrentLength, setSuggestedPathFromCurrentLength] = useState(null);
   const [error, setError] = useState(null); // Game-specific errors
+  // --- State for Move Accuracy ---
+  const [optimalMovesMade, setOptimalMovesMade] = useState(0);
+  const [moveAccuracy, setMoveAccuracy] = useState(null); // Percentage (0-100)
+  // --- State for Semantic Distance ---
+  const [playerSemanticDistance, setPlayerSemanticDistance] = useState(0);
+  const [optimalSemanticDistance, setOptimalSemanticDistance] = useState(null);
+  // --- State for End Game Report ---
+  const [gameReport, setGameReport] = useState(null);
+  // --- State for Optimal Remaining Path Length ---
+  const [optimalRemainingLength, setOptimalRemainingLength] = useState(null);
+  // --- End State ---
 
   // REMOVED: Effect to reset game state when selectedKProp changes
   // useEffect(() => { ... }, [selectedKProp]); 
+
+  // --- Helper Function: Generate Game Report ---
+  const generateGameReport = useCallback((nodes, playerPath, optimalPath, optimalMovesMade, playerSemanticDistance, optimalSemanticDistance) => {
+    if (!playerPath || playerPath.length <= 1) return null; // Need at least one move
+
+    const numPlayerMoves = playerPath.length - 1;
+    const finalAccuracy = (optimalMovesMade / numPlayerMoves) * 100;
+    let greedyMoves = 0;
+    let repositioningMoves = 0; // Renamed from jackknifeMoves
+    let totalPlayerSimilarity = 0;
+
+    for (let i = 0; i < numPlayerMoves; i++) {
+      const current = playerPath[i];
+      const selected = playerPath[i+1];
+      const target = playerPath[playerPath.length - 1]; // End word
+      const neighbors = nodes[current]?.edges;
+      
+      // --- Calculate Similarity & Greedy --- 
+      if (neighbors) {
+        const moveSimilarity = neighbors[selected] ?? 0;
+        totalPlayerSimilarity += moveSimilarity;
+        // Check if it was the most similar choice
+        const maxSimilarity = Math.max(...Object.values(neighbors));
+        if (moveSimilarity >= maxSimilarity * 0.999) { // Allow for floating point issues
+          greedyMoves++;
+        }
+      }
+
+      // --- Calculate Repositioning Moves --- 
+      // Requires A, B, C - check index i >= 1
+      if (i >= 1) {
+        const nodeA = nodes[playerPath[i-1]]; // A
+        const nodeB = nodes[current];          // B
+        const nodeC = nodes[selected];         // C
+        const nodeEnd = nodes[target];         // Target
+
+        const distSq_B_End = calculateDistanceSquared(nodeB?.tsne, nodeEnd?.tsne);
+        const distSq_C_End = calculateDistanceSquared(nodeC?.tsne, nodeEnd?.tsne);
+        
+        if (distSq_C_End > distSq_B_End) { // Cond 1: C further than B
+          let minDistSq_neighbor_end = Infinity;
+          let bestNextWord = null;
+          const neighborsOfC = nodeC?.edges;
+          if (neighborsOfC) {
+            for (const neighborWord in neighborsOfC) {
+               const neighborNodeData = nodes[neighborWord];
+               const distSq = calculateDistanceSquared(neighborNodeData?.tsne, nodeEnd?.tsne);
+               if (distSq < minDistSq_neighbor_end) {
+                 minDistSq_neighbor_end = distSq;
+                 bestNextWord = neighborWord; 
+               }
+            }
+          }
+          if (bestNextWord && minDistSq_neighbor_end < distSq_B_End) { // Cond 2: Best next from C closer than B
+            repositioningMoves++; // Renamed from jackknifeMoves++
+          }
+        }
+      }
+    } // End loop through moves
+
+    return {
+      playerMoves: numPlayerMoves,
+      optimalMoves: optimalPath?.length ? optimalPath.length - 1 : null,
+      accuracy: finalAccuracy,
+      optimalMovesMade: optimalMovesMade,
+      subOptimalMoves: numPlayerMoves - optimalMovesMade,
+      greedyMoves: greedyMoves,
+      repositioningMoves: repositioningMoves, // Renamed property key
+      playerDistance: playerSemanticDistance,
+      optimalDistance: optimalSemanticDistance,
+      averageSimilarity: numPlayerMoves > 0 ? totalPlayerSimilarity / numPlayerMoves : 0,
+    };
+
+  }, []); // No dependencies needed for the function definition itself
 
   // --- Game Logic Functions ---
 
@@ -60,6 +149,15 @@ export const GameProvider = ({ children }) => {
     setOptimalDistance(null);
     setSuggestedPathFromCurrent([]);
     setSuggestedPathFromCurrentLength(null);
+    // --- Reset Accuracy State ---
+    setOptimalMovesMade(0);
+    setMoveAccuracy(null); // Reset accuracy for new game
+    // --- Reset Semantic Distance State ---
+    setPlayerSemanticDistance(0);
+    setOptimalSemanticDistance(null);
+    setGameReport(null); // Reset report
+    // Reset the new state variable too
+    setOptimalRemainingLength(null);
 
     // Restore the core logic for finding a word pair
     const allWords = Object.keys(nodes);
@@ -72,9 +170,9 @@ export const GameProvider = ({ children }) => {
     let attempts = 0;
     const maxAttempts = 200;
     let foundPair = false;
-    let calculatedResult = null; // Store the successful result
+    let calculatedResult = null;
 
-    console.log(`Searching for word pair with optimal path between ${MIN_PATH_MOVES} and ${MAX_PATH_MOVES} moves...`);
+    console.log(`Searching for word pair (Moves: ${MIN_PATH_MOVES}-${MAX_PATH_MOVES}, Min Coord Dist Sq: ${MIN_COORD_DISTANCE_SQUARED}, Min Degree: ${MIN_NODE_DEGREE})...`);
 
     while (attempts < maxAttempts && !foundPair) {
       attempts++;
@@ -87,15 +185,79 @@ export const GameProvider = ({ children }) => {
       const potentialStart = allWords[randomIndex1]; // Define potentialStart
       const potentialEnd = allWords[randomIndex2];   // Define potentialEnd
 
+      // --- New: Check node degrees early --- 
+      const startNodeData = nodes[potentialStart];
+      const endNodeData = nodes[potentialEnd];
+      const startDegree = startNodeData?.edges ? Object.keys(startNodeData.edges).length : 0;
+      const endDegree = endNodeData?.edges ? Object.keys(endNodeData.edges).length : 0;
+
+      if (startDegree < MIN_NODE_DEGREE || endDegree < MIN_NODE_DEGREE) {
+        console.log(`Pair ${potentialStart}(${startDegree}) -> ${potentialEnd}(${endDegree}) rejected: Low node degree.`);
+        continue; // Skip to next attempt if degree is too low
+      }
+      // --- End New Check ---
+
       const result = findShortestPath(nodes, potentialStart, potentialEnd);
       const moves = result.path ? result.path.length - 1 : 0;
-
+      
+      // Check path length first (cheaper check)
       if (result.path && moves >= MIN_PATH_MOVES && moves <= MAX_PATH_MOVES) {
-        console.log(`Found valid pair: ${potentialStart} -> ${potentialEnd}, Optimal Moves: ${moves}, Distance: ${result.distance}`);
-        // Store result and words, set state *after* loop
-        calculatedResult = { potentialStart, potentialEnd, path: result.path, distance: result.distance, moves };
-        foundPair = true;
-      } 
+        
+        // Now check visual distance using t-SNE coordinates
+        const startNodeData = nodes[potentialStart];
+        const endNodeData = nodes[potentialEnd];
+
+        if (startNodeData?.tsne && endNodeData?.tsne) {
+          const [startX, startY] = startNodeData.tsne;
+          const [endX, endY] = endNodeData.tsne;
+          const dx = startX - endX;
+          const dy = startY - endY;
+          const distSq = dx * dx + dy * dy;
+
+          if (distSq >= MIN_COORD_DISTANCE_SQUARED) {
+            // --- New: Penultimate Node Check --- 
+            let hasAlternateApproach = false;
+            if (result.path.length >= 2) { // Should always be true given MIN_PATH_MOVES >= 3
+              const penultimateNode = result.path[result.path.length - 2];
+              const penultimateNeighbors = nodes[penultimateNode]?.edges;
+              if (penultimateNeighbors) {
+                for (const neighbor of Object.keys(penultimateNeighbors)) {
+                  if (neighbor !== potentialEnd) { // Don't check the end node itself
+                    const neighborNodeData = nodes[neighbor];
+                    // Check if this neighbor connects back to the end node
+                    if (neighborNodeData?.edges && neighborNodeData.edges[potentialEnd]) {
+                      hasAlternateApproach = true;
+                      // console.log(`   - Alt approach found: ${penultimateNode} -> ${neighbor} -> ${potentialEnd}`);
+                      break; // Found one, no need to check further
+                    }
+                  }
+                }
+              }
+            }
+            // --- End Penultimate Node Check ---
+            
+            if (hasAlternateApproach) {
+             // Valid pair found!
+             console.log(`Found valid pair: ${potentialStart} -> ${potentialEnd}, Moves: ${moves}, DistSq: ${distSq.toFixed(2)}, Has Alt Approach`);
+             calculatedResult = { potentialStart, potentialEnd, path: result.path, distance: result.distance, moves };
+             foundPair = true;
+            } else {
+              console.log(`Pair ${potentialStart} -> ${potentialEnd} rejected: No alternate approach path near end.`);
+            }
+          } else {
+            console.log(`Pair ${potentialStart} -> ${potentialEnd} rejected: Too close visually (DistSq: ${distSq.toFixed(2)}).`);
+          }
+        } else {
+          console.log(`Pair ${potentialStart} -> ${potentialEnd} rejected: Missing t-SNE data.`);
+        }
+      } else {
+        // Path length was invalid, log rejection
+        if (!result.path) {
+          console.log(`Pair ${potentialStart} -> ${potentialEnd} rejected: No path found.`);
+        } else {
+          console.log(`Pair ${potentialStart} -> ${potentialEnd} rejected: Path length ${moves} out of range (${MIN_PATH_MOVES}-${MAX_PATH_MOVES}).`);
+        }
+      }
     }
 
     // Set state based on loop outcome
@@ -107,44 +269,134 @@ export const GameProvider = ({ children }) => {
         setOptimalDistance(calculatedResult.distance);
         setOptimalPathLength(calculatedResult.moves);
         setOptimalPath(calculatedResult.path);
+        // --- Set Initial Optimal Remaining Length ---
+        // It's the same as the overall optimal length at the start
+        setOptimalRemainingLength(calculatedResult.moves);
+        // --- End Initial Set ---
         setStatus(GameStatus.PLAYING);
+        // --- Calculate Optimal Semantic Distance --- 
+        if (calculatedResult.path && calculatedResult.path.length > 1) {
+          let distanceSum = 0;
+          for (let i = 0; i < calculatedResult.path.length - 1; i++) {
+            const similarity = getSimilarity(nodes, calculatedResult.path[i], calculatedResult.path[i+1]);
+            distanceSum += (1 - similarity);
+          }
+          setOptimalSemanticDistance(distanceSum);
+        }
+        // --- End Calculation ---
     } else {
-        setError(`Could not find a suitable word pair (moves ${MIN_PATH_MOVES}-${MAX_PATH_MOVES}) after ${maxAttempts} attempts.`);
+        setError(`Could not find a suitable word pair (moves ${MIN_PATH_MOVES}-${MAX_PATH_MOVES}, min coord dist sq ${MIN_COORD_DISTANCE_SQUARED}, min degree ${MIN_NODE_DEGREE}) after ${maxAttempts} attempts.`);
         setStatus(GameStatus.ERROR);
         console.error("Failed to find a suitable word pair for the game.");
     }
 
   }, []); // Dependency removed
 
+  // --- Helper for Euclidean Distance (Squared) ---
+  function calculateDistanceSquared(coord1, coord2) {
+    if (!coord1 || !coord2 || coord1.length !== 2 || coord2.length !== 2) {
+      return Infinity; // Or null/undefined, handle appropriately
+    }
+    const dx = coord1[0] - coord2[0];
+    const dy = coord1[1] - coord2[1];
+    return dx * dx + dy * dy;
+  }
+
+  // Helper function to get similarity score (or 0 if missing)
+  function getSimilarity(nodes, wordA, wordB) {
+    return nodes?.[wordA]?.edges?.[wordB] ?? 0;
+  }
+
   // selectWord now needs nodes passed in
   const selectWord = useCallback((selectedWord, nodes) => {
-    if (status !== GameStatus.PLAYING || !nodes || !currentWord) return;
+    if (status !== GameStatus.PLAYING || !nodes || !currentWord || !endWord) return;
     
+    const startNodeData = nodes[currentWord];
+    const endNodeData = nodes[endWord]; // Need end node data for distance
+    const selectedNodeData = nodes[selectedWord];
+
     // Restore core logic:
-    const neighbors = nodes[currentWord]?.edges;
-    // Check if the selected word is a valid neighbor of the current word
+    const neighbors = startNodeData?.edges;
     if (!neighbors || !neighbors[selectedWord]) {
       console.warn(`Selected word "${selectedWord}" is not a valid neighbor of "${currentWord}".`);
-      // Optionally set an error state or just return
       return; 
     }
 
+    // --- Calculate if move was optimal (based on graph path) ---
+    let wasOptimalMove = false;
+    const pathResult = findShortestPath(nodes, currentWord, endWord); 
+    if (pathResult.path && pathResult.path.length > 1) {
+      if (pathResult.path[1] === selectedWord) {
+        wasOptimalMove = true;
+      }
+    } else {
+        // If no path exists from current, the move cannot be optimal in terms of path reduction
+    }
+    // --- End Optimal Move Check ---
+
     console.log(`Player selected: ${selectedWord}`);
     const newPath = [...playerPath, selectedWord];
+    const currentMovesCount = newPath.length - 1;
+    let updatedOptimalMoves = optimalMovesMade;
+
+    if (wasOptimalMove) {
+      updatedOptimalMoves++;
+    }
+    
+    // Capture the NEW current word *after* the move
+    const newCurrentWord = selectedWord; 
+    
+    // Update state
     setPlayerPath(newPath);
-    setCurrentWord(selectedWord);
+    setCurrentWord(newCurrentWord); 
+    setOptimalMovesMade(updatedOptimalMoves);
+
+    // --- Update Player Semantic Distance ---
+    const moveSimilarity = getSimilarity(nodes, currentWord, selectedWord);
+    const moveDistance = 1 - moveSimilarity;
+    setPlayerSemanticDistance(prev => prev + moveDistance);
+    // --- End Update ---
+
+    // Update accuracy
+    if (currentMovesCount > 0) {
+      setMoveAccuracy((updatedOptimalMoves / currentMovesCount) * 100);
+    } else {
+      setMoveAccuracy(null); // Or 100? If 0 moves, accuracy is undefined or perfect? Let's go with null.
+    }
+
+    // --- Calculate and Update Optimal Remaining Length ---
+    const newRemainingResult = findShortestPath(nodes, newCurrentWord, endWord);
+    if (newRemainingResult.path && newRemainingResult.path.length > 0) {
+      // Path length is nodes - 1 for moves
+      setOptimalRemainingLength(newRemainingResult.path.length - 1);
+    } else {
+      // No path found from the new position
+      setOptimalRemainingLength(null); 
+    }
+    // --- End Update ---
 
     // Check for win condition
-    if (selectedWord === endWord) {
+    if (newCurrentWord === endWord) {
       setStatus(GameStatus.WON);
-      console.log("Player reached the end word!");
+      // --- Generate Report on Win ---
+      const report = generateGameReport(nodes, newPath, optimalPath, updatedOptimalMoves, playerSemanticDistance + (1 - getSimilarity(nodes, currentWord, newCurrentWord)), optimalSemanticDistance);
+      setGameReport(report);
+      console.log("Player reached the end word! Report:", report);
+      // When winning, the remaining path is 0
+      setOptimalRemainingLength(0);
     }
-    // No change: // ... (rest of selectWord logic) ...
-  }, [status, currentWord, playerPath, endWord]); // Dependencies: status, currentWord, playerPath, endWord
+  }, [status, currentWord, playerPath, endWord, optimalMovesMade, optimalPath, playerSemanticDistance, optimalSemanticDistance, generateGameReport]); // Dependencies updated
 
   // giveUp now needs nodes passed in
   const giveUp = useCallback((nodes) => {
     if (status !== GameStatus.PLAYING) return;
+    
+    // --- Generate Report on Give Up --- 
+    const report = generateGameReport(nodes, playerPath, optimalPath, optimalMovesMade, playerSemanticDistance, optimalSemanticDistance);
+    setGameReport(report);
+    console.log("Player gave up. Report:", report);
+    // --- End Report Generation ---
+
     setSuggestedPathFromCurrent([]);
     setSuggestedPathFromCurrentLength(null);
     
@@ -170,8 +422,9 @@ export const GameProvider = ({ children }) => {
     }
     
     setStatus(GameStatus.GAVE_UP);
-    
-  }, [status, currentWord, endWord, startWord]); // Removed nodes/graphData dependency
+    // Set remaining to null when giving up?
+    setOptimalRemainingLength(null);
+  }, [status, currentWord, endWord, startWord, playerPath, optimalPath, optimalMovesMade, playerSemanticDistance, optimalSemanticDistance, generateGameReport]); // Dependencies updated
 
   // --- Context Value --- 
   const value = {
@@ -186,6 +439,18 @@ export const GameProvider = ({ children }) => {
     suggestedPathFromCurrent,
     suggestedPathFromCurrentLength,
     error, // Game specific error
+    // --- Add Accuracy to Context ---
+    optimalMovesMade,
+    moveAccuracy,
+    // --- End Accuracy Context ---
+    // --- Add Semantic Distance to Context ---
+    playerSemanticDistance,
+    optimalSemanticDistance,
+    // --- End Semantic Distance Context ---
+    // --- Add Game Report to Context ---
+    gameReport,
+    // --- End Game Report Context ---
+    optimalRemainingLength, // Used for Possible
     startGame,
     selectWord,
     giveUp,
