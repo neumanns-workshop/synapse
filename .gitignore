@@ -1,0 +1,19 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+client/dist/
+
+# Data intermediates (optional, keep if useful)
+# data/
+# raw_data/embeddings.pkl
+
+# IDE / OS files
+.DS_Store
+.idea/
+*.suo
+*.user
+*.sln.docstates 

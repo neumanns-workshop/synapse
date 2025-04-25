@@ -11,7 +11,7 @@ import argparse # Import argparse
 WORDS_PATH = os.path.join("raw_data", "ENGLISH_LEMMATIZED.json")
 EMBEDDINGS_PATH = os.path.join("raw_data", "embeddings.pkl")
 TSNE_COORDS_PATH = os.path.join("data", "tsne_coordinates.json")
-OUTPUT_DIR = os.path.join("data")
+OUTPUT_DIR = os.path.join("client", "public", "data")
 OUTPUT_PATH = os.path.join(OUTPUT_DIR, "graph.json")
 
 def build_graph(k_neighbors):

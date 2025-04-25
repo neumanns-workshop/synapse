@@ -32,14 +32,15 @@
 - **Framework**: React (using Vite for build tooling)
 - **Visualization**: D3.js (Switched from basic SVG)
 - **Styling**: CSS (`App.css`, refactored from inline styles)
-- **State Management**: React Context API (GraphDataContext, GameContext)
+- **State Management**: React Context API (`GraphDataContext`, `GameContext`)
+- **Utility Functions**: Extracted logic into `utils/` (e.g., `graphUtils`, `gameReportUtils`)
 
 ### 3.2 Data Storage
-- **Graph Structure**: Adjacency list representation of the word graph (`graph.json`) - Includes integrated t-SNE coordinates.
-- **Edge Weights**: Pre-computed similarity scores between connected words (Stored in `graph.json`).
-- **Optimal Paths**: Pre-calculated shortest paths for common word pairs
-- **t-SNE Coordinates**: Pre-calculated 2D positions for visualization
-- **Word Definitions:** Pre-computed WordNet definitions for all vocabulary words (`definitions.json`).
+- **Graph Structure**: Adjacency list representation of the word graph (`client/public/data/graph.json`) - Includes integrated t-SNE coordinates.
+- **Edge Weights**: Pre-computed similarity scores between connected words (Stored in `client/public/data/graph.json`).
+- **Optimal Paths**: Pre-calculated shortest paths for common word pairs (*Decision: Calculated on demand*)
+- **t-SNE Coordinates**: Pre-calculated 2D positions for visualization (Stored in `client/public/data/graph.json`)
+- **Word Definitions:** Pre-computed WordNet definitions for all vocabulary words (`client/public/data/definitions.json`).
 
 ### 3.3 Optimization Techniques
 - **Data Compression**: Quantized word vectors to reduce file size (Future possibility)
@@ -51,24 +52,24 @@
 ### Phase 1: Data Preparation
 1. ~~Process word embeddings for the 4,000-word vocabulary~~ (Done - loaded from `raw_data`)
 2. ~~Construct the word graph by finding top-k similar words for each word~~ (Done - `scripts/build_graph.py`, K=6 settled)
-3. ~~Store graph as an adjacency list with weighted edges~~ (Done - `data/graph.json`)
-4. ~~Generate t-SNE coordinates for visualization~~ (Done - `scripts/generate_tsne.py`)
+3. ~~Store graph as an adjacency list with weighted edges~~ (Done - Output now directly to `client/public/data/graph.json`)
+4. ~~Generate t-SNE coordinates for visualization~~ (Done - `scripts/generate_tsne.py`, intermediate `data/tsne_coordinates.json` consumed by build script)
 5. ~~Pre-compute optimal paths between common word pairs~~ (*Decision: Calculate on demand*)
-6. ~~Create optimized data structures for client-side use~~ (Done - `client/public/data/graph.json` combines graph and t-SNE)
+6. ~~Create optimized data structures for client-side use~~ (Done - `client/public/data/graph.json` combines graph and t-SNE, `client/public/data/definitions.json`)
 7. ~~Filter problematic words~~ (Done - Filter added to `scripts/build_graph.py` for offensive words *and words lacking definitions*)
-8. ~~Add visual distance check to pair finding~~ (Done - Added to `startGame`)
+8. ~~Add visual distance check to pair finding~~ (Done - Added to `startGame`, later refactored to `utils/graphUtils.js`)
 
 ### Phase 2: Core Game Logic
-1. ~~Implement graph traversal algorithms (Dijkstra's)~~ - (Implemented in `graphUtils.js`)
+1. ~~Implement graph traversal algorithms (Dijkstra's)~~ - (Implemented in `utils/graphUtils.js`)
 2. ~~Develop functions to access the pre-computed word graph~~ - (Implemented via `GraphDataContext`)
 3. ~~Create path validation and scoring system based on graph distances~~ - (Implemented - Validation in `startGame`, scoring display in UI)
-4. ~~Build difficulty estimation using graph metrics (path length, connectivity)~~ - (Implemented via Path Length + Visual Distance Constraints in `startGame`)
-5. ~~Implement game state management and progression~~ - (Implemented via `GameContext`)
+4. ~~Build difficulty estimation using graph metrics (path length, connectivity)~~ - (Implemented via Path Length + Visual Distance Constraints in `startGame`, refactored to `findValidWordPair` in `utils/graphUtils.js`)
+5. ~~Implement game state management and progression~~ - (Implemented via `GameContext`, refactored significant logic (`findValidWordPair`, `generateGameReport`) into `utils/`)
 6. ~~Add Suggested Path calculation on Give Up~~ - (Implemented in `GameContext`)
 
 ### Phase 3: User Interface
-1. ~~Design main game screen with word selection interface~~ - (Implemented & Refined - `Game` component in `App.jsx`)
-2. ~~Implement interactive graph visualization component~~ - (Implemented using D3.js - `GraphVisualization.jsx`, includes path toggling for various combinations, node clicking)
+1. ~~Design main game screen with word selection interface~~ - (Implemented & Refined - `Game` component in `App.jsx`, `NeighborSelection` component extracted)
+2. ~~Implement interactive graph visualization component~~ - (Implemented using D3.js - `GraphVisualization.jsx`, includes path toggling, node clicking, internal helpers refactored)
 3. ~~Create visual elements for showing current position, path history, and target~~ - (Implemented & Refined - Status info block, colored path text)
 4. ~~Develop radar-like t-SNE plot with zoom/pan capabilities~~ - (Basic pan/zoom via D3 viewBox, no radar yet - Future enhancement)
 5. ~~Create responsive layout for desktop and mobile~~ - (Substantially addressed via CSS @media queries in `App.css`, adjustments for buttons, graph, report. Further fine-tuning possible.)
@@ -76,8 +77,8 @@
 7. ~~Refactor inline styles to CSS~~ - (Done - Styles moved to `App.css`)
 8. ~~Improve overall visual aesthetic (theme, spacing, controls)~~ - (Done - Dark theme refined, K selector removed, layout simplified, Post-Game Report styled, Info Box refined, Button Contrast improved, Layout Consistency improved, Status Line refined)
 9. ~~Implement K selector for graph complexity~~ - (*Decision: Removed*, settled on K=6)
-10. ~~Add "How to Play" info box~~ - (Implemented & Refined - Thematically integrated, concise)
-11. ~~Implement detailed Post-Game Report component~~ - (Implemented - `GameReportDisplay` in `App.jsx`)
+10. ~~Add \"How to Play\" info box~~ - (Implemented & Refined - Thematically integrated, concise, extracted to `InfoBox` component)
+11. ~~Implement detailed Post-Game Report component~~ - (Implemented - `GameReportDisplay` component extracted from `App.jsx`)
 12. ~~Implement enhanced path visibility toggles for Give Up state~~ - (Implemented in `App.jsx` and `GraphVisualization.jsx`)
 13. ~~Implement Definition Tooltips on Hover (Neighbor words, Path words, Target word)~~ - (Done)
 
@@ -126,12 +127,13 @@
 - Pre-compute similarity matrices and extract top-k connections for each word (K=6)
 - Ensure graph connectivity through validation algorithms (*Note: Currently relies on random pair finding success with path length/visual distance constraints*)
 - Analyze graph properties to confirm navigability
-- Store graph in optimized format for client-side use (`graph.json`)
+- Store graph in optimized format for client-side use (`client/public/data/graph.json`)
 
 ### 5.2 Visualization Performance
 **Challenge**: Rendering and updating the graph visualization efficiently, including on mobile.
 **Solution**:
-- Implemented using D3.js with enter/update/exit pattern.
+- Implemented using D3.js with enter/update/exit pattern (`GraphVisualization.jsx`).
+- Internal helper functions and rendering logic refactored for clarity.
 - ViewBox calculation adjusts zoom/pan based on relevant nodes, with responsive padding.
 - Basic transitions added.
 - Pre-calculate layout positions using t-SNE.
@@ -195,8 +197,10 @@
 ### 6.3 Game State (Managed in `GameContext`)
 ```javascript
 // Represents the state managed by the useGame() hook
+// Note: Complex logic like report generation and word pair finding
+// has been extracted to utility functions in `client/src/utils/`.
 {
-  status: GameStatus, 
+  status: GameStatus,
   startWord: string | null,
   endWord: string | null,
   currentWord: string | null,
@@ -259,6 +263,7 @@
 - **Phase 1**: Data preparation and initial architecture (Complete)
 - **Phase 2**: Core game logic implementation (Complete, incl. Suggested Path)
 - **Phase 3**: User interface development (Complete - Core elements implemented, minor refinements possible later)
+- **Code Refactoring**: Significant cleanup of project structure, component modularity (`App.jsx`, `GraphVisualization.jsx`), and state logic extraction (`GameContext.jsx`). (Complete)
 - **Phase 4**: Game features and enhancements (Future)
 - **Phase 5**: Testing, optimization, and initial release (Future)
 
@@ -268,9 +273,10 @@
 2. ~~Core Gameplay Functional~~: Basic word navigation, pathfinding, state management, difficulty/visual distance constraints, suggested path implemented, game report calculation added.
 3. ~~Visualization Implemented~~: D3.js visualization showing paths, nodes, basic transitions, interactivity, multiple path combination toggles, and responsive adjustments implemented.
 4. ~~UI Refined~~: Basic styling, layout improved (including responsiveness), controls polished, game report styled and integrated.
-5. **Alpha Version**: Getting closer. Needs focus on pair quality & robust testing.
-6. **Beta Version**: Limited release with core functionality.
-7. **Initial Release**: Public release with complete basic features.
+5. ~~Code Structure Refactored~~: Cleaned root directory, modularized `App.jsx`, extracted logic from `GameContext.jsx`, refactored `GraphVisualization.jsx` internals.
+6. **Alpha Version**: Getting closer. Needs focus on pair quality & robust testing.
+7. **Beta Version**: Limited release with core functionality.
+8. **Initial Release**: Public release with complete basic features.
 
 ## 10. Possible Extensions
 

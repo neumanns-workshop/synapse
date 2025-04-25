@@ -87,4 +87,104 @@ export function findShortestPath(graphNodes, startWord, endWord) {
     console.error("Path reconstruction failed.");
     return { path: null, distance: Infinity };
   }
-} 
+}
+
+// --- Helper for Euclidean Distance (Squared) ---
+// Moved from GameContext/GameReportUtils
+export function calculateDistanceSquared(coord1, coord2) {
+    if (!coord1 || !coord2 || coord1.length !== 2 || coord2.length !== 2) {
+      return Infinity; // Treat missing coords as infinitely far
+    }
+    const dx = coord1[0] - coord2[0];
+    const dy = coord1[1] - coord2[1];
+    return dx * dx + dy * dy;
+}
+
+// --- Find Valid Word Pair Function --- 
+const MAX_PAIR_FINDING_ATTEMPTS = 200;
+
+export function findValidWordPair(nodes, constraints) {
+    const {
+        minPathMoves = 3,
+        maxPathMoves = 8,
+        minCoordDistanceSquared = 900, // Default 30*30
+        minNodeDegree = 2
+    } = constraints;
+
+    const allWords = Object.keys(nodes);
+    if (allWords.length < 2) {
+      console.error('Not enough words in the graph to find a pair.');
+      return null; // Or throw error
+    }
+
+    let attempts = 0;
+    while (attempts < MAX_PAIR_FINDING_ATTEMPTS) {
+      attempts++;
+      // Select two distinct random words
+      let randomIndex1 = Math.floor(Math.random() * allWords.length);
+      let randomIndex2 = Math.floor(Math.random() * allWords.length);
+      while (randomIndex1 === randomIndex2) {
+        randomIndex2 = Math.floor(Math.random() * allWords.length);
+      }
+      const potentialStart = allWords[randomIndex1];
+      const potentialEnd = allWords[randomIndex2];
+
+      // Check node degrees
+      const startNodeData = nodes[potentialStart];
+      const endNodeData = nodes[potentialEnd];
+      const startDegree = startNodeData?.edges ? Object.keys(startNodeData.edges).length : 0;
+      const endDegree = endNodeData?.edges ? Object.keys(endNodeData.edges).length : 0;
+
+      if (startDegree < minNodeDegree || endDegree < minNodeDegree) {
+        continue; 
+      }
+
+      // Check path length
+      const result = findShortestPath(nodes, potentialStart, potentialEnd);
+      const moves = result.path ? result.path.length - 1 : 0;
+      
+      if (result.path && moves >= minPathMoves && moves <= maxPathMoves) {
+        // Check visual distance
+        if (startNodeData?.tsne && endNodeData?.tsne) {
+          const distSq = calculateDistanceSquared(startNodeData.tsne, endNodeData.tsne);
+
+          if (distSq >= minCoordDistanceSquared) {
+            // Check for alternate approach near the end
+            let hasAlternateApproach = false;
+            if (result.path.length >= 2) {
+              const penultimateNode = result.path[result.path.length - 2];
+              const penultimateNeighbors = nodes[penultimateNode]?.edges;
+              if (penultimateNeighbors) {
+                for (const neighbor of Object.keys(penultimateNeighbors)) {
+                  if (neighbor !== potentialEnd) {
+                    const neighborNodeData = nodes[neighbor];
+                    if (neighborNodeData?.edges && neighborNodeData.edges[potentialEnd]) {
+                      hasAlternateApproach = true;
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+            
+            if (hasAlternateApproach) {
+             // Valid pair found!
+             return { 
+                 startWord: potentialStart, 
+                 endWord: potentialEnd, 
+                 path: result.path, 
+                 distance: result.distance, 
+                 moves 
+             };
+            } 
+          } 
+        } 
+      } 
+    } // end while loop
+
+    // Failed to find a pair after max attempts
+    console.error(`Could not find a suitable word pair after ${MAX_PAIR_FINDING_ATTEMPTS} attempts.`);
+    return null;
+}
+
+// Add other graph-related utilities here if needed 

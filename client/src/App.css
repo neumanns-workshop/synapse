@@ -136,18 +136,43 @@ button:disabled {
 }
 
 .info-button {
-  position: absolute;
-  top: 20px; /* Adjust position */
-  right: 20px;
-  z-index: 10;
-  background-color: #4a5060; /* Distinct utility button color */
-  border: 1px solid #666;
-  padding: 0.5em 1em; /* Smaller padding */
-  font-size: 0.9em;
+  /* Keep general button styles, but remove icon-specific ones */
+  /* background-color: transparent; */
+  /* border: none; */
+  /* color: #aaa; */
+  /* padding: 0.2em 0.4em; */
+  /* font-size: 1.2em; */
+  /* line-height: 1; */
+  /* Restore or adjust standard button styles as needed */
+  font-size: 0.95em; 
+  padding: 0.7em 1.4em; 
+  margin: 0.5em;
+  cursor: pointer;
+  border-radius: 6px; 
+  border: 1px solid #444; 
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #333842; 
+  transition: border-color 0.2s, background-color 0.2s, transform 0.1s;
+  color: #e0e0e0;
 }
+
 .info-button:hover {
-  background-color: #5a6070;
-  border-color: #888;
+  /* Keep standard hover */
+  background-color: #404552;
+  border-color: #7a8bff;
+  color: #e0e0e0; /* Ensure text color doesn't change oddly */
+}
+
+/* Specific style for help button if needed */
+.help-button {
+    background-color: #4a5060; /* Maybe slightly different color? */
+    border-color: #666;
+}
+
+.help-button:hover {
+    background-color: #5a6070;
+    border-color: #888;
 }
 
 .info-box {
@@ -161,6 +186,8 @@ button:disabled {
   color: #ccc; 
   max-width: 500px; /* Add max-width to match graph-status-info */
   box-sizing: border-box; /* Include padding/border in element's total width/height */
+  z-index: 101; /* Above backdrop */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
 .info-box h3 {
@@ -246,13 +273,14 @@ button:disabled {
 }
 
 .options-container {
-  margin-top: 0; 
+  margin-top: 0;
   padding-top: 0;
-  text-align: center; 
-  max-width: 500px; /* Add max-width */
-  margin-left: auto; /* Add centering */
-  margin-right: auto; /* Add centering */
-  box-sizing: border-box; /* Add box-sizing for consistency */
+  text-align: center;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  margin-bottom: 1.5rem; /* Restore bottom margin here */
 }
 
 .options-container h3 {
@@ -261,38 +289,44 @@ button:disabled {
 }
 
 .options-buttons {
-  /* Change from flex to grid */
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Create 3 equal columns */
-  /* flex-wrap: wrap; REMOVED */
-  justify-content: center; /* Center the grid container if needed, or remove */
-  justify-items: center; /* Center items within grid cells */
-  align-items: center;   /* Vertically center items */
-  gap: 15px; /* Adjust gap as needed for grid */
+  /* Change from grid to flex wrap */
+  display: flex; 
+  flex-wrap: wrap;
+  justify-content: center; /* Keep items centered */
+  /* REMOVED grid properties */
+  /* grid-template-columns: repeat(3, 1fr); */ 
+  /* justify-items: center; */ 
+  /* align-items: center; */ 
+  gap: 10px; /* Adjust gap as needed for flex */
   margin-bottom: 15px;
-  max-width: 500px; /* Add max-width to prevent excessive stretching */
-  margin-left: auto;  /* Center the grid block */
-  margin-right: auto; /* Center the grid block */
+  max-width: 500px; 
+  margin-left: auto;  
+  margin-right: auto; 
 }
 
-.neighbor-button {
-  min-width: 110px; /* Slightly larger minimum width */
-  border-width: 2px; /* Make border thicker for gradient visibility */
-  border-color: transparent; /* Start transparent */
-  /* Background color applied inline */
-  color: #111; /* Darker text for contrast on light HSL */
+/* Ensure option-button styles work well (likely fine, but confirm no fixed width) */
+.option-button { 
+  min-width: 90px; /* Allow slightly smaller min-width if needed */
+  border-width: 2px; 
+  border-color: transparent; 
+  color: #111; 
   font-weight: 600;
   transition: transform 0.1s ease-out, border-color 0.2s;
+  /* Ensure no fixed width is set that would interfere with packing */
 }
 
-.neighbor-button:hover {
-    transform: translateY(-2px); /* Add slight lift on hover */
-    border-color: rgba(255, 255, 255, 0.7); /* Highlight border on hover */
-    /* Keep inline background color */
+.option-button:hover {
+    transform: translateY(-2px); 
+    border-color: rgba(255, 255, 255, 0.7); 
 }
+
+/* Renaming neighbor-button styles to option-button if they existed */
+/* (Assuming .neighbor-button styles previously targeted these, 
+   let's ensure equivalent styles exist for .option-button if needed. 
+   The styles above look like they might be intended for .option-button) */
 
 .give-up-button {
-  margin-top: 20px;
+  margin-top: 0; /* Remove top margin as gap is handled by container */
   background-color: #7f1d1d; /* Slightly different dark red */
   border-color: #9f2d2d;
   color: #f0e0e0;
@@ -564,36 +598,19 @@ button:disabled {
 
 /* Style for optimal choice words in the player path */
 .optimal-choice-word {
-  position: relative;
-  font-weight: 600;
+  /* Removed position: relative and margin-right */
+  /* Keep this class for potential future shared styles, but color is now specific */
 }
 
-/* Base style for the star indicator */
-.optimal-choice-word::after {
-  content: "★";
-  position: absolute;
-  font-size: 10px;
-  top: -8px;
-  right: -10px;
+/* REMOVED ::after pseudo-element styles */
+/* .optimal-choice-word::after { ... } */
+
+.global-optimal-choice {
+  color: #ffab7a; /* Orange for global optimal - Applied directly */
 }
 
-/* Orange star for global optimal path moves (matching optimal path color) */
-.global-optimal-choice::after {
-  color: #ffab7a; /* Match optimal path color */
-}
-
-/* Purple star for local optimal path moves (matching suggested path color) */
-.local-optimal-choice::after {
-  color: #d4a0ff; /* Match suggested path color */
-}
-
-/* Colored stars for the game report */
-.global-optimal-star {
-  color: #ffab7a; /* Match optimal path color */
-}
-
-.local-optimal-star {
-  color: #d4a0ff; /* Match suggested path color */
+.local-optimal-choice {
+  color: #d4a0ff; /* Purple for local optimal - Applied directly */
 }
 
 /* Ensure color overrides highlight background if needed */
@@ -834,13 +851,6 @@ button:disabled {
   border-top: 1px dashed #444a54;
 }
 
-.missed-optimal-moves h5 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: #b0b9c6;
-  font-size: 0.95rem;
-}
-
 .missed-optimal-moves ul {
   list-style: none;
   padding-left: 0;
@@ -859,13 +869,6 @@ button:disabled {
   border-top: 1px dashed #444a54;
 }
 
-.optimal-moves-made h5 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  color: #98c379; /* Green color for positive feedback */
-  font-size: 0.95rem;
-}
-
 .optimal-moves-made ul {
   list-style: none;
   padding-left: 0;
@@ -878,16 +881,65 @@ button:disabled {
 }
 
 .player-position {
-  color: #a0c8ff; /* Light blue for position */
+  color: #ffd700; /* Changed to gold (current word color) */
   font-weight: 500;
 }
 
 .player-choice {
-  color: #ffd700; /* Gold for player's choice */
+  color: #fff; /* Changed to white #fff */
   font-weight: 500;
 }
 
 .optimal-choice {
-  color: #ffab7a; /* Match optimal path color */
+  /* REMOVED color rule to avoid conflict */
+  /* color: #ffab7a; */ 
   font-weight: 500;
 }
+
+/* ADDED: Container for Start/Help buttons */
+.start-controls-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Space between buttons */
+    margin-top: 1rem; /* Add some space above */
+    margin-bottom: 1rem; /* Add some space below */
+}
+
+/* Container for the bottom row buttons inside NeighborSelection */
+.action-buttons-row {
+  display: flex;
+  justify-content: center;
+  /* align-items: center; */ /* Changed from center */
+  align-items: baseline; /* Align by text baseline */
+  gap: 10px; /* Space between Give Up, About, etc. */
+  margin-top: 15px; /* Space above this row */
+}
+
+.give-up-button {
+  margin-top: 0; /* Remove top margin as gap is handled by container */
+  /* background-color: #7f1d1d; */ /* Already defined */
+  /* border-color: #9f2d2d; */
+  /* color: #f0e0e0; */
+}
+
+/* Adjust About button margin when in this row */
+.action-buttons-row .info-button.help-button {
+  margin: 0; /* Remove default margin */
+}
+
+
+/* REMOVED: Container for In-Game Actions */
+/*
+.in-game-actions-container {
+  display: flex;
+  flex-direction: column; 
+  align-items: center; 
+  gap: 10px; 
+  margin-top: 1rem; 
+  margin-bottom: 1.5rem; 
+}
+.in-game-actions-container .info-button.help-button {
+  margin-top: 5px; 
+}
+*/
