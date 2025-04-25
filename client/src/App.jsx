@@ -363,19 +363,23 @@ function Game() {
   );
 }
 
+// Top-level App component to wrap providers and Game
 function App() {
   return (
-    // Remove props from providers
-    <GameProvider>
-      <GraphDataProvider>
-        <div className="App">
-          {/* REMOVED title-container and InfoBox from here */}
-          <h1>Synapse</h1>
-          <h2 className="subtitle">Semantic Pathways</h2>
-          <Game />
+    <GraphDataProvider>
+      <GameProvider>
+        <div className="app-wrapper"> {/* Added wrapper div */}
+          <h1>Synapse</h1> {/* Re-added title */}
+          <h2 className="subtitle">Semantic Pathways</h2> {/* Re-added subtitle */}
+          <main className="app-content"> {/* Added main content area */}
+            <Game />
+          </main>
+          <footer className="app-footer"> {/* Added footer */}
+            Copyright © 2025 Jared Neumann. Licensed under the <a href="/LICENSE" target="_blank" rel="noopener noreferrer">GPLv3</a>.
+          </footer>
         </div>
-      </GraphDataProvider>
-    </GameProvider>
+      </GameProvider>
+    </GraphDataProvider>
   );
 }
 
