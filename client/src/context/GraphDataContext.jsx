@@ -20,9 +20,9 @@ export const GraphDataProvider = ({ children }) => {
       setGraphData(null);
       setDefinitionsData(null);
 
-      // Define paths
-      const graphDataPath = `/data/graph.json`;
-      const definitionsDataPath = `/data/definitions.json`;
+      // Define paths using BASE_URL for correct resolution in dev and prod
+      const graphDataPath = `${import.meta.env.BASE_URL}data/graph.json`;
+      const definitionsDataPath = `${import.meta.env.BASE_URL}data/definitions.json`;
       console.log(`Fetching graph data from: ${graphDataPath}`);
       console.log(`Fetching definitions data from: ${definitionsDataPath}`);
 
