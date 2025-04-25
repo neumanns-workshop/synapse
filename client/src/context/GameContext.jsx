@@ -49,6 +49,8 @@ export const GameProvider = ({ children }) => {
   const [gameReport, setGameReport] = useState(null);
   // --- State for Optimal Remaining Path Length ---
   const [optimalRemainingLength, setOptimalRemainingLength] = useState(null);
+  // --- State for Optimal Choices ---
+  const [optimalChoices, setOptimalChoices] = useState([]); // Store optimal choices at each step
   // --- End State ---
 
   // REMOVED: Effect to reset game state when selectedKProp changes
@@ -124,9 +126,10 @@ export const GameProvider = ({ children }) => {
       playerDistance: playerSemanticDistance,
       optimalDistance: optimalSemanticDistance,
       averageSimilarity: numPlayerMoves > 0 ? totalPlayerSimilarity / numPlayerMoves : 0,
+      optimalChoiceHistory: optimalChoices, // Add the optimal choices to the report
     };
 
-  }, []); // No dependencies needed for the function definition itself
+  }, [optimalChoices]); // Add optimalChoices as a dependency
 
   // --- Game Logic Functions ---
 
@@ -158,6 +161,8 @@ export const GameProvider = ({ children }) => {
     setGameReport(null); // Reset report
     // Reset the new state variable too
     setOptimalRemainingLength(null);
+    // Reset optimal choices
+    setOptimalChoices([]);
 
     // Restore the core logic for finding a word pair
     const allWords = Object.keys(nodes);
@@ -324,8 +329,10 @@ export const GameProvider = ({ children }) => {
 
     // --- Calculate if move was optimal (based on graph path) ---
     let wasOptimalMove = false;
+    let optimalChoice = null;
     const pathResult = findShortestPath(nodes, currentWord, endWord); 
     if (pathResult.path && pathResult.path.length > 1) {
+      optimalChoice = pathResult.path[1]; // Store the optimal choice
       if (pathResult.path[1] === selectedWord) {
         wasOptimalMove = true;
       }
@@ -334,7 +341,7 @@ export const GameProvider = ({ children }) => {
     }
     // --- End Optimal Move Check ---
 
-    console.log(`Player selected: ${selectedWord}`);
+    console.log(`Player selected: ${selectedWord}` + (optimalChoice ? `, Optimal choice was: ${optimalChoice}` : ''));
     const newPath = [...playerPath, selectedWord];
     const currentMovesCount = newPath.length - 1;
     let updatedOptimalMoves = optimalMovesMade;
@@ -344,7 +351,14 @@ export const GameProvider = ({ children }) => {
     }
     
     // Capture the NEW current word *after* the move
-    const newCurrentWord = selectedWord; 
+    const newCurrentWord = selectedWord;
+    
+    // Update optimal choices
+    setOptimalChoices(prev => [...prev, { 
+      playerPosition: currentWord, 
+      playerChose: selectedWord, 
+      optimalChoice: optimalChoice 
+    }]);
     
     // Update state
     setPlayerPath(newPath);
@@ -385,7 +399,7 @@ export const GameProvider = ({ children }) => {
       // When winning, the remaining path is 0
       setOptimalRemainingLength(0);
     }
-  }, [status, currentWord, playerPath, endWord, optimalMovesMade, optimalPath, playerSemanticDistance, optimalSemanticDistance, generateGameReport]); // Dependencies updated
+  }, [status, currentWord, playerPath, endWord, optimalMovesMade, optimalPath, playerSemanticDistance, optimalSemanticDistance, generateGameReport, optimalChoices]); // Dependencies updated
 
   // giveUp now needs nodes passed in
   const giveUp = useCallback((nodes) => {
@@ -451,6 +465,7 @@ export const GameProvider = ({ children }) => {
     gameReport,
     // --- End Game Report Context ---
     optimalRemainingLength, // Used for Possible
+    optimalChoices, // Add the optimal choices
     startGame,
     selectWord,
     giveUp,

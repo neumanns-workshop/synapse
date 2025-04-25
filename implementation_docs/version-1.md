@@ -81,6 +81,30 @@
 12. ~~Implement enhanced path visibility toggles for Give Up state~~ - (Implemented in `App.jsx` and `GraphVisualization.jsx`)
 13. ~~Implement Definition Tooltips on Hover (Neighbor words, Path words, Target word)~~ - (Done)
 
+### 3.3 UI Enhancements (Recent Progress)
+1. ✅ Implemented multiselect buttons for path visualization in Give Up screen
+   - Replaced pairwise buttons with three toggle buttons (Player, Optimal, Suggested)
+   - Added visual indicators for active paths with proper coloring
+   - Improved button styling and tooltips
+
+2. ✅ Enhanced path visualization and streamlined UI
+   - Added dynamic ellipsis with dots representing remaining moves
+   - Integrated color logic (orange for optimal path, purple for alternative path)
+   - Moved target word display to the path itself with expansion notation
+   - Reduced unnecessary text metrics in favor of visual storytelling
+   - Added comprehensive tooltips for game information
+
+3. ✅ Added optimal move indicators with visual feedback
+   - Implemented star indicators (★) for words that were optimal choices
+   - Color-coded stars: orange for global optimal path moves, purple for locally optimal moves
+   - Created consistent visual system in both gameplay and post-game report
+   - Removed numerical accuracy display during gameplay for cleaner UI
+   - Enhanced learning feedback loop by highlighting good decisions in real-time
+
+4. 🔄 Future Considerations
+   - Further refinement of dots visualization (possibly keeping them orange)
+   - Potentially making dots disappear or animate as moves are made
+
 ### Phase 4: Game Features
 1. Implement scoring system - (Future - beyond basic move count)
 2. Add difficulty levels - (Future - K selector removed, could revisit)

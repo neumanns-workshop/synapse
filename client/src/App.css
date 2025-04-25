@@ -1,3 +1,6 @@
+/* Import Inter font from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 /* === Base & Typography === */
 body {
   margin: 0;
@@ -217,7 +220,12 @@ button:disabled {
 
 .optimal-move-count {
   font-weight: 600; /* Semi-bold */
-  color: #a0c8ff; /* Light blue (match graph path?) */
+  color: #ffab7a; /* Changed from light blue to match optimal path visualization */
+}
+
+.possible-move-count {
+  font-weight: 600; /* Semi-bold */
+  color: #d4a0ff; /* Using the suggested path color (light purple/violet) */
 }
 
 .player-path {
@@ -311,16 +319,17 @@ button:disabled {
 }
 
 .gave-up-section h3 {
-  color: #ffab7a; /* Brighter salmon */
+  color: #ffab7a; /* Match optimal path color */
   margin-top: 0;
   font-size: 1.4em;
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .optimal-path {
   /* REMOVED font-style: normal; */
   font-style: italic; /* Added back italic style */
-  color: #b0e0ff; /* Keep light blue for optimal path */
+  color: #ffab7a; /* Changed from light blue to match optimal path visualization */
   /* REMOVED background-color: #303848; */
   /* REMOVED padding: 8px 12px; */
   /* REMOVED border-radius: 4px; */
@@ -331,29 +340,44 @@ button:disabled {
   line-height: 1.5;
 }
 
+/* === Path Toggle Section === */
 .path-toggle-container {
-  margin: 20px 0 10px 0;
+  margin-top: 20px;
   padding-top: 15px;
-  border-top: 1px dashed #444; /* Separator */
+  border-top: 1px solid #444a54; /* More visible separator */
+  text-align: center; /* Center the buttons */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  align-items: center;
 }
 
 .path-toggle-container button {
-  margin-left: 5px;
-  margin-right: 5px;
-  background-color: #4a5060; /* Match info button */
-  border-color: #666;
-  font-size: 0.9em;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background-color: #3a3f47;
+  color: #e0e0e0;
+  border: 1px solid #555;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-.path-toggle-container button:hover {
-   background-color: #5a6070;
-   border-color: #888;
+
+/* Style for active path buttons */
+.path-button-active {
+  background-color: #ffab7a !important; /* Match optimal path color */
+  color: #282c34 !important; /* Dark text for contrast */
+  border-color: #ffab7a !important;
+}
+
+.path-toggle-container button:hover:not(:disabled) {
+  background-color: #4a5060;
 }
 
 .path-toggle-container button:disabled {
-  background-color: #3a3f47; /* Darker disabled */
-  border-color: #555;
-  color: #888;
-  opacity: 0.8;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* === Graph Visualization Styling === */
@@ -511,7 +535,7 @@ button:disabled {
 /* Add style for Optimal Path text reference */
 .optimal-path-text {
   font-style: italic;
-  color: #b0e0ff; /* Match optimal path color */
+  color: #ffab7a; /* Changed from light blue to match optimal path visualization */
 }
 
 /* === Text Color Classes === */
@@ -538,6 +562,40 @@ button:disabled {
   font-weight: 700; /* Make highlighted bolder */
 }
 
+/* Style for optimal choice words in the player path */
+.optimal-choice-word {
+  position: relative;
+  font-weight: 600;
+}
+
+/* Base style for the star indicator */
+.optimal-choice-word::after {
+  content: "★";
+  position: absolute;
+  font-size: 10px;
+  top: -8px;
+  right: -10px;
+}
+
+/* Orange star for global optimal path moves (matching optimal path color) */
+.global-optimal-choice::after {
+  color: #ffab7a; /* Match optimal path color */
+}
+
+/* Purple star for local optimal path moves (matching suggested path color) */
+.local-optimal-choice::after {
+  color: #d4a0ff; /* Match suggested path color */
+}
+
+/* Colored stars for the game report */
+.global-optimal-star {
+  color: #ffab7a; /* Match optimal path color */
+}
+
+.local-optimal-star {
+  color: #d4a0ff; /* Match suggested path color */
+}
+
 /* Ensure color overrides highlight background if needed */
 .start-word-text.highlighted-path-word {
   /* color: #fff; */ /* Optional: Change text color too */
@@ -553,6 +611,21 @@ button:disabled {
 .path-arrow {
   color: #777; /* Dim arrow color */
   margin: 0 0.2em; /* Add slight space around arrow */
+  font-family: sans-serif; /* Ensure proper arrow display */
+}
+
+/* Style for the expansion arrow that leads to target */
+.path-arrow.path-expand {
+  color: #999; /* Slightly brighter than regular arrows */
+  font-style: normal; /* Remove italic */
+  letter-spacing: 0; /* Reset letter spacing */
+  margin: 0 0.3em; /* Consistent spacing with other arrows */
+}
+
+/* Style for the leading arrow at the beginning of the path */
+.path-arrow.path-leading {
+  margin-right: 0.1em;
+  margin-left: 0;
 }
 
 /* Remove default Vite styles (already commented out previously) */
@@ -566,6 +639,12 @@ button:disabled {
   border: 1px solid #444a54;
   color: #abb2bf; /* Lighter text */
   text-align: left; /* Align text left */
+}
+
+.game-report {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #444a54; /* Add a separator */
 }
 
 .game-report h4 {
@@ -586,6 +665,7 @@ button:disabled {
 .game-report li {
   margin-bottom: 8px; /* Space between list items */
   line-height: 1.5;
+  color: #b0b9c6; /* Slightly brighter text for better readability */
 }
 
 .game-report li::before { /* Optional: Custom bullet or marker */
@@ -612,36 +692,6 @@ button:disabled {
 .player-path-report-text {
     font-weight: bold;
     /* Add any other styling specific to player path in report */
-}
-
-/* --- Path Toggle Buttons --- */
-.path-toggle-container {
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid #444a54;
-  text-align: center; /* Center the buttons */
-}
-
-.path-toggle-container button {
-  margin: 0 5px; /* Space between buttons */
-  padding: 8px 12px;
-  background-color: #3a3f4b; /* Slightly lighter than report bg */
-  color: #abb2bf;
-  border: 1px solid #4f5666;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.path-toggle-container button:hover:not(:disabled) {
-  background-color: #4f5666;
-}
-
-.path-toggle-container button:disabled {
-  background-color: #61afef; /* Highlight selected/active button */
-  color: #282c34;
-  cursor: default;
-  opacity: 1; /* Ensure disabled doesn't fade */
 }
 
 /* === Responsive Design Adjustments === */
@@ -750,4 +800,94 @@ button:disabled {
   .info-box {
       padding: 15px;
   }
+}
+
+/* Style for path dots (ellipsis) */
+.path-dots {
+  color: #999;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  margin: 0 2px;
+}
+
+/* Individual dots */
+.path-dot {
+  margin: 0 1px;
+  font-weight: bold;
+}
+
+/* Dots when player is on optimal path */
+.optimal-path-dot {
+  color: #ffab7a; /* Match optimal path color */
+}
+
+/* Dots when player has deviated from optimal path */
+.possible-path-dot {
+  color: #d4a0ff; /* Match suggested path color */
+}
+
+/* Missed optimal moves display */
+.missed-optimal-moves {
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px dashed #444a54;
+}
+
+.missed-optimal-moves h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #b0b9c6;
+  font-size: 0.95rem;
+}
+
+.missed-optimal-moves ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.missed-optimal-moves li {
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+/* Optimal moves display */
+.optimal-moves-made {
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px dashed #444a54;
+}
+
+.optimal-moves-made h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #98c379; /* Green color for positive feedback */
+  font-size: 0.95rem;
+}
+
+.optimal-moves-made ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.optimal-moves-made li {
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.player-position {
+  color: #a0c8ff; /* Light blue for position */
+  font-weight: 500;
+}
+
+.player-choice {
+  color: #ffd700; /* Gold for player's choice */
+  font-weight: 500;
+}
+
+.optimal-choice {
+  color: #ffab7a; /* Match optimal path color */
+  font-weight: 500;
 }

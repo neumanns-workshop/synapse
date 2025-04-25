@@ -41,6 +41,7 @@ function Game() {
     gameReport, 
     isLoading: isGameLoading, 
     graphError, 
+    optimalChoices, // Add this to get access to the optimal choices
     startGame: startGameAction, 
     selectWord: selectWordAction, 
     giveUp: giveUpAction
@@ -53,9 +54,12 @@ function Game() {
   // Combine game error and graph error for display
   const displayError = gameError || graphError;
 
-  // State for controlling path visibility on give up
-  // Possible values: 'player', 'optimal', 'suggested', 'both'
-  const [pathDisplayMode, setPathDisplayMode] = useState('both');
+  // Replace string state with object for multiselect
+  const [pathDisplay, setPathDisplay] = useState({
+    player: true,
+    optimal: false,
+    suggested: false
+  });
 
   // State for info box visibility
   const [showInfo, setShowInfo] = useState(false);
@@ -75,37 +79,45 @@ function Game() {
     if (status === GameStatus.GAVE_UP) {
         // Set initial mode when giving up. 'both' makes sense.
         // If we want 'suggested' as default, check if suggestedPathFromCurrent exists.
-        setPathDisplayMode('both'); 
+        setPathDisplay({
+          player: true,
+          optimal: true,
+          suggested: false
+        }); 
     }
     // Reset if not in gave_up state (e.g., starting new game)
     else if (status !== GameStatus.GAVE_UP) {
-      setPathDisplayMode('both'); // Or null/irrelevant state?
+      setPathDisplay({
+        player: true,
+        optimal: true,
+        suggested: false
+      }); // Or null/irrelevant state?
     }
   }, [status]); // Run only when status changes
 
   // Wrap actions to pass graphData.nodes
   const handleStartGame = () => {
-      if (graphData) {
-          startGameAction(graphData.nodes);
-      } else {
-          console.error("Cannot start game, graph data not loaded");
-  }
+    startGameAction(graphData.nodes);
+    // Reset path display when starting a new game
+    setPathDisplay({
+      player: true,
+      optimal: false,
+      suggested: false
+    });
   };
   
   const handleSelectWord = (word) => {
-      if (graphData) {
-          selectWordAction(word, graphData.nodes);
-      } else {
-          console.error("Cannot select word, graph data not loaded");
-      }
+    selectWordAction(word, graphData.nodes);
   };
   
   const handleGiveUp = () => {
-      if (graphData) {
-          giveUpAction(graphData.nodes);
-      } else {
-          console.error("Cannot give up, graph data not loaded");
-  }
+    giveUpAction(graphData.nodes);
+    // Reset path display when giving up
+    setPathDisplay({
+      player: true,
+      optimal: false,
+      suggested: false
+    });
   };
 
   // Get neighbors for the current word when playing
@@ -123,6 +135,21 @@ function Game() {
   if (graphError) {
     return <p className="error-message">Graph Error: {graphError}</p>;
   }
+
+  // Add toggle handler for path display
+  const togglePathDisplay = (path) => {
+    // Get current state
+    const currentState = {...pathDisplay};
+    
+    // If user tries to deselect the only selected path, prevent it
+    if (currentState[path] && Object.values(currentState).filter(Boolean).length === 1) {
+      return; // At least one path must be selected
+    }
+    
+    // Toggle the path
+    currentState[path] = !currentState[path];
+    setPathDisplay(currentState);
+  };
 
   // Render based on Game Status
   return (
@@ -164,62 +191,18 @@ function Game() {
 
       {/* Visualization Container (Graph Only) */}
       {(status === GameStatus.PLAYING || status === GameStatus.GAVE_UP) && graphData && (
-        <div className="graph-visualization-container">
-          {/* Pass handleNodeClick down */}
-          <GraphVisualization pathDisplayMode={pathDisplayMode} onNodeClick={handleNodeClick} /> 
+        <div className="graph-container">
+          {/* Pass handleNodeClick and pathDisplay down */}
+          <GraphVisualization pathDisplayMode={pathDisplay} onNodeClick={handleNodeClick} /> 
          </div>
       )}
 
       {/* Status Info (Moves & Path) */}
       {(status === GameStatus.PLAYING || status === GameStatus.GAVE_UP) && graphData && (
         <div className="graph-status-info">
-          {/* Combined Moves and Target Info */}
-          { status === GameStatus.PLAYING && (
-            <p className="moves-info">
-              {/* Target Word */}
-              {endWord && definitionsData && (
-                <>
-                  <span title="The destination word.">
-                    {'Target: '}
-                    {
-                      (() => {
-                        const definitionsList = definitionsData[endWord] || [];
-                        const tooltipText = definitionsList.length > 0
-                          ? definitionsList.map((def, i) => `${i + 1}. ${def}`).join('\n')
-                          : 'No definition found';
-                        return (
-                          <span className="end-word-text" title={tooltipText}>
-                            {endWord}
-                          </span>
-                        );
-                      })()
-                    }
-                  </span>
-                  {' | '} 
-                </>
-              )}
-              {/* Moves Info */}
-              <span title="Your current number of moves.">
-                {'Moves: '}
-                <span className="player-move-count">{playerPath.length - 1}</span>
-              </span>
-              {' | '}
-              {/* Possible Score from Current */}
-              <span title="The lowest possible moves remaining from your current word.">
-                {'Possible in: '}
-                <span className="optimal-move-count">{optimalRemainingLength ?? 'N/A'}</span>
-              </span>
-              {' | '} {/* Separator before Accuracy */} 
-              {/* Always display Accuracy section */} 
-              <span title="Accuracy of your moves compared to the optimal path from each step.">
-                {'Accuracy: '}
-                {/* Display placeholder or actual value */} 
-                {moveAccuracy === null ? '--%' : `${moveAccuracy.toFixed(1)}%`}
-              </span>
-            </p> 
-          )}
           {/* Player Path Rendering */}
           <div className="player-path">
+            {/* Render Player Path */}
             {playerPath.map((word, index) => {
               let wordClass = '';
               const isFirst = index === 0;
@@ -237,6 +220,43 @@ function Game() {
               if (word === highlightedWord) {
                 wordClass += ' highlighted-path-word'; // Append class
               }
+              
+              // Check if this move was optimal (for non-first words)
+              if (index > 0 && gameReport?.optimalChoiceHistory) {
+                // The previous position is where the choice was made
+                const prevPosition = playerPath[index-1];
+                // Find the choice that matches this position and word choice
+                const moveData = gameReport.optimalChoiceHistory.find(
+                  choice => choice.playerPosition === prevPosition && choice.playerChose === word
+                );
+                
+                // Add optimal choice marker if this was an optimal move
+                if (moveData && moveData.playerChose === moveData.optimalChoice) {
+                  // Check if this choice is part of the original optimal path
+                  const isOnOriginalOptimalPath = optimalPath.includes(word) && 
+                                                  optimalPath.includes(prevPosition) &&
+                                                  optimalPath.indexOf(word) === optimalPath.indexOf(prevPosition) + 1;
+                  
+                  wordClass += ' optimal-choice-word'; // Base class for optimal choices
+                  wordClass += isOnOriginalOptimalPath ? ' global-optimal-choice' : ' local-optimal-choice';
+                }
+              } else if (index > 0 && status === GameStatus.PLAYING && optimalChoices) {
+                // For active games, check against the accumulated optimalChoices
+                const prevPosition = playerPath[index-1];
+                const moveData = optimalChoices.find(
+                  choice => choice.playerPosition === prevPosition && choice.playerChose === word
+                );
+                
+                if (moveData && moveData.playerChose === moveData.optimalChoice) {
+                  // Check if this choice is part of the original optimal path
+                  const isOnOriginalOptimalPath = optimalPath.includes(word) && 
+                                                  optimalPath.includes(prevPosition) &&
+                                                  optimalPath.indexOf(word) === optimalPath.indexOf(prevPosition) + 1;
+                  
+                  wordClass += ' optimal-choice-word'; // Base class for optimal choices
+                  wordClass += isOnOriginalOptimalPath ? ' global-optimal-choice' : ' local-optimal-choice';
+                }
+              }
 
               // Fetch and format definitions for the tooltip
               const definitionsList = definitionsData && definitionsData[word] ? definitionsData[word] : [];
@@ -246,7 +266,7 @@ function Game() {
 
               return (
                 <React.Fragment key={word + index}> 
-                  {(index > 0) && <span className="path-arrow">{' -> '}</span>} 
+                  {(index > 0) && <span className="path-arrow">{' → '}</span>} 
                   <span 
                     className={wordClass.trim()} 
                     title={tooltipText} // Add tooltip here
@@ -256,6 +276,42 @@ function Game() {
                 </React.Fragment>
               );
             })}
+            
+            {/* Add trailing arrow and Target Word if not won and not already at target */}
+            {status === GameStatus.PLAYING && endWord && definitionsData && currentWord !== endWord && (
+              <>
+                <span className="path-arrow">{' → '}</span>
+                <span 
+                  className="path-dots"
+                  title={`Optimal path length: ${optimalRemainingLength} moves remaining`}
+                >
+                  {/* Generate N dots where N is optimalRemainingLength */}
+                  {Array.from({ length: Math.min(optimalRemainingLength || 0, 10) }, (_, i) => 
+                    <span 
+                      key={i} 
+                      className={moveAccuracy !== null && moveAccuracy < 100 ? "path-dot possible-path-dot" : "path-dot optimal-path-dot"}
+                    >
+                      .
+                    </span>
+                  )}
+                </span>
+                <span className="path-arrow">{' → '}</span>
+                {(() => {
+                  const definitionsList = definitionsData[endWord] || [];
+                  const tooltipText = definitionsList.length > 0
+                    ? definitionsList.map((def, i) => `${i + 1}. ${def}`).join('\n')
+                    : 'No definition found';
+                  return (
+                    <span 
+                      className="end-word-text" 
+                      title={tooltipText + "\n\nThis is your target word."}
+                    >
+                      {endWord}
+                    </span>
+                  );
+                })()}
+              </>
+            )}
           </div>
         </div>
       )}
@@ -312,7 +368,7 @@ function Game() {
           {/* Conditionally display Suggested Path */}
           {suggestedPathFromCurrentLength !== null && suggestedPathFromCurrent.length > 0 && (
             <div style={{ marginTop: '10px' }}> {/* Add some space */}
-              <p>Suggested Path (from Current) ({suggestedPathFromCurrentLength} moves):</p>
+              <p>Currently Suggested Path ({suggestedPathFromCurrentLength} moves):</p>
               {/* Add a class for styling this path text */}
               <p className="suggested-path-text">{suggestedPathFromCurrent.join(' -> ')}</p>
             </div>
@@ -324,40 +380,32 @@ function Game() {
           {/* --- Render Report --- */}
           <GameReportDisplay report={gameReport} />
 
-          {/* Path Display Toggle Buttons */}
+          {/* Replace Path Display Toggle Buttons with multiselect */}
           <div className="path-toggle-container">
             Show on Graph:
-            <button onClick={() => setPathDisplayMode('player')} disabled={pathDisplayMode === 'player'}>
+            <button 
+              onClick={() => togglePathDisplay('player')} 
+              className={pathDisplay.player ? 'path-button-active' : ''}
+              title="Show or hide the path you took through the word space"
+            >
               Player
             </button>
-            <button onClick={() => setPathDisplayMode('optimal')} disabled={pathDisplayMode === 'optimal'}>
+            <button 
+              onClick={() => togglePathDisplay('optimal')} 
+              className={pathDisplay.optimal ? 'path-button-active' : ''}
+              title="Show or hide the optimal path from start to end"
+            >
               Optimal
             </button>
             <button
-              onClick={() => setPathDisplayMode('suggested')}
-              disabled={pathDisplayMode === 'suggested' || suggestedPathFromCurrentLength === null}
-              title={suggestedPathFromCurrentLength === null ? "No suggested path available" : "Show suggested path"}
+              onClick={() => togglePathDisplay('suggested')}
+              disabled={suggestedPathFromCurrentLength === null}
+              className={pathDisplay.suggested ? 'path-button-active' : ''}
+              title={suggestedPathFromCurrentLength === null ? 
+                "No suggested path available" : 
+                "Show or hide the suggested path from your current position to the end"}
             >
-              Suggested
-            </button>
-            <button onClick={() => setPathDisplayMode('player_optimal')} disabled={pathDisplayMode === 'player_optimal'}>
-              Player / Optimal
-            </button>
-            {/* Add Player/Suggested Button */}
-            <button
-              onClick={() => setPathDisplayMode('player_suggested')}
-              disabled={pathDisplayMode === 'player_suggested' || suggestedPathFromCurrentLength === null}
-              title={suggestedPathFromCurrentLength === null ? "No suggested path available" : "Show Player vs Suggested paths"}
-            >
-              Player / Suggested
-            </button>
-             {/* Add Optimal/Suggested Button */}
-            <button
-              onClick={() => setPathDisplayMode('optimal_suggested')}
-              disabled={pathDisplayMode === 'optimal_suggested' || suggestedPathFromCurrentLength === null}
-              title={suggestedPathFromCurrentLength === null ? "No suggested path available" : "Show Optimal vs Suggested paths"}
-            >
-              Optimal / Suggested
+              Currently Suggested
             </button>
           </div>
         </div>
@@ -378,19 +426,76 @@ function GameReportDisplay({ report }) {
     return `${playerStr} (Optimal: ${optimalStr})`;
   };
 
+  // Filter for non-optimal moves with available alternatives
+  const missedOptimalMoves = report.optimalChoiceHistory?.filter(
+    choice => choice.playerChose !== choice.optimalChoice && choice.optimalChoice !== null
+  ) || [];
+
+  // Filter for optimal moves made by the player
+  const optimalMovesMade = report.optimalChoiceHistory?.filter(
+    choice => choice.playerChose === choice.optimalChoice && choice.optimalChoice !== null
+  ) || [];
+
   return (
     <div className="game-report">
-      <h4>Game Analysis</h4>
       <ul>
-        <li>Moves: {formatPairedValue(report.playerMoves, report.optimalMoves)}</li>
-        <li>Accuracy: {report.accuracy?.toFixed(1) ?? 'N/A'}% ({report.optimalMovesMade} / {report.playerMoves} optimal steps)</li>
-        <li>Semantic Distance: {formatPairedValue(report.playerDistance, report.optimalDistance, 2)}</li>
-        <li>Avg. Similarity / Move: {report.averageSimilarity?.toFixed(3) ?? 'N/A'}</li>
-        <li>"Greedy" Moves (Most Similar): {report.greedyMoves} / {report.playerMoves}</li>
-        <li title="Moves where the chosen word appeared further from the target (based on graph layout), but enabled a potentially closer move next.">
-          Repositioning Moves: {report.repositioningMoves} / {report.playerMoves}
+        <li title="Total number of moves you made, compared to the optimal solution">
+          Moves: {report.playerMoves ?? 'N/A'}
+        </li>
+        <li title="Percentage of your moves that matched the best possible move at each step">
+          Accuracy: {report.accuracy?.toFixed(1) ?? 'N/A'}% ({report.optimalMovesMade} / {report.playerMoves} optimal steps)
+        </li>
+        <li title="Total semantic distance traveled through the word space, based on word similarity">
+          Semantic Distance: {formatPairedValue(report.playerDistance, report.optimalDistance, 2)}
+        </li>
+        <li title="Average similarity score between consecutive words in your path">
+          Avg. Similarity / Move: {report.averageSimilarity?.toFixed(3) ?? 'N/A'}
+        </li>
+        <li title="Moves where you selected the most semantically similar neighbor available">
+          "Greedy" Moves (Most Similar): {report.greedyMoves} / {report.playerMoves}
+        </li>
+        <li title="Moves where the chosen word appeared further from the target (based on graph layout), but enabled a potentially closer approach in future steps">
+          "Jackknife" Moves: {report.repositioningMoves} / {report.playerMoves}
         </li>
       </ul>
+
+      {/* Show optimal choices if any exist */}
+      {optimalMovesMade.length > 0 && (
+        <div className="optimal-moves-made">
+          <h5>Optimal Moves Made:</h5>
+          <ul>
+            {optimalMovesMade.map((move, idx) => {
+              // Check if this move was part of the original optimal path
+              const isOnOriginalOptimalPath = report.optimalPath && report.optimalPath.includes(move.playerChose) && 
+                                          report.optimalPath.includes(move.playerPosition) &&
+                                          report.optimalPath.indexOf(move.playerChose) === report.optimalPath.indexOf(move.playerPosition) + 1;
+              
+              // Determine which class to use
+              const starClass = isOnOriginalOptimalPath ? "global-optimal-star" : "local-optimal-star";
+              
+              return (
+                <li key={idx}>
+                  At <span className="player-position">{move.playerPosition}</span> you chose <span className="optimal-choice">{move.playerChose}</span> <span className={starClass}>★</span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* Show missed optimal choices if any exist */}
+      {missedOptimalMoves.length > 0 && (
+        <div className="missed-optimal-moves">
+          <h5>Missed Optimal Moves:</h5>
+          <ul>
+            {missedOptimalMoves.map((move, idx) => (
+              <li key={idx}>
+                At <span className="player-position">{move.playerPosition}</span> you chose <span className="player-choice">{move.playerChose}</span>, optimal was <span className="optimal-choice">{move.optimalChoice}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

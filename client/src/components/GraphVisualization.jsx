@@ -3,6 +3,16 @@ import * as d3 from 'd3';
 import { useGraphData } from '../context/GraphDataContext';
 import { useGame, GameStatus } from '../context/GameContext';
 
+// Helper function to determine if a node's text should be shown
+function showNodeText(word, { startWord, endWord, currentWord, suggestedPathFromCurrent, status, pathDisplayMode }) {
+  return (
+    word === startWord || 
+    word === endWord || 
+    (word === currentWord && status === GameStatus.PLAYING && currentWord !== startWord) ||
+    (pathDisplayMode.suggested && word === suggestedPathFromCurrent[0])
+  );
+}
+
 // Helper function to determine node class based on its status
 function getNodeClass(word, { startWord, endWord, currentWord, playerPath, optimalPath, suggestedPathFromCurrent, status, pathDisplayMode }) {
   let classes = ['graph-node'];
@@ -16,18 +26,18 @@ function getNodeClass(word, { startWord, endWord, currentWord, playerPath, optim
 
   // Apply path classes based on mode for GAVE_UP state
   if (status === GameStatus.GAVE_UP) {
-    if (inPlayerPath && (pathDisplayMode === 'player' || pathDisplayMode === 'player_optimal' || pathDisplayMode === 'player_suggested')) {
+    if (inPlayerPath && pathDisplayMode.player) {
       classes.push('player-path-node');
     }
-    if (inOptimalPath && (pathDisplayMode === 'optimal' || pathDisplayMode === 'player_optimal' || pathDisplayMode === 'optimal_suggested')) {
+    if (inOptimalPath && pathDisplayMode.optimal) {
       classes.push('optimal-path-node');
     }
-    if (inSuggestedPath && (pathDisplayMode === 'suggested' || pathDisplayMode === 'player_suggested' || pathDisplayMode === 'optimal_suggested')) {
+    if (inSuggestedPath && pathDisplayMode.suggested) {
       classes.push('suggested-path-node');
     }
 
     // Specific styling for current node when suggested path is active
-    if (word === currentWord && (pathDisplayMode === 'suggested' || pathDisplayMode === 'player_suggested' || pathDisplayMode === 'optimal_suggested')) {
+    if (word === currentWord && pathDisplayMode.suggested) {
       classes.push('current-gave-up'); // Potentially overrides other fills if CSS is specific
     }
   } else if (status === GameStatus.PLAYING || status === GameStatus.WON) {
@@ -44,10 +54,6 @@ function getLinkClass(linkData, { status, pathDisplayMode }) {
   // Just apply the base class for the type. CSS handles the visual distinction.
   if (linkData.type === 'player') {
     classes.push('player-path-link');
-    // REMOVED Dimming logic: rely on distinct path styles
-    // if (status === GameStatus.GAVE_UP && pathDisplayMode === 'player_optimal') {
-    //   classes.push('dimmed');
-    // }
   } else if (linkData.type === 'optimal') {
     classes.push('optimal-path-link');
   } else if (linkData.type === 'suggested') {
@@ -73,73 +79,61 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
     // 1. Prepare data for D3 (Nodes and Links)
     let wordsInvolved = new Set([startWord, endWord, currentWord].filter(Boolean));
     playerPath.forEach(word => wordsInvolved.add(word));
-  if (status === GameStatus.GAVE_UP) {
-        optimalPath.forEach(word => wordsInvolved.add(word));
-        suggestedPathFromCurrent.forEach(word => wordsInvolved.add(word));
-  }
+    if (status === GameStatus.GAVE_UP) {
+      optimalPath.forEach(word => wordsInvolved.add(word));
+      suggestedPathFromCurrent.forEach(word => wordsInvolved.add(word));
+    }
 
     const nodeMap = new Map();
-  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     wordsInvolved.forEach(word => {
-    const node = graphData.nodes[word];
-    if (node && node.tsne) {
-      const [x, y] = node.tsne;
-            nodeMap.set(word, { id: word, x, y }); // D3 often uses 'id'
-      minX = Math.min(minX, x);
-      maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y);
-      maxY = Math.max(maxY, y);
-    } else {
-         console.warn(`Node data or tsne coords missing for word: ${word}`);
+      const node = graphData.nodes[word];
+      if (node && node.tsne) {
+        const [x, y] = node.tsne;
+        nodeMap.set(word, { id: word, x, y }); // D3 often uses 'id'
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
+      } else {
+        console.warn(`Node data or tsne coords missing for word: ${word}`);
       }
     });
 
     if (nodeMap.size === 0) {
-        d3.select(svgRef.current).selectAll('*').remove(); // Clear if no nodes
-        return;
+      d3.select(svgRef.current).selectAll('*').remove(); // Clear if no nodes
+      return;
     }
 
     // -- Determine Visible Nodes based on mode --
     let visibleNodeIds = new Set();
     if (status === GameStatus.PLAYING) {
-        visibleNodeIds = new Set([startWord, endWord, currentWord, ...playerPath].filter(Boolean));
+      visibleNodeIds = new Set([startWord, endWord, currentWord, ...playerPath].filter(Boolean));
     } else if (status === GameStatus.GAVE_UP) {
-        // Base nodes for gave up state
-        const baseNodes = new Set([startWord, endWord].filter(Boolean));
-        playerPath.forEach(word => baseNodes.add(word)); // Always include player path nodes initially?
-
-        if (pathDisplayMode === 'player') {
-            playerPath.forEach(word => visibleNodeIds.add(word));
-        } else if (pathDisplayMode === 'optimal') {
-            optimalPath.forEach(word => visibleNodeIds.add(word));
-        } else if (pathDisplayMode === 'suggested') {
-            // Also include current word when suggested path is shown
-            suggestedPathFromCurrent.forEach(word => visibleNodeIds.add(word));
-            if (currentWord) visibleNodeIds.add(currentWord); // Ensure current is visible
-        } else if (pathDisplayMode === 'player_optimal') { // Changed from 'both'
-            playerPath.forEach(word => visibleNodeIds.add(word));
-            optimalPath.forEach(word => visibleNodeIds.add(word));
-        } else if (pathDisplayMode === 'player_suggested') {
-            playerPath.forEach(word => visibleNodeIds.add(word));
-            suggestedPathFromCurrent.forEach(word => visibleNodeIds.add(word));
-            if (currentWord) visibleNodeIds.add(currentWord); // Ensure current is visible
-        } else if (pathDisplayMode === 'optimal_suggested') {
-            optimalPath.forEach(word => visibleNodeIds.add(word));
-            suggestedPathFromCurrent.forEach(word => visibleNodeIds.add(word));
-            if (currentWord) visibleNodeIds.add(currentWord); // Ensure current is visible
-        } else { // Default (could be player? or player_optimal?)
-            playerPath.forEach(word => visibleNodeIds.add(word));
-            optimalPath.forEach(word => visibleNodeIds.add(word));
-        }
-        // Always ensure start and end words are visible
-        if (startWord) visibleNodeIds.add(startWord);
-        if (endWord) visibleNodeIds.add(endWord);
+      // Base nodes for gave up state
+      const baseNodes = new Set([startWord, endWord].filter(Boolean));
+      
+      // Add nodes based on the selected path display options
+      if (pathDisplayMode.player) {
+        playerPath.forEach(word => visibleNodeIds.add(word));
+      }
+      if (pathDisplayMode.optimal) {
+        optimalPath.forEach(word => visibleNodeIds.add(word));
+      }
+      if (pathDisplayMode.suggested) {
+        suggestedPathFromCurrent.forEach(word => visibleNodeIds.add(word));
+        if (currentWord) visibleNodeIds.add(currentWord); // Ensure current is visible
+      }
+      
+      // Always ensure start and end words are visible
+      if (startWord) visibleNodeIds.add(startWord);
+      if (endWord) visibleNodeIds.add(endWord);
     } else if (status === GameStatus.WON) {
-        // Show Start, End, and the full player path upon winning
-        visibleNodeIds = new Set([startWord, endWord, ...playerPath].filter(Boolean));
+      // Show Start, End, and the full player path upon winning
+      visibleNodeIds = new Set([startWord, endWord, ...playerPath].filter(Boolean));
     } else { // IDLE, LOADING, ERROR
-        // Show only Start and End before game starts or on error
-        visibleNodeIds = new Set([startWord, endWord].filter(Boolean));
+      // Show only Start and End before game starts or on error
+      visibleNodeIds = new Set([startWord, endWord].filter(Boolean));
     }
 
     // Filter the nodes from nodeMap based on visibility
@@ -157,59 +151,58 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
     const links = [];
     // Player Path Links (always calculate, filter visibility with CSS/D3 join)
     for (let i = 1; i < playerPath.length; i++) {
-        const sourceNode = nodeMap.get(playerPath[i - 1]);
-        const targetNode = nodeMap.get(playerPath[i]);
-        if (sourceNode && targetNode) {
-            links.push({ source: sourceNode, target: targetNode, type: 'player' });
-        }
+      const sourceNode = nodeMap.get(playerPath[i - 1]);
+      const targetNode = nodeMap.get(playerPath[i]);
+      if (sourceNode && targetNode) {
+        links.push({ source: sourceNode, target: targetNode, type: 'player' });
+      }
     }
     // Optimal Path Links (always calculate if GAVE_UP, filter visibility with CSS/D3 join)
     if (status === GameStatus.GAVE_UP && optimalPath.length > 0) {
-        for (let i = 1; i < optimalPath.length; i++) {
-            const sourceNode = nodeMap.get(optimalPath[i - 1]);
-            const targetNode = nodeMap.get(optimalPath[i]);
-            if (sourceNode && targetNode) {
-                links.push({ source: sourceNode, target: targetNode, type: 'optimal' });
-            }
+      for (let i = 1; i < optimalPath.length; i++) {
+        const sourceNode = nodeMap.get(optimalPath[i - 1]);
+        const targetNode = nodeMap.get(optimalPath[i]);
+        if (sourceNode && targetNode) {
+          links.push({ source: sourceNode, target: targetNode, type: 'optimal' });
         }
+      }
     }
     // Suggested Path Links (always calculate if GAVE_UP, filter visibility with CSS/D3 join)
     if (status === GameStatus.GAVE_UP && suggestedPathFromCurrent.length > 0) {
-        for (let i = 1; i < suggestedPathFromCurrent.length; i++) {
-            const sourceNode = nodeMap.get(suggestedPathFromCurrent[i - 1]);
-            const targetNode = nodeMap.get(suggestedPathFromCurrent[i]);
-            if (sourceNode && targetNode) {
-                links.push({ source: sourceNode, target: targetNode, type: 'suggested' });
-            }
+      for (let i = 1; i < suggestedPathFromCurrent.length; i++) {
+        const sourceNode = nodeMap.get(suggestedPathFromCurrent[i - 1]);
+        const targetNode = nodeMap.get(suggestedPathFromCurrent[i]);
+        if (sourceNode && targetNode) {
+          links.push({ source: sourceNode, target: targetNode, type: 'suggested' });
         }
+      }
     }
+    
     // Filter links based on pathDisplayMode *before* binding
     const linksToRender = links.filter(link => {
-        if (status !== GameStatus.GAVE_UP) return link.type === 'player'; // Only player path if playing or won
-        // Handle GAVE_UP states
-        if (pathDisplayMode === 'player') return link.type === 'player';
-        if (pathDisplayMode === 'optimal') return link.type === 'optimal';
-        if (pathDisplayMode === 'suggested') return link.type === 'suggested';
-        if (pathDisplayMode === 'player_optimal') return link.type === 'player' || link.type === 'optimal';
-        if (pathDisplayMode === 'player_suggested') return link.type === 'player' || link.type === 'suggested';
-        if (pathDisplayMode === 'optimal_suggested') return link.type === 'optimal' || link.type === 'suggested';
-
-        return false; // Default: should not happen if mode is set correctly
+      if (status !== GameStatus.GAVE_UP) return link.type === 'player'; // Only player path if playing or won
+      
+      // Handle GAVE_UP states with multiselect
+      if (link.type === 'player') return pathDisplayMode.player;
+      if (link.type === 'optimal') return pathDisplayMode.optimal;
+      if (link.type === 'suggested') return pathDisplayMode.suggested;
+      
+      return false; // Default: should not happen if type is set correctly
     });
 
     // 2. Calculate viewBox (use nodesToRender for bounds)
     // Recalculate bounds based only on visible nodes
     minX = Infinity; maxX = -Infinity; minY = Infinity; maxY = -Infinity;
     if (nodesToRender.length > 0) {
-        nodesToRender.forEach(node => {
-            minX = Math.min(minX, node.x);
-            maxX = Math.max(maxX, node.x);
-            minY = Math.min(minY, node.y);
-            maxY = Math.max(maxY, node.y);
-        });
+      nodesToRender.forEach(node => {
+        minX = Math.min(minX, node.x);
+        maxX = Math.max(maxX, node.x);
+        minY = Math.min(minY, node.y);
+        maxY = Math.max(maxY, node.y);
+      });
     } else {
-        // Handle case with no visible nodes? Default viewbox?
-        minX = -50; maxX = 50; minY = -50; maxY = 50; // Example default
+      // Handle case with no visible nodes? Default viewbox?
+      minX = -50; maxX = 50; minY = -50; maxY = 50; // Example default
     }
 
     // Make padding responsive
@@ -263,7 +256,7 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
         enter => enter.append('circle')
                     .attr('transform', d => `translate(${d.x},${d.y})`)
                     .attr('r', 0)
-                    .attr('class', d => getNodeClass(d.id, gameContext))
+                    .attr('class', d => getNodeClass(d.id, {...gameContext, pathDisplayMode}))
                     // ADDED: onclick handler (function will be passed via props)
                     .on('click', (event, d) => {
                         if (onNodeClick) { // Check if the handler prop exists
@@ -273,7 +266,7 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
                     .style('cursor', 'pointer') // Indicate clickability (move to CSS later)
                     .call(enter => enter.transition().duration(500).attr('r', 5)),
         update => update
-                    .attr('class', d => getNodeClass(d.id, gameContext))
+                    .attr('class', d => getNodeClass(d.id, {...gameContext, pathDisplayMode}))
                     // Make sure click handler is attached to updated nodes too
                     .on('click', (event, d) => {
                         if (onNodeClick) {
@@ -292,9 +285,7 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
         d.id === startWord || 
         d.id === endWord || 
         (d.id === currentWord && status === GameStatus.PLAYING && currentWord !== startWord) || // Only show current if it's moved
-        (pathDisplayMode === 'suggested' && d.id === suggestedPathFromCurrent[0]) ||
-        (pathDisplayMode === 'player_suggested' && d.id === suggestedPathFromCurrent[0]) || // Label start of suggested
-        (pathDisplayMode === 'optimal_suggested' && d.id === suggestedPathFromCurrent[0])   // Label start of suggested
+        (pathDisplayMode.suggested && d.id === suggestedPathFromCurrent[0])
     );
 
     const labelSelection = labelGroup
@@ -305,7 +296,9 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
                         .attr('class', 'graph-label')
                         .attr('x', d => d.x + 12)
                         .attr('y', d => d.y + 3)
-                        .text(d => d.id),
+                        .text(d => d.id) // Always show text for these filtered nodes
+                        .classed('node-label', true)
+                        .classed('visible', true),
             update => update
                       .style('opacity', 1)
                       .call(update => update.transition().duration(500)
@@ -335,7 +328,7 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
         if (word === startWord) return 4; 
         
         // Lower priority: Start of suggested path
-        if (pathDisplayMode === 'suggested' && word === suggestedPathFromCurrent[0]) return 2; 
+        if (pathDisplayMode.suggested && word === suggestedPathFromCurrent[0]) return 2; 
         
         return 0; // Default/fallback
     }
