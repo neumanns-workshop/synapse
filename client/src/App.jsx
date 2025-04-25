@@ -420,7 +420,7 @@ function App() {
           <Game />
           </main>
           <footer className="app-footer"> {/* Added footer */}
-            Copyright © 2025 Jared Neumann. Licensed under the <a href="https://github.com/neumanns-workshop/synapse/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPLv3</a>. | v1.0.0 Alpha
+            Copyright © 2025 Jared Neumann. Licensed under the <a href="https://github.com/neumanns-workshop/synapse/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPLv3</a>. | v1.1.1
           </footer>
         </div>
         {/* Add Tooltip component instance with clickable prop */}
