@@ -6,7 +6,7 @@ This repository contains the complete project, including the frontend client and
 
 ## Status
 
-Latest Version: [1.1.1] - See [CHANGELOG.md](CHANGELOG.md) for details.
+Latest Version: [1.1.2] - See [CHANGELOG.md](CHANGELOG.md) for details.
 
 ## Project Structure
 

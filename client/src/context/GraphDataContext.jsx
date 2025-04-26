@@ -6,8 +6,7 @@ const GraphDataContext = createContext(null);
 
 // Remove selectedKProp
 export const GraphDataProvider = ({ children }) => {
-  // Remove selectedK usage
-
+  // console.log('--- Rendering GraphDataProvider ---'); // Log GraphDataProvider render
   const [graphData, setGraphData] = useState(null);
   const [definitionsData, setDefinitionsData] = useState(null); // Add state for definitions
   const [isLoading, setIsLoading] = useState(true);
@@ -75,6 +74,7 @@ export const GraphDataProvider = ({ children }) => {
 
   return (
     <GraphDataContext.Provider value={value}>
+      {/* {console.log('--- GraphDataProvider: Rendering children ---')} */} {/* Removed log */}
       {children}
     </GraphDataContext.Provider>
   );

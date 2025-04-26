@@ -28,6 +28,7 @@ const GameContext = createContext(null);
 
 // Accept props: selectedKProp, changeKProp -> REMOVED
 export const GameProvider = ({ children }) => {
+  // console.log('--- Rendering GameProvider ---'); // Log GameProvider render
   
   const [status, setStatus] = useState(GameStatus.IDLE);
   const [startWord, setStartWord] = useState(null);
@@ -60,10 +61,11 @@ export const GameProvider = ({ children }) => {
   // --- Game Logic Functions ---
 
   const startGame = useCallback(async (nodes) => {
+    // console.log('--- startGame function entered ---'); // Add log at the very start
     if (!nodes) {
       setError('Graph data not available for starting game.');
       setStatus(GameStatus.ERROR);
-      console.error("Attempted to start game without nodes.");
+      // Error already logged by findValidWordPair
       return;
     }
     // Reset game state HERE
@@ -105,6 +107,9 @@ export const GameProvider = ({ children }) => {
         setOptimalDistance(calculatedResult.distance);
         setOptimalPathLength(calculatedResult.moves);
         setOptimalPath(calculatedResult.path);
+        // --- LOG FOR DEBUGGING --- REMOVED
+        // console.log('Optimal Path:', calculatedResult.path);
+        // --- END LOG ---
         setOptimalRemainingLength(calculatedResult.moves);
         setStatus(GameStatus.PLAYING);
         // Calculate Optimal Semantic Distance 

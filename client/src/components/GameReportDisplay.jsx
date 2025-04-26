@@ -11,6 +11,7 @@ const formatPairedValue = (playerVal, optimalVal, precision = 0) => {
 };
 
 function GameReportDisplay({ report }) {
+  // console.log('--- Rendering GameReportDisplay, report:', report); // Log component entry and report prop
   if (!report) return null;
 
   // Filter for non-optimal moves with available alternatives

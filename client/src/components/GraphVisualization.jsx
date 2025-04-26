@@ -265,26 +265,28 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
     }
 
     const links = [];
-    for (let i = 1; i < playerPath.length; i++) {
-      const sourceNode = nodeMap.get(playerPath[i - 1]);
-      const targetNode = nodeMap.get(playerPath[i]);
-      if (sourceNode && targetNode) {
-        links.push({ source: sourceNode, target: targetNode, type: 'player' });
+    if (playerPath.length > 1) { 
+      for (let i = 0; i < playerPath.length - 1; i++) {
+        const sourceNode = nodeMap.get(playerPath[i]);
+        const targetNode = nodeMap.get(playerPath[i + 1]);
+        if (sourceNode && targetNode) {
+          links.push({ source: sourceNode, target: targetNode, type: 'player' });
+        }
       }
     }
-    if (status === GameStatus.GAVE_UP && optimalPath.length > 0) {
-      for (let i = 1; i < optimalPath.length; i++) {
-        const sourceNode = nodeMap.get(optimalPath[i - 1]);
-        const targetNode = nodeMap.get(optimalPath[i]);
+    if (status === GameStatus.GAVE_UP && optimalPath.length > 1) { 
+      for (let i = 0; i < optimalPath.length - 1; i++) {
+        const sourceNode = nodeMap.get(optimalPath[i]);
+        const targetNode = nodeMap.get(optimalPath[i + 1]);
         if (sourceNode && targetNode) {
           links.push({ source: sourceNode, target: targetNode, type: 'optimal' });
         }
       }
     }
-    if (status === GameStatus.GAVE_UP && suggestedPathFromCurrent.length > 0) {
-      for (let i = 1; i < suggestedPathFromCurrent.length; i++) {
-        const sourceNode = nodeMap.get(suggestedPathFromCurrent[i - 1]);
-        const targetNode = nodeMap.get(suggestedPathFromCurrent[i]);
+    if (status === GameStatus.GAVE_UP && suggestedPathFromCurrent.length > 1) { 
+      for (let i = 0; i < suggestedPathFromCurrent.length - 1; i++) {
+        const sourceNode = nodeMap.get(suggestedPathFromCurrent[i]);
+        const targetNode = nodeMap.get(suggestedPathFromCurrent[i + 1]);
         if (sourceNode && targetNode) {
           links.push({ source: sourceNode, target: targetNode, type: 'suggested' });
         }
@@ -292,11 +294,15 @@ function GraphVisualization({ pathDisplayMode, onNodeClick }) {
     }
     
     const filteredLinks = links.filter(link => {
-      if (status !== GameStatus.GAVE_UP) return link.type === 'player';
+      if ((status === GameStatus.PLAYING || status === GameStatus.WON) && link.type === 'player') {
+        return true;
+      }
       
-      if (link.type === 'player' && pathDisplayMode?.player) return true;
-      if (link.type === 'optimal' && pathDisplayMode?.optimal) return true;
-      if (link.type === 'suggested' && pathDisplayMode?.suggested) return true;
+      if (status === GameStatus.GAVE_UP) {
+        if (link.type === 'player' && pathDisplayMode?.player) return true;
+        if (link.type === 'optimal' && pathDisplayMode?.optimal) return true;
+        if (link.type === 'suggested' && pathDisplayMode?.suggested) return true;
+      }
       
       return false;
     });

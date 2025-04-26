@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - 2025-04-25
+
+### Fixed
+-   Ensured the final segment of the player's path is correctly drawn on the graph visualization during the "Win" screen.
+
 ## [1.1.1] - 2025-04-25
 
 ### Changed

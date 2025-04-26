@@ -38,6 +38,9 @@ function Game() {
   // Get graph data AND definitions data from GraphDataContext
   const { graphData, definitionsData, isLoading: isGraphLoading } = useGraphData(); 
 
+  // Log component render and loading state
+  // console.log('Rendering Game component, isGameLoading:', isGameLoading);
+
   // Lifted state for InfoBox modal
   const [showInfo, setShowInfo] = useState(false);
 
@@ -84,6 +87,7 @@ function Game() {
 
   // Wrap actions to pass graphData.nodes
   const handleStartGame = () => {
+    // console.log('--- handleStartGame called ---'); // Log entry into the handler
     startGameAction(graphData.nodes);
     setPathDisplay({ player: true, optimal: false, suggested: false });
   };
@@ -306,45 +310,47 @@ function Game() {
 
       {/* Won State Display */}
       {status === GameStatus.WON && gameReport && (
-        <div className="won-section game-report-section">
-          <h3>You Won!</h3>
-          
-          <p>Optimal Path ({optimalPathLength ?? 'N/A'} moves):</p>
-          <p className="optimal-path">{optimalPath.join(' -> ')}</p>
+        <>
+          <div className="won-section game-report-section">
+            <h3>You Won!</h3>
+            
+            <p>Optimal Path ({optimalPathLength ?? 'N/A'} moves):</p>
+            <p className="optimal-path">{optimalPath.join(' -> ')}</p>
 
-          <div style={{ marginTop: '10px' }}>
-             <p>Currently Suggested Path:</p>
-             <p className="suggested-path-text" style={{ fontStyle: 'italic' }}>N/A (Game Won)</p>
-          </div>
-          
-          <GameReportDisplay report={gameReport} />
+            <div style={{ marginTop: '10px' }}>
+               <p>Currently Suggested Path:</p>
+               <p className="suggested-path-text" style={{ fontStyle: 'italic' }}>N/A (Game Won)</p>
+            </div>
+            
+            <GameReportDisplay report={gameReport} />
 
-          <div className="path-toggle-container">
-            Show on Graph:
-            <button 
-              onClick={() => togglePathDisplay('player')} 
-              className={pathDisplay.player ? 'path-button-active' : ''}
-              title="Show or hide the path you took through the word space"
-            >
-              Player
-            </button>
-            <button 
-              onClick={() => togglePathDisplay('optimal')} 
-              className={pathDisplay.optimal ? 'path-button-active' : ''}
-              title="Show or hide the optimal path from start to end"
-            >
-              Optimal
-            </button>
-            <button
-              onClick={() => togglePathDisplay('suggested')} 
-              disabled={true}
-              className={pathDisplay.suggested ? 'path-button-active' : ''}
-              title="Suggested path is not applicable after winning"
-            >
-              Currently Suggested
-            </button>
+            <div className="path-toggle-container">
+              Show on Graph:
+              <button 
+                onClick={() => togglePathDisplay('player')} 
+                className={pathDisplay.player ? 'path-button-active' : ''}
+                title="Show or hide the path you took through the word space"
+              >
+                Player
+              </button>
+              <button 
+                onClick={() => togglePathDisplay('optimal')} 
+                className={pathDisplay.optimal ? 'path-button-active' : ''}
+                title="Show or hide the optimal path from start to end"
+              >
+                Optimal
+              </button>
+              <button
+                onClick={() => togglePathDisplay('suggested')} 
+                disabled={true}
+                className={pathDisplay.suggested ? 'path-button-active' : ''}
+                title="Suggested path is not applicable after winning"
+              >
+                Currently Suggested
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Gave Up State Display */}
@@ -410,6 +416,7 @@ function Game() {
 
 // Top-level App component to wrap providers and Game
 function App() {
+  // console.log('--- Rendering App component ---'); // Log App render
   return (
     <GraphDataProvider>
       <GameProvider>
@@ -420,7 +427,7 @@ function App() {
           <Game />
           </main>
           <footer className="app-footer"> {/* Added footer */}
-            Copyright © 2025 Jared Neumann. Licensed under the <a href="https://github.com/neumanns-workshop/synapse/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPLv3</a>. | v1.1.1
+            Copyright © 2025 Jared Neumann. Licensed under the <a href="https://github.com/neumanns-workshop/synapse/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPLv3</a>. | v1.1.2
           </footer>
         </div>
         {/* Add Tooltip component instance with clickable prop */}
