@@ -35,4 +35,7 @@ yarn-error.*
 *.ntvs*
 *.njsproj
 *.sln
-*.sw? 
+*.sw?
+
+# Ignore large similarity matrix that shouldn't be committed
+client/public/data/dense_similarity_matrix.json 
