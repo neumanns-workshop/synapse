@@ -2,11 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { GameReport } from '../utils/gameReportUtils';
 import type { Achievement } from '../features/achievements/achievements'; // For achievement types
 import type { WordCollection } from '../features/wordCollections/wordCollections';
+import type { GameState } from '../stores/useGameStore';
 
 const GAME_HISTORY_KEY = 'synapse_game_history';
 const LIFETIME_STATS_KEY = 'synapse_lifetime_stats';
 const UNLOCKED_ACHIEVEMENTS_KEY = 'synapse_unlocked_achievements';
 const WORD_COLLECTIONS_PROGRESS_KEY = 'synapse_word_collections_progress';
+const CURRENT_GAME_KEY = 'synapse_current_game';
 
 export interface LifetimeStats {
   totalGamesPlayed: number;
@@ -201,5 +203,84 @@ export const checkAndRecordWordForCollections = async (
     if (collection.words.includes(word)) {
       await recordWordForCollection(collection.id, word);
     }
+  }
+};
+
+// --- Current Game Persistence ---
+// Define what we need to persist from the game state
+export interface PersistentGameState {
+  startWord: string | null;
+  endWord: string | null;
+  currentWord: string | null;
+  playerPath: string[];
+  optimalPath: string[];
+  suggestedPathFromCurrent: string[];
+  gameStatus: GameState['gameStatus'];
+  optimalChoices: GameState['optimalChoices'];
+  backtrackHistory: GameState['backtrackHistory'];
+  pathDisplayMode: GameState['pathDisplayMode'];
+  startTime: number; // Add timestamp of when the game started
+}
+
+export const saveCurrentGame = async (gameState: Partial<PersistentGameState>): Promise<void> => {
+  try {
+    // Only save games that are in progress
+    if (gameState.gameStatus !== 'playing') {
+      return;
+    }
+    
+    // Add current timestamp if not provided
+    if (!gameState.startTime) {
+      gameState.startTime = Date.now();
+    }
+    
+    await AsyncStorage.setItem(CURRENT_GAME_KEY, JSON.stringify(gameState));
+    console.log('Game state saved successfully');
+  } catch (e) {
+    console.error('Failed to save current game', e);
+  }
+};
+
+export const loadCurrentGame = async (): Promise<PersistentGameState | null> => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(CURRENT_GAME_KEY);
+    if (!jsonValue) {
+      console.log('StorageService: No saved game found');
+      return null;
+    }
+    
+    const gameState = JSON.parse(jsonValue) as PersistentGameState;
+    
+    // Validate required fields
+    if (!gameState || !gameState.startWord || !gameState.endWord || !gameState.currentWord || 
+        !gameState.playerPath || gameState.playerPath.length === 0) {
+      console.log('StorageService: Invalid saved game data', gameState);
+      return null;
+    }
+    
+    // Only return if the game was in progress
+    if (gameState.gameStatus === 'playing') {
+      console.log('StorageService: Loaded valid saved game', {
+        startWord: gameState.startWord,
+        endWord: gameState.endWord,
+        moves: gameState.playerPath?.length || 0
+      });
+      return gameState;
+    }
+    
+    console.log('StorageService: Saved game not in playing state', gameState.gameStatus);
+    return null;
+  } catch (e) {
+    console.error('StorageService: Failed to load current game', e);
+    return null;
+  }
+};
+
+export const clearCurrentGame = async (): Promise<void> => {
+  try {
+    await AsyncStorage.removeItem(CURRENT_GAME_KEY);
+    console.log('Current game cleared');
+  } catch (e) {
+    console.error('Failed to clear current game', e);
   }
 }; 

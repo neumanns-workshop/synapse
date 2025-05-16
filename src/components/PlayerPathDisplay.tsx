@@ -23,6 +23,7 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
   const currentPathDisplayMode = useGameStore((state) => state.pathDisplayMode);
   const endWord = useGameStore((state) => state.endWord);
   const gameStatus = useGameStore((state) => state.gameStatus);
+  const backtrackHistory = useGameStore((state) => state.backtrackHistory);
   const scrollViewRef = useRef<ScrollView>(null);
 
   const handlePlayerPathPress = () => {
@@ -118,7 +119,10 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
               let textStyle: any = { ...gameScreenStyles.pathWord, color: customColors.pathNode }; 
               const isLastWordInPath = index === playerPath.length - 1;
               let isOptimalWord = false;
-              let isUsedCheckpoint = false;
+              let isUsedCheckpointForThisChoice = false;
+
+              // Check if this word has ever been landed on by a backtrack
+              const hasBeenLandedOnByBacktrack = backtrackHistory.some(event => event.landedOn === word);
 
               if (index === 0) {
                 textStyle.color = customColors.startNode;
@@ -132,7 +136,7 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
                   // Check if this was an optimal move and if it was used as a checkpoint
                   if (choice.isGlobalOptimal || choice.isLocalOptimal) {
                     isOptimalWord = true;
-                    isUsedCheckpoint = !!choice.usedAsCheckpoint;
+                    isUsedCheckpointForThisChoice = !!choice.usedAsCheckpoint;
                     
                     // First, set the base optimal color based on the choice type
                     if (choice.isGlobalOptimal) {
@@ -142,15 +146,24 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
                     }
                     
                     // Then, apply specific styling for used checkpoints or active clickable checkpoints
-                    if (isUsedCheckpoint) {
+                    if (isUsedCheckpointForThisChoice) {
                       // Apply styling for used checkpoints (e.g., opacity) while retaining the base color
                       textStyle = { ...textStyle, ...styles.usedCheckpoint };
-                    } else if (gameStatus === 'playing' && !isLastWordInPath) {
+                    } else if (gameStatus === 'playing' && !isLastWordInPath && !hasBeenLandedOnByBacktrack) {
                       // Add visual cue for active (non-used) optimal words that can be used as checkpoints
                       textStyle = { ...textStyle, ...styles.optimalWordClickable };
                     }
                   }
                 }
+              }
+              
+              // If the word has ever been landed on by any backtrack, apply used styling
+              // This overrides other styling if it's a stronger visual cue for "used".
+              // Ensure this doesn't conflict too much with start/end/current node styling if those are more important.
+              // For now, "used by backtrack" takes precedence over optimal choice styling, but not start/current/end.
+              if (hasBeenLandedOnByBacktrack && !isLastWordInPath && index !== 0) { // Avoid styling start/current/end words this way for now
+                 // Merge with existing styles, potentially overriding color but keeping others
+                 textStyle = { ...textStyle, ...styles.usedCheckpoint };
               }
               
               if (isLastWordInPath) {

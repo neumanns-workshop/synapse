@@ -26,6 +26,7 @@ import type { ExtendedTheme } from '../theme/SynapseTheme';
 import { Linking } from 'react-native';
 import AppHeader from '../components/AppHeader';
 import PlayerPathDisplay from '../components/PlayerPathDisplay';
+import { loadCurrentGame } from '../services/StorageService';
 
 type RootStackParamList = {
   Home: undefined;
@@ -46,6 +47,8 @@ const GameScreen = () => {
   const [definitionVisible, setDefinitionVisible] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const [gameWasRestored, setGameWasRestored] = useState(false);
 
   // Game state
   const graphData = useGameStore((state) => state.graphData);
@@ -64,13 +67,35 @@ const GameScreen = () => {
   const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
   const gameReport = useGameStore((state) => state.gameReport);
   const optimalChoices = useGameStore((state) => state.optimalChoices);
+  const loadInitialData = useGameStore((state) => state.loadInitialData);
 
-  // Automatically start a new game when graphData is loaded and game is idle
+  // Load initial data on mount and check if a game was restored.
   useEffect(() => {
-    if (graphData && (gameStatus === 'idle' || gameStatus === 'loading')) {
+    const performInitialLoad = async () => {
+      console.log('GameScreen: Performing initial load...');
+      const restored = await loadInitialData();
+      setGameWasRestored(restored);
+      console.log(`GameScreen: Initial load complete. Game restored: ${restored}`);
+      setInitialLoadComplete(true);
+    };
+
+    // We only want this to run once.
+    if (!initialLoadComplete) {
+        performInitialLoad();
+    }
+  }, [loadInitialData, initialLoadComplete]);
+
+  // Automatically start a new game if:
+  // 1. Initial data load is complete.
+  // 2. Graph data is available.
+  // 3. A game was NOT restored during the initial load.
+  // 4. Game status is 'idle' or 'loading'.
+  useEffect(() => {
+    if (initialLoadComplete && graphData && !gameWasRestored && (gameStatus === 'idle' || gameStatus === 'loading')) {
+      console.log('GameScreen: Auto-starting new game as no game was restored on initial load.');
       startGame();
     }
-  }, [graphData, gameStatus, startGame]);
+  }, [initialLoadComplete, graphData, gameWasRestored, gameStatus, startGame]);
 
   // Determine if we should show the path display options
   const showPathOptions = gameStatus === 'given_up' || gameStatus === 'won';
@@ -260,6 +285,18 @@ const GameScreen = () => {
   // Add ref at the top of the component
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // If still checking persistence or loading data, show loading indicator
+  if (!initialLoadComplete || isLoading) {
+    return (
+      <SafeAreaView style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={[styles.loadingText, { color: colors.onBackground }]}>
+          Loading game data...
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <>
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}> 
@@ -429,6 +466,16 @@ const styles = StyleSheet.create({
   transparentContent: {
     backgroundColor: 'transparent',
     width: '100%',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

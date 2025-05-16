@@ -4,7 +4,7 @@ import { generateGameReport, trackOptimalChoice, GameReport, OptimalChoice, Back
 import { findShortestPath } from '../utils/graphUtils';
 import type { Achievement } from '../features/achievements/achievements'; // Import Achievement
 import { evaluateAchievements } from '../features/achievements/achievements'; // Import evaluateAchievements
-import { recordEndedGame } from '../services/StorageService'; // Corrected casing
+import { recordEndedGame, saveCurrentGame, loadCurrentGame, clearCurrentGame } from '../services/StorageService'; // Add new storage functions
 import type { WordCollection } from '../features/wordCollections/wordCollections';
 import { getFilteredWordCollections, testCollectionsForDate } from '../features/wordCollections/wordCollections';
 import { checkAndRecordWordForCollections } from '../services/StorageService';
@@ -56,7 +56,7 @@ export interface GameState { // Existing interface, adding export
   activeWordCollections: WordCollection[];
 
   // Actions
-  loadInitialData: () => void;
+  loadInitialData: () => Promise<boolean>;
   clearSavedData: () => void;
   startGame: () => void; // Start game action without difficulty
   selectWord: (word: string) => void; // Placeholder for next step
@@ -394,7 +394,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   pathDisplayMode: {
     player: true,
     optimal: false,
-    suggested: true
+    suggested: false  // DEFAULT TO FALSE - don't show suggested path during gameplay
   },
   gameStatus: 'idle',
   gameReport: null,
@@ -416,7 +416,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   activeWordCollections: [],
 
   // Actions
-  loadInitialData: async () => {
+  loadInitialData: async (): Promise<boolean> => {
     try {
       set({ isLoadingData: true, errorLoadingData: null });
       
@@ -435,26 +435,66 @@ export const useGameStore = create<GameState>((set, get) => ({
       // Load word collections
       if (graphData) {
         const filteredCollections = await getFilteredWordCollections(graphData);
-        set(state => ({
-          ...state,
-          wordCollections: filteredCollections,
-          // For now, make all collections active
-          activeWordCollections: filteredCollections
-        }));
+        
+        // Check for a saved game
+        const savedGame = await loadCurrentGame();
+        
+        if (savedGame && savedGame.gameStatus === 'playing') {
+          // If there's a saved game, restore it
+          console.log('useGameStore: Restoring saved game', { 
+            startWord: savedGame.startWord,
+            endWord: savedGame.endWord, 
+            currentWord: savedGame.currentWord,
+            pathLength: savedGame.playerPath?.length || 0
+          });
+          
+          const suggested = findShortestPath(graphData, savedGame.currentWord || '', savedGame.endWord || '');
+          set({
+            startWord: savedGame.startWord,
+            endWord: savedGame.endWord,
+            currentWord: savedGame.currentWord,
+            playerPath: savedGame.playerPath,
+            optimalPath: savedGame.optimalPath,
+            suggestedPathFromCurrent: suggested,
+            // Explicitly set to 'playing' regardless of what was saved to ensure correct state
+            gameStatus: 'playing',
+            optimalChoices: savedGame.optimalChoices,
+            backtrackHistory: savedGame.backtrackHistory,
+            // Restore pathDisplayMode but ENSURE suggested is FALSE during gameplay
+            pathDisplayMode: {
+              ...savedGame.pathDisplayMode,
+              suggested: false
+            },
+            wordCollections: filteredCollections,
+            activeWordCollections: filteredCollections
+          });
+          
+          console.log('useGameStore: Game successfully restored to playing state');
+          return true;
+        } else {
+          // No saved game, just set the collections
+          console.log('useGameStore: No saved game found or invalid saved game');
+          set(state => ({
+            ...state,
+            wordCollections: filteredCollections,
+            activeWordCollections: filteredCollections
+          }));
+        }
       }
+      return false;
     } catch (error) {
       console.error('Error loading initial data:', error);
       set({ 
         isLoadingData: false, 
         errorLoadingData: error instanceof Error ? error.message : 'Failed to load data' 
       });
+      return false;
     }
   },
 
   // Action to clear saved data (placeholder)
-  clearSavedData: () => {
+  clearSavedData: async () => {
     console.log("Clearing saved data...");
-    // In the future, this will interact with AsyncStorage
     try {
       // Reset game state
       set({ 
@@ -463,9 +503,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         errorLoadingData: null,
       });
       
-      // In a real implementation, we would clear AsyncStorage:
-      // await AsyncStorage.removeItem('gameScores');
-      // await AsyncStorage.removeItem('gameSettings');
+      // Clear the saved game
+      await clearCurrentGame();
       
       console.log("Game data cleared successfully");
     } catch (error) {
@@ -479,13 +518,17 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   // Action to start a new game
-  startGame: () => {
+  startGame: async () => {
     const { graphData } = get();
     if (!graphData) {
       console.error("Cannot start game: Graph data not loaded.");
       set({ gameStatus: 'idle', errorLoadingData: "Graph data missing." });
       return;
     }
+    
+    // Clear any existing saved game when starting a new one
+    await clearCurrentGame();
+    
     set({ 
       gameStatus: 'loading', 
       errorLoadingData: null, 
@@ -495,62 +538,55 @@ export const useGameStore = create<GameState>((set, get) => ({
       gameReport: null,
       optimalChoices: [],
       backtrackHistory: [],
+      // Set path display mode - hide suggested path during gameplay
+      pathDisplayMode: {
+        player: true,
+        optimal: false,
+        suggested: false
+      }
     });
-    // Clear pathfinding caches for the new game
-    // findShortestPathByHops.clearCache(); // Removed, findShortestPath doesn't have this
-    // findShortestPathBySemanticDistance.clearCache(); // Removed
-
+    
     const { start, end } = findValidWordPair(graphData);
 
     if (start && end) {
       // Calculate OPTIMAL path (by hops)
-      const optimal = findShortestPath(graphData, start, end); // Corrected call
+      const optimal = findShortestPath(graphData, start, end);
       // Calculate SUGGESTED path from start (by hops)
-      const suggested = findShortestPath(graphData, start, end); // Corrected call
+      const suggested = findShortestPath(graphData, start, end);
 
-      // --- Cache Warm-up for Heuristic Greedy on First Move ---
-      // Pre-calculate semantic paths from initial neighbors of startWord to endWord
-      if (graphData && graphData[start]?.edges) {
-        const initialNeighbors = Object.keys(graphData[start].edges);
-        // console.log(`[CACHE WARM-UP] Warming up for ${initialNeighbors.length} neighbors of ${start}...`);
-        const warmupPromises = initialNeighbors.map(neighbor => {
-          if (graphData[neighbor]) { // Ensure neighbor is a valid node
-            // Call to populate cache, result not immediately used here
-            return findShortestPath(graphData, neighbor, end); // Corrected call
-          }
-          return Promise.resolve([]); // Return empty path for invalid neighbors
-        });
-        // We don't strictly need to await these for game start, 
-        // but ensures calculations are initiated. Can be run in background.
-        Promise.all(warmupPromises).then(() => {
-          // console.log(`[CACHE WARM-UP] Complete for ${start}.`);
-        }).catch(err => {
-          console.error("[CACHE WARM-UP] Error during warm-up:", err);
-        });
-      }
-      // --- End Cache Warm-up ---
-
-      // Debug log for initial optimal/suggested moves
-      console.log('[GAME START DEBUG]', {
-        startWord: start,
-        endWord: end,
-        optimalPath: optimal,
-        firstOptimalMove: optimal[1],
-        suggestedPath: suggested,
-        firstSuggestedMove: suggested[1]
-      });
-
-      console.log(`Starting game with ${start} -> ${end}`);
-      set({
+      // Update game state with new game
+      set({ 
         startWord: start,
         endWord: end,
         currentWord: start,
         playerPath: [start],
         optimalPath: optimal,
         suggestedPathFromCurrent: suggested,
-        gameStatus: 'playing',
-        pathDisplayMode: { player: true, optimal: false, suggested: false },
+        gameStatus: 'playing'
       });
+      
+      // Save initial game state - include pathDisplayMode
+      const gameState = {
+        startWord: start,
+        endWord: end,
+        currentWord: start,
+        playerPath: [start],
+        optimalPath: optimal,
+        suggestedPathFromCurrent: suggested,
+        gameStatus: 'playing' as const,
+        optimalChoices: [],
+        backtrackHistory: [],
+        pathDisplayMode: {
+          player: true,
+          optimal: false,
+          suggested: false
+        },
+        startTime: Date.now()
+      };
+      await saveCurrentGame(gameState);
+      
+      console.log(`Game started: ${start} → ${end}`);
+      console.log(`Optimal path: ${optimal.join(' → ')}`);
     } else {
       console.error("Failed to find valid start/end word pair.");
       set({ gameStatus: 'idle', errorLoadingData: "Could not start game." });
@@ -561,6 +597,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   giveUp: async () => {
     const { graphData, playerPath, optimalPath, optimalChoices, endWord, backtrackHistory } = get();
     if (!graphData || !endWord) return;
+
+    // Clear saved game when giving up
+    await clearCurrentGame();
 
     let report = generateGameReport(
       graphData,
@@ -580,6 +619,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ 
       gameStatus: 'given_up',
       gameReport: report, 
+      // Show suggested path after giving up
       pathDisplayMode: { player: true, optimal: false, suggested: true }
     });
     await recordEndedGame(report);
@@ -619,10 +659,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       isLocalOptimal: optimalChoice.isLocalOptimal
     });
 
-    // Update player path and current word
+    // Update player position and path
     const newPlayerPath = [...playerPath, word];
-    set({ 
-      currentWord: word, 
+    
+    // Update the central game state in Zustand
+    set({
+      currentWord: word,
       playerPath: newPlayerPath,
       optimalChoices: [...get().optimalChoices, optimalChoice]
     });
@@ -630,6 +672,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     // Check for win condition
     if (word === endWord) {
       console.log("Player won!");
+      
+      // Clear saved game on win
+      await clearCurrentGame();
+      
       const currentOptimalChoices = get().optimalChoices;
       const finalBacktrackHistory = get().backtrackHistory;
       let report = generateGameReport(
@@ -668,6 +714,21 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     console.log(`Updated suggested path: ${word} → ${endWord}, length: ${suggested.length}, path: ${suggested.join(' → ')}`);
     set({ suggestedPathFromCurrent: suggested });
+    
+    // Save game state after recalculating the suggested path - include pathDisplayMode
+    const gameState = {
+      startWord: playerPath[0],
+      endWord: endWord,
+      currentWord: word,
+      playerPath: newPlayerPath,
+      optimalPath: optimalPath,
+      suggestedPathFromCurrent: suggested,
+      gameStatus: 'playing' as const,
+      optimalChoices: get().optimalChoices,
+      backtrackHistory: backtrackHistory,
+      pathDisplayMode: get().pathDisplayMode  // Save current pathDisplayMode
+    };
+    await saveCurrentGame(gameState);
 
     if (activeWordCollections.length > 0) {
       // Record the word for any active collections it belongs to
@@ -689,7 +750,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   setStatsModalVisible: (visible) => set({ statsModalVisible: visible }),
 
   // New action for backtracking to a previous optimal word
-  backtrackToWord: (word: string, index: number) => {
+  backtrackToWord: async (word: string, index: number) => {
     const { graphData, playerPath, optimalChoices, endWord, startWord, currentWord: wordPlayerIsJumpingFrom, backtrackHistory } = get();
     if (!graphData || !playerPath || !endWord || !startWord || !wordPlayerIsJumpingFrom || get().gameStatus !== 'playing') return;
 
@@ -762,6 +823,21 @@ export const useGameStore = create<GameState>((set, get) => ({
       suggestedPathFromCurrent: suggested,
       backtrackHistory: [...backtrackHistory, newBacktrackEvent],
     });
+
+    // Save game state after backtracking - include pathDisplayMode
+    const gameState = {
+      startWord: playerPath[0],
+      endWord: endWord,
+      currentWord: newCurrentWordAfterBacktrack,
+      playerPath: newPlayerPath,
+      optimalPath: newOptimalPath,
+      suggestedPathFromCurrent: suggested,
+      gameStatus: 'playing' as const,
+      optimalChoices: finalOptimalChoices,
+      backtrackHistory: [...backtrackHistory, newBacktrackEvent],
+      pathDisplayMode: get().pathDisplayMode  // Save current pathDisplayMode
+    };
+    await saveCurrentGame(gameState);
   },
 
   // Definition Dialog Actions

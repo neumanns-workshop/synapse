@@ -23,6 +23,7 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
   const optimalChoices = useGameStore((state) => state.optimalChoices);
   const gameStatus = useGameStore((state) => state.gameStatus);
   const backtrackToWord = useGameStore((state) => state.backtrackToWord);
+  const backtrackHistory = useGameStore((state) => state.backtrackHistory);
   
   // Check if this word is a valid backtracking point
   const canBacktrackToWord = React.useMemo(() => {
@@ -38,8 +39,10 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
     if (choiceIndex < 0 || choiceIndex >= optimalChoices.length) return false;
     
     const choice = optimalChoices[choiceIndex];
-    return (choice.isGlobalOptimal || choice.isLocalOptimal) && !choice.usedAsCheckpoint;
-  }, [word, pathIndexInPlayerPath, playerPath, optimalChoices, gameStatus]);
+    return (choice.isGlobalOptimal || choice.isLocalOptimal) && 
+           !choice.usedAsCheckpoint &&
+           !backtrackHistory.some(event => event.landedOn === word);
+  }, [word, pathIndexInPlayerPath, playerPath, optimalChoices, gameStatus, backtrackHistory]);
   
   const handleBacktrack = () => {
     if (!canBacktrackToWord) return;
