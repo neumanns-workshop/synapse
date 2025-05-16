@@ -106,30 +106,30 @@ To incrementally build a robust, user-friendly, and cross-platform word navigati
 
 1.  **Scoring:** - ✅ COMPLETE
     *   Implement logic to calculate scores based on path length, time, or other metrics. (*Current game report metrics address this.*)
-2.  **Stats, Achievements & Gamified Events (Adapted from "Future Ideas"):** - 🔄 IN PROGRESS
+2.  **Stats, Achievements & Gamified Events (Adapted from "Future Ideas"):** - ✅ COMPLETE
     *   **Concept:** Introduce systems for tracking broader player statistics, achievements, and potentially themed collection events.
-    *   **Statistics Tracking:** Design and implement tracking for persistent player statistics (e.g., games won/lost, average path efficiency, unique words discovered, etc.). - ⏳ PLANNED
+    *   **Statistics Tracking:** Design and implement tracking for persistent player statistics (e.g., games won/lost, average path efficiency, unique words discovered, etc.). - ✅ COMPLETE
     *   **Achievements System:**
         *   Define a set of achievements (e.g., "First Win," "Perfect Game," "Completed X Games," "Found Y Secret Words"). - ✅ COMPLETE
         *   Implement logic to unlock and record achievements. - ✅ COMPLETE
-    *   **Collection Events (Based on "Secret Word Hunt" idea):** - ⏳ PLANNED
-        *   Implement themed wordlists for collection events.
-        *   Track "collected" items/words.
-    *   **Rewards:** Define and link rewards to achievements/collections (e.g., visual badges, UI theme unlocks). - ⏳ PLANNED
-    *   **UI Display:** - ⏳ PLANNED
-        *   Enhance `StatsModal.tsx` or create a dedicated "Stats & Achievements" screen.
-        *   Display overall statistics, unlocked achievements, and collected items.
-        *   Game Report could show items collected in that specific game.
-3.  **Persistence:** - ⏳ PLANNED
+    *   **Collection Events (Based on "Secret Word Hunt" idea):** - ✅ COMPLETE
+        *   Implement themed wordlists for collection events. - ✅ COMPLETE
+        *   Track "collected" items/words. - ✅ COMPLETE
+    *   **Rewards:** Define and link rewards to achievements/collections (e.g., visual badges, UI theme unlocks). - ✅ COMPLETE
+    *   **UI Display:** - ✅ COMPLETE
+        *   Enhance `StatsModal.tsx` or create a dedicated "Stats & Achievements" screen. - ✅ COMPLETE
+        *   Display overall statistics, unlocked achievements, and collected items. - ✅ COMPLETE
+        *   Game Report could show items collected in that specific game. - ✅ COMPLETE
+3.  **Persistence:** - ✅ COMPLETE
     *   Use `@react-native-async-storage/async-storage` to save/load:
-        *   Game state (allowing resuming games).
-        *   Player statistics and unlocked achievements.
-        *   Collected items from events.
-    *   Update `StatsModal.tsx` or the dedicated screen to display persisted data.
-4.  **Sharing:** - ⏳ PLANNED
-    *   Implement text-based sharing using `react-native`'s `Share` API (e.g., sharing scores, completed achievements, or specific game results).
-    *   Implement screenshot sharing using `react-native-view-shot` for results/achievements.
-    *   Add share buttons to relevant UI sections.
+        *   Game state (allowing resuming games). - ✅ COMPLETE
+        *   Player statistics and unlocked achievements. - ✅ COMPLETE
+        *   Collected items from events. - ✅ COMPLETE
+    *   Update `StatsModal.tsx` or the dedicated screen to display persisted data. - ✅ COMPLETE
+4.  **Sharing:** - 🔄 IN PROGRESS
+    *   Implement text-based sharing using `react-native`'s `Share` API (e.g., sharing scores, completed achievements, or specific game results). - 🔄 IN PROGRESS
+    *   Implement screenshot sharing using `react-native-view-shot` for results/achievements. - 🔄 IN PROGRESS
+    *   Add share buttons to relevant UI sections. - ⏳ PLANNED
 
 ---
 

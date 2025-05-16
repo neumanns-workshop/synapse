@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { loadGraphData, loadDefinitionsData, GraphData, DefinitionsData } from '../services/dataLoader';
+import { loadGraphData, loadDefinitionsData, GraphData, DefinitionsData, WordFrequencies, loadWordFrequencies } from '../services/dataLoader';
 import { generateGameReport, trackOptimalChoice, GameReport, OptimalChoice, BacktrackReportEntry } from '../utils/gameReportUtils';
 import { findShortestPath } from '../utils/graphUtils';
 import type { Achievement } from '../features/achievements/achievements'; // Import Achievement
@@ -22,10 +22,17 @@ interface BacktrackEvent {
   landedOn: string;
 }
 
+interface PotentialRarestMove {
+  word: string;
+  frequency: number;
+  playerChoseThisRarestOption: boolean;
+}
+
 // Define the state structure -- EXPORTING THIS
 export interface GameState { // Existing interface, adding export
   graphData: GraphData | null;
   definitionsData: DefinitionsData | null;
+  wordFrequencies: WordFrequencies | null;
   isLoadingData: boolean;
   errorLoadingData: string | null;
   // Add game state properties
@@ -35,6 +42,7 @@ export interface GameState { // Existing interface, adding export
   playerPath: string[];
   optimalPath: string[]; // Path from startWord to endWord
   suggestedPathFromCurrent: string[]; // Path from currentWord to endWord
+  potentialRarestMovesThisGame: PotentialRarestMove[]; // Added for "Putting on the Dog"
   pathDisplayMode: PathDisplayMode;
   gameStatus: 'idle' | 'loading' | 'playing' | 'won' | 'lost' | 'given_up';
   gameReport: GameReport | null; // Add game report
@@ -383,6 +391,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   // Initial state
   graphData: null,
   definitionsData: null,
+  wordFrequencies: null,
   isLoadingData: false,
   errorLoadingData: null,
   startWord: null,
@@ -391,10 +400,11 @@ export const useGameStore = create<GameState>((set, get) => ({
   playerPath: [],
   optimalPath: [],
   suggestedPathFromCurrent: [],
+  potentialRarestMovesThisGame: [], // Initialized
   pathDisplayMode: {
     player: true,
     optimal: false,
-    suggested: false  // DEFAULT TO FALSE - don't show suggested path during gameplay
+    suggested: false
   },
   gameStatus: 'idle',
   gameReport: null,
@@ -402,45 +412,36 @@ export const useGameStore = create<GameState>((set, get) => ({
   backtrackHistory: [],
   aboutModalVisible: false,
   statsModalVisible: false,
-  // Definition Dialog Initial State
   definitionDialogWord: null,
   definitionDialogPathIndex: null,
   definitionDialogVisible: false,
-
-  // Achievement Detail Dialog Initial State
   selectedAchievement: null,
   achievementDialogVisible: false,
-
-  // Word Collections
   wordCollections: [],
   activeWordCollections: [],
 
-  // Actions
   loadInitialData: async (): Promise<boolean> => {
     try {
-      set({ isLoadingData: true, errorLoadingData: null });
+      set({ isLoadingData: true, errorLoadingData: null, potentialRarestMovesThisGame: [] }); // Reset on load
       
-      // Load both data files in parallel
-      const [graphData, definitionsData] = await Promise.all([
+      const [graphData, definitionsData, wordFrequencies, savedGame] = await Promise.all([
         loadGraphData(),
-        loadDefinitionsData()
+        loadDefinitionsData(),
+        loadWordFrequencies(),
+        loadCurrentGame()
       ]);
 
       set({ 
         graphData, 
         definitionsData,
+        wordFrequencies,
         isLoadingData: false 
       });
 
-      // Load word collections
       if (graphData) {
         const filteredCollections = await getFilteredWordCollections(graphData);
         
-        // Check for a saved game
-        const savedGame = await loadCurrentGame();
-        
         if (savedGame && savedGame.gameStatus === 'playing') {
-          // If there's a saved game, restore it
           console.log('useGameStore: Restoring saved game', { 
             startWord: savedGame.startWord,
             endWord: savedGame.endWord, 
@@ -456,11 +457,11 @@ export const useGameStore = create<GameState>((set, get) => ({
             playerPath: savedGame.playerPath,
             optimalPath: savedGame.optimalPath,
             suggestedPathFromCurrent: suggested,
-            // Explicitly set to 'playing' regardless of what was saved to ensure correct state
             gameStatus: 'playing',
             optimalChoices: savedGame.optimalChoices,
             backtrackHistory: savedGame.backtrackHistory,
-            // Restore pathDisplayMode but ENSURE suggested is FALSE during gameplay
+            // Assuming potentialRarestMovesThisGame is not in savedGame or should be reset
+            potentialRarestMovesThisGame: savedGame.potentialRarestMovesThisGame || [], // Restore if available
             pathDisplayMode: {
               ...savedGame.pathDisplayMode,
               suggested: false
@@ -470,14 +471,49 @@ export const useGameStore = create<GameState>((set, get) => ({
           });
           
           console.log('useGameStore: Game successfully restored to playing state');
+          
+          // Log rare words available at the restored position with comprehensive details
+          if (savedGame.currentWord && wordFrequencies) {
+            const currentNeighborsEdges = graphData[savedGame.currentWord]?.edges;
+            if (currentNeighborsEdges) {
+              const neighborFreqs = Object.keys(currentNeighborsEdges)
+                .map(word => ({ word, frequency: wordFrequencies[word] ?? Infinity }))
+                .sort((a, b) => a.frequency - b.frequency);
+                
+              const rarestWord = neighborFreqs.length > 0 ? neighborFreqs[0] : null;
+              const rarestFreq = rarestWord?.frequency;
+              
+              // Get optimal and suggested paths for the restored game position
+              const optimalPath = savedGame.optimalPath || [];
+              const optimalNextMove = optimalPath[optimalPath.indexOf(savedGame.currentWord) + 1];
+              const suggestedPath = savedGame.currentWord ? 
+                findShortestPath(graphData, savedGame.currentWord, savedGame.endWord || '') : 
+                [];
+              const suggestedNextMove = suggestedPath.length > 1 ? suggestedPath[1] : null;
+        
+              console.log('[RESTORED GAME DEBUG FOR TESTING]', {
+                // Current state
+                currentPosition: savedGame.currentWord,
+                // Optimal information
+                optimalNextMove: optimalNextMove,
+                suggestedNextMove: suggestedNextMove,
+                // Rare word information
+                allAvailableWords: Object.keys(currentNeighborsEdges),
+                rarestWordAvailable: rarestWord?.word,
+                rarestWordFrequency: rarestFreq,
+                top5RarestWords: neighborFreqs.slice(0, 5)
+              });
+            }
+          }
+          
           return true;
         } else {
-          // No saved game, just set the collections
           console.log('useGameStore: No saved game found or invalid saved game');
           set(state => ({
             ...state,
             wordCollections: filteredCollections,
-            activeWordCollections: filteredCollections
+            activeWordCollections: filteredCollections,
+            potentialRarestMovesThisGame: [] // Ensure reset if no saved game
           }));
         }
       }
@@ -492,20 +528,16 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  // Action to clear saved data (placeholder)
   clearSavedData: async () => {
     console.log("Clearing saved data...");
     try {
-      // Reset game state
       set({ 
         playerPath: [],
         gameStatus: 'idle',
         errorLoadingData: null,
+        potentialRarestMovesThisGame: [], // Reset here too
       });
-      
-      // Clear the saved game
       await clearCurrentGame();
-      
       console.log("Game data cleared successfully");
     } catch (error) {
       console.error("Failed to clear saved data:", error);
@@ -517,7 +549,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  // Action to start a new game
   startGame: async () => {
     const { graphData } = get();
     if (!graphData) {
@@ -526,7 +557,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       return;
     }
     
-    // Clear any existing saved game when starting a new one
     await clearCurrentGame();
     
     set({ 
@@ -538,7 +568,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       gameReport: null,
       optimalChoices: [],
       backtrackHistory: [],
-      // Set path display mode - hide suggested path during gameplay
+      potentialRarestMovesThisGame: [], // Reset for new game
       pathDisplayMode: {
         player: true,
         optimal: false,
@@ -549,12 +579,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { start, end } = findValidWordPair(graphData);
 
     if (start && end) {
-      // Calculate OPTIMAL path (by hops)
       const optimal = findShortestPath(graphData, start, end);
-      // Calculate SUGGESTED path from start (by hops)
       const suggested = findShortestPath(graphData, start, end);
 
-      // Update game state with new game
       set({ 
         startWord: start,
         endWord: end,
@@ -565,7 +592,6 @@ export const useGameStore = create<GameState>((set, get) => ({
         gameStatus: 'playing'
       });
       
-      // Save initial game state - include pathDisplayMode
       const gameState = {
         startWord: start,
         endWord: end,
@@ -576,6 +602,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         gameStatus: 'playing' as const,
         optimalChoices: [],
         backtrackHistory: [],
+        potentialRarestMovesThisGame: [], // Start with empty for saved game
         pathDisplayMode: {
           player: true,
           optimal: false,
@@ -586,19 +613,36 @@ export const useGameStore = create<GameState>((set, get) => ({
       await saveCurrentGame(gameState);
       
       console.log(`Game started: ${start} → ${end}`);
-      console.log(`Optimal path: ${optimal.join(' → ')}`);
+      
+      // Log rare words available at the start position
+      const { wordFrequencies } = get();
+      const directNeighborsEdges = graphData[start]?.edges;
+      if (directNeighborsEdges && wordFrequencies) {
+        const neighborFreqs = Object.keys(directNeighborsEdges)
+          .map(word => ({ word, frequency: wordFrequencies[word] ?? Infinity }))
+          .sort((a, b) => a.frequency - b.frequency)
+          .slice(0, 5); // Show top 5 at game start
+          
+        const rarestWord = neighborFreqs[0]?.word;
+        const rarestFreq = neighborFreqs[0]?.frequency;
+  
+        console.log('[GAME START RARE WORDS]', {
+          startWord: start,
+          rarestOptions: neighborFreqs,
+          rarestAvailable: rarestWord,
+          rarestFrequency: rarestFreq
+        });
+      }
     } else {
       console.error("Failed to find valid start/end word pair.");
       set({ gameStatus: 'idle', errorLoadingData: "Could not start game." });
     }
   },
 
-  // Action for giving up
   giveUp: async () => {
-    const { graphData, playerPath, optimalPath, optimalChoices, endWord, backtrackHistory } = get();
+    const { graphData, playerPath, optimalPath, optimalChoices, endWord, backtrackHistory, potentialRarestMovesThisGame } = get();
     if (!graphData || !endWord) return;
 
-    // Clear saved game when giving up
     await clearCurrentGame();
 
     let report = generateGameReport(
@@ -609,7 +653,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       endWord,
       findShortestPath, 
       findShortestPath, 
-      backtrackHistory
+      backtrackHistory,
+      potentialRarestMovesThisGame // Pass to report
     );
 
     const earnedAchievements = evaluateAchievements(report, 'given_up'); 
@@ -619,74 +664,144 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ 
       gameStatus: 'given_up',
       gameReport: report, 
-      // Show suggested path after giving up
       pathDisplayMode: { player: true, optimal: false, suggested: true }
     });
     await recordEndedGame(report);
   },
 
-  // Action for selecting a word
-  selectWord: async (word: string) => {
-    const { graphData, currentWord, endWord, playerPath, optimalPath, gameStatus, suggestedPathFromCurrent, backtrackHistory, activeWordCollections } = get();
+  selectWord: async (selectedWord: string) => {
+    const { graphData, currentWord, endWord, playerPath, optimalPath, gameStatus, suggestedPathFromCurrent, backtrackHistory, activeWordCollections, wordFrequencies, potentialRarestMovesThisGame } = get();
     if (!graphData || !currentWord || !endWord || gameStatus !== 'playing') return;
 
-    // Basic validation (is it a neighbor?)
-    if (!graphData[currentWord]?.edges[word]) {
-      console.warn(`Invalid move: ${word} is not a neighbor of ${currentWord}`);
+    if (!graphData[currentWord]?.edges[selectedWord]) {
+      console.warn(`Invalid move: ${selectedWord} is not a neighbor of ${currentWord}`);
       return;
     }
 
-    // Track optimal choice
+    // --- Logic for "Putting on the Dog" ---
+    let rarestOfferedThisStep: { word: string, frequency: number } | null = null;
+    const directNeighborsEdges = graphData[currentWord]?.edges;
+    if (directNeighborsEdges && Object.keys(directNeighborsEdges).length > 0 && wordFrequencies) {
+      const neighborFreqDetails = Object.keys(directNeighborsEdges)
+        .map(neighborWord => ({
+          word: neighborWord,
+          frequency: wordFrequencies[neighborWord] ?? Infinity,
+        }))
+        .sort((a, b) => a.frequency - b.frequency); // Sort by frequency, rarest first
+
+      if (neighborFreqDetails.length > 0 && neighborFreqDetails[0].frequency !== Infinity) {
+        rarestOfferedThisStep = neighborFreqDetails[0];
+      }
+    }
+
+    let newPotentialRarestMovesList = [...potentialRarestMovesThisGame];
+    if (rarestOfferedThisStep) {
+      newPotentialRarestMovesList.push({
+        word: rarestOfferedThisStep.word,
+        frequency: rarestOfferedThisStep.frequency,
+        playerChoseThisRarestOption: selectedWord === rarestOfferedThisStep.word,
+      });
+    }
+    // --- End logic for "Putting on the Dog" ---
+
     let sTime = performance.now();
     const optimalChoice = trackOptimalChoice(
       graphData, 
       currentWord, 
-      word, 
+      selectedWord, 
       optimalPath,
       suggestedPathFromCurrent,
       endWord, 
-      findShortestPath
+      findShortestPath,
+      wordFrequencies
     );
     console.log(`[PERF] selectWord.trackOptimalChoice call took ${(performance.now() - sTime).toFixed(2)}ms`);
 
-    // Debug log for optimality
-    console.log('[MOVE DEBUG]', {
-      playerPosition: currentWord,
-      playerChose: word,
-      optimalNextMove: optimalPath[optimalPath.indexOf(currentWord) + 1],
-      suggestedNextMove: suggestedPathFromCurrent[suggestedPathFromCurrent.indexOf(currentWord) + 1],
-      isGlobalOptimal: optimalChoice.isGlobalOptimal,
-      isLocalOptimal: optimalChoice.isLocalOptimal
-    });
-
-    // Update player position and path
-    const newPlayerPath = [...playerPath, word];
+    // Get all relevant information for logging BEFORE the move is made
+    const optimalNextMove = optimalPath[optimalPath.indexOf(currentWord) + 1];
+    const suggestedNextMove = suggestedPathFromCurrent[suggestedPathFromCurrent.indexOf(currentWord) + 1];
     
-    // Update the central game state in Zustand
-    set({
-      currentWord: word,
-      playerPath: newPlayerPath,
-      optimalChoices: [...get().optimalChoices, optimalChoice]
+    // Log ALL testing information together in one place
+    console.log('[MOVE DEBUG FOR TESTING]', {
+      // Current state
+      currentPosition: currentWord,
+      // Optimal information
+      optimalNextMove: optimalNextMove,
+      suggestedNextMove: suggestedNextMove,
+      // Rare word information
+      allAvailableWords: directNeighborsEdges ? Object.keys(directNeighborsEdges) : [],
+      rarestWordAvailable: rarestOfferedThisStep?.word,
+      rarestWordFrequency: rarestOfferedThisStep?.frequency,
+      top5RarestWords: directNeighborsEdges && wordFrequencies 
+        ? Object.keys(directNeighborsEdges)
+            .map(word => ({ word, frequency: wordFrequencies[word] ?? Infinity }))
+            .sort((a, b) => a.frequency - b.frequency)
+            .slice(0, 5)
+        : [],
+      // Player choice info
+      playerChose: selectedWord,
+      playerChoseFrequency: wordFrequencies?.[selectedWord] ?? 'unknown',
+      isGlobalOptimal: optimalChoice.isGlobalOptimal,
+      isLocalOptimal: optimalChoice.isLocalOptimal,
+      choseRarestWord: selectedWord === rarestOfferedThisStep?.word
     });
 
-    // Check for win condition
-    if (word === endWord) {
-      console.log("Player won!");
+    const newPlayerPath = [...playerPath, selectedWord];
+    
+    set({
+      currentWord: selectedWord,
+      playerPath: newPlayerPath,
+      optimalChoices: [...get().optimalChoices, optimalChoice],
+      potentialRarestMovesThisGame: newPotentialRarestMovesList // Update the list
+    });
+
+    // Log available rare words for achievement testing from the NEW position
+    if (graphData[selectedWord]?.edges && wordFrequencies) {
+      const newPositionNeighborsEdges = graphData[selectedWord]?.edges;
+      const neighborFreqs = Object.keys(newPositionNeighborsEdges)
+        .map(word => ({ word, frequency: wordFrequencies[word] ?? Infinity }))
+        .sort((a, b) => a.frequency - b.frequency);
       
-      // Clear saved game on win
+      // Get full list for proper tracking
+      const allOptions = [...neighborFreqs];
+      // For display, limit to top 5
+      const displayOptions = neighborFreqs.slice(0, 5);
+
+      // Find the rarest option at the new position
+      const rarestAtNewPosition = neighborFreqs.length > 0 ? neighborFreqs[0] : null;
+
+      // Get next optimal move from the new position if one exists
+      const newOptimalNextMove = optimalPath[optimalPath.indexOf(selectedWord) + 1] || null;
+      
+      console.log('[MOVE OPTIONS FROM NEW POSITION]', {
+        currentPosition: selectedWord,
+        optimalNextMove: newOptimalNextMove,
+        suggestedPath: graphData[selectedWord] && endWord ? findShortestPath(graphData, selectedWord, endWord).slice(1) : [],
+        rarestWord: rarestAtNewPosition?.word,
+        rarestFrequency: rarestAtNewPosition?.frequency,
+        topRareOptions: displayOptions,
+        totalNeighbors: Object.keys(newPositionNeighborsEdges).length
+      });
+    }
+
+    if (selectedWord === endWord) {
+      console.log("Player won!");
       await clearCurrentGame();
       
-      const currentOptimalChoices = get().optimalChoices;
+      const finalOptimalChoices = get().optimalChoices;
       const finalBacktrackHistory = get().backtrackHistory;
+      const finalPotentialRarestMoves = get().potentialRarestMovesThisGame; // Get the final list
+
       let report = generateGameReport(
         graphData,
         newPlayerPath,
         optimalPath, 
-        currentOptimalChoices, 
+        finalOptimalChoices, 
         endWord,
         findShortestPath, 
         findShortestPath, 
-        finalBacktrackHistory
+        finalBacktrackHistory,
+        finalPotentialRarestMoves // Pass to report
       );
 
       const earnedAchievements = evaluateAchievements(report, 'won');
@@ -700,132 +815,102 @@ export const useGameStore = create<GameState>((set, get) => ({
       await recordEndedGame(report);
 
       if (activeWordCollections.length > 0) {
-        // Record the word for any active collections it belongs to
-        checkAndRecordWordForCollections(word, activeWordCollections);
+        checkAndRecordWordForCollections(selectedWord, activeWordCollections);
       }
-
       return;
     }
 
-    // Recalculate SUGGESTED path from the new current word (by hops)
     sTime = performance.now();
-    const suggested = findShortestPath(graphData, word, endWord);
+    const suggested = findShortestPath(graphData, selectedWord, endWord);
     console.log(`[PERF] selectWord.findShortestPath (for suggested) took ${(performance.now() - sTime).toFixed(2)}ms`);
 
-    console.log(`Updated suggested path: ${word} → ${endWord}, length: ${suggested.length}, path: ${suggested.join(' → ')}`);
     set({ suggestedPathFromCurrent: suggested });
     
-    // Save game state after recalculating the suggested path - include pathDisplayMode
-    const gameState = {
+    const gameStateToSave = {
       startWord: playerPath[0],
       endWord: endWord,
-      currentWord: word,
+      currentWord: selectedWord,
       playerPath: newPlayerPath,
       optimalPath: optimalPath,
       suggestedPathFromCurrent: suggested,
       gameStatus: 'playing' as const,
       optimalChoices: get().optimalChoices,
       backtrackHistory: backtrackHistory,
-      pathDisplayMode: get().pathDisplayMode  // Save current pathDisplayMode
+      potentialRarestMovesThisGame: get().potentialRarestMovesThisGame, // Save this list
+      pathDisplayMode: get().pathDisplayMode
     };
-    await saveCurrentGame(gameState);
+    await saveCurrentGame(gameStateToSave);
 
     if (activeWordCollections.length > 0) {
-      // Record the word for any active collections it belongs to
-      checkAndRecordWordForCollections(word, activeWordCollections);
+      checkAndRecordWordForCollections(selectedWord, activeWordCollections);
     }
   },
 
-  // Action to update path display mode
   setPathDisplayMode: (modeUpdate: Partial<PathDisplayMode>) => {
     set((state) => ({
       pathDisplayMode: { ...state.pathDisplayMode, ...modeUpdate }
     }));
   },
 
-  // About modal state control
   setAboutModalVisible: (visible) => set({ aboutModalVisible: visible }),
-
-  // Stats modal state control (Renamed from History modal)
   setStatsModalVisible: (visible) => set({ statsModalVisible: visible }),
 
-  // New action for backtracking to a previous optimal word
   backtrackToWord: async (word: string, index: number) => {
-    const { graphData, playerPath, optimalChoices, endWord, startWord, currentWord: wordPlayerIsJumpingFrom, backtrackHistory } = get();
+    const { graphData, playerPath, optimalChoices, endWord, startWord, currentWord: wordPlayerIsJumpingFrom, backtrackHistory, potentialRarestMovesThisGame } = get();
     if (!graphData || !playerPath || !endWord || !startWord || !wordPlayerIsJumpingFrom || get().gameStatus !== 'playing') return;
 
-    // NEW CHECK: Has this word (value) already been used as a backtrack landing spot?
     const alreadyBacktrackedToThisWord = backtrackHistory.some(event => event.landedOn === word);
     if (alreadyBacktrackedToThisWord) {
       console.warn(`Invalid backtrack: The word "${word}" has already been used as a backtrack target.`);
       return; 
     }
 
-    // playerPath is 1-indexed for display, choiceIndex is 0-indexed for optimalChoices array
-    // If player clicks on playerPath[index] (which is the word landed on),
-    // the choice that LED to this word is optimalChoices[index-1].
-    // This is the checkpoint we are marking.
     const checkpointChoiceIndex = index -1; 
-
     if (checkpointChoiceIndex < 0 || checkpointChoiceIndex >= optimalChoices.length) {
-      console.warn(`Invalid backtrack: checkpointChoiceIndex ${checkpointChoiceIndex} out of range for optimal choices (length ${optimalChoices.length}) based on playerPath index ${index}`);
+      console.warn(`Invalid backtrack: checkpointChoiceIndex ${checkpointChoiceIndex} out of range.`);
       return;
     }
     
     const choiceToMark = optimalChoices[checkpointChoiceIndex];
     if (!(choiceToMark.isGlobalOptimal || choiceToMark.isLocalOptimal) || choiceToMark.usedAsCheckpoint) {
-      console.warn(`Invalid backtrack: word at playerPath index ${index} (choice ${checkpointChoiceIndex}) is not an unused optimal choice.`);
+      console.warn(`Invalid backtrack: word at playerPath index ${index} not an unused optimal choice.`);
       return;
     }
 
-    // Slice optimalChoices to match the new player path length BEFORE updating the checkpoint.
-    // If newPlayerPath has length N, it means N-1 moves were made.
-    // So, optimalChoices should be sliced to length N-1.
-    // newPlayerPath will be playerPath.slice(0, index + 1). Its length is index + 1.
-    // So, optimalChoices should be sliced to length (index + 1) - 1 = index.
-    const newOptimalChoicesBase = optimalChoices.slice(0, index);
+    const newPlayerPath = playerPath.slice(0, index + 1);
+    // Truncate optimalChoices and potentialRarestMovesThisGame to match the new path length
+    // New path has newPlayerPath.length words, meaning (newPlayerPath.length - 1) moves.
+    const numMoves = newPlayerPath.length - 1;
+    const newOptimalChoicesBase = optimalChoices.slice(0, numMoves); 
+    const newPotentialRarestMoves = potentialRarestMovesThisGame.slice(0, numMoves);
 
-    // Now, update the last choice in this new base array (which corresponds to the checkpoint) 
-    // The checkpointChoiceIndex is relative to the original optimalChoices array.
-    // If we sliced to playerPath[index] (inclusive for word, exclusive for choice that got us there)
-    // then the choice to mark is at newOptimalChoicesBase.length -1 if newOptimalChoicesBase.length > 0
-    // Actually, the choice to mark is at checkpointChoiceIndex. We need to ensure this index is valid for the *original* array and then apply to the sliced one if it's the last one.
-    // Simpler: newPlayerPath will be path up to 'word'. Choices are for moves *between* words.
-    // So if newPlayerPath is [start, word1, word2(checkpoint)], newOptimalChoices should have 2 entries.
-    // The length of newOptimalChoices should be newPlayerPath.length - 1.
     const finalOptimalChoices = newOptimalChoicesBase.map((c, i) => {
-      // We are marking the choice that LED TO the word at playerPath[index]
-      // This choice is at optimalChoices[index-1].
-      // So, in the sliced newOptimalChoicesBase, this is the last element if index > 0.
-      if (i === checkpointChoiceIndex) { // checkpointChoiceIndex is correct for the original array, and is the one we need to mark.
+      if (i === checkpointChoiceIndex) {
         return { ...c, usedAsCheckpoint: true };
       }
       return c;
     });
 
-    const newPlayerPath = playerPath.slice(0, index + 1);
     const newCurrentWordAfterBacktrack = newPlayerPath[newPlayerPath.length - 1];
+    const newOptimalPath = findShortestPath(graphData, startWord, endWord);
+    const suggested = findShortestPath(graphData, newCurrentWordAfterBacktrack, endWord);
     
-    const newOptimalPath = findShortestPath(graphData, startWord, endWord); // Corrected call
-    const suggested = findShortestPath(graphData, newCurrentWordAfterBacktrack, endWord); // Corrected call
-    
-    // Create new backtrack event
     const newBacktrackEvent: BacktrackEvent = {
       jumpedFrom: wordPlayerIsJumpingFrom,
-      landedOn: word, // 'word' is the checkpoint word landed on
+      landedOn: word,
     };
 
     set({ 
       currentWord: newCurrentWordAfterBacktrack,
       playerPath: newPlayerPath,
-      optimalChoices: finalOptimalChoices, // Use the correctly sliced and updated optimalChoices
+      optimalChoices: finalOptimalChoices,
+      potentialRarestMovesThisGame: newPotentialRarestMoves, // Set truncated list
       optimalPath: newOptimalPath,
       suggestedPathFromCurrent: suggested,
       backtrackHistory: [...backtrackHistory, newBacktrackEvent],
     });
 
-    // Save game state after backtracking - include pathDisplayMode
-    const gameState = {
+    const gameStateToSave = {
       startWord: playerPath[0],
       endWord: endWord,
       currentWord: newCurrentWordAfterBacktrack,
@@ -835,12 +920,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       gameStatus: 'playing' as const,
       optimalChoices: finalOptimalChoices,
       backtrackHistory: [...backtrackHistory, newBacktrackEvent],
-      pathDisplayMode: get().pathDisplayMode  // Save current pathDisplayMode
+      potentialRarestMovesThisGame: newPotentialRarestMoves, // Save truncated list
+      pathDisplayMode: get().pathDisplayMode
     };
-    await saveCurrentGame(gameState);
+    await saveCurrentGame(gameStateToSave);
   },
 
-  // Definition Dialog Actions
   showWordDefinition: (word: string, pathIndex?: number | null) => {
     set({
       definitionDialogWord: word,
@@ -856,7 +941,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     });
   },
 
-  // Achievement Detail Dialog Actions
   showAchievementDetail: (achievement: Achievement) => {
     set({
       selectedAchievement: achievement,
@@ -870,7 +954,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     });
   },
 
-  // Testing function for date-based collections
   testWordCollectionsForDate: async (month: number, day: number) => {
     const { graphData } = get();
     if (!graphData) {
@@ -879,19 +962,13 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
     
     try {
-      // Create a test date with the specified month and day
       const testDate = new Date(new Date().getFullYear(), month - 1, day);
       console.log(`Testing collections for date: ${testDate.toLocaleDateString()}`);
-      
-      // Get collections that would be visible on that date
       const collections = await getFilteredWordCollections(graphData, testDate);
-      
-      // Update the store with these collections temporarily
       set({ 
         wordCollections: collections,
         activeWordCollections: collections
       });
-      
       console.log(`Found ${collections.length} collections for date ${testDate.toLocaleDateString()}`);
       collections.forEach(c => console.log(` - ${c.id}: ${c.title}`));
     } catch (error) {

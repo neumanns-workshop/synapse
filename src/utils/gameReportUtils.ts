@@ -1,6 +1,13 @@
-import { GraphData } from '../services/dataLoader';
+import { GraphData, WordFrequencies } from '../services/dataLoader';
 import { findShortestPath } from './graphUtils';
 import type { Achievement } from '../features/achievements/achievements';
+
+// Mirroring PotentialRarestMove from useGameStore for clarity, or it could be imported
+interface PotentialRarestMove {
+  word: string;
+  frequency: number;
+  playerChoseThisRarestOption: boolean;
+}
 
 // Interface for optimal choice tracking
 export interface OptimalChoice {
@@ -13,6 +20,7 @@ export interface OptimalChoice {
   hopsFromPlayerPositionToEnd?: number; // Hops from playerPosition on this choice to endWord via suggested path
   choseMostSimilarNeighbor?: boolean; // Was this choice the most similar among available direct neighbors?
   choseLeastSimilarNeighbor?: boolean; // Was this choice the least similar among available direct neighbors?
+  choseRarestNeighbor?: boolean; // Added field
 }
 
 export interface BacktrackReportEntry {
@@ -36,6 +44,7 @@ export interface GameReport {
   backtrackEvents?: BacktrackReportEntry[]; // Renamed and using new type
   semanticPathEfficiency?: number; // Added for the new efficiency metric
   earnedAchievements?: Achievement[]; // Added to store earned achievements
+  potentialRarestMoves?: PotentialRarestMove[]; // Added for "Putting on the Dog"
   id: string;
   timestamp: number;
   startWord: string;
@@ -80,7 +89,8 @@ export const trackOptimalChoice = (
   optimalPath: string[],
   suggestedPath: string[],
   endWord: string,
-  findShortestPathFn: (graphData: GraphData | null, start: string, end: string) => string[]
+  findShortestPathFn: (graphData: GraphData | null, start: string, end: string) => string[],
+  wordFrequencies: WordFrequencies | null
 ): OptimalChoice => {
   const functionStartTime = performance.now();
 
@@ -89,30 +99,42 @@ export const trackOptimalChoice = (
   const optimalNextMove = optimalPath[optimalPath.indexOf(playerPosition) + 1];
   const suggestedNextMove = suggestedPath[suggestedPath.indexOf(playerPosition) + 1];
 
-  // Determine if chosen word was most/least similar among current direct neighbors
   let wasMostSimilar = false;
   let wasLeastSimilar = false;
-  const directNeighbors = graphData[playerPosition]?.edges;
-  if (directNeighbors && Object.keys(directNeighbors).length > 0) {
-    const neighborSimilarities = Object.entries(directNeighbors).map(([word, similarity]) => ({ word, similarity }));
+  let wasRarest = false; // Added variable
+
+  const directNeighborsEdges = graphData[playerPosition]?.edges;
+  if (directNeighborsEdges && Object.keys(directNeighborsEdges).length > 0) {
+    const neighborDetails = Object.entries(directNeighborsEdges).map(([word, similarity]) => ({
+      word,
+      similarity,
+      frequency: wordFrequencies && wordFrequencies[word] !== undefined ? wordFrequencies[word] : Infinity 
+    }));
     
-    if (neighborSimilarities.length > 0) {
-      neighborSimilarities.sort((a, b) => b.similarity - a.similarity); // Sort descending by similarity
-      
-      if (playerChoice === neighborSimilarities[0].word) {
+    if (neighborDetails.length > 0) {
+      // Similarity sorting
+      const sortedBySimilarity = [...neighborDetails].sort((a, b) => b.similarity - a.similarity);
+      if (playerChoice === sortedBySimilarity[0].word) {
         wasMostSimilar = true;
       }
-      // To be the least similar, it must also not be the most similar if there's only one neighbor
-      if (playerChoice === neighborSimilarities[neighborSimilarities.length - 1].word) {
-        if (neighborSimilarities.length === 1) { // Only one neighbor, it's both most and least
-            wasMostSimilar = true; // Ensure it's marked if only one option
+      if (playerChoice === sortedBySimilarity[sortedBySimilarity.length - 1].word) {
+        if (sortedBySimilarity.length === 1 || sortedBySimilarity[0].similarity === sortedBySimilarity[sortedBySimilarity.length - 1].similarity) {
+          wasMostSimilar = true; // Handles single neighbor or all same similarity
+          wasLeastSimilar = true;
+        } else if (playerChoice !== sortedBySimilarity[0].word) {
             wasLeastSimilar = true;
-        } else if (playerChoice !== neighborSimilarities[0].word) { // If multiple, ensure it's not also the most similar
-            wasLeastSimilar = true;
-        } else if (neighborSimilarities[0].similarity === neighborSimilarities[neighborSimilarities.length -1].similarity) {
-            // If all neighbors have the same similarity, the chosen one is both most and least
-            wasMostSimilar = true;
-            wasLeastSimilar = true;
+        }
+      }
+
+      // Frequency sorting (lower frequency is rarer)
+      if (wordFrequencies) {
+        const sortedByFrequency = [...neighborDetails].sort((a, b) => a.frequency - b.frequency);
+        if (sortedByFrequency.length > 0 && sortedByFrequency[0].frequency !== Infinity) {
+            const rarestFrequency = sortedByFrequency[0].frequency;
+            const playerChoiceDetails = neighborDetails.find(n => n.word === playerChoice);
+            if (playerChoiceDetails && playerChoiceDetails.frequency === rarestFrequency) {
+                wasRarest = true;
+            }
         }
       }
     }
@@ -127,10 +149,11 @@ export const trackOptimalChoice = (
     hopsFromPlayerPositionToEnd: hopsToEnd,
     choseMostSimilarNeighbor: wasMostSimilar,
     choseLeastSimilarNeighbor: wasLeastSimilar,
+    choseRarestNeighbor: wasRarest, // Added field
   };
 
   const functionEndTime = performance.now();
-  console.log(`[PERF] trackOptimalChoice for ${playerPosition} -> ${playerChoice} took ${(functionEndTime - functionStartTime).toFixed(2)}ms (Simplified)`);
+  console.log(`[PERF] trackOptimalChoice for ${playerPosition} -> ${playerChoice} took ${(functionEndTime - functionStartTime).toFixed(2)}ms (Freq Logic Updated)`);
 
   return result;
 };
@@ -146,32 +169,18 @@ export const generateGameReport = (
   graphData: GraphData,
   playerPath: string[],
   optimalPathGlobal: string[],
-  minimalOptimalChoices: OptimalChoice[],
+  recordedOptimalChoices: OptimalChoice[],
   endWord: string,
   findShortestPathByHopsFn: (graphData: GraphData | null, start: string, end: string) => string[],
   findShortestPathBySemanticDistanceFn: (graphData: GraphData | null, start: string, end: string) => string[],
-  backtrackEvents: BacktrackReportEntry[]
+  backtrackEvents: BacktrackReportEntry[],
+  potentialRarestMovesInput?: PotentialRarestMove[] // Added parameter
 ): GameReport => {
-  const enrichedOptimalChoices: OptimalChoice[] = [];
-  let playerSemanticDistanceTotal = 0;
-
-  // This loop correctly enriches choices based on the final playerPath and minimalOptimalChoices
-  for (let i = 0; i < playerPath.length - 1; i++) {
-    const playerPosition = playerPath[i];
-    const playerChose = playerPath[i + 1];
-    const baseChoice = minimalOptimalChoices.find(oc => oc.playerPosition === playerPosition && oc.playerChose === playerChose && oc.playerPosition === playerPath[i]) || 
-                       { playerPosition, playerChose, optimalChoice: optimalPathGlobal[optimalPathGlobal.indexOf(playerPosition) + 1] || '', isGlobalOptimal: false, isLocalOptimal: false };
-
-    playerSemanticDistanceTotal += getSemanticDistance(graphData, playerPosition, playerChose);
-
-    enrichedOptimalChoices.push({
-      ...baseChoice,
-    });
-  }
+  let playerSemanticDistanceTotal = calculatePathDistance(graphData, playerPath);
 
   const optimalSemanticDistance = calculatePathDistance(graphData, optimalPathGlobal);
   const totalMoves = playerPath.length - 1;
-  const optimalMovesMade = enrichedOptimalChoices.filter(oc => oc.isGlobalOptimal || oc.isLocalOptimal).length;
+  const optimalMovesMade = recordedOptimalChoices.filter(oc => oc.isGlobalOptimal || oc.isLocalOptimal).length;
   const moveAccuracy = totalMoves > 0 ? Math.min(100, (optimalMovesMade / totalMoves) * 100) : 0;
   const averageSimilarity = calculateAverageSimilarity(graphData, playerPath);
   
@@ -182,7 +191,7 @@ export const generateGameReport = (
   const pathEfficiency = optimalPathGlobal.length > 1 && playerPath.length > 1 ? (optimalPathGlobal.length - 1) / (playerPath.length - 1) : 0;
 
   const missedOptimalMovesList: string[] = [];
-  for (const choice of enrichedOptimalChoices) {
+  for (const choice of recordedOptimalChoices) {
     if (optimalPathGlobal.includes(choice.playerPosition)) {
       const optimalNextStep = optimalPathGlobal[optimalPathGlobal.indexOf(choice.playerPosition) + 1];
       if (optimalNextStep && choice.playerChose !== optimalNextStep) {
@@ -223,11 +232,12 @@ export const generateGameReport = (
     playerPath: playerPath,
     optimalPath: optimalPathGlobal,
     suggestedPath: suggestedPathFromFinalPosition,
-    optimalChoices: enrichedOptimalChoices,
+    optimalChoices: recordedOptimalChoices,
     status: gameStatus,
     totalMoves,
     optimalMovesMade,
     moveAccuracy,
+    missedOptimalMoves: missedOptimalMovesList,
     playerSemanticDistance: playerSemanticDistanceTotal,
     optimalSemanticDistance,
     averageSimilarity,
@@ -235,6 +245,7 @@ export const generateGameReport = (
     semanticPathEfficiency: calculatedSemanticPathEfficiency,
     earnedAchievements: [],
     pathEfficiency: pathEfficiency,
+    potentialRarestMoves: potentialRarestMovesInput, // Assign to report
   };
 };
 
@@ -251,19 +262,17 @@ export const calculateTotalSemanticDistance = (
   for (let i = 0; i < path.length - 1; i++) {
     const wordA = path[i];
     const wordB = path[i + 1];
-    const similarity = graphData?.[wordA]?.edges?.[wordB];
-
-    if (typeof similarity === 'number') {
-      totalDistance += (1 - similarity);
+    // Assuming getSemanticDistance exists and is appropriate here or graphData edge directly used if it means distance
+    // For this example, let's use the raw edge value if it's distance, or 1-similarity if it's similarity
+    const edgeValue = graphData[wordA]?.edges?.[wordB];
+    if (typeof edgeValue === 'number') {
+      // If your graph stores SENSE (semantic similarity), convert to distance
+      // If it already stores DISTANCE, use it directly.
+      // This example assumes it stores SIMILARITY as per prior context.
+      totalDistance += (1 - edgeValue); 
     } else {
-      // This case should ideally not happen if the path is valid and from findShortestPath
-      // Consider how to handle missing edges in a path: error, or assume max distance (1)?
-      // For now, let's assume valid paths and that edges exist.
-      // If an edge were missing, it implies an issue with path generation or graph data.
-      // To be robust, one might add a large penalty or throw an error.
-      // Given findShortestPath should only return paths with valid edges, this is more a safety.
-      console.warn(`calculateTotalSemanticDistance: Missing similarity between ${wordA} and ${wordB}.`);
-      totalDistance += 1; // Assume max distance for this segment
+      // Handle missing edge - perhaps assign a high penalty or throw error
+      totalDistance += 1; // Max distance penalty for unlinked words
     }
   }
   return totalDistance;

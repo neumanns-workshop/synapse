@@ -329,6 +329,84 @@ export const sorryWrongRoomAchievement: Achievement = {
   },
 };
 
+// New Achievement: "Those Who Know"
+export const thoseWhoKnowAchievement: Achievement = {
+  id: 'thoseWhoKnow',
+  name: 'Those Who Know',
+  description: 'Selected a word that was both the rarest available option and an optimal move.',
+  check: (gameReport, gameStatus) => {
+    if (!['won', 'given_up'].includes(gameStatus) || !gameReport || !gameReport.optimalChoices) {
+      return false;
+    }
+    return gameReport.optimalChoices.some(choice => 
+      choice.choseRarestNeighbor === true && 
+      (choice.isGlobalOptimal === true || choice.isLocalOptimal === true)
+    );
+  }
+};
+
+// New Achievement: "Putting on the Dog"
+export const puttingOnTheDogAchievement: Achievement = {
+  id: 'puttingOnTheDog',
+  name: 'Putting on the Dog',
+  description: 'Selected the rarest word that was offered as an option throughout the entire game and won.',
+  check: (gameReport, gameStatus) => {
+    if (gameStatus !== 'won' || // Require win
+        !gameReport || 
+        !gameReport.potentialRarestMoves || 
+        gameReport.potentialRarestMoves.length === 0) {
+      return false;
+    }
+
+    let overallRarestFrequency = Infinity;
+    for (const potentialMove of gameReport.potentialRarestMoves) {
+      if (potentialMove.frequency < overallRarestFrequency) {
+        overallRarestFrequency = potentialMove.frequency;
+      }
+    }
+
+    if (overallRarestFrequency === Infinity) {
+      return false;
+    }
+
+    return gameReport.potentialRarestMoves.some(potentialMove => 
+      potentialMove.frequency === overallRarestFrequency && 
+      potentialMove.playerChoseThisRarestOption === true
+    );
+  }
+};
+
+
+
+// New Achievement: "Selling Seashells"
+export const sellingSeashellsAchievement: Achievement = {
+  id: 'sellingSeashells',
+  name: 'Selling Seashells',
+  description: 'Chose three words in a row that start with the same letter and won.',
+  check: (gameReport, gameStatus) => {
+    if (gameStatus !== 'won' || 
+        !gameReport || 
+        !gameReport.playerPath || 
+        gameReport.playerPath.length < 3) {
+      return false;
+    }
+    
+    const path = gameReport.playerPath;
+    // Check if there are three consecutive words starting with the same letter
+    for (let i = 0; i < path.length - 2; i++) {
+      const firstLetter1 = path[i].charAt(0).toLowerCase();
+      const firstLetter2 = path[i + 1].charAt(0).toLowerCase();
+      const firstLetter3 = path[i + 2].charAt(0).toLowerCase();
+      
+      if (firstLetter1 === firstLetter2 && firstLetter2 === firstLetter3) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+};
+
 // Final list of achievements
 export const allAchievements: Achievement[] = [
   straightAndNarrowAchievement,
@@ -381,6 +459,9 @@ export const allAchievements: Achievement[] = [
     },
   },
   sorryWrongRoomAchievement,
+  thoseWhoKnowAchievement,
+  puttingOnTheDogAchievement,
+  sellingSeashellsAchievement,
 ];
 
 // Function to evaluate all achievements for a given game report and status

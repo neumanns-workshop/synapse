@@ -18,26 +18,31 @@ export interface DefinitionsData {
   [word: string]: string[];
 }
 
+export interface WordFrequencies {
+  [word: string]: number;
+}
+
 // Import JSON files directly
-import graphData from '../data/graph.json';
-import definitionsData from '../data/definitions.json';
+import graphDataJson from '../data/graph.json';
+import definitionsDataJson from '../data/definitions.json';
+import wordFrequenciesJson from '../data/filtered_word_frequencies.json';
 
 export const loadGraphData = async (): Promise<GraphData> => {
   try {
     console.log("loadGraphData: Loading graph data...");
     
     // Check if the data is in the expected format
-    if (typeof graphData === 'object' && graphData !== null) {
-      const keys = Object.keys(graphData);
+    if (typeof graphDataJson === 'object' && graphDataJson !== null) {
+      const keys = Object.keys(graphDataJson);
       console.log(`loadGraphData: Found ${keys.length} top-level keys.`);
 
       // Check for the nested "nodes" structure
-      if (keys.length === 1 && keys[0] === 'nodes' && typeof graphData.nodes === 'object' && graphData.nodes !== null) {
+      if (keys.length === 1 && keys[0] === 'nodes' && typeof graphDataJson.nodes === 'object' && graphDataJson.nodes !== null) {
         console.log("loadGraphData: Detected nested 'nodes' structure.");
-        return graphData.nodes as unknown as GraphData;
+        return graphDataJson.nodes as unknown as GraphData;
       } else if (keys.length > 1) {
         console.log("loadGraphData: Using top-level keys as words.");
-        return graphData as unknown as GraphData;
+        return graphDataJson as unknown as GraphData;
       } else {
         throw new Error("Invalid graph data structure.");
       }
@@ -53,9 +58,23 @@ export const loadGraphData = async (): Promise<GraphData> => {
 export const loadDefinitionsData = async (): Promise<DefinitionsData> => {
   try {
     console.log("loadDefinitionsData: Loading definitions data...");
-    return definitionsData as DefinitionsData;
+    return definitionsDataJson as DefinitionsData;
   } catch (error) {
     console.error("Error loading definitions data:", error);
     throw new Error("Failed to load definitions data.");
+  }
+};
+
+export const loadWordFrequencies = async (): Promise<WordFrequencies> => {
+  try {
+    console.log("loadWordFrequencies: Loading word frequencies data (filtered)...");
+    if (typeof wordFrequenciesJson === 'object' && wordFrequenciesJson !== null) {
+      return wordFrequenciesJson as WordFrequencies;
+    } else {
+      throw new Error("Invalid word frequencies data format.");
+    }
+  } catch (error) {
+    console.error("Error loading word frequencies data:", error);
+    throw error instanceof Error ? error : new Error("Failed to load word frequencies data.");
   }
 }; 
