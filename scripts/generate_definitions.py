@@ -11,12 +11,16 @@ import os
 GRAPH_FILE_PATH = os.path.join('client', 'public', 'data', 'graph.json')
 OUTPUT_FILE_PATH = os.path.join('client', 'public', 'data', 'definitions.json')
 
+# Maximum number of definitions to store per word
+MAX_DEFINITIONS_PER_WORD = 3
+
 def get_wordnet_definition(word):
-    """Fetches all synset definitions for a given word."""
+    """Fetches up to MAX_DEFINITIONS_PER_WORD synset definitions for a given word."""
     synsets = wn.synsets(word)
     if synsets:
-        # Return a list of definitions from all synsets
-        return [s.definition() for s in synsets if s.definition()] # Ensure definition exists
+        # Get definitions, filtering out empty ones, and take only the first MAX_DEFINITIONS_PER_WORD
+        definitions = [s.definition() for s in synsets if s.definition()]
+        return definitions[:MAX_DEFINITIONS_PER_WORD] 
     return [] # Return an empty list if word not found or no definitions available
 
 def main():

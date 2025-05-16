@@ -1,124 +1,166 @@
-# Synapse: Semantic Pathways (V1)
+# Synapse: Semantic Pathways (React Native)
 
-A word navigation game where players find paths between words using semantic similarity. Navigate a graph of interconnected words, aiming to reach the target word from the start word in the fewest steps.
+A mobile and web implementation of the Synapse word navigation game, where players find paths between words using semantic similarity. Navigate a graph of interconnected words, aiming to reach the target word from the start word in the fewest steps.
 
-This repository contains the complete project, including the frontend client and the data generation scripts. It is intended to be used as a Git submodule within a larger website structure.
+## How to Play
 
-## Status
+The goal of Synapse is to find a path between a randomly selected **Start Word** and **End Word** by navigating through a graph of interconnected words. 
 
-Latest Version: [1.1.2] - See [CHANGELOG.md](CHANGELOG.md) for details.
+- Each word is a node in the graph.
+- You can only move from your current word to directly connected (semantically similar) words shown in the graph.
+- Select adjacent words one by one to form a path. Your path history will be visually highlighted.
+- If you make a mistake or want to explore a different route, simply **click/tap on a word in your path history** to backtrack to that point.
+- Try to reach the **End Word** in the **fewest steps** possible!
+- You can explore word definitions to help guide your choices.
+- When you're stuck, you can choose to "Give Up" and see the optimal path.
+- After completing a game (winning or giving up), you can view different path visualizations including your path and the optimal path.
 
 ## Project Structure
 
-- `client/`: Contains the React frontend application (Vite + React + D3.js). See `client/README.md` for more details.
-  - `client/public/data/`: Holds the generated data files required by the game (`graph.json`, `definitions.json`). **These files are essential for the client to run.**
-  - `client/dist/`: Contains the built static assets after running `npm run build` in the `client` directory.
-  - `client/src/`: Source code for the React components, game logic, context, and utilities.
-- `scripts/`: Python scripts used to generate the data files.
-- `raw_data/`: Source data (word lists, initial embeddings) used by the Python scripts.
-- `implementation_docs/`: Design documents and implementation plans.
-- `CHANGELOG.md`: Log of changes per version.
-- `.gitignore`: Specifies intentionally untracked files.
-- `README.md`: This file.
+This project is built with React Native using Expo, following modern development practices:
 
-## Running the Client (Development)
+- **TypeScript**: For type safety and improved developer experience
+- **React Navigation**: For screen navigation
+- **React Native SVG**: For graph visualization (replaces Skia from previous versions)
+- **React Native Paper**: For Material Design UI components, providing a consistent look and feel.
+- **Zustand**: For lightweight global state management
+- **AsyncStorage**: For local data persistence (scores, settings)
+- **Native Sharing & ViewShot**: For sharing game results as text or screenshots
 
-1.  Navigate to the client directory:
-    ```bash
-    cd client
-    ```
-2.  Install Node.js dependencies:
+## Features
+
+- Navigate through a semantic word graph to find connections
+- **Accordion-style Path Display:** Visualize your journey with color-coded words and progress indication
+- **Word Definitions:** Tap on any word to see its definition
+- **Path Visualization:** See the optimal path after completing a game
+- **Responsive Design:** Works on iOS, Android, and **Web browsers**
+- **Custom Theming:** Consistent color scheme for different node types (start, current, end, path, optimal, suggested)
+- Works with minimal dependencies and no server requirements
+
+## Recent UI Improvements
+
+- **Visual Path Journey:** The path display now shows your word journey as a sequence (word1 → word2 → word3), with the number of dots after your current word indicating the length of the suggested remaining path
+- **Color-Coded Path Words:** Words are colored based on their role (start=green, current=blue, end=red, optimal=orange, suggested=purple)
+- **Improved Button Labels:** "Restart" changed to "New Game" for clarity, "Hint" replaced with "Give Up" to match the original game philosophy
+- **Better Context Awareness:** Path display options only appear when appropriate (after completing a game)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (Latest LTS recommended)
+- npm or yarn
+- Expo CLI (`npm install -g expo-cli` or `npx expo`)
+- iOS Simulator (for Mac) / Android Emulator or Device (for native development)
+- A Web Browser (for web development)
+
+### Installation
+
+1.  Clone the repository
+2.  Install dependencies:
     ```bash
     npm install
     ```
-3.  Run the Vite development server:
-    ```bash
-    npm run dev
-    ```
-    The application should now be running, typically on `http://localhost:5173/synapse/` (note the `/synapse/` base path).
+    *(Note: The previous `--legacy-peer-deps` flag might no longer be needed but can be added if peer dependency issues arise.)*
 
-## Building the Client (Production)
+### Running the Development Server
 
-1.  Navigate to the client directory:
-    ```bash
-    cd client
-    ```
-2.  Run the build script:
-    ```bash
-    npm run build
-    ```
-    Static assets will be generated directly in the **root directory** (`./synapse/`) of this repository. These files are ready for deployment.
-
-## Testing the Production Build Locally
-
-1.  After building (see above), navigate to the client directory:
-    ```bash
-    cd client
-    ```
-2.  Run the Vite preview server:
-    ```bash
-    npm run preview
-    ```
-    The preview server will host the built files, simulating the production environment. Access it at the URL provided, typically `http://localhost:4173/synapse/`.
-
-## Data Generation (Development / Customization)
-
-The game client relies on `client/public/data/graph.json` and `client/public/data/definitions.json`. These are pre-generated and included in the repository. If you wish to regenerate them (e.g., using different embeddings, word lists, or parameters):
-
-**Prerequisites:**
-
-*   Python 3.x
-*   Required Python libraries: `pip install requests numpy scikit-learn nltk`
-*   NLTK data: Run `python -m nltk.downloader wordnet omw-1.4`
-*   A running Ollama instance (if using `generate_embeddings_ollama.py`) accessible at `http://localhost:11434` with the desired model pulled (e.g., `ollama pull nomic-embed-text:137m-v1.5-fp16`).
-
-**Steps:**
-
-1.  **(Embeddings)** Generate the word embeddings dictionary and save it to `raw_data/embeddings.pkl`. Use the provided script or your own method:
-    ```bash
-    # Example using the Ollama script
-    python scripts/generate_embeddings_ollama.py 
-    ```
-2.  **(t-SNE)** Generate 2D coordinates from the embeddings. This reads `raw_data/embeddings.pkl` and outputs `data/tsne_coordinates.json`.
-    ```bash
-    python scripts/generate_tsne.py
-    ```
-3.  **(Graph)** Build the final graph structure. This reads `raw_data/embeddings.pkl` and `data/tsne_coordinates.json`, filters words, calculates similarities, finds neighbors (use `-k` to specify), and saves `client/public/data/graph.json`.
-    ```bash
-    # Example using K=7
-    python scripts/build_graph.py -k 7 
-    ```
-4.  **(Definitions)** Fetch WordNet definitions for the words present in the final graph. This reads `client/public/data/graph.json` and saves `client/public/data/definitions.json`.
-    ```bash
-    python scripts/generate_definitions.py
-    ```
-5.  **(Cleanup - Optional)** The intermediate `data/tsne_coordinates.json` file is no longer needed after step 3.
-
-## Submodule Usage
-
-This repository can be added to another project as a Git submodule. For example:
-
+Start the Expo development server:
 ```bash
-git submodule add <repository_url> path/to/synapse
+npm start 
+# or: npx expo start
 ```
+Follow the instructions in the terminal to run the app:
+- Press `i` to run on iOS Simulator
+- Press `a` to run on Android Emulator/Device
+- Press `w` to run in a Web Browser
 
-Ensure your deployment process correctly serves the static files located in the root (`./synapse/`) of this repository.
+### Building for Web (Production)
 
-## Deployment (GitHub Pages via Submodule)
+To create a static build for web deployment:
+```bash
+npm run build:web
+# or: npx expo export -p web
+```
+This command generates a `web-build` directory (or similar, check `app.json` configuration) containing the static assets (HTML, CSS, JS).
 
-This repository is designed to be deployed as part of a larger site (e.g., `your-username.github.io`) using Git submodules. The build process creates the necessary static files in the root directory.
+### Deploying the Web Build
 
-1.  **Develop & Build:** Make changes within the `client/` directory and build the application using `npm run build` from within `client/`. This places the built files in the repository root (`synapse/`).
-2.  **Commit in Synapse:** Commit all changes in this `synapse` repository (including the newly built files in the root and any changes in `client/`). Push these changes.
-3.  **Update Parent Repository:**
-    *   Navigate to the root of the parent repository (e.g., `your-username.github.io`).
-    *   Pull the latest commit from the `synapse` submodule:
-        ```bash
-        git submodule update --remote synapse
-        ```
-    *   Stage the updated submodule:
-        ```bash
-        git add synapse
-        ```
-    *   Commit and push the changes in the parent repository.
-4.  **GitHub Pages:** GitHub Actions (or the standard Pages build process) in the parent repository will deploy the site, including the updated `synapse` submodule content. The Synapse application will be accessible at `https://your-username.github.io/synapse/`. 
+Deploy the contents of the `web-build` directory to any static web hosting provider. Popular choices include:
+- Vercel
+- Netlify
+- GitHub Pages
+- Cloudflare Pages
+
+These platforms often integrate directly with your Git repository for automatic deployments.
+
+### Troubleshooting 
+
+If you encounter issues:
+
+1.  Ensure dependencies are installed correctly (`npm install`).
+2.  Run `npx expo doctor --fix-dependencies` to check for common Expo/dependency issues.
+3.  Check for TypeScript errors: `npx tsc --noEmit`
+4.  If you see Babel errors related to `@babel/runtime/helpers`:
+    ```
+    Unable to resolve "@babel/runtime/helpers/interopRequireDefault" from "index.js"
+    ```
+    Run the following commands:
+    ```bash
+    npm cache clean --force
+    npm install --save @babel/runtime
+    ```
+    If that doesn't work, try updating the babel.config.js file to add `absoluteRuntime: false` to the plugin-transform-runtime options.
+
+5.  React DOM warnings about createRoot in development mode are expected and can be safely ignored.
+
+## Storage Implementation
+
+The game uses `@react-native-async-storage/async-storage` for persisting data like high scores and user settings locally on the device or in the browser's local storage (via Expo's web adaptation).
+
+## Sharing Implementation
+
+Game results can be shared using React Native's `Share` API for text-based results and `react-native-view-shot` to capture and share screenshots of the game state.
+
+## Development Status
+
+- [x] Configure project structure and dependencies ✅
+- [x] Add UI Library (`react-native-paper`) ✅
+- [x] Create basic screen navigation ✅
+- [x] Integrate `react-native-paper` components into UI elements ✅
+- [x] Create data loading service to fetch game data from assets/imports ✅
+- [x] Set up state management (Zustand) for core data ✅
+- [x] Implement graph visualization component using `react-native-svg` ✅
+- [x] Implement word selection and path finding logic ✅
+- [x] Add Settings screen with theme configuration ✅
+- [x] Create word definition dialog for looking up meanings ✅
+- [x] Implement accordion-style path display with color coding ✅
+- [x] Add game completion detection (win condition) ✅
+- [x] Implement optimal path visualization after game completion ✅
+- [ ] Add animations and transitions for a better UX (using `react-native-reanimated`) 🔄
+- [ ] Implement panning and zooming for graph visualization 🔄
+- [ ] Design and implement tutorial screens ⏳
+- [ ] Add persistence for game state and settings ⏳
+- [ ] Test sharing functionality on different platforms (iOS, Android, Web) ⏳
+- [ ] Add unit tests for storage and game logic ⏳
+- [ ] Optimize performance for different device sizes and web ⏳
+
+Legend: ✅ Complete, 🔄 In Progress, ⏳ Planned
+
+## Data Files
+
+The game requires the following data files, located in `src/data/`:
+
+- `graph.json`: Contains the word graph structure (nodes, edges, coordinates).
+- `definitions.json`: Contains word definitions.
+
+**Data Generation Summary (Phase 0 - Complete):** The data was generated using Python scripts (`scripts/build_graph.py`) with the following parameters and filters applied:
+- **Neighbors (K):** 5
+- **Definition Filtering:** Words without definitions in WordNet were excluded.
+- **Definition Length:** Only definitions <= 90 characters were kept.
+- **Max Definitions:** Max 3 definitions stored per word.
+- **Final Count:** The resulting dataset includes ~4970 words.
+
+## Folder Structure
+
+```

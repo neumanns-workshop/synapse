@@ -4,61 +4,85 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import os
 import sys
-import argparse # Import argparse
+import argparse
+import nltk # Add NLTK imports
+from nltk.corpus import wordnet as wn
 
 # Constants
-# K = 7  # REMOVED: Number of neighbors will come from args
+MAX_DEFINITIONS_PER_WORD = 3 # Max definitions to keep
+MAX_DEFINITION_LENGTH = 90 # Max characters per definition
+# K = 7 # REMOVED
 WORDS_PATH = os.path.join("raw_data", "ENGLISH_LEMMATIZED.json")
 EMBEDDINGS_PATH = os.path.join("raw_data", "embeddings.pkl")
 TSNE_COORDS_PATH = os.path.join("data", "tsne_coordinates.json")
 OUTPUT_DIR = os.path.join("client", "public", "data")
-OUTPUT_PATH = os.path.join(OUTPUT_DIR, "graph.json")
+OUTPUT_GRAPH_PATH = os.path.join(OUTPUT_DIR, "graph.json")
+OUTPUT_DEFS_PATH = os.path.join(OUTPUT_DIR, "definitions.json") # Path for definitions
+
+# --- WordNet Definition Function ---
+# Ensure WordNet data is available before calling this
+try:
+    wn.ensure_loaded()
+except LookupError:
+    print("WordNet corpus not found. Please ensure NLTK data is downloaded.")
+    print("Run: python -c \"import nltk; nltk.download('wordnet'); nltk.download('omw-1.4')\"")
+    sys.exit(1)
+
+def get_wordnet_definition(word):
+    """Fetches up to MAX_DEFINITIONS_PER_WORD synset definitions for a given word,
+       filtering by MAX_DEFINITION_LENGTH."""
+    synsets = wn.synsets(word)
+    if synsets:
+        # Get all non-empty definitions first
+        all_definitions = [s.definition() for s in synsets if s.definition()]
+        # Filter by length
+        filtered_definitions = [d for d in all_definitions if len(d) <= MAX_DEFINITION_LENGTH]
+        # Return the first MAX_DEFINITIONS_PER_WORD from the filtered list
+        return filtered_definitions[:MAX_DEFINITIONS_PER_WORD]
+    return []
+# --- End Definition Function ---
 
 def build_graph(k_neighbors):
     """
-    Loads words and embeddings, loads pre-computed t-SNE coordinates,
-    calculates pairwise cosine similarity, finds the top k_neighbors for each word,
-    and saves the resulting graph structure (including t-SNE coords) to a JSON file.
+    Loads embeddings, filters words based on definition existence,
+    loads t-SNE coordinates, calculates similarity, finds neighbors,
+    and saves the resulting graph and definitions to JSON files.
 
     Args:
-        k_neighbors (int): The number of nearest neighbors to find for each word.
+        k_neighbors (int): The number of nearest neighbors.
     """
-    # print("Loading words...") # No longer loading words file first
-    # with open(WORDS_PATH, 'r') as f:
-    #     words = json.load(f)
-    # print(f"Loaded {len(words)} words.")
-
     print("Loading embeddings dictionary...")
     with open(EMBEDDINGS_PATH, 'rb') as f:
         embeddings_dict = pickle.load(f)
-    print(f"Loaded embeddings for {len(embeddings_dict)} words.")
+    initial_word_count = len(embeddings_dict)
+    print(f"Loaded embeddings for {initial_word_count} words.")
 
-    # --- Filter Words ---
-    # Define words to filter (offensive words, words without definitions, etc.)
-    words_to_remove = {
-        "negro", # Offensive word
-        # Words without definitions found in WordNet (identified by generate_definitions.py)
-        'albeit', 
-        'etc', 
-        'reconfigure', 
-        'tong', 
-        'via', 
-        'whereas', 
-        'whereby'
-    }
+    # --- Filter Words Based on Definitions ---
+    print("Fetching definitions and filtering words...")
+    filtered_embeddings_dict = {}
+    final_definitions = {}
+    definition_not_found_count = 0
+    words_processed = 0
 
-    removed_count = 0
-    # Iterate through a copy of the keys because we are modifying the dictionary
-    for word in list(embeddings_dict.keys()): 
-        if word in words_to_remove:
-            del embeddings_dict[word]
-            removed_count += 1
-            # print(f"Removed word '{word}' from embeddings dictionary.") # Optional: uncomment for verbose output
+    for word, embedding in embeddings_dict.items():
+        definitions_list = get_wordnet_definition(word)
+        if definitions_list: # Keep only words with definitions
+            filtered_embeddings_dict[word] = embedding
+            final_definitions[word] = definitions_list
+        else:
+            definition_not_found_count += 1
+        
+        words_processed += 1
+        if words_processed % 500 == 0:
+            print(f"  Processed {words_processed}/{initial_word_count} words for definition check...")
     
-    if removed_count > 0:
-        print(f"Removed {removed_count} specified words from embeddings dictionary.")
-        print(f"Embeddings dictionary now contains {len(embeddings_dict)} words.")
+    filtered_word_count = len(filtered_embeddings_dict)
+    print(f"Finished definition check. Kept {filtered_word_count} words with definitions.")
+    print(f"Removed {definition_not_found_count} words without definitions.")
     # --- End Filter ---
+
+    # Continue with the filtered dictionary
+    embeddings_dict = filtered_embeddings_dict
 
     print(f"Loading t-SNE coordinates from {TSNE_COORDS_PATH}...")
     try:
@@ -73,9 +97,9 @@ def build_graph(k_neighbors):
         print(f"Error: Could not decode JSON from {TSNE_COORDS_PATH}")
         sys.exit(1)
 
-    # --- Reconstruct words list and embeddings matrix ---
-    print("Reconstructing words list and embeddings matrix from dictionary...")
-    words = list(embeddings_dict.keys())
+    # --- Reconstruct words list and embeddings matrix FROM FILTERED DATA ---
+    print("Reconstructing words list and embeddings matrix from FILTERED dictionary...")
+    words = list(embeddings_dict.keys()) # Now uses filtered words
     # Assuming values are numpy arrays or lists that can be stacked
     try:
         embeddings_list = [embeddings_dict[word] for word in words]
@@ -91,15 +115,6 @@ def build_graph(k_neighbors):
     print(f"Reconstructed word list with {len(words)} words.")
     # --- End Reconstruct ---
 
-    # Remove inspection code:
-    # print(f"Type of loaded embeddings data: {type(embeddings_data)}")
-    # if isinstance(embeddings_data, dict):
-    # ... rest of inspection code ...
-
-    # The shape check is now redundant as we just built the matrix
-    # if len(words) != embeddings.shape[0]:
-    #    raise ValueError("Mismatch between number of words and number of embedding vectors.")
-
     print("Calculating cosine similarity matrix...")
     # Ensure embeddings are float32 for efficiency if needed
     if embeddings.dtype != np.float32:
@@ -114,36 +129,27 @@ def build_graph(k_neighbors):
 
     for i in range(num_words):
         word = words[i]
-        # Get similarities for the current word, excluding itself
         similarities = similarity_matrix[i]
-        # Get indices of top k_neighbors+1 similarities (including self)
-        # Use argpartition for efficiency, find k_neighbors+1 largest, then sort those k_neighbors+1
-        # Ensure k_neighbors+1 does not exceed the number of words
         num_to_find = min(k_neighbors + 1, num_words)
         indices = np.argpartition(similarities, -num_to_find)[-num_to_find:]
-        # Sort these indices by similarity score in descending order
         sorted_indices = indices[np.argsort(similarities[indices])[::-1]]
 
         edges = {}
         neighbors_found = 0
         for idx in sorted_indices:
-            if idx != i:  # Exclude self
+            if idx != i:
                 neighbor_word = words[idx]
-                score = float(similarities[idx]) # Ensure score is JSON serializable float
+                score = float(similarities[idx])
                 edges[neighbor_word] = score
                 neighbors_found += 1
-                if neighbors_found == k_neighbors: # Use k_neighbors arg
+                if neighbors_found == k_neighbors:
                     break
 
-        # Get t-SNE coordinates for the current word
         tsne_coords = tsne_coords_map.get(word)
         if tsne_coords is None:
-            # This case should ideally not happen if both scripts use the same source
-            # print(f"Warning: No t-SNE coordinates found for word: {word}. Skipping.")
-            tsne_coords = [0.0, 0.0] # Assign default or handle as error?
+            tsne_coords = [0.0, 0.0]
             missing_tsne_count += 1
 
-        # Add node data including edges and t-SNE coordinates
         graph["nodes"][word] = {
             "edges": edges,
             "tsne": tsne_coords
@@ -156,20 +162,59 @@ def build_graph(k_neighbors):
         print(f"Warning: Missing t-SNE coordinates for {missing_tsne_count} words. Defaulted to [0,0].")
     print("Graph construction complete.")
 
-    print(f"Saving graph to {OUTPUT_PATH}...")
-    # Ensure output directory exists
+    # --- Save Output Files ---
+    print(f"Saving graph to {OUTPUT_GRAPH_PATH}...")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    with open(OUTPUT_PATH, 'w') as f:
-        json.dump(graph, f, indent=2) # Use indent for readability for now
+    with open(OUTPUT_GRAPH_PATH, 'w') as f:
+        json.dump(graph, f, indent=2)
     print("Graph saved successfully.")
 
-if __name__ == "__main__":
-    # Setup argument parser
-    parser = argparse.ArgumentParser(description="Build a semantic graph from word embeddings.")
-    parser.add_argument("-k", "--k", type=int, default=7,
-                        help="Number of nearest neighbors (K) to include for each word.")
-    # Parse arguments
-    args = parser.parse_args()
+    print(f"Saving definitions to {OUTPUT_DEFS_PATH}...")
+    with open(OUTPUT_DEFS_PATH, 'w') as f:
+        json.dump(final_definitions, f, indent=2)
+    print("Definitions saved successfully.")
+    # --- End Save ---
 
-    # Call build_graph with the parsed k value
+    # --- Generate and Save Dense Similarity Matrix ---
+    print("\nGenerating dense similarity matrix for all filtered word pairs...")
+    dense_similarity_data = {}
+    num_filtered_words = len(words) # words list is already based on filtered_embeddings_dict
+
+    for i in range(num_filtered_words):
+        word1 = words[i]
+        dense_similarity_data[word1] = {}
+        for j in range(num_filtered_words):
+            word2 = words[j]
+            # similarity_matrix was calculated on the filtered embeddings
+            raw_score = float(similarity_matrix[i][j])
+            quantized_score = round(raw_score, 3) # Round to 3 decimal places
+            dense_similarity_data[word1][word2] = quantized_score
+        if (i + 1) % 500 == 0:
+            print(f"  Built dense similarities for {i + 1}/{num_filtered_words} words...")
+
+    OUTPUT_DENSE_SIMILARITY_PATH = os.path.join(OUTPUT_DIR, "dense_similarity_matrix.json")
+    print(f"Saving dense similarity matrix to {OUTPUT_DENSE_SIMILARITY_PATH}...")
+    try:
+        with open(OUTPUT_DENSE_SIMILARITY_PATH, 'w') as f:
+            json.dump(dense_similarity_data, f) # Intentionally no indent for smaller size
+        print("Dense similarity matrix saved successfully.")
+        
+        # Get and print file size
+        file_size_bytes = os.path.getsize(OUTPUT_DENSE_SIMILARITY_PATH)
+        file_size_mb = file_size_bytes / (1024 * 1024)
+        print(f"\n--- Dense Similarity Matrix File Size ---")
+        print(f"Vocabulary size (filtered words): {num_filtered_words}")
+        print(f"File size of dense_similarity_matrix.json: {file_size_mb:.2f} MB")
+        print(f"This contains N*N = {num_filtered_words*num_filtered_words} similarity scores.")
+        print(f"--- End File Size Report ---")
+
+    except Exception as e:
+        print(f"Error saving or getting size of dense similarity matrix: {e}")
+    # --- End Dense Similarity ---
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Build a semantic graph and definitions from word embeddings, filtering words without definitions.")
+    parser.add_argument("-k", "--k", type=int, default=5, # Default to K=5
+                        help="Number of nearest neighbors (K) to include for each word.")
+    args = parser.parse_args()
     build_graph(args.k) 

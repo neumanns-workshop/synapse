@@ -1,0 +1,49 @@
+diff --git a/node_modules/react-native-svg/lib/commonjs/index.js b/node_modules/react-native-svg/lib/commonjs/index.js
+index 53bfd2a..cd30236 100644
+--- a/node_modules/react-native-svg/lib/commonjs/index.js
++++ b/node_modules/react-native-svg/lib/commonjs/index.js
+@@ -26,3 +26,23 @@ Object.keys(_ReactNativeSVG).forEach(function (key) {
+ function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function (e) { return e ? t : r; })(e); }
+ function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != typeof e && "function" != typeof e) return { default: e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && {}.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n.default = e, t && t.set(e, n), n; }
+ //# sourceMappingURL=index.js.map
++
++function hasTouchableProperty(props) {
++  if (!props) return false;
++  // This is a simplified check based on common touchable props.
++  // The actual list of all touchable props in react-native-svg is more extensive,
++  // but these are the most common ones related to basic touch interaction.
++  const relevantProps = ['onPress', 'onPressIn', 'onPressOut', 'onLongPress', 'disabled'];
++  for (const p of relevantProps) {
++    // Check if the prop exists on the props object
++    if (typeof props[p] !== 'undefined') {
++      return true;
++    }
++  }
++  return false;
++}
++
++exports.hasTouchableProperty = hasTouchableProperty;
+\ No newline at end of file
+diff --git a/node_modules/react-native-svg/lib/module/index.js b/node_modules/react-native-svg/lib/module/index.js
+index 760e30d..191f99f 100644
+--- a/node_modules/react-native-svg/lib/module/index.js
++++ b/node_modules/react-native-svg/lib/module/index.js
+@@ -2,4 +2,17 @@
+ 
+ export * from './ReactNativeSVG';
+ export { default } from './ReactNativeSVG';
++
++export function hasTouchableProperty(props) {
++  if (!props) return false;
++  // This is a simplified check based on common touchable props.
++  const relevantProps = ['onPress', 'onPressIn', 'onPressOut', 'onLongPress', 'disabled'];
++  for (const p of relevantProps) {
++    if (typeof props[p] !== 'undefined') {
++      return true;
++    }
++  }
++  return false;
++}
++
+ //# sourceMappingURL=index.js.map
+\ No newline at end of file 
