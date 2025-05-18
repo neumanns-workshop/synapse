@@ -1,7 +1,7 @@
-import { Platform, ViewStyle, StyleProp } from 'react-native';
+import { Platform, ViewStyle, StyleProp } from "react-native";
 
 // Define a type for pointerEvents that matches React Native's accepted values
-type PointerEvents = 'auto' | 'none' | 'box-none' | 'box-only';
+type PointerEvents = "auto" | "none" | "box-none" | "box-only";
 
 interface PointerEventStyle {
   pointerEvents?: PointerEvents;
@@ -14,8 +14,10 @@ interface PointerEventStyle {
  * Properly handle pointer events in a cross-platform way
  * This prevents the "props.pointerEvents is deprecated" warning on web
  */
-export const getPointerEventStyles = (pointerEvents: PointerEvents): PointerEventStyle => {
-  if (Platform.OS === 'web') {
+export const getPointerEventStyles = (
+  pointerEvents: PointerEvents,
+): PointerEventStyle => {
+  if (Platform.OS === "web") {
     // On web, we should use style.pointerEvents instead of the prop
     return { style: { pointerEvents } };
   } else {
@@ -35,13 +37,15 @@ interface ShadowOptions {
 /**
  * Platform-specific shadow styles that work across platforms
  */
-export const getShadowStyles = (options: ShadowOptions = {}): StyleProp<ViewStyle> => {
+export const getShadowStyles = (
+  options: ShadowOptions = {},
+): StyleProp<ViewStyle> => {
   const {
     elevation = 2,
-    shadowColor = '#000',
+    shadowColor = "#000",
     shadowOpacity = 0.1,
     shadowRadius = 2,
-    shadowOffset = { width: 0, height: 1 }
+    shadowOffset = { width: 0, height: 1 },
   } = options;
 
   return Platform.select<ViewStyle>({
@@ -54,11 +58,10 @@ export const getShadowStyles = (options: ShadowOptions = {}): StyleProp<ViewStyl
     web: {
       // For web, boxShadow expects a string.
       // We construct it carefully. Note: React Native's ViewStyle for web doesn't strictly type boxShadow.
-      // Using `any` or a more specific string type if preferred.
       boxShadow: `0px ${shadowOffset.height}px ${shadowRadius}px rgba(0, 0, 0, ${shadowOpacity})`,
-    } as any, // Using `as any` for boxShadow on web as ViewStyle doesn't fully cover it
+    } as ViewStyle & { boxShadow: string }, // More specific cast for web
     android: {
       elevation,
     },
   });
-}; 
+};

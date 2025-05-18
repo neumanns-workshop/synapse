@@ -39,3 +39,6 @@ yarn-error.*
 
 # Ignore large similarity matrix that shouldn't be committed
 client/public/data/dense_similarity_matrix.json 
+
+# Compiled/generated scripts
+scripts/wordListFilter.js 

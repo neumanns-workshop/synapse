@@ -1,29 +1,29 @@
-import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
-import type { MD3Theme } from 'react-native-paper';
+import { MD3LightTheme, MD3DarkTheme } from "react-native-paper";
+import type { MD3Theme } from "react-native-paper";
 
 // Define custom colors
 const synapseColors = {
   // Brand colors - chalk pastel, colorblind-friendly
-  primary: '#ffffff', // White
-  secondary: '#A8E6CF', // Pastel Green (Start Node)
-  tertiary: '#FFD3B6', // Pastel Orange (Greedy/Strategic)
+  primary: "#ffffff", // White
+  secondary: "#A8E6CF", // Pastel Green (Start Node)
+  tertiary: "#FFD3B6", // Pastel Orange (Greedy/Strategic)
 
   // Path colors - chalk pastel palette
-  startNodeColor: '#A8E6CF', // Pastel Green
-  endNodeColor: '#FF8B94', // Pastel Coral
-  currentNodeColor: '#A0CED9', // Pastel Blue
-  pathNodeColor: '#D6D6D6', // Pastel Gray
-  globalOptimalNodeColor: '#FFF6A3', // Pastel Yellow
-  localOptimalNodeColor: '#CBAACB', // Pastel Purple
-  greedyMoveColor: '#FFD3B6', // Pastel Orange
-  strategicRepositioningMoveColor: '#FFD3B6', // Pastel Orange (alt)
-  
+  startNodeColor: "#A8E6CF", // Pastel Green
+  endNodeColor: "#FF8B94", // Pastel Coral
+  currentNodeColor: "#A0CED9", // Pastel Blue
+  pathNodeColor: "#D6D6D6", // Pastel Gray
+  globalOptimalNodeColor: "#FFF6A3", // Pastel Yellow
+  localOptimalNodeColor: "#CBAACB", // Pastel Purple
+  greedyMoveColor: "#FFD3B6", // Pastel Orange
+  strategicRepositioningMoveColor: "#FFD3B6", // Pastel Orange (alt)
+
   // Stats modal colors
-  warningColor: '#FF8B94', // Same as endNodeColor for consistency
-  achievementChipColor: '#FFF6A3', // Same as globalOptimalNodeColor
-  achievementIconColor: '#FFF6A3', // Same as globalOptimalNodeColor
-  progressBadgeColor: '#A8E6CF', // Same as startNodeColor
-  collectedWordChipColor: '#A0CED9', // Same as currentNodeColor
+  warningColor: "#FF8B94", // Same as endNodeColor for consistency
+  achievementChipColor: "#FFF6A3", // Same as globalOptimalNodeColor
+  achievementIconColor: "#FFF6A3", // Same as globalOptimalNodeColor
+  progressBadgeColor: "#A8E6CF", // Same as startNodeColor
+  collectedWordChipColor: "#A0CED9", // Same as currentNodeColor
 };
 
 // Define the extended theme structure
@@ -54,8 +54,8 @@ export const SynapseLightTheme: ExtendedTheme = {
     primary: synapseColors.primary,
     secondary: synapseColors.secondary,
     tertiary: synapseColors.tertiary,
-    background: '#f5f5f5',
-    surface: '#ffffff',
+    background: "#f5f5f5",
+    surface: "#ffffff",
   },
   // Custom colors in a separate property
   customColors: {
@@ -84,8 +84,8 @@ export const SynapseDarkTheme: ExtendedTheme = {
     primary: synapseColors.primary,
     secondary: synapseColors.secondary,
     tertiary: synapseColors.tertiary,
-    background: '#121212',
-    surface: '#1e1e1e',
+    background: "#121212",
+    surface: "#1e1e1e",
   },
   // Custom colors in a separate property
   customColors: {
@@ -107,4 +107,4 @@ export const SynapseDarkTheme: ExtendedTheme = {
 };
 
 // Default theme is light
-export default SynapseLightTheme; 
+export default SynapseLightTheme;

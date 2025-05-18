@@ -1,16 +1,22 @@
 // Utility: Dijkstra's algorithm for shortest path in the word graph
-import { GraphData } from './gameReportUtils';
+import { GraphData } from "./gameReportUtils";
 
-export const findShortestPath = (graphData: GraphData | null, start: string, end: string): string[] => {
+export const findShortestPath = (
+  graphData: GraphData | null,
+  start: string,
+  end: string,
+): string[] => {
   if (!graphData || !graphData[start] || !graphData[end]) {
-    console.error(`findShortestPath: Invalid graph data or start/end words (start=${start}, end=${end})`);
+    console.error(
+      `findShortestPath: Invalid graph data or start/end words (start=${start}, end=${end})`,
+    );
     return [];
   }
 
   // Track distances from start node
-  const distances: {[key: string]: number} = {};
+  const distances: { [key: string]: number } = {};
   // Track previous nodes in optimal path
-  const previousNodes: {[key: string]: string | null} = {};
+  const previousNodes: { [key: string]: string | null } = {};
   // Track nodes that have been visited
   const visited = new Set<string>();
   // Nodes to be visited (all nodes initially)
@@ -40,7 +46,11 @@ export const findShortestPath = (graphData: GraphData | null, start: string, end
     }
 
     // If all remaining unvisited nodes are inaccessible, or if we reached end node
-    if (currentNode === null || distances[currentNode] === Infinity || currentNode === end) {
+    if (
+      currentNode === null ||
+      distances[currentNode] === Infinity ||
+      currentNode === end
+    ) {
       break;
     }
 
@@ -88,4 +98,4 @@ export const findShortestPath = (graphData: GraphData | null, start: string, end
   }
 
   return path;
-}; 
+};

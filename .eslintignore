@@ -1,0 +1,26 @@
+# Build artifacts
+node_modules/
+.expo/
+dist/
+web-build/
+coverage/
+
+# Config files (often CommonJS, not strict TS/ESM)
+metro.config.js
+babel.config.js
+webpack.config.js
+# .eslintrc.js # Don't ignore the ESLint config itself if you want to lint it
+
+# Other
+bfg.jar
+
+# Data files (if they cause issues or are very large)
+# data/
+# raw_data/
+
+# Patch files
+patches/
+
+# Old code (if you want to exclude it from linting)
+old/
+client/ 

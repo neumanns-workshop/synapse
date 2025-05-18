@@ -1,7 +1,10 @@
-import React from 'react';
-import { Portal, Dialog, Text, Button, useTheme } from 'react-native-paper';
-import type { ExtendedTheme } from '../theme/SynapseTheme';
-import type { Achievement } from '../features/achievements/achievements';
+import React from "react";
+import { StyleSheet } from "react-native";
+
+import { Portal, Dialog, Text, Button, useTheme } from "react-native-paper";
+
+import type { Achievement } from "../features/achievements";
+import type { ExtendedTheme } from "../theme/SynapseTheme";
 
 interface AchievementDetailDialogProps {
   achievement: Achievement | null;
@@ -9,27 +12,26 @@ interface AchievementDetailDialogProps {
   onDismiss: () => void;
 }
 
-const AchievementDetailDialog: React.FC<AchievementDetailDialogProps> = ({ achievement, visible, onDismiss }) => {
+const AchievementDetailDialog: React.FC<AchievementDetailDialogProps> = ({
+  achievement,
+  visible,
+  onDismiss,
+}) => {
   const { colors } = useTheme() as ExtendedTheme;
 
   if (!achievement) return null;
 
   return (
     <Portal>
-      <Dialog 
-        visible={visible} 
+      <Dialog
+        visible={visible}
         onDismiss={onDismiss}
-        style={{
-          backgroundColor: colors.surface,
-          borderColor: colors.outline,
-          borderWidth: 1,
-          borderRadius: 8, // Consistent with other dialogs
-          maxWidth: 500, // Max width for readability
-          width: '90%',    // Responsive width
-          alignSelf: 'center',
-        }}
+        style={[
+          styles.dialogContainer,
+          { backgroundColor: colors.surface, borderColor: colors.outline },
+        ]}
       >
-        <Dialog.Title style={{ color: colors.primary, fontWeight: 'bold' }}>
+        <Dialog.Title style={[styles.dialogTitle, { color: colors.primary }]}>
           {achievement.name}
         </Dialog.Title>
         <Dialog.Content>
@@ -38,11 +40,26 @@ const AchievementDetailDialog: React.FC<AchievementDetailDialogProps> = ({ achie
           </Text>
         </Dialog.Content>
         <Dialog.Actions>
-          <Button onPress={onDismiss} textColor={colors.primary}>Close</Button>
+          <Button onPress={onDismiss} textColor={colors.primary}>
+            Close
+          </Button>
         </Dialog.Actions>
       </Dialog>
     </Portal>
   );
 };
 
-export default AchievementDetailDialog; 
+const styles = StyleSheet.create({
+  dialogContainer: {
+    borderWidth: 1,
+    borderRadius: 8,
+    maxWidth: 500,
+    width: "90%",
+    alignSelf: "center",
+  },
+  dialogTitle: {
+    fontWeight: "bold",
+  },
+});
+
+export default AchievementDetailDialog;

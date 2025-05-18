@@ -1,4 +1,5 @@
-import { registerRootComponent } from 'expo';
-import ExpoRoot from './src/ExpoRoot';
+import { registerRootComponent } from "expo";
 
-registerRootComponent(ExpoRoot); 
+import ExpoRoot from "./src/ExpoRoot";
+
+registerRootComponent(ExpoRoot);

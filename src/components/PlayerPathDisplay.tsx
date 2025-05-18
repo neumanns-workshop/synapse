@@ -1,9 +1,18 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, ScrollView } from 'react-native';
-import { useTheme } from 'react-native-paper';
-import type { ExtendedTheme } from '../theme/SynapseTheme';
-import { useGameStore } from '../stores/useGameStore';
-import type { OptimalChoice } from '../utils/gameReportUtils';
+import React, { useRef } from "react";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  ScrollView,
+  type TextStyle,
+} from "react-native";
+
+import { useTheme } from "react-native-paper";
+
+import { useGameStore } from "../stores/useGameStore";
+import type { ExtendedTheme } from "../theme/SynapseTheme";
+import type { OptimalChoice } from "../utils/gameReportUtils";
 
 interface PlayerPathDisplayProps {
   playerPath: string[];
@@ -12,11 +21,11 @@ interface PlayerPathDisplayProps {
   onWordDefinition: (word: string, pathIndex?: number) => void;
 }
 
-const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({ 
-  playerPath, 
-  optimalChoices, 
+const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
+  playerPath,
+  optimalChoices,
   suggestedPath,
-  onWordDefinition 
+  onWordDefinition,
 }) => {
   const { colors, customColors } = useTheme() as ExtendedTheme;
   const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
@@ -38,8 +47,8 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
   const styles = StyleSheet.create({
     section: {
       marginVertical: 8,
-      alignSelf: 'center',
-      width: '100%',
+      alignSelf: "center",
+      width: "100%",
       maxWidth: 700,
       paddingHorizontal: 24,
     },
@@ -48,29 +57,29 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
     },
     pathScrollContent: {
       flexGrow: 1,
-      justifyContent: 'center',
+      justifyContent: "center",
     },
     pathRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      alignItems: 'center',
-      justifyContent: 'center',
+      flexDirection: "row",
+      flexWrap: "wrap",
+      alignItems: "center",
+      justifyContent: "center",
       gap: 8,
       paddingVertical: 4,
     },
     // Styles for pathWord, pathArrow, pathEllipsis, pathDot are now primarily driven by gameScreenStyles for parity
     // Any definitions here would be overridden by the inline styles in the JSX using gameScreenStyles.
-    pathWord: { }, // Keeping as placeholders to avoid breaking references if any existed, but they are overridden.
-    pathArrow: { },
-    pathEllipsis: { },
-    pathDot: { },
+    pathWord: {}, // Keeping as placeholders to avoid breaking references if any existed, but they are overridden.
+    pathArrow: {},
+    pathEllipsis: {},
+    pathDot: {},
     optimalWordClickable: {
-      textDecorationLine: 'underline',
-      textDecorationStyle: 'dotted',
+      textDecorationLine: "underline",
+      textDecorationStyle: "dotted",
     },
     usedCheckpoint: {
       opacity: 0.6,
-      textDecorationLine: 'none',
+      textDecorationLine: "none",
     },
   });
 
@@ -81,97 +90,126 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
   const gameScreenStyles = {
     pathWord: {
       fontSize: 16,
-      fontWeight: '500' as '500',
+      fontWeight: "500" as const,
     },
     pathArrow: {
       fontSize: 16,
       opacity: 0.7,
       marginHorizontal: 8,
-      color: colors.onSurface, 
-      fontWeight: '300' as '300',
+      color: colors.onSurface,
+      fontWeight: "300" as const,
     },
     pathEllipsis: {
       fontSize: 16, // This is for the container of dots
-      opacity: 0.7, 
-      letterSpacing: 3, 
-      color: colors.onSurface, 
+      opacity: 0.7,
+      letterSpacing: 3,
+      color: colors.onSurface,
     },
     pathDot: {
       fontSize: 5, // Adjusted to 5 as requested by user
-      opacity: 0.5, 
-      marginHorizontal: 2, 
-      color: colors.onSurface, 
+      opacity: 0.5,
+      marginHorizontal: 2,
+      color: colors.onSurface,
+    },
+    suggestedEndWord: {
+      fontSize: 16,
+      fontWeight: "bold" as const,
     },
   };
 
   return (
     <View style={styles.section}>
       <TouchableOpacity onPress={handlePlayerPathPress}>
-        <ScrollView 
+        <ScrollView
           ref={scrollViewRef}
           style={styles.pathScrollContainer}
           contentContainerStyle={styles.pathScrollContent}
           showsVerticalScrollIndicator={false}
-          onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+          onContentSizeChange={() =>
+            scrollViewRef.current?.scrollToEnd({ animated: true })
+          }
         >
           <View style={styles.pathRow}>
             {playerPath.map((word, index) => {
-              let textStyle: any = { ...gameScreenStyles.pathWord, color: customColors.pathNode }; 
+              let textStyle: TextStyle = {
+                ...gameScreenStyles.pathWord,
+                color: customColors.pathNode,
+              };
               const isLastWordInPath = index === playerPath.length - 1;
-              let isOptimalWord = false;
               let isUsedCheckpointForThisChoice = false;
 
               // Check if this word has ever been landed on by a backtrack
-              const hasBeenLandedOnByBacktrack = backtrackHistory.some(event => event.landedOn === word);
+              const hasBeenLandedOnByBacktrack = backtrackHistory.some(
+                (event) => event.landedOn === word,
+              );
 
               if (index === 0) {
                 textStyle.color = customColors.startNode;
               } else {
                 const choiceIndex = index - 1;
-                if (optimalChoices && choiceIndex >= 0 && choiceIndex < optimalChoices.length && 
-                    optimalChoices[choiceIndex].playerPosition === playerPath[choiceIndex] && 
-                    optimalChoices[choiceIndex].playerChose === word) {
+                if (
+                  optimalChoices &&
+                  choiceIndex >= 0 &&
+                  choiceIndex < optimalChoices.length &&
+                  optimalChoices[choiceIndex].playerPosition ===
+                    playerPath[choiceIndex] &&
+                  optimalChoices[choiceIndex].playerChose === word
+                ) {
                   const choice = optimalChoices[choiceIndex];
-                  
+
                   // Check if this was an optimal move and if it was used as a checkpoint
                   if (choice.isGlobalOptimal || choice.isLocalOptimal) {
-                    isOptimalWord = true;
                     isUsedCheckpointForThisChoice = !!choice.usedAsCheckpoint;
-                    
+
                     // First, set the base optimal color based on the choice type
                     if (choice.isGlobalOptimal) {
                       textStyle.color = customColors.globalOptimalNode;
                     } else if (choice.isLocalOptimal) {
                       textStyle.color = customColors.localOptimalNode;
                     }
-                    
+
                     // Then, apply specific styling for used checkpoints or active clickable checkpoints
                     if (isUsedCheckpointForThisChoice) {
                       // Apply styling for used checkpoints (e.g., opacity) while retaining the base color
                       textStyle = { ...textStyle, ...styles.usedCheckpoint };
-                    } else if (gameStatus === 'playing' && !isLastWordInPath && !hasBeenLandedOnByBacktrack) {
+                    } else if (
+                      gameStatus === "playing" &&
+                      !isLastWordInPath &&
+                      !hasBeenLandedOnByBacktrack
+                    ) {
                       // Add visual cue for active (non-used) optimal words that can be used as checkpoints
-                      textStyle = { ...textStyle, ...styles.optimalWordClickable };
+                      textStyle = {
+                        ...textStyle,
+                        ...styles.optimalWordClickable,
+                      };
                     }
                   }
                 }
               }
-              
+
               // If the word has ever been landed on by any backtrack, apply used styling
               // This overrides other styling if it's a stronger visual cue for "used".
               // Ensure this doesn't conflict too much with start/end/current node styling if those are more important.
               // For now, "used by backtrack" takes precedence over optimal choice styling, but not start/current/end.
-              if (hasBeenLandedOnByBacktrack && !isLastWordInPath && index !== 0) { // Avoid styling start/current/end words this way for now
-                 // Merge with existing styles, potentially overriding color but keeping others
-                 textStyle = { ...textStyle, ...styles.usedCheckpoint };
+              if (
+                hasBeenLandedOnByBacktrack &&
+                !isLastWordInPath &&
+                index !== 0
+              ) {
+                // Avoid styling start/current/end words this way for now
+                // Merge with existing styles, potentially overriding color but keeping others
+                textStyle = { ...textStyle, ...styles.usedCheckpoint };
               }
-              
+
               if (isLastWordInPath) {
-                textStyle.fontWeight = 'bold'; 
-                if (word === endWord) { 
-                  textStyle.color = customColors.endNode; 
-                } else { 
-                  if (textStyle.color === customColors.pathNode || (index === 0 && textStyle.color === customColors.startNode)){
+                textStyle.fontWeight = "bold";
+                if (word === endWord) {
+                  textStyle.color = customColors.endNode;
+                } else {
+                  if (
+                    textStyle.color === customColors.pathNode ||
+                    (index === 0 && textStyle.color === customColors.startNode)
+                  ) {
                     textStyle.color = customColors.currentNode;
                   }
                 }
@@ -179,39 +217,51 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
 
               return (
                 <React.Fragment key={`path-${word}-${index}`}>
-                  <TouchableOpacity onPress={() => onWordDefinition(word, index)}>
-                    <Text style={textStyle}>
-                      {word}
-                    </Text>
+                  <TouchableOpacity
+                    onPress={() => onWordDefinition(word, index)}
+                  >
+                    <Text style={textStyle}>{word}</Text>
                   </TouchableOpacity>
                   {index < playerPath.length - 1 && (
-                    <Text style={gameScreenStyles.pathArrow}> → </Text> 
+                    <Text style={gameScreenStyles.pathArrow}> → </Text>
                   )}
                 </React.Fragment>
               );
             })}
 
-            {lastWordOfPlayerPath !== endWord && suggestedPath && suggestedPath.length > 1 && (
-              <>
-                <Text style={gameScreenStyles.pathArrow}> → </Text> 
-                {(suggestedPath.length -1) > 0 && (
-                  <>
-                    <Text style={gameScreenStyles.pathEllipsis}>
-                      {Array.from({ length: Math.max(0, suggestedPath.length - 1) }).map((_, i) => (
-                        <Text key={`dot-${i}`} style={gameScreenStyles.pathDot}>●</Text> 
-                      ))}
-                    </Text>
-                    <Text style={gameScreenStyles.pathArrow}> → </Text>
-                  </>
-                )}
-                <Text 
-                  style={{ ...gameScreenStyles.pathWord, color: customColors.endNode, fontWeight: 'bold' }}
-                  onPress={() => endWord && onWordDefinition(endWord)}
-                >
-                  {endWord} 
-                </Text>
-              </>
-            )}
+            {lastWordOfPlayerPath !== endWord &&
+              suggestedPath &&
+              suggestedPath.length > 1 && (
+                <>
+                  <Text style={gameScreenStyles.pathArrow}> → </Text>
+                  {suggestedPath.length - 1 > 0 && (
+                    <>
+                      <Text style={gameScreenStyles.pathEllipsis}>
+                        {Array.from({
+                          length: Math.max(0, suggestedPath.length - 1),
+                        }).map((_, i) => (
+                          <Text
+                            key={`dot-${i}`}
+                            style={gameScreenStyles.pathDot}
+                          >
+                            ●
+                          </Text>
+                        ))}
+                      </Text>
+                      <Text style={gameScreenStyles.pathArrow}> → </Text>
+                    </>
+                  )}
+                  <Text
+                    style={{
+                      ...gameScreenStyles.suggestedEndWord,
+                      color: customColors.endNode,
+                    }}
+                    onPress={() => endWord && onWordDefinition(endWord)}
+                  >
+                    {endWord}
+                  </Text>
+                </>
+              )}
           </View>
         </ScrollView>
       </TouchableOpacity>
@@ -219,4 +269,4 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
   );
 };
 
-export default PlayerPathDisplay; 
+export default PlayerPathDisplay;

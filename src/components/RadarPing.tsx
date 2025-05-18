@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
-import { Circle, CircleProps } from 'react-native-svg';
+import React, { useEffect } from "react";
+
 import Animated, {
   useSharedValue,
   useAnimatedProps,
   withRepeat,
   withTiming,
-  withSequence,
   withDelay,
   interpolate,
   Easing,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
+import { Circle } from "react-native-svg";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -41,8 +41,8 @@ const RadarPing: React.FC<RadarPingProps> = ({
       withRepeat(
         withTiming(1, { duration, easing: Easing.out(Easing.ease) }),
         -1, // Infinite repeats
-        false // Do not reverse
-      )
+        false, // Do not reverse
+      ),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [duration, initialDelay]); // Rerun effect if duration or initialDelay changes
@@ -51,12 +51,12 @@ const RadarPing: React.FC<RadarPingProps> = ({
     const currentRadius = interpolate(
       progress.value,
       [0, 1],
-      [startRadius, maxRadius]
+      [startRadius, maxRadius],
     );
     const currentOpacity = interpolate(
       progress.value,
       [0, 0.15, 0.7, 1], // Opacity ramps up, holds, then fades
-      [0, 0.4, 0.2, 0]   // Max opacity 0.4
+      [0, 0.4, 0.2, 0], // Max opacity 0.4
     );
 
     return {
@@ -77,4 +77,4 @@ const RadarPing: React.FC<RadarPingProps> = ({
   );
 };
 
-export default RadarPing; 
+export default RadarPing;

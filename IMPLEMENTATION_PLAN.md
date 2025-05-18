@@ -126,10 +126,15 @@ To incrementally build a robust, user-friendly, and cross-platform word navigati
         *   Player statistics and unlocked achievements. - ✅ COMPLETE
         *   Collected items from events. - ✅ COMPLETE
     *   Update `StatsModal.tsx` or the dedicated screen to display persisted data. - ✅ COMPLETE
-4.  **Sharing:** - 🔄 IN PROGRESS
-    *   Implement text-based sharing using `react-native`'s `Share` API (e.g., sharing scores, completed achievements, or specific game results). - 🔄 IN PROGRESS
-    *   Implement screenshot sharing using `react-native-view-shot` for results/achievements. - 🔄 IN PROGRESS
-    *   Add share buttons to relevant UI sections. - ⏳ PLANNED
+4.  **Sharing:** - ✅ COMPLETE
+    *   **Deep Link Challenges:** - ✅ COMPLETE
+        *   Generated deep links (`/challenge?start=[word]&target=[word]`) for sharing specific game pairs. - ✅
+        *   Implemented deep link handling in `App.tsx` for app launch and in-app events. - ✅
+        *   Added `startChallengeGame` logic in `useGameStore.ts` to initialize games from deep links, including temporary save/restore of ongoing regular games. - ✅
+        *   Validated deep link word pairs for existence and path availability in the graph. - ✅
+        *   Implemented UI for sharing challenges from the `ReportScreen` (after winning/giving up) and `StatsModal` (for historical games). - ✅
+        *   Included graph previews (player's path only) in challenge sharing dialogs. - ✅
+        *   Ensured graceful error handling for invalid challenge links, with user feedback (snackbar) and fallback to a new random game. - ✅
 
 ---
 
@@ -149,6 +154,11 @@ To incrementally build a robust, user-friendly, and cross-platform word navigati
 3.  **Styling & Theming:** - ✅ COMPLETE
     *   Leveraged `react-native-paper`'s theming capabilities for consistent styling across `WordDefinitionDialog`, `GameReportDisplay`, `AboutModal`, and `StatsModal`. - ✅
     *   Ensured layouts are responsive and look good across different device sizes (mobile and web).
+4.  **Repository Cleanup:** (New item)
+    *   Review and remove any unused code, comments, or assets.
+    *   Ensure consistent formatting and linting across the codebase.
+    *   Check for and update outdated dependencies if feasible and safe.
+    *   Organize file structure if necessary.
 
 ---
 
@@ -226,3 +236,24 @@ Some warnings may appear in development mode but do not affect production builds
 *This plan provides a structured path, but phases can overlap, and priorities may shift based on development findings.*
 
 --- 
+
+## Post-V1 / Future Enhancements
+
+This section outlines features and improvements planned for after the initial V1 release.
+
+### Advanced Sharing & Discovery
+
+*   **Universal Links (iOS) & App Links (Android):**
+    *   Configure `synapse.com` domain to enable deep links (`https://synapse.com/challenge?start=...&target=...`) to open the native mobile app directly if installed.
+    *   Utilize Expo's tools and documentation for `app.json` configuration and hosting necessary association files (`apple-app-site-association`, `assetlinks.json`).
+*   **App Store Redirection:**
+    *   Implement logic or use third-party services to guide users to the App Store/Google Play Store if the app is not installed when a deep link is opened.
+    *   Consider smart app banners on a web landing page or redirects.
+*   **Basic Text & Screenshot Sharing (General Results/Achievements):** 
+    *   Implement text-based sharing using `react-native`'s `Share` API (e.g., sharing scores, completed achievements).
+    *   Implement screenshot sharing using `react-native-view-shot` for general results/achievements (distinct from challenge graph previews).
+*   **General Share Buttons:**
+    *   Add general share buttons to relevant UI sections (e.g., for achievements, overall stats).
+
+### Other Potential Enhancements
+*(Placeholder for other future ideas)* 

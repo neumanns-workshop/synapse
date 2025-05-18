@@ -1,9 +1,10 @@
-import React from 'react';
-import { Appbar, useTheme } from 'react-native-paper';
-import { Image } from 'react-native';
-import type { ExtendedTheme } from '../theme/SynapseTheme';
-import { useGameStore } from '../stores/useGameStore';
-import StatsModal from '../components/StatsModal';
+import React from "react";
+import { Image, StyleSheet } from "react-native";
+
+import { Appbar, useTheme } from "react-native-paper";
+
+import { useGameStore } from "../stores/useGameStore";
+import type { ExtendedTheme } from "../theme/SynapseTheme";
 
 interface AppHeaderProps {
   onNewGame: () => void;
@@ -18,10 +19,14 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   newGameDisabled = false,
   giveUpDisabled = false,
 }) => {
-  const { colors, customColors } = useTheme() as ExtendedTheme;
-  const setAboutModalVisible = useGameStore((state) => state.setAboutModalVisible);
-  const setStatsModalVisible = useGameStore((state) => state.setStatsModalVisible);
-  
+  const { customColors } = useTheme() as ExtendedTheme;
+  const setAboutModalVisible = useGameStore(
+    (state) => state.setAboutModalVisible,
+  );
+  const setStatsModalVisible = useGameStore(
+    (state) => state.setStatsModalVisible,
+  );
+
   // Handler to open the about modal
   const handleAbout = () => setAboutModalVisible(true);
   // Handler to open the stats modal
@@ -29,16 +34,18 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
   return (
     <Appbar.Header>
-      <Image 
-        source={require('../../assets/favicon.svg')} 
-        style={{ width: 40, height: 40, marginLeft: 8, marginRight: 8, marginVertical: 8 }}
+      <Image source={require("../../assets/favicon.svg")} style={styles.logo} />
+      <Appbar.Content title="Synapse" titleStyle={styles.title} />
+      <Appbar.Action
+        icon="book-open-variant"
+        onPress={handleAbout}
+        color={customColors.currentNode}
       />
-      <Appbar.Content
-        title="Synapse"
-        titleStyle={{ fontWeight: 'bold', fontSize: 24 }}
+      <Appbar.Action
+        icon="trophy"
+        onPress={handleStats}
+        color={customColors.globalOptimalNode}
       />
-      <Appbar.Action icon="book-open-variant" onPress={handleAbout} color={customColors.currentNode} />
-      <Appbar.Action icon="trophy" onPress={handleStats} color={customColors.globalOptimalNode} />
       <Appbar.Action
         icon="refresh"
         onPress={onNewGame}
@@ -55,4 +62,18 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   );
 };
 
-export default AppHeader; 
+const styles = StyleSheet.create({
+  logo: {
+    width: 40,
+    height: 40,
+    marginLeft: 8,
+    marginRight: 8,
+    marginVertical: 8,
+  },
+  title: {
+    fontWeight: "bold",
+    fontSize: 24,
+  },
+});
+
+export default AppHeader;

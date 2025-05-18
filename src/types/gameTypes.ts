@@ -1,6 +1,6 @@
 // Common types used throughout the app
 
-export type Theme = 'light' | 'dark' | 'system';
+export type Theme = "light" | "dark" | "system";
 
 export interface WordDefinition {
   word: string;
@@ -44,4 +44,4 @@ export interface UserSettings {
   theme: Theme;
   soundEnabled: boolean;
   hapticFeedbackEnabled: boolean;
-} 
+}

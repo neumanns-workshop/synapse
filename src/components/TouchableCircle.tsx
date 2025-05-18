@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { Circle, CircleProps } from 'react-native-svg';
-import { Platform } from 'react-native';
+import React, { useEffect } from "react";
+import { Platform } from "react-native";
+
 import Animated, {
   useSharedValue,
   useAnimatedProps,
@@ -9,11 +9,12 @@ import Animated, {
   withSequence,
   Easing,
   // SharedValue // Not typically needed for direct import unless for explicit typing
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
+import { Circle, CircleProps } from "react-native-svg";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-interface TouchableCircleProps extends Omit<CircleProps, 'r' | 'onPress'> {
+interface TouchableCircleProps extends Omit<CircleProps, "r" | "onPress"> {
   cx: number;
   cy: number;
   initialRadius: number; // This is the key prop that was missing
@@ -56,23 +57,35 @@ const TouchableCircle: React.FC<TouchableCircleProps> = ({
             animatedRadius.value = withRepeat(
               withSequence(
                 // Inhale: expand slightly from the trough
-                withTiming(focusedRadius + 1.5, { duration: 2500, easing: Easing.inOut(Easing.ease) }),
+                withTiming(focusedRadius + 1.5, {
+                  duration: 2500,
+                  easing: Easing.inOut(Easing.ease),
+                }),
                 // Exhale: contract slightly back to the trough
-                withTiming(focusedRadius - 1, { duration: 3000, easing: Easing.inOut(Easing.ease) })
+                withTiming(focusedRadius - 1, {
+                  duration: 3000,
+                  easing: Easing.inOut(Easing.ease),
+                }),
               ),
               -1, // Repeat indefinitely
-              false // Play the sequence as defined, then repeat it
+              false, // Play the sequence as defined, then repeat it
             );
           }
-        }
+        },
       );
     } else if (isCurrent === false) {
       // Animate to defaultRadius when not current. Reanimated should cancel the prior loop.
-      animatedRadius.value = withTiming(defaultRadius, { duration: 500, easing: Easing.out(Easing.ease) });
+      animatedRadius.value = withTiming(defaultRadius, {
+        duration: 500,
+        easing: Easing.out(Easing.ease),
+      });
     } else {
       // isCurrent is undefined (e.g. for start/end nodes not currently active)
       // Animate to initialRadius (which should be their focused size)
-      animatedRadius.value = withTiming(initialRadius, { duration: 500, easing: Easing.out(Easing.ease) });
+      animatedRadius.value = withTiming(initialRadius, {
+        duration: 500,
+        easing: Easing.out(Easing.ease),
+      });
     }
   }, [isCurrent, focusedRadius, defaultRadius, initialRadius, animatedRadius]);
 
@@ -82,8 +95,9 @@ const TouchableCircle: React.FC<TouchableCircleProps> = ({
     } as { r: number }; // Explicitly type the return for animatedProps
   });
 
-  const pressHandler = Platform.OS === 'web' ? { onClick: onPress } : { onPress };
-  
+  const pressHandler =
+    Platform.OS === "web" ? { onClick: onPress } : { onPress };
+
   return (
     <AnimatedCircle
       cx={cx}
@@ -99,4 +113,4 @@ const TouchableCircle: React.FC<TouchableCircleProps> = ({
   );
 };
 
-export default TouchableCircle; 
+export default TouchableCircle;

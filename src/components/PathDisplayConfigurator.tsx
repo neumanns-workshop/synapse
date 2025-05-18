@@ -1,19 +1,23 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Switch, Text, Divider } from 'react-native-paper';
-import { useGameStore } from '../stores/useGameStore';
+import React from "react";
+import { View, StyleSheet } from "react-native";
+
+import { Switch, Text, Divider } from "react-native-paper";
+
+import { useGameStore } from "../stores/useGameStore";
 
 interface PathDisplayConfiguratorProps {
   compact?: boolean;
 }
 
-const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({ compact = false }) => {
+const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({
+  compact = false,
+}) => {
   const pathDisplayMode = useGameStore((state) => state.pathDisplayMode);
   const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
   const gameStatus = useGameStore((state) => state.gameStatus);
-  
+
   // Only show optimal/suggested paths options if the game is over
-  const showAdvancedOptions = gameStatus === 'given_up' || gameStatus === 'won';
+  const showAdvancedOptions = gameStatus === "given_up" || gameStatus === "won";
 
   const handleTogglePlayerPath = () => {
     setPathDisplayMode({ player: !pathDisplayMode.player });
@@ -38,7 +42,7 @@ const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({ compa
             onValueChange={handleTogglePlayerPath}
           />
         </View>
-        
+
         {showAdvancedOptions && (
           <>
             <View style={styles.compactOption}>
@@ -48,7 +52,7 @@ const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({ compa
                 onValueChange={handleToggleOptimalPath}
               />
             </View>
-            
+
             <View style={styles.compactOption}>
               <Text style={styles.compactLabel}>Suggested</Text>
               <Switch
@@ -67,7 +71,7 @@ const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({ compa
     <View style={styles.container}>
       <Text style={styles.title}>Path Display Options</Text>
       <Divider style={styles.divider} />
-      
+
       <View style={styles.option}>
         <Text>Your Path</Text>
         <Switch
@@ -75,7 +79,7 @@ const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({ compa
           onValueChange={handleTogglePlayerPath}
         />
       </View>
-      
+
       {showAdvancedOptions && (
         <>
           <View style={styles.option}>
@@ -85,7 +89,7 @@ const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({ compa
               onValueChange={handleToggleOptimalPath}
             />
           </View>
-          
+
           <View style={styles.option}>
             <Text>Suggested Path</Text>
             <Switch
@@ -102,18 +106,18 @@ const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({ compa
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 8,
   },
   compactContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
     padding: 8,
   },
   compactOption: {
-    flexDirection: 'column',
-    alignItems: 'center',
+    flexDirection: "column",
+    alignItems: "center",
     marginHorizontal: 4,
   },
   compactLabel: {
@@ -122,18 +126,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   divider: {
     marginBottom: 12,
   },
   option: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginVertical: 8,
   },
 });
 
-export default PathDisplayConfigurator; 
+export default PathDisplayConfigurator;

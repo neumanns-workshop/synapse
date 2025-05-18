@@ -4,6 +4,7 @@
     "strict": true,
     "jsx": "react-native",
     "lib": ["DOM", "ESNext"],
+    "module": "esnext",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
