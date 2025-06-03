@@ -1,0 +1,31 @@
+import type { WordCollection } from "../collection.types";
+
+export const gratitudeGatheringCollection: WordCollection = {
+  id: "gratitude-gathering",
+  title: "Gratitude & Gathering",
+  icon: "account-group",
+  isWordlistViewable: true,
+  startDate: new Date(2024, 10, 15), // November 15th
+  endDate: new Date(2024, 11, 15),    // December 15th (overlapping with Long Night)
+  words: [
+    // Gratitude & Thankfulness
+    "gratitude", "thankful", "grateful", "appreciation", "blessing", "gift", "grace", "fortune",
+    "abundance", "plenty", "wealth", "richness", "fullness", "satisfaction", "contentment", "joy",
+    
+    // Communal Feasts & Sharing
+    "feast", "banquet", "meal", "table", "sharing", "communal", "together", "unity",
+    "hospitality", "welcome", "invitation", "generous", "giving", "offering", "tribute", "honor",
+    
+    // Shared Bounty
+    "bounty", "harvest", "abundance", "plenty", "cornucopia", "provision", "sustenance", "nourishment",
+    "bread", "wine", "fruit", "grain", "vegetables", "soup", "stew", "warmth",
+    
+    // Thankful Voices & Community
+    "voices", "chorus", "harmony", "song", "praise", "celebration", "rejoicing", "laughter",
+    "storytelling", "memory", "tradition", "legacy", "heritage", "ancestors", "wisdom", "love",
+    
+    // Gathering & Togetherness
+    "gathering", "assembly", "congregation", "circle", "reunion", "homecoming", "embrace", "connection",
+    "family", "friends", "neighbors", "community", "kinship", "bond", "tie", "link"
+  ]
+}; 

@@ -8,6 +8,7 @@ import Svg, { Line, Text } from "react-native-svg";
 import TouchableCircle from "./TouchableCircle";
 import { useGameStore } from "../stores/useGameStore";
 import type { GameReport } from "../utils/gameReportUtils";
+import { startMeasure, endMeasure, PerformanceMarks, PerformanceMeasures, startFrameRateMonitoring } from '../utils/performanceMonitor';
 
 interface CustomTheme extends MD3Theme {
   customColors: {
@@ -31,6 +32,7 @@ interface RenderNode {
   isInPath: boolean;
   isOptimal: boolean; // Add flag
   isSuggested: boolean; // Add flag
+  isAi: boolean; // AI solution path flag
   isPlayerGlobalOptimalChoice?: boolean; // Flag for player's globally optimal choice
   isPlayerLocalOptimalChoice?: boolean; // Flag for player's locally optimal choice
   isNextGlobalOptimal?: boolean;
@@ -56,8 +58,40 @@ const DEFAULT_NODE_STROKE = "#333";
 const DEFAULT_NODE_STROKE_WIDTH = 0.5;
 const PLAYER_PATH_LINK_STROKE_WIDTH = 3;
 const PLAYER_PATH_LINK_STROKE_OPACITY = 0.8;
-const LABEL_TEXT_FONT_SIZE = 12;
+const BASE_LABEL_TEXT_FONT_SIZE = 12; // Base font size for scaling
+const MIN_LABEL_TEXT_FONT_SIZE = 8; // Minimum font size
+const MAX_LABEL_TEXT_FONT_SIZE = 16; // Maximum font size
 const LABEL_TEXT_FONT_WEIGHT = "bold";
+
+// Helper function to calculate dynamic font size based on available horizontal space to graph edges only
+const calculateDynamicFontSize = (
+  nodeId: string,
+  nodeX: number,
+  viewBoxX: number,
+  viewBoxWidth: number,
+  label: string
+): number => {
+  const MARGIN = 12; // px, margin from each edge
+  const MAX_FONT_SIZE = 24;
+  const MIN_FONT_SIZE = 8;
+  // Calculate left and right edges
+  const leftEdge = viewBoxX + MARGIN;
+  const rightEdge = viewBoxX + viewBoxWidth - MARGIN;
+  // The max width the label can take without being cut off
+  const maxLabelWidth = Math.min(nodeX - leftEdge, rightEdge - nodeX) * 2;
+  // Estimate average character width (in px per font size unit)
+  const AVG_CHAR_WIDTH = 0.6; // This is a good default for most sans-serif fonts
+  // Calculate the max font size that fits
+  let fontSize = maxLabelWidth / (label.length * AVG_CHAR_WIDTH);
+  fontSize = Math.max(MIN_FONT_SIZE, Math.min(MAX_FONT_SIZE, fontSize));
+  return fontSize;
+};
+
+// Helper function - NO truncation, just return the full text
+const truncateText = (text: string, fontSize: number): string => {
+  // Never truncate - always show the full word and let font sizing handle it
+  return text;
+};
 
 // Update component definition to accept props with height
 interface GraphVisualizationProps {
@@ -67,6 +101,7 @@ interface GraphVisualizationProps {
     player?: boolean;
     optimal?: boolean;
     suggested?: boolean;
+    ai?: boolean;
   };
 }
 
@@ -89,7 +124,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   // Get data and state from Zustand store
   const storeGraphData = useGameStore((state) => state.graphData);
   const storeStartWord = useGameStore((state) => state.startWord);
-  const storeEndWord = useGameStore((state) => state.endWord);
+  const storeEndWord = useGameStore((state) => state.targetWord);
   const storeCurrentWord = useGameStore((state) => state.currentWord);
   const storePlayerPath = useGameStore((state) => state.playerPath);
   const storeGameStatus = useGameStore((state) => state.gameStatus);
@@ -97,6 +132,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   const storeSuggestedPath = useGameStore(
     (state) => state.suggestedPathFromCurrent,
   );
+  const storeAiPath = useGameStore((state) => state.aiPath);
   const storePathDisplayMode = useGameStore((state) => state.pathDisplayMode);
   const storeSelectWord = useGameStore((state) => state.selectWord);
   const storeOptimalChoices = useGameStore((state) => state.optimalChoices); // Get optimal choices
@@ -104,12 +140,12 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   // Determine data sources based on whether gameReport is provided
   const graphData = storeGraphData; // graphData always comes from the store
   const startWord = gameReport ? gameReport.startWord : storeStartWord;
-  const endWord = gameReport ? gameReport.endWord : storeEndWord;
+  const targetWord = gameReport ? gameReport.targetWord : storeEndWord;
 
   // For currentWord, if gameReport is provided, it's usually a completed game.
   // We can set currentWord to the last word of the player's path or the target word if won.
   // For a preview, we might not need a distinct 'current' word highlight unless it's the end word.
-  // Let's simplify: if gameReport is present, currentWord is the targetWord (endWord).
+  // Let's simplify: if gameReport is present, currentWord is the targetWord (targetWord).
   // const currentWord = gameReport
   //   ? gameReport.playerPath[gameReport.playerPath.length -1] // last word in player path
   //   : storeCurrentWord;
@@ -139,6 +175,12 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
     return storeSuggestedPath;
   }, [gameReport, storeSuggestedPath]);
 
+  // Memoize aiPath initialization
+  const aiPath = useMemo(() => {
+    // AI path is only available from store (not in gameReport)
+    return storeAiPath;
+  }, [storeAiPath]);
+
   // Memoize pathDisplayMode initialization
   const pathDisplayMode = useMemo(() => {
     if (pathDisplayModeOverride) {
@@ -155,6 +197,10 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
           pathDisplayModeOverride.suggested !== undefined
             ? pathDisplayModeOverride.suggested
             : storePathDisplayMode.suggested,
+        ai:
+          pathDisplayModeOverride.ai !== undefined
+            ? pathDisplayModeOverride.ai
+            : storePathDisplayMode.ai,
       };
     }
     return storePathDisplayMode;
@@ -167,30 +213,53 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
     ? gameReport.optimalChoices
     : storeOptimalChoices;
 
-  // Handle word selection
+  // Start frame rate monitoring when component mounts
+  React.useEffect(() => {
+    startFrameRateMonitoring();
+  }, []);
+
+  // Handle word selection with performance monitoring
   const onSelectWord = (word: string) => {
+    startMeasure(PerformanceMarks.WORD_SELECTION);
+    
     // Only allow selection if not using a gameReport (i.e., it's a live game)
     if (!gameReport && gameStatus === "playing") {
       selectWord(word);
     }
+
+    endMeasure(
+      PerformanceMarks.WORD_SELECTION,
+      PerformanceMarks.WORD_SELECTION,
+      PerformanceMeasures.WORD_SELECTION_TIME
+    );
   };
 
   // --- Memoized Data Preparation ---
-  const { nodesToRender, linksToRender, viewBox } = useMemo(() => {
-    // graphData comes from store, startWord/endWord can be from report or store
+  const { nodesToRender, linksToRender, viewBox, viewBoxX, viewBoxY, viewBoxWidth, viewBoxHeight } = useMemo(() => {
+    startMeasure(PerformanceMarks.GRAPH_RENDER);
+    
+    // graphData comes from store, startWord/targetWord can be from report or store
     if (
       !graphData ||
       !startWord ||
-      !endWord ||
+      !targetWord ||
       (gameStatus !== "won" &&
         gameStatus !== "given_up" &&
         (gameStatus === "idle" || gameStatus === "loading"))
     ) {
-      return { nodesToRender: [], linksToRender: [], viewBox: "0 0 100 100" };
+      return { 
+        nodesToRender: [], 
+        linksToRender: [], 
+        viewBox: "0 0 100 100", 
+        viewBoxX: 0,
+        viewBoxY: 0,
+        viewBoxWidth: 100, 
+        viewBoxHeight: 100 
+      };
     }
 
     // Collect all relevant words
-    const relevantWords = new Set<string>([startWord, endWord]);
+    const relevantWords = new Set<string>([startWord, targetWord]);
     if (currentWordForDisplay) {
       // Use currentWordForDisplay here
       relevantWords.add(currentWordForDisplay);
@@ -207,6 +276,10 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
     if (pathDisplayMode.suggested && suggestedPath) {
       // Ensure suggestedPath exists
       suggestedPath.forEach((word) => relevantWords.add(word));
+    }
+    if (pathDisplayMode.ai && aiPath) {
+      // Add AI path words
+      aiPath.forEach((word) => relevantWords.add(word));
     }
 
     // Create node map with flags
@@ -225,11 +298,12 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
           x,
           y,
           isStart: word === startWord,
-          isEnd: word === endWord,
+          isEnd: word === targetWord,
           isCurrent: word === currentWordForDisplay, // Use currentWordForDisplay
           isInPath: playerPath.includes(word),
           isOptimal: optimalPath ? optimalPath.includes(word) : false, // Check if optimalPath exists
           isSuggested: suggestedPath ? suggestedPath.includes(word) : false, // Check if suggestedPath exists
+          isAi: aiPath ? aiPath.includes(word) : false, // Check if word is in AI path
           // Initialize new flags
           isPlayerGlobalOptimalChoice: false,
           isPlayerLocalOptimalChoice: false,
@@ -317,6 +391,22 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
       }
     }
 
+    // Add AI path links
+    if (pathDisplayMode.ai && aiPath && aiPath.length > 1) {
+      for (let i = 0; i < aiPath.length - 1; i++) {
+        const sourceNode = nodeMap.get(aiPath[i]);
+        const targetNode = nodeMap.get(aiPath[i + 1]);
+        if (sourceNode && targetNode) {
+          finalLinksToRender.push({
+            key: `ai-${sourceNode.id}-${targetNode.id}-${i}`,
+            source: sourceNode,
+            target: targetNode,
+            type: "ai",
+          });
+        }
+      }
+    }
+
     // Calculate viewBox
     const padding = 30;
     const vbX = minX - padding;
@@ -324,15 +414,27 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
     const vbWidth = maxX - minX + 2 * padding;
     const vbHeight = maxY - minY + 2 * padding;
 
-    return {
+    const result = {
       nodesToRender: finalNodesToRender,
       linksToRender: finalLinksToRender,
       viewBox: `${vbX} ${vbY} ${vbWidth} ${vbHeight}`,
+      viewBoxX: vbX,
+      viewBoxY: vbY,
+      viewBoxWidth: vbWidth,
+      viewBoxHeight: vbHeight,
     };
+
+    endMeasure(
+      PerformanceMarks.GRAPH_RENDER,
+      PerformanceMarks.GRAPH_RENDER,
+      PerformanceMeasures.GRAPH_RENDER_TIME
+    );
+
+    return result;
   }, [
     graphData,
     startWord,
-    endWord,
+    targetWord,
     currentWordForDisplay,
     playerPath,
     optimalPath,
@@ -340,6 +442,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
     pathDisplayMode,
     gameStatus,
     optimalChoices,
+    aiPath,
   ]);
 
   // --- Render Checks ---
@@ -356,7 +459,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
     );
   }
 
-  if (!startWord || !endWord || nodesToRender.length === 0) {
+  if (!startWord || !targetWord || nodesToRender.length === 0) {
     return (
       <View style={styles.container}>
         <RNText>Waiting for game data...</RNText>
@@ -386,7 +489,9 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
                 ? PATH_NODE_FILL
                 : link.type === "optimal"
                   ? GLOBAL_OPTIMAL_NODE_FILL
-                  : LOCAL_OPTIMAL_NODE_FILL
+                  : link.type === "ai"
+                    ? "#FF6B35" // Orange color for AI path
+                    : LOCAL_OPTIMAL_NODE_FILL
             }
             strokeWidth={PLAYER_PATH_LINK_STROKE_WIDTH}
             strokeOpacity={PLAYER_PATH_LINK_STROKE_OPACITY}
@@ -395,7 +500,9 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
                 ? "5,3"
                 : link.type === "suggested"
                   ? "2,4"
-                  : undefined
+                  : link.type === "ai"
+                    ? "8,2"
+                    : undefined
             }
           />
         ))}
@@ -419,6 +526,26 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
             const allowRadiusAnimationBasedOnCurrent =
               !(node.isStart || node.isEnd) || node.isCurrent;
 
+            const nodeTargetFill = node.isCurrent
+              ? CURRENT_NODE_FILL
+              : node.isStart
+                ? START_NODE_FILL
+                : node.isEnd
+                  ? END_NODE_FILL
+                  : node.isPlayerGlobalOptimalChoice
+                    ? GLOBAL_OPTIMAL_NODE_FILL
+                    : node.isPlayerLocalOptimalChoice
+                      ? LOCAL_OPTIMAL_NODE_FILL
+                      : pathDisplayMode.optimal && node.isOptimal
+                        ? GLOBAL_OPTIMAL_NODE_FILL
+                        : pathDisplayMode.suggested && node.isSuggested
+                          ? LOCAL_OPTIMAL_NODE_FILL
+                          : pathDisplayMode.ai && node.isAi
+                            ? "#FF6B35" // Orange color for AI path nodes
+                            : pathDisplayMode.player && node.isInPath
+                              ? PATH_NODE_FILL
+                              : DEFAULT_NODE_FILL;
+
             return (
               <React.Fragment key={`node-fragment-${node.id}`}>
                 {" "}
@@ -437,25 +564,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
                   } // node.isCurrent now uses currentWordForDisplay
                   focusedRadius={FOCUSED_NODE_RADIUS}
                   defaultRadius={NODE_RADIUS}
-                  fill={
-                    node.isCurrent
-                      ? CURRENT_NODE_FILL // node.isCurrent now uses currentWordForDisplay
-                      : node.isStart
-                        ? START_NODE_FILL
-                        : node.isEnd
-                          ? END_NODE_FILL
-                          : node.isPlayerGlobalOptimalChoice
-                            ? GLOBAL_OPTIMAL_NODE_FILL
-                            : node.isPlayerLocalOptimalChoice
-                              ? LOCAL_OPTIMAL_NODE_FILL
-                              : pathDisplayMode.optimal && node.isOptimal
-                                ? GLOBAL_OPTIMAL_NODE_FILL
-                                : pathDisplayMode.suggested && node.isSuggested
-                                  ? LOCAL_OPTIMAL_NODE_FILL
-                                  : pathDisplayMode.player && node.isInPath
-                                    ? PATH_NODE_FILL
-                                    : DEFAULT_NODE_FILL
-                  }
+                  targetFill={nodeTargetFill}
                   stroke={DEFAULT_NODE_STROKE}
                   strokeWidth={DEFAULT_NODE_STROKE_WIDTH}
                   onPress={() => onSelectWord(node.id)}
@@ -487,14 +596,15 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
                 (n) => n.id === activeCurrentWord,
               );
               if (currentNodeData) {
-                const AVG_CHAR_WIDTH = LABEL_TEXT_FONT_SIZE * 0.6; // Approx. avg char width
+                const dynamicFontSize = calculateDynamicFontSize(node.id, node.x, viewBoxX, viewBoxWidth, node.id);
+                const AVG_CHAR_WIDTH = dynamicFontSize * 0.6; // Approx. avg char width
 
                 // Vertical collision check
                 const verticalLabelProximity = Math.abs(
                   node.y - currentNodeData.y,
                 );
                 const verticalCollision =
-                  verticalLabelProximity < LABEL_TEXT_FONT_SIZE;
+                  verticalLabelProximity < dynamicFontSize;
 
                 // Horizontal collision check
                 const startLabelEstWidth = node.id.length * AVG_CHAR_WIDTH;
@@ -524,19 +634,22 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
             if (!a.isEnd && b.isEnd && !a.isCurrent && !b.isCurrent) return -1;
             return 0;
           })
-          .map((node) => (
-            <Text
-              key={`label-${node.id}`}
-              x={node.x}
-              y={node.y + 20}
-              textAnchor="middle"
-              fill={LABEL_TEXT_FILL}
-              fontSize={LABEL_TEXT_FONT_SIZE}
-              fontWeight={LABEL_TEXT_FONT_WEIGHT}
-            >
-              {node.id}
-            </Text>
-          ))}
+          .map((node) => {
+            const fontSize = calculateDynamicFontSize(node.id, node.x, viewBoxX, viewBoxWidth, node.id);
+            return (
+              <Text
+                key={`label-${node.id}`}
+                x={node.x}
+                y={node.y + 20}
+                textAnchor="middle"
+                fill={LABEL_TEXT_FILL}
+                fontSize={fontSize}
+                fontWeight={LABEL_TEXT_FONT_WEIGHT}
+              >
+                {truncateText(node.id, fontSize)}
+              </Text>
+            );
+          })}
       </Svg>
     </View>
   );

@@ -1,0 +1,42 @@
+import type { WordCollection } from "../collection.types";
+import { createCollection } from "../logic";
+
+const affectionWordList = [
+  // Core Affection & Warmth
+  "warmth", "tender", "gentle", "soft", "comfort", "embrace", "hug", "hold",
+  "close", "near", "bond", "connect", "link", "tie", "unite", "join",
+  
+  // Togetherness & Kinship
+  "together", "shared", "mutual", "common", "companion", "friend", "ally", "partner",
+  "mate", "kindred", "family", "clan", "tribe", "community", "belong", "welcome",
+  
+  // Love & Romance (Valentine's themes woven in)
+  "love", "adore", "cherish", "treasure", "value", "appreciate", "grateful", "thankful",
+  "romance", "passion", "devotion", "affection", "fondness", "infatuation", "attraction", "desire",
+  "heart", "soul", "spirit", "essence", "valentine", "sweetheart", "beloved", "darling",
+  
+  // Care & Protection
+  "care", "nurture", "protect", "shelter", "haven", "refuge", "sanctuary", "safe",
+  "secure", "trust", "faith", "loyal", "devoted", "steadfast", "reliable", "faithful",
+  
+  // Support & Encouragement
+  "support", "encourage", "uplift", "inspire", "comfort", "soothe", "heal", "mend",
+  "strengthen", "empower", "boost", "cheer", "brighten", "warm", "glow", "radiant",
+  
+  // Romantic Imagery & Symbols
+  "rose", "flower", "bloom", "blossom", "petal", "fragrance", "perfume", "sweet",
+  "kiss", "caress", "touch", "gentle", "tender", "soft", "silk", "velvet",
+  "chocolate", "honey", "sugar", "candy", "treat", "gift", "surprise", "delight"
+];
+
+export const affectionCollection: WordCollection = createCollection(
+  "affection",
+  "Affection & Kinship",
+  affectionWordList,
+  {
+    icon: "heart-outline",
+    isWordlistViewable: true,
+    startDate: new Date(new Date().getFullYear(), 1, 1), // February 1st
+    endDate: new Date(new Date().getFullYear(), 1, 28), // February 28th
+  },
+); 

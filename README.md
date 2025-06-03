@@ -1,151 +1,102 @@
-# Synapse: Semantic Pathways (React Native)
+# Synapse: Semantic Pathways
 
-A mobile and web implementation of the Synapse word navigation game, where players find paths between words using semantic similarity. Navigate a graph of interconnected words, aiming to reach the target word from the start word in the fewest steps.
-
-## How to Play
-
-The goal of Synapse is to find a path between a randomly selected **Start Word** and **End Word** by navigating through a graph of interconnected words. 
-
-- Each word is a node in the graph.
-- You can only move from your current word to directly connected (semantically similar) words shown in the graph.
-- Select adjacent words one by one to form a path. Your path history will be visually highlighted.
-- If you make a mistake or want to explore a different route, simply **click/tap on a word in your path history** to backtrack to that point.
-- Try to reach the **End Word** in the **fewest steps** possible!
-- You can explore word definitions to help guide your choices.
-- When you're stuck, you can choose to "Give Up" and see the optimal path.
-- After completing a game (winning or giving up), you can view different path visualizations including your path and the optimal path.
-
-## Project Structure
-
-This project is built with React Native using Expo, following modern development practices:
-
-- **TypeScript**: For type safety and improved developer experience
-- **React Navigation**: For screen navigation
-- **React Native SVG**: For graph visualization (replaces Skia from previous versions)
-- **React Native Paper**: For Material Design UI components, providing a consistent look and feel.
-- **Zustand**: For lightweight global state management
-- **AsyncStorage**: For local data persistence (scores, settings)
-- **Native Sharing & ViewShot**: For sharing game results as text or screenshots
+A cross-platform word navigation game built with React Native and Expo, where players find paths between words using semantic similarity. Navigate through a graph of interconnected words, aiming to reach the target word from the start word in the fewest steps.
 
 ## Features
 
-- Navigate through a semantic word graph to find connections
-- **Accordion-style Path Display:** Visualize your journey with color-coded words and progress indication
-- **Word Definitions:** Tap on any word to see its definition
-- **Path Visualization:** See the optimal path after completing a game
-- **Responsive Design:** Works on iOS, Android, and **Web browsers**
-- **Custom Theming:** Consistent color scheme for different node types (start, current, end, path, optimal, suggested)
-- Works with minimal dependencies and no server requirements
+### Core Gameplay
+- **Semantic Word Navigation**: Find paths between words using semantic similarity
+- **Daily Word Challenges**: Engaging Wordle-style daily puzzles to keep you coming back for more.
+- **Interactive Graph Visualization**: Beautiful SVG-based graph with color-coded nodes and paths
+- **Word Definitions**: Tap any word to see its definition
+- **Path History**: Visualize your journey with an accordion-style path display
+- **Backtracking**: Click on any word in your path to backtrack and try a different route
+- **Optimal Path**: View the optimal path after completing a game
 
-## Recent UI Improvements
+### Advanced Features
+- **Unlimited Play Mode**: Unlock random pair generation for endless gameplay (premium feature).
+- **Performance Optimized**: Frame rate limiting and efficient rendering
+- **Cross-Platform**: Works seamlessly on iOS, Android, and Web
+- **Deep Linking**: Share and play specific word challenges
+- **Achievements**: Track progress with various achievements
+- **Word Collections**: Special themed word collections
+- **Statistics**: Track your performance and progress
+- **Game History**: View and share past games
+- **Responsive Design**: Adapts to different screen sizes and orientations
 
-- **Visual Path Journey:** The path display now shows your word journey as a sequence (word1 → word2 → word3), with the number of dots after your current word indicating the length of the suggested remaining path
-- **Color-Coded Path Words:** Words are colored based on their role (start=green, current=blue, end=red, optimal=orange, suggested=purple)
-- **Improved Button Labels:** "Restart" changed to "New Game" for clarity, "Hint" replaced with "Give Up" to match the original game philosophy
-- **Better Context Awareness:** Path display options only appear when appropriate (after completing a game)
+### Technical Features
+- **TypeScript**: Type-safe codebase
+- **Zustand**: Efficient state management
+- **React Native Paper**: Material Design components
+- **React Native SVG**: High-performance graph visualization
+- **AsyncStorage**: Local data persistence
+- **Performance Monitoring**: Built-in performance tracking and optimization
 
 ## Getting Started
 
 ### Prerequisites
-
 - Node.js (Latest LTS recommended)
 - npm or yarn
-- Expo CLI (`npm install -g expo-cli` or `npx expo`)
-- iOS Simulator (for Mac) / Android Emulator or Device (for native development)
-- A Web Browser (for web development)
+- Expo CLI (`npm install -g expo-cli`)
+- iOS Simulator (Mac) / Android Emulator or physical device
+- Web Browser (for web development)
 
 ### Installation
 
-1.  Clone the repository
-2.  Install dependencies:
-    ```bash
-    npm install
-    ```
-    *(Note: The previous `--legacy-peer-deps` flag might no longer be needed but can be added if peer dependency issues arise.)*
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/neumanns-workshop/synapse
+   cd synapse
+   ```
 
-### Running the Development Server
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-Start the Expo development server:
+### Development
+
+Start the development server:
 ```bash
-npm start 
-# or: npx expo start
+npm start
 ```
-Follow the instructions in the terminal to run the app:
-- Press `i` to run on iOS Simulator
-- Press `a` to run on Android Emulator/Device
-- Press `w` to run in a Web Browser
 
-### Building for Web (Production)
+Then:
+- Press `i` for iOS Simulator
+- Press `a` for Android Emulator/Device
+- Press `w` for Web Browser
 
-To create a static build for web deployment:
+### Building for Production
+
+#### Web Build
 ```bash
 npm run build:web
-# or: npx expo export -p web
 ```
-This command generates a `web-build` directory (or similar, check `app.json` configuration) containing the static assets (HTML, CSS, JS).
+This generates a `web-build` directory with static assets ready for deployment.
 
-### Deploying the Web Build
+#### Mobile Builds
+```bash
+# For iOS
+expo build:ios
 
-Deploy the contents of the `web-build` directory to any static web hosting provider. Popular choices include:
-- Vercel
-- Netlify
-- GitHub Pages
-- Cloudflare Pages
+# For Android
+expo build:android
+```
 
-These platforms often integrate directly with your Git repository for automatic deployments.
+## Project Structure
 
-### Troubleshooting 
-
-If you encounter issues:
-
-1.  Ensure dependencies are installed correctly (`npm install`).
-2.  Run `npx expo doctor --fix-dependencies` to check for common Expo/dependency issues.
-3.  Check for TypeScript errors: `npx tsc --noEmit`
-4.  If you see Babel errors related to `@babel/runtime/helpers`:
-    ```
-    Unable to resolve "@babel/runtime/helpers/interopRequireDefault" from "index.js"
-    ```
-    Run the following commands:
-    ```bash
-    npm cache clean --force
-    npm install --save @babel/runtime
-    ```
-    If that doesn't work, try updating the babel.config.js file to add `absoluteRuntime: false` to the plugin-transform-runtime options.
-
-5.  React DOM warnings about createRoot in development mode are expected and can be safely ignored.
-
-## Storage Implementation
-
-The game uses `@react-native-async-storage/async-storage` for persisting data like high scores and user settings locally on the device or in the browser's local storage (via Expo's web adaptation).
-
-## Sharing Implementation
-
-Game results can be shared using React Native's `Share` API for text-based results and `react-native-view-shot` to capture and share screenshots of the game state.
-
-## Development Status
-
-- [x] Configure project structure and dependencies ✅
-- [x] Add UI Library (`react-native-paper`) ✅
-- [x] Create basic screen navigation ✅
-- [x] Integrate `react-native-paper` components into UI elements ✅
-- [x] Create data loading service to fetch game data from assets/imports ✅
-- [x] Set up state management (Zustand) for core data ✅
-- [x] Implement graph visualization component using `react-native-svg` ✅
-- [x] Implement word selection and path finding logic ✅
-- [x] Add Settings screen with theme configuration ✅
-- [x] Create word definition dialog for looking up meanings ✅
-- [x] Implement accordion-style path display with color coding ✅
-- [x] Add game completion detection (win condition) ✅
-- [x] Implement optimal path visualization after game completion ✅
-- [ ] Add animations and transitions for a better UX (using `react-native-reanimated`) 🔄
-- [ ] Implement panning and zooming for graph visualization 🔄
-- [ ] Design and implement tutorial screens ⏳
-- [ ] Add persistence for game state and settings ⏳
-- [ ] Test sharing functionality on different platforms (iOS, Android, Web) ⏳
-- [ ] Add unit tests for storage and game logic ⏳
-- [ ] Optimize performance for different device sizes and web ⏳
-
-Legend: ✅ Complete, 🔄 In Progress, ⏳ Planned
+```
+src/
+├── components/     # Reusable UI components
+├── features/       # Game features (achievements, collections)
+├── screens/        # Main app screens
+├── services/       # Data and storage services
+├── stores/         # State management
+├── theme/          # UI theming
+├── types/          # TypeScript type definitions
+├── utils/          # Utility functions
+└── data/           # Game data files
+```
 
 ## Data Files
 
@@ -154,13 +105,79 @@ The game requires the following data files, located in `src/data/`:
 - `graph.json`: Contains the word graph structure (nodes, edges, coordinates).
 - `definitions.json`: Contains word definitions.
 
-**Data Generation Summary (Phase 0 - Complete):** The data was generated using Python scripts (`scripts/build_graph.py`) with the following parameters and filters applied:
+**Data Generation Summary:** The data was generated using Python scripts (`scripts/build_graph.py`) with the following parameters and filters applied:
 - **Neighbors (K):** 5
 - **Definition Filtering:** Words without definitions in WordNet were excluded.
 - **Definition Length:** Only definitions <= 90 characters were kept.
 - **Max Definitions:** Max 3 definitions stored per word.
 - **Final Count:** The resulting dataset includes ~4970 words.
 
-## Folder Structure
+## Performance Optimization
 
-```
+The app includes several performance optimizations:
+
+1. **Frame Rate Limiting**
+   - Configurable target FPS (default: 60)
+   - Smart throttling to reduce battery usage
+   - Smooth animations with minimal impact on performance
+
+2. **Rendering Optimization**
+   - Efficient SVG rendering
+   - Memoized components
+   - Optimized path calculations
+
+3. **State Management**
+   - Efficient Zustand store
+   - Selective re-rendering
+   - Optimized data structures
+
+## Deployment
+
+### Web Deployment
+The web build can be deployed to any static hosting service:
+- Vercel
+- Netlify
+- GitHub Pages
+- Cloudflare Pages
+
+### Mobile Deployment
+1. **iOS App Store**
+   - Generate certificates and provisioning profiles
+   - Submit through App Store Connect
+
+2. **Google Play Store**
+   - Generate signed APK/Bundle
+   - Submit through Google Play Console
+
+## Troubleshooting
+
+If you encounter issues:
+
+1.  Ensure dependencies are installed correctly (`npm install`).
+2.  Run `npx expo doctor --fix-dependencies` to check for common Expo/dependency issues.
+3.  Check for TypeScript errors: `npx tsc --noEmit`
+4.  React DOM warnings about `createRoot` in development mode are expected with Expo and can be safely ignored for development builds.
+
+## Known Development Warnings
+
+- **React DOM createRoot Warning**: This is a common warning in React DOM development mode when using frameworks like Expo: "You are calling ReactDOMClient.createRoot() on a container that has already been passed to createRoot() before." This warning does not appear in production builds and does not affect functionality.
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+*(Note: The GitHub repository at https://github.com/neumanns-workshop/synapse currently indicates a GPL-3.0 license. Please ensure consistency.)*
+
+## Acknowledgments
+
+- WordNet for semantic data
+- React Native community
+- Expo team
+- All contributors and testers

@@ -1,0 +1,32 @@
+import type { WordCollection } from "../collection.types";
+
+export const longNightCollection: WordCollection = {
+  id: "long-night",
+  title: "Long Night & Spark",
+  icon: "weather-night",
+  isWordlistViewable: true,
+  startDate: new Date(2024, 11, 1), // December 1st
+  endDate: new Date(2024, 11, 31),   // December 31st
+  words: [
+    // Starry Skies & Night
+    "starry", "celestial", "constellation", "galaxy", "nebula", "cosmic", "infinite", "vast",
+    "twinkling", "glimmering", "sparkling", "shimmering", "luminous", "radiant", "brilliant", "dazzling",
+    
+    // Hearth & Warmth
+    "hearth", "ember", "spark", "flame", "glow", "warmth", "comfort", "cozy",
+    "fireplace", "mantle", "logs", "kindling", "tinder", "fuel", "blaze", "crackle",
+    
+    // Endurance & Darkness
+    "endurance", "persistence", "resilience", "strength", "fortitude", "courage", "determination", "will",
+    "darkness", "night", "shadow", "depth", "mystery", "hidden", "secret", "unseen",
+    
+    // Winter & Cold
+    "winter", "solstice", "longest", "deepest", "coldest", "harshest", "bitter", "fierce",
+    "snow", "ice", "crystal", "frozen", "white", "pure", "clean", "pristine",
+    
+    // Light in Darkness
+    "candle", "lantern", "torch", "beacon", "lighthouse", "guide", "hope", "faith",
+    "illuminate", "brighten", "kindle", "ignite", "awaken", "inspire", "uplift", "sustain",
+    "tradition", "ritual", "ceremony", "celebration", "gathering", "family", "community", "love"
+  ]
+}; 

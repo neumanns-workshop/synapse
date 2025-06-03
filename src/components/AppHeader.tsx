@@ -1,7 +1,13 @@
 import React from "react";
-import { Image, StyleSheet } from "react-native";
+import { Image, StyleSheet, Pressable } from "react-native";
 
 import { Appbar, useTheme } from "react-native-paper";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -12,6 +18,9 @@ interface AppHeaderProps {
   newGameDisabled?: boolean;
   giveUpDisabled?: boolean;
 }
+
+// Create animated version of Appbar.Action
+const AnimatedAction = Animated.createAnimatedComponent(Appbar.Action);
 
 const AppHeader: React.FC<AppHeaderProps> = ({
   onNewGame,
@@ -27,36 +36,90 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     (state) => state.setStatsModalVisible,
   );
 
-  // Handler to open the about modal
-  const handleAbout = () => setAboutModalVisible(true);
-  // Handler to open the stats modal
-  const handleStats = () => setStatsModalVisible(true);
+  // Animation values for each button
+  const aboutScale = useSharedValue(1);
+  const statsScale = useSharedValue(1);
+  const newGameScale = useSharedValue(1);
+  const giveUpScale = useSharedValue(1);
+
+  // Shared animation style creator
+  const createAnimatedStyle = (scale: Animated.SharedValue<number>) => 
+    useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
+
+  // Animation styles for each button
+  const aboutAnimatedStyle = createAnimatedStyle(aboutScale);
+  const statsAnimatedStyle = createAnimatedStyle(statsScale);
+  const newGameAnimatedStyle = createAnimatedStyle(newGameScale);
+  const giveUpAnimatedStyle = createAnimatedStyle(giveUpScale);
+
+  // Shared press animation function
+  const animatePress = (scale: Animated.SharedValue<number>) => {
+    scale.value = withTiming(0.9, { duration: 100, easing: Easing.inOut(Easing.ease) });
+    setTimeout(() => {
+      scale.value = withTiming(1, { duration: 200, easing: Easing.inOut(Easing.ease) });
+    }, 100);
+  };
+
+  // Handlers with animation
+  const handleAbout = () => {
+    animatePress(aboutScale);
+    setAboutModalVisible(true);
+  };
+
+  const handleStats = () => {
+    animatePress(statsScale);
+    setStatsModalVisible(true);
+  };
+
+  const handleNewGame = () => {
+    if (!newGameDisabled) {
+      animatePress(newGameScale);
+      onNewGame();
+    }
+  };
+
+  const handleGiveUp = () => {
+    if (!giveUpDisabled) {
+      animatePress(giveUpScale);
+      onGiveUp();
+    }
+  };
 
   return (
     <Appbar.Header>
       <Image source={require("../../assets/favicon.svg")} style={styles.logo} />
       <Appbar.Content title="Synapse" titleStyle={styles.title} />
-      <Appbar.Action
+      
+      <AnimatedAction
         icon="book-open-variant"
         onPress={handleAbout}
         color={customColors.currentNode}
+        style={aboutAnimatedStyle}
       />
-      <Appbar.Action
+      
+      <AnimatedAction
         icon="trophy"
         onPress={handleStats}
         color={customColors.globalOptimalNode}
+        style={statsAnimatedStyle}
       />
-      <Appbar.Action
+      
+      <AnimatedAction
         icon="refresh"
-        onPress={onNewGame}
+        onPress={handleNewGame}
         disabled={newGameDisabled}
         color={customColors.startNode}
+        style={newGameAnimatedStyle}
       />
-      <Appbar.Action
+      
+      <AnimatedAction
         icon="flag-variant"
-        onPress={onGiveUp}
+        onPress={handleGiveUp}
         disabled={giveUpDisabled}
         color={customColors.endNode}
+        style={giveUpAnimatedStyle}
       />
     </Appbar.Header>
   );

@@ -1,0 +1,38 @@
+[
+  {
+    "id": "2025-06-09",
+    "startWord": "breathtaking",
+    "endWord": "admit",
+    "optimalPathLength": 4,
+    "llmPath": [
+      "breathtaking",
+      "admire",
+      "regard",
+      "respect",
+      "acknowledge"
+    ],
+    "stepsTaken": 4,
+    "status": "solved",
+    "reason": "Found path in 4 moves",
+    "model": "phi4-reasoning:plus",
+    "backtrackAttempts": 0
+  },
+  {
+    "id": "2025-07-06",
+    "startWord": "bombastic",
+    "endWord": "kill",
+    "optimalPathLength": 4,
+    "llmPath": [
+      "bombastic",
+      "bomb",
+      "explode",
+      "detonate",
+      "destroy"
+    ],
+    "stepsTaken": 4,
+    "status": "solved",
+    "reason": "Found path in 4 moves",
+    "model": "phi4-reasoning:plus",
+    "backtrackAttempts": 0
+  }
+]

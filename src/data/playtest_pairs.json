@@ -1,0 +1,2256 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2025-06-03",
+  "pairs": [
+    {
+      "startWord": "deceit",
+      "targetWord": "hoof",
+      "pathLength": 6
+    },
+    {
+      "startWord": "street",
+      "targetWord": "scout",
+      "pathLength": 6
+    },
+    {
+      "startWord": "lens",
+      "targetWord": "exuberant",
+      "pathLength": 6
+    },
+    {
+      "startWord": "plaster",
+      "targetWord": "route",
+      "pathLength": 5
+    },
+    {
+      "startWord": "mow",
+      "targetWord": "mart",
+      "pathLength": 6
+    },
+    {
+      "startWord": "lucent",
+      "targetWord": "beneficial",
+      "pathLength": 5
+    },
+    {
+      "startWord": "pathos",
+      "targetWord": "aspect",
+      "pathLength": 5
+    },
+    {
+      "startWord": "ancestry",
+      "targetWord": "fertile",
+      "pathLength": 4
+    },
+    {
+      "startWord": "dynamic",
+      "targetWord": "glisten",
+      "pathLength": 6
+    },
+    {
+      "startWord": "therapy",
+      "targetWord": "cage",
+      "pathLength": 6
+    },
+    {
+      "startWord": "cadre",
+      "targetWord": "entrust",
+      "pathLength": 5
+    },
+    {
+      "startWord": "dazzle",
+      "targetWord": "acknowledge",
+      "pathLength": 5
+    },
+    {
+      "startWord": "hedge",
+      "targetWord": "maintenance",
+      "pathLength": 6
+    },
+    {
+      "startWord": "raw",
+      "targetWord": "redefine",
+      "pathLength": 5
+    },
+    {
+      "startWord": "drag",
+      "targetWord": "hotel",
+      "pathLength": 6
+    },
+    {
+      "startWord": "vascular",
+      "targetWord": "cookie",
+      "pathLength": 6
+    },
+    {
+      "startWord": "ticket",
+      "targetWord": "consensus",
+      "pathLength": 6
+    },
+    {
+      "startWord": "connect",
+      "targetWord": "injury",
+      "pathLength": 5
+    },
+    {
+      "startWord": "theoretical",
+      "targetWord": "cooperate",
+      "pathLength": 6
+    },
+    {
+      "startWord": "expunge",
+      "targetWord": "hopeless",
+      "pathLength": 6
+    },
+    {
+      "startWord": "wrest",
+      "targetWord": "complain",
+      "pathLength": 6
+    },
+    {
+      "startWord": "jewel",
+      "targetWord": "furthermore",
+      "pathLength": 6
+    },
+    {
+      "startWord": "flank",
+      "targetWord": "prostitute",
+      "pathLength": 6
+    },
+    {
+      "startWord": "solitary",
+      "targetWord": "affirm",
+      "pathLength": 6
+    },
+    {
+      "startWord": "income",
+      "targetWord": "facilitate",
+      "pathLength": 5
+    },
+    {
+      "startWord": "primitive",
+      "targetWord": "windy",
+      "pathLength": 6
+    },
+    {
+      "startWord": "tsar",
+      "targetWord": "wicked",
+      "pathLength": 6
+    },
+    {
+      "startWord": "empathy",
+      "targetWord": "attempt",
+      "pathLength": 6
+    },
+    {
+      "startWord": "effervescent",
+      "targetWord": "imagine",
+      "pathLength": 6
+    },
+    {
+      "startWord": "flavor",
+      "targetWord": "steal",
+      "pathLength": 4
+    },
+    {
+      "startWord": "insist",
+      "targetWord": "unearthly",
+      "pathLength": 6
+    },
+    {
+      "startWord": "ladder",
+      "targetWord": "plant",
+      "pathLength": 6
+    },
+    {
+      "startWord": "charisma",
+      "targetWord": "command",
+      "pathLength": 4
+    },
+    {
+      "startWord": "dare",
+      "targetWord": "readjust",
+      "pathLength": 6
+    },
+    {
+      "startWord": "maize",
+      "targetWord": "depend",
+      "pathLength": 5
+    },
+    {
+      "startWord": "length",
+      "targetWord": "configuration",
+      "pathLength": 6
+    },
+    {
+      "startWord": "luck",
+      "targetWord": "unroll",
+      "pathLength": 6
+    },
+    {
+      "startWord": "healthy",
+      "targetWord": "assist",
+      "pathLength": 5
+    },
+    {
+      "startWord": "austere",
+      "targetWord": "craft",
+      "pathLength": 6
+    },
+    {
+      "startWord": "showy",
+      "targetWord": "meet",
+      "pathLength": 6
+    },
+    {
+      "startWord": "optimal",
+      "targetWord": "sincere",
+      "pathLength": 6
+    },
+    {
+      "startWord": "problematic",
+      "targetWord": "disillusionment",
+      "pathLength": 5
+    },
+    {
+      "startWord": "rag",
+      "targetWord": "insolent",
+      "pathLength": 6
+    },
+    {
+      "startWord": "reflux",
+      "targetWord": "flimsy",
+      "pathLength": 6
+    },
+    {
+      "startWord": "household",
+      "targetWord": "everyday",
+      "pathLength": 6
+    },
+    {
+      "startWord": "leave",
+      "targetWord": "automobile",
+      "pathLength": 6
+    },
+    {
+      "startWord": "hat",
+      "targetWord": "bed",
+      "pathLength": 4
+    },
+    {
+      "startWord": "grease",
+      "targetWord": "stillness",
+      "pathLength": 5
+    },
+    {
+      "startWord": "airy",
+      "targetWord": "whip",
+      "pathLength": 6
+    },
+    {
+      "startWord": "mark",
+      "targetWord": "funny",
+      "pathLength": 6
+    },
+    {
+      "startWord": "amenable",
+      "targetWord": "proper",
+      "pathLength": 6
+    },
+    {
+      "startWord": "weed",
+      "targetWord": "fly",
+      "pathLength": 5
+    },
+    {
+      "startWord": "nocturnal",
+      "targetWord": "bake",
+      "pathLength": 6
+    },
+    {
+      "startWord": "indoor",
+      "targetWord": "budge",
+      "pathLength": 5
+    },
+    {
+      "startWord": "grope",
+      "targetWord": "noise",
+      "pathLength": 5
+    },
+    {
+      "startWord": "leg",
+      "targetWord": "shell",
+      "pathLength": 5
+    },
+    {
+      "startWord": "coarse",
+      "targetWord": "tensile",
+      "pathLength": 4
+    },
+    {
+      "startWord": "dress",
+      "targetWord": "dessert",
+      "pathLength": 5
+    },
+    {
+      "startWord": "main",
+      "targetWord": "forward",
+      "pathLength": 5
+    },
+    {
+      "startWord": "classy",
+      "targetWord": "simulate",
+      "pathLength": 6
+    },
+    {
+      "startWord": "nowadays",
+      "targetWord": "control",
+      "pathLength": 6
+    },
+    {
+      "startWord": "rat",
+      "targetWord": "aim",
+      "pathLength": 5
+    },
+    {
+      "startWord": "soy",
+      "targetWord": "innumerable",
+      "pathLength": 6
+    },
+    {
+      "startWord": "naked",
+      "targetWord": "commonplace",
+      "pathLength": 6
+    },
+    {
+      "startWord": "abusive",
+      "targetWord": "regular",
+      "pathLength": 6
+    },
+    {
+      "startWord": "nab",
+      "targetWord": "reagent",
+      "pathLength": 6
+    },
+    {
+      "startWord": "apart",
+      "targetWord": "hop",
+      "pathLength": 6
+    },
+    {
+      "startWord": "extreme",
+      "targetWord": "incoherent",
+      "pathLength": 4
+    },
+    {
+      "startWord": "jelly",
+      "targetWord": "courage",
+      "pathLength": 5
+    },
+    {
+      "startWord": "quack",
+      "targetWord": "tumble",
+      "pathLength": 5
+    },
+    {
+      "startWord": "abstention",
+      "targetWord": "waste",
+      "pathLength": 6
+    },
+    {
+      "startWord": "immaculate",
+      "targetWord": "mundane",
+      "pathLength": 6
+    },
+    {
+      "startWord": "roomy",
+      "targetWord": "wash",
+      "pathLength": 6
+    },
+    {
+      "startWord": "thicken",
+      "targetWord": "struggle",
+      "pathLength": 5
+    },
+    {
+      "startWord": "pinch",
+      "targetWord": "cross",
+      "pathLength": 6
+    },
+    {
+      "startWord": "bland",
+      "targetWord": "geriatric",
+      "pathLength": 5
+    },
+    {
+      "startWord": "ban",
+      "targetWord": "contest",
+      "pathLength": 5
+    },
+    {
+      "startWord": "appellate",
+      "targetWord": "retaliate",
+      "pathLength": 6
+    },
+    {
+      "startWord": "sow",
+      "targetWord": "suspicion",
+      "pathLength": 6
+    },
+    {
+      "startWord": "radio",
+      "targetWord": "sew",
+      "pathLength": 6
+    },
+    {
+      "startWord": "disrepute",
+      "targetWord": "cease",
+      "pathLength": 6
+    },
+    {
+      "startWord": "carry",
+      "targetWord": "solo",
+      "pathLength": 6
+    },
+    {
+      "startWord": "palette",
+      "targetWord": "remainder",
+      "pathLength": 5
+    },
+    {
+      "startWord": "gilt",
+      "targetWord": "calculate",
+      "pathLength": 6
+    },
+    {
+      "startWord": "loss",
+      "targetWord": "hesitate",
+      "pathLength": 5
+    },
+    {
+      "startWord": "hole",
+      "targetWord": "whistle",
+      "pathLength": 6
+    },
+    {
+      "startWord": "thinness",
+      "targetWord": "lunch",
+      "pathLength": 6
+    },
+    {
+      "startWord": "jejune",
+      "targetWord": "lady",
+      "pathLength": 5
+    },
+    {
+      "startWord": "sneeze",
+      "targetWord": "science",
+      "pathLength": 5
+    },
+    {
+      "startWord": "detonate",
+      "targetWord": "degrade",
+      "pathLength": 4
+    },
+    {
+      "startWord": "unbalance",
+      "targetWord": "resemble",
+      "pathLength": 4
+    },
+    {
+      "startWord": "bloat",
+      "targetWord": "battle",
+      "pathLength": 5
+    },
+    {
+      "startWord": "triplicate",
+      "targetWord": "alleviate",
+      "pathLength": 5
+    },
+    {
+      "startWord": "plum",
+      "targetWord": "snap",
+      "pathLength": 5
+    },
+    {
+      "startWord": "stage",
+      "targetWord": "avenue",
+      "pathLength": 4
+    },
+    {
+      "startWord": "advent",
+      "targetWord": "commemorate",
+      "pathLength": 4
+    },
+    {
+      "startWord": "decline",
+      "targetWord": "mere",
+      "pathLength": 4
+    },
+    {
+      "startWord": "preposterous",
+      "targetWord": "sabotage",
+      "pathLength": 4
+    },
+    {
+      "startWord": "complete",
+      "targetWord": "comprise",
+      "pathLength": 4
+    },
+    {
+      "startWord": "annul",
+      "targetWord": "issue",
+      "pathLength": 4
+    },
+    {
+      "startWord": "foster",
+      "targetWord": "contempt",
+      "pathLength": 4
+    },
+    {
+      "startWord": "triad",
+      "targetWord": "shadow",
+      "pathLength": 4
+    },
+    {
+      "startWord": "architecture",
+      "targetWord": "denominator",
+      "pathLength": 4
+    },
+    {
+      "startWord": "squelch",
+      "targetWord": "join",
+      "pathLength": 4
+    },
+    {
+      "startWord": "unmarried",
+      "targetWord": "explicit",
+      "pathLength": 4
+    },
+    {
+      "startWord": "configuration",
+      "targetWord": "pronounce",
+      "pathLength": 4
+    },
+    {
+      "startWord": "immortal",
+      "targetWord": "kid",
+      "pathLength": 4
+    },
+    {
+      "startWord": "jubilant",
+      "targetWord": "unlucky",
+      "pathLength": 4
+    },
+    {
+      "startWord": "sparse",
+      "targetWord": "unsatisfactory",
+      "pathLength": 4
+    },
+    {
+      "startWord": "incredulous",
+      "targetWord": "wish",
+      "pathLength": 4
+    },
+    {
+      "startWord": "monitor",
+      "targetWord": "acclaim",
+      "pathLength": 4
+    },
+    {
+      "startWord": "press",
+      "targetWord": "convene",
+      "pathLength": 6
+    },
+    {
+      "startWord": "tarry",
+      "targetWord": "thereafter",
+      "pathLength": 5
+    },
+    {
+      "startWord": "attribute",
+      "targetWord": "crew",
+      "pathLength": 6
+    },
+    {
+      "startWord": "forget",
+      "targetWord": "ceremony",
+      "pathLength": 4
+    },
+    {
+      "startWord": "custard",
+      "targetWord": "sputter",
+      "pathLength": 6
+    },
+    {
+      "startWord": "flight",
+      "targetWord": "warm",
+      "pathLength": 5
+    },
+    {
+      "startWord": "harmonize",
+      "targetWord": "fish",
+      "pathLength": 5
+    },
+    {
+      "startWord": "mussel",
+      "targetWord": "sorrow",
+      "pathLength": 6
+    },
+    {
+      "startWord": "discipline",
+      "targetWord": "landlord",
+      "pathLength": 5
+    },
+    {
+      "startWord": "tremulous",
+      "targetWord": "retrograde",
+      "pathLength": 6
+    },
+    {
+      "startWord": "lonely",
+      "targetWord": "humanitarian",
+      "pathLength": 5
+    },
+    {
+      "startWord": "fizzle",
+      "targetWord": "senatorial",
+      "pathLength": 4
+    },
+    {
+      "startWord": "whitewash",
+      "targetWord": "danger",
+      "pathLength": 6
+    },
+    {
+      "startWord": "chest",
+      "targetWord": "lawless",
+      "pathLength": 6
+    },
+    {
+      "startWord": "crouch",
+      "targetWord": "predilection",
+      "pathLength": 5
+    },
+    {
+      "startWord": "illogical",
+      "targetWord": "unprepared",
+      "pathLength": 6
+    },
+    {
+      "startWord": "inside",
+      "targetWord": "leaf",
+      "pathLength": 6
+    },
+    {
+      "startWord": "project",
+      "targetWord": "indestructible",
+      "pathLength": 6
+    },
+    {
+      "startWord": "apricot",
+      "targetWord": "bomb",
+      "pathLength": 5
+    },
+    {
+      "startWord": "soil",
+      "targetWord": "combine",
+      "pathLength": 5
+    },
+    {
+      "startWord": "hotel",
+      "targetWord": "ground",
+      "pathLength": 4
+    },
+    {
+      "startWord": "nail",
+      "targetWord": "bang",
+      "pathLength": 4
+    },
+    {
+      "startWord": "screw",
+      "targetWord": "replace",
+      "pathLength": 4
+    },
+    {
+      "startWord": "pout",
+      "targetWord": "collapse",
+      "pathLength": 5
+    },
+    {
+      "startWord": "tiger",
+      "targetWord": "smoke",
+      "pathLength": 5
+    },
+    {
+      "startWord": "pollution",
+      "targetWord": "result",
+      "pathLength": 6
+    },
+    {
+      "startWord": "torpedo",
+      "targetWord": "flax",
+      "pathLength": 4
+    },
+    {
+      "startWord": "report",
+      "targetWord": "shrimp",
+      "pathLength": 6
+    },
+    {
+      "startWord": "straight",
+      "targetWord": "shapeless",
+      "pathLength": 4
+    },
+    {
+      "startWord": "intercede",
+      "targetWord": "extreme",
+      "pathLength": 6
+    },
+    {
+      "startWord": "golf",
+      "targetWord": "nifty",
+      "pathLength": 6
+    },
+    {
+      "startWord": "curve",
+      "targetWord": "alter",
+      "pathLength": 6
+    },
+    {
+      "startWord": "crochet",
+      "targetWord": "confer",
+      "pathLength": 5
+    },
+    {
+      "startWord": "family",
+      "targetWord": "start",
+      "pathLength": 4
+    },
+    {
+      "startWord": "dumpling",
+      "targetWord": "participant",
+      "pathLength": 4
+    },
+    {
+      "startWord": "tenet",
+      "targetWord": "extend",
+      "pathLength": 4
+    },
+    {
+      "startWord": "ajar",
+      "targetWord": "germ",
+      "pathLength": 5
+    },
+    {
+      "startWord": "irrelevant",
+      "targetWord": "annex",
+      "pathLength": 5
+    },
+    {
+      "startWord": "unhelpful",
+      "targetWord": "include",
+      "pathLength": 5
+    },
+    {
+      "startWord": "priest",
+      "targetWord": "unbiased",
+      "pathLength": 6
+    },
+    {
+      "startWord": "swell",
+      "targetWord": "worthy",
+      "pathLength": 5
+    },
+    {
+      "startWord": "simple",
+      "targetWord": "cafeteria",
+      "pathLength": 6
+    },
+    {
+      "startWord": "recurrent",
+      "targetWord": "adhesive",
+      "pathLength": 6
+    },
+    {
+      "startWord": "seat",
+      "targetWord": "uninvolved",
+      "pathLength": 6
+    },
+    {
+      "startWord": "play",
+      "targetWord": "graduate",
+      "pathLength": 6
+    },
+    {
+      "startWord": "desk",
+      "targetWord": "lesson",
+      "pathLength": 5
+    },
+    {
+      "startWord": "yell",
+      "targetWord": "appear",
+      "pathLength": 6
+    },
+    {
+      "startWord": "spatial",
+      "targetWord": "jar",
+      "pathLength": 5
+    },
+    {
+      "startWord": "disposition",
+      "targetWord": "outside",
+      "pathLength": 4
+    },
+    {
+      "startWord": "opera",
+      "targetWord": "sweet",
+      "pathLength": 6
+    },
+    {
+      "startWord": "cane",
+      "targetWord": "fragile",
+      "pathLength": 6
+    },
+    {
+      "startWord": "oxymoron",
+      "targetWord": "imply",
+      "pathLength": 4
+    },
+    {
+      "startWord": "tertiary",
+      "targetWord": "december",
+      "pathLength": 5
+    },
+    {
+      "startWord": "pot",
+      "targetWord": "holy",
+      "pathLength": 6
+    },
+    {
+      "startWord": "rev",
+      "targetWord": "lest",
+      "pathLength": 5
+    },
+    {
+      "startWord": "murder",
+      "targetWord": "cruel",
+      "pathLength": 5
+    },
+    {
+      "startWord": "unstoppable",
+      "targetWord": "cry",
+      "pathLength": 6
+    },
+    {
+      "startWord": "tree",
+      "targetWord": "salon",
+      "pathLength": 5
+    },
+    {
+      "startWord": "enlarge",
+      "targetWord": "redirect",
+      "pathLength": 5
+    },
+    {
+      "startWord": "mundane",
+      "targetWord": "imitate",
+      "pathLength": 5
+    },
+    {
+      "startWord": "cancer",
+      "targetWord": "ignore",
+      "pathLength": 6
+    },
+    {
+      "startWord": "discover",
+      "targetWord": "myth",
+      "pathLength": 5
+    },
+    {
+      "startWord": "omit",
+      "targetWord": "nick",
+      "pathLength": 6
+    },
+    {
+      "startWord": "impulse",
+      "targetWord": "friction",
+      "pathLength": 5
+    },
+    {
+      "startWord": "grave",
+      "targetWord": "tell",
+      "pathLength": 5
+    },
+    {
+      "startWord": "parley",
+      "targetWord": "blade",
+      "pathLength": 5
+    },
+    {
+      "startWord": "charitable",
+      "targetWord": "wisdom",
+      "pathLength": 6
+    },
+    {
+      "startWord": "lancet",
+      "targetWord": "embrace",
+      "pathLength": 6
+    },
+    {
+      "startWord": "unpublished",
+      "targetWord": "shame",
+      "pathLength": 5
+    },
+    {
+      "startWord": "streak",
+      "targetWord": "olive",
+      "pathLength": 6
+    },
+    {
+      "startWord": "masculine",
+      "targetWord": "roach",
+      "pathLength": 6
+    },
+    {
+      "startWord": "draft",
+      "targetWord": "messenger",
+      "pathLength": 5
+    },
+    {
+      "startWord": "dear",
+      "targetWord": "veteran",
+      "pathLength": 6
+    },
+    {
+      "startWord": "stun",
+      "targetWord": "continue",
+      "pathLength": 6
+    },
+    {
+      "startWord": "baggy",
+      "targetWord": "unfavorable",
+      "pathLength": 6
+    },
+    {
+      "startWord": "address",
+      "targetWord": "audience",
+      "pathLength": 6
+    },
+    {
+      "startWord": "atlas",
+      "targetWord": "adjacent",
+      "pathLength": 6
+    },
+    {
+      "startWord": "council",
+      "targetWord": "cede",
+      "pathLength": 6
+    },
+    {
+      "startWord": "ease",
+      "targetWord": "recreate",
+      "pathLength": 5
+    },
+    {
+      "startWord": "presence",
+      "targetWord": "hold",
+      "pathLength": 6
+    },
+    {
+      "startWord": "eager",
+      "targetWord": "onward",
+      "pathLength": 4
+    },
+    {
+      "startWord": "practice",
+      "targetWord": "transcend",
+      "pathLength": 6
+    },
+    {
+      "startWord": "deeply",
+      "targetWord": "unclear",
+      "pathLength": 4
+    },
+    {
+      "startWord": "approximate",
+      "targetWord": "harm",
+      "pathLength": 5
+    },
+    {
+      "startWord": "apparent",
+      "targetWord": "field",
+      "pathLength": 5
+    },
+    {
+      "startWord": "furthest",
+      "targetWord": "clause",
+      "pathLength": 6
+    },
+    {
+      "startWord": "stand",
+      "targetWord": "collaborate",
+      "pathLength": 5
+    },
+    {
+      "startWord": "adhesive",
+      "targetWord": "controversy",
+      "pathLength": 5
+    },
+    {
+      "startWord": "fascinate",
+      "targetWord": "seminal",
+      "pathLength": 6
+    },
+    {
+      "startWord": "inflammable",
+      "targetWord": "resign",
+      "pathLength": 5
+    },
+    {
+      "startWord": "effortlessly",
+      "targetWord": "get",
+      "pathLength": 6
+    },
+    {
+      "startWord": "intemperate",
+      "targetWord": "healthful",
+      "pathLength": 6
+    },
+    {
+      "startWord": "horse",
+      "targetWord": "rivalry",
+      "pathLength": 5
+    },
+    {
+      "startWord": "poor",
+      "targetWord": "knife",
+      "pathLength": 5
+    },
+    {
+      "startWord": "european",
+      "targetWord": "abuse",
+      "pathLength": 5
+    },
+    {
+      "startWord": "compel",
+      "targetWord": "nasty",
+      "pathLength": 5
+    },
+    {
+      "startWord": "mealy",
+      "targetWord": "grimy",
+      "pathLength": 4
+    },
+    {
+      "startWord": "messy",
+      "targetWord": "drench",
+      "pathLength": 6
+    },
+    {
+      "startWord": "aesthetic",
+      "targetWord": "obliterate",
+      "pathLength": 6
+    },
+    {
+      "startWord": "outdo",
+      "targetWord": "revert",
+      "pathLength": 5
+    },
+    {
+      "startWord": "municipal",
+      "targetWord": "amidships",
+      "pathLength": 6
+    },
+    {
+      "startWord": "reclamation",
+      "targetWord": "crackle",
+      "pathLength": 5
+    },
+    {
+      "startWord": "coil",
+      "targetWord": "domain",
+      "pathLength": 5
+    },
+    {
+      "startWord": "commend",
+      "targetWord": "relevant",
+      "pathLength": 5
+    },
+    {
+      "startWord": "team",
+      "targetWord": "fragrant",
+      "pathLength": 5
+    },
+    {
+      "startWord": "invoke",
+      "targetWord": "melt",
+      "pathLength": 5
+    },
+    {
+      "startWord": "retire",
+      "targetWord": "resilient",
+      "pathLength": 5
+    },
+    {
+      "startWord": "flex",
+      "targetWord": "charitable",
+      "pathLength": 4
+    },
+    {
+      "startWord": "rescue",
+      "targetWord": "deface",
+      "pathLength": 4
+    },
+    {
+      "startWord": "behavior",
+      "targetWord": "bound",
+      "pathLength": 4
+    },
+    {
+      "startWord": "stubby",
+      "targetWord": "dauntless",
+      "pathLength": 4
+    },
+    {
+      "startWord": "local",
+      "targetWord": "more",
+      "pathLength": 4
+    },
+    {
+      "startWord": "parameter",
+      "targetWord": "overlap",
+      "pathLength": 4
+    },
+    {
+      "startWord": "scholar",
+      "targetWord": "aware",
+      "pathLength": 4
+    },
+    {
+      "startWord": "nurture",
+      "targetWord": "farm",
+      "pathLength": 5
+    },
+    {
+      "startWord": "increase",
+      "targetWord": "recalcitrant",
+      "pathLength": 6
+    },
+    {
+      "startWord": "spell",
+      "targetWord": "land",
+      "pathLength": 6
+    },
+    {
+      "startWord": "pen",
+      "targetWord": "motif",
+      "pathLength": 5
+    },
+    {
+      "startWord": "embedding",
+      "targetWord": "ascent",
+      "pathLength": 5
+    },
+    {
+      "startWord": "expect",
+      "targetWord": "affix",
+      "pathLength": 6
+    },
+    {
+      "startWord": "vote",
+      "targetWord": "theological",
+      "pathLength": 6
+    },
+    {
+      "startWord": "gun",
+      "targetWord": "rendezvous",
+      "pathLength": 6
+    },
+    {
+      "startWord": "endorse",
+      "targetWord": "infernal",
+      "pathLength": 6
+    },
+    {
+      "startWord": "eyelash",
+      "targetWord": "rose",
+      "pathLength": 4
+    },
+    {
+      "startWord": "notebook",
+      "targetWord": "beauty",
+      "pathLength": 6
+    },
+    {
+      "startWord": "bowl",
+      "targetWord": "blush",
+      "pathLength": 4
+    },
+    {
+      "startWord": "studio",
+      "targetWord": "mean",
+      "pathLength": 6
+    },
+    {
+      "startWord": "await",
+      "targetWord": "nocturnal",
+      "pathLength": 5
+    },
+    {
+      "startWord": "offense",
+      "targetWord": "decide",
+      "pathLength": 5
+    },
+    {
+      "startWord": "reform",
+      "targetWord": "consonant",
+      "pathLength": 4
+    },
+    {
+      "startWord": "integral",
+      "targetWord": "appreciate",
+      "pathLength": 5
+    },
+    {
+      "startWord": "virtue",
+      "targetWord": "choice",
+      "pathLength": 5
+    },
+    {
+      "startWord": "melody",
+      "targetWord": "push",
+      "pathLength": 5
+    },
+    {
+      "startWord": "muffled",
+      "targetWord": "heredity",
+      "pathLength": 6
+    },
+    {
+      "startWord": "facile",
+      "targetWord": "look",
+      "pathLength": 6
+    },
+    {
+      "startWord": "oar",
+      "targetWord": "linguistic",
+      "pathLength": 6
+    },
+    {
+      "startWord": "appraise",
+      "targetWord": "tepid",
+      "pathLength": 6
+    },
+    {
+      "startWord": "fir",
+      "targetWord": "fawning",
+      "pathLength": 6
+    },
+    {
+      "startWord": "proceed",
+      "targetWord": "provide",
+      "pathLength": 5
+    },
+    {
+      "startWord": "rucksack",
+      "targetWord": "unbalance",
+      "pathLength": 5
+    },
+    {
+      "startWord": "consonant",
+      "targetWord": "intuitive",
+      "pathLength": 6
+    },
+    {
+      "startWord": "dull",
+      "targetWord": "heritage",
+      "pathLength": 6
+    },
+    {
+      "startWord": "powdery",
+      "targetWord": "symphony",
+      "pathLength": 5
+    },
+    {
+      "startWord": "veil",
+      "targetWord": "upright",
+      "pathLength": 5
+    },
+    {
+      "startWord": "sufficient",
+      "targetWord": "royal",
+      "pathLength": 6
+    },
+    {
+      "startWord": "flare",
+      "targetWord": "override",
+      "pathLength": 6
+    },
+    {
+      "startWord": "fling",
+      "targetWord": "source",
+      "pathLength": 5
+    },
+    {
+      "startWord": "vulnerability",
+      "targetWord": "emeritus",
+      "pathLength": 5
+    },
+    {
+      "startWord": "mackerel",
+      "targetWord": "voice",
+      "pathLength": 6
+    },
+    {
+      "startWord": "illustrate",
+      "targetWord": "restrict",
+      "pathLength": 6
+    },
+    {
+      "startWord": "prosaic",
+      "targetWord": "preach",
+      "pathLength": 5
+    },
+    {
+      "startWord": "ink",
+      "targetWord": "handle",
+      "pathLength": 6
+    },
+    {
+      "startWord": "jangle",
+      "targetWord": "popular",
+      "pathLength": 6
+    },
+    {
+      "startWord": "lord",
+      "targetWord": "pawn",
+      "pathLength": 5
+    },
+    {
+      "startWord": "box",
+      "targetWord": "regard",
+      "pathLength": 6
+    },
+    {
+      "startWord": "horizon",
+      "targetWord": "greek",
+      "pathLength": 6
+    },
+    {
+      "startWord": "brevity",
+      "targetWord": "enlighten",
+      "pathLength": 5
+    },
+    {
+      "startWord": "stark",
+      "targetWord": "saddle",
+      "pathLength": 6
+    },
+    {
+      "startWord": "cart",
+      "targetWord": "poll",
+      "pathLength": 6
+    },
+    {
+      "startWord": "grant",
+      "targetWord": "confirm",
+      "pathLength": 6
+    },
+    {
+      "startWord": "metropolitan",
+      "targetWord": "cook",
+      "pathLength": 5
+    },
+    {
+      "startWord": "reflect",
+      "targetWord": "oat",
+      "pathLength": 6
+    },
+    {
+      "startWord": "tug",
+      "targetWord": "prominent",
+      "pathLength": 5
+    },
+    {
+      "startWord": "devalue",
+      "targetWord": "speech",
+      "pathLength": 6
+    },
+    {
+      "startWord": "guiltless",
+      "targetWord": "congruent",
+      "pathLength": 6
+    },
+    {
+      "startWord": "topple",
+      "targetWord": "butterfly",
+      "pathLength": 6
+    },
+    {
+      "startWord": "federal",
+      "targetWord": "dress",
+      "pathLength": 6
+    },
+    {
+      "startWord": "transform",
+      "targetWord": "exhibit",
+      "pathLength": 6
+    },
+    {
+      "startWord": "burst",
+      "targetWord": "outcome",
+      "pathLength": 6
+    },
+    {
+      "startWord": "state",
+      "targetWord": "tragedy",
+      "pathLength": 4
+    },
+    {
+      "startWord": "intolerance",
+      "targetWord": "omit",
+      "pathLength": 5
+    },
+    {
+      "startWord": "background",
+      "targetWord": "apologetic",
+      "pathLength": 5
+    },
+    {
+      "startWord": "suck",
+      "targetWord": "legislate",
+      "pathLength": 6
+    },
+    {
+      "startWord": "lemon",
+      "targetWord": "piece",
+      "pathLength": 6
+    },
+    {
+      "startWord": "debate",
+      "targetWord": "gang",
+      "pathLength": 6
+    },
+    {
+      "startWord": "overwrought",
+      "targetWord": "compete",
+      "pathLength": 5
+    },
+    {
+      "startWord": "flamingo",
+      "targetWord": "rock",
+      "pathLength": 6
+    },
+    {
+      "startWord": "collapse",
+      "targetWord": "overestimate",
+      "pathLength": 6
+    },
+    {
+      "startWord": "vile",
+      "targetWord": "cumulative",
+      "pathLength": 5
+    },
+    {
+      "startWord": "complex",
+      "targetWord": "purview",
+      "pathLength": 5
+    },
+    {
+      "startWord": "county",
+      "targetWord": "harmonize",
+      "pathLength": 6
+    },
+    {
+      "startWord": "elude",
+      "targetWord": "aid",
+      "pathLength": 5
+    },
+    {
+      "startWord": "moonlight",
+      "targetWord": "finite",
+      "pathLength": 6
+    },
+    {
+      "startWord": "space",
+      "targetWord": "quiz",
+      "pathLength": 6
+    },
+    {
+      "startWord": "inferior",
+      "targetWord": "flank",
+      "pathLength": 6
+    },
+    {
+      "startWord": "interchange",
+      "targetWord": "chalk",
+      "pathLength": 6
+    },
+    {
+      "startWord": "stadium",
+      "targetWord": "spot",
+      "pathLength": 4
+    },
+    {
+      "startWord": "seduce",
+      "targetWord": "unify",
+      "pathLength": 5
+    },
+    {
+      "startWord": "lilac",
+      "targetWord": "nowadays",
+      "pathLength": 6
+    },
+    {
+      "startWord": "obliterate",
+      "targetWord": "contentious",
+      "pathLength": 5
+    },
+    {
+      "startWord": "pervasive",
+      "targetWord": "strengthen",
+      "pathLength": 6
+    },
+    {
+      "startWord": "exceed",
+      "targetWord": "precision",
+      "pathLength": 5
+    },
+    {
+      "startWord": "maternal",
+      "targetWord": "sex",
+      "pathLength": 4
+    },
+    {
+      "startWord": "bow",
+      "targetWord": "cotton",
+      "pathLength": 5
+    },
+    {
+      "startWord": "period",
+      "targetWord": "relinquish",
+      "pathLength": 5
+    },
+    {
+      "startWord": "groundless",
+      "targetWord": "hang",
+      "pathLength": 5
+    },
+    {
+      "startWord": "large",
+      "targetWord": "rhetoric",
+      "pathLength": 6
+    },
+    {
+      "startWord": "sincerest",
+      "targetWord": "uncertainty",
+      "pathLength": 5
+    },
+    {
+      "startWord": "calico",
+      "targetWord": "nursery",
+      "pathLength": 5
+    },
+    {
+      "startWord": "circumvent",
+      "targetWord": "elaborate",
+      "pathLength": 6
+    },
+    {
+      "startWord": "sandwich",
+      "targetWord": "address",
+      "pathLength": 5
+    },
+    {
+      "startWord": "narcissus",
+      "targetWord": "brake",
+      "pathLength": 6
+    },
+    {
+      "startWord": "kindle",
+      "targetWord": "assassinate",
+      "pathLength": 6
+    },
+    {
+      "startWord": "category",
+      "targetWord": "discipline",
+      "pathLength": 4
+    },
+    {
+      "startWord": "pour",
+      "targetWord": "steady",
+      "pathLength": 6
+    },
+    {
+      "startWord": "pray",
+      "targetWord": "gallant",
+      "pathLength": 5
+    },
+    {
+      "startWord": "prevent",
+      "targetWord": "fresco",
+      "pathLength": 5
+    },
+    {
+      "startWord": "straighten",
+      "targetWord": "brawl",
+      "pathLength": 5
+    },
+    {
+      "startWord": "toothless",
+      "targetWord": "confine",
+      "pathLength": 5
+    },
+    {
+      "startWord": "technical",
+      "targetWord": "liable",
+      "pathLength": 5
+    },
+    {
+      "startWord": "geometry",
+      "targetWord": "cousin",
+      "pathLength": 5
+    },
+    {
+      "startWord": "transmit",
+      "targetWord": "eat",
+      "pathLength": 5
+    },
+    {
+      "startWord": "spontaneous",
+      "targetWord": "efficacious",
+      "pathLength": 4
+    },
+    {
+      "startWord": "propensity",
+      "targetWord": "cigarette",
+      "pathLength": 4
+    },
+    {
+      "startWord": "henceforth",
+      "targetWord": "stop",
+      "pathLength": 4
+    },
+    {
+      "startWord": "quail",
+      "targetWord": "drop",
+      "pathLength": 4
+    },
+    {
+      "startWord": "employ",
+      "targetWord": "obstacle",
+      "pathLength": 4
+    },
+    {
+      "startWord": "confine",
+      "targetWord": "religious",
+      "pathLength": 4
+    },
+    {
+      "startWord": "oil",
+      "targetWord": "strength",
+      "pathLength": 4
+    },
+    {
+      "startWord": "knot",
+      "targetWord": "crave",
+      "pathLength": 4
+    },
+    {
+      "startWord": "crew",
+      "targetWord": "acquisition",
+      "pathLength": 4
+    },
+    {
+      "startWord": "president",
+      "targetWord": "curl",
+      "pathLength": 4
+    },
+    {
+      "startWord": "shareholder",
+      "targetWord": "display",
+      "pathLength": 4
+    },
+    {
+      "startWord": "sculpture",
+      "targetWord": "skull",
+      "pathLength": 4
+    },
+    {
+      "startWord": "import",
+      "targetWord": "hereditary",
+      "pathLength": 4
+    },
+    {
+      "startWord": "ail",
+      "targetWord": "remedy",
+      "pathLength": 6
+    },
+    {
+      "startWord": "concert",
+      "targetWord": "bamboo",
+      "pathLength": 6
+    },
+    {
+      "startWord": "detail",
+      "targetWord": "grand",
+      "pathLength": 6
+    },
+    {
+      "startWord": "unconscious",
+      "targetWord": "enthusiastic",
+      "pathLength": 4
+    },
+    {
+      "startWord": "reprint",
+      "targetWord": "disclose",
+      "pathLength": 5
+    },
+    {
+      "startWord": "cue",
+      "targetWord": "mankind",
+      "pathLength": 6
+    },
+    {
+      "startWord": "thorax",
+      "targetWord": "aloft",
+      "pathLength": 4
+    },
+    {
+      "startWord": "alternate",
+      "targetWord": "uncontroversial",
+      "pathLength": 5
+    },
+    {
+      "startWord": "ascertain",
+      "targetWord": "exclude",
+      "pathLength": 6
+    },
+    {
+      "startWord": "poem",
+      "targetWord": "growl",
+      "pathLength": 5
+    },
+    {
+      "startWord": "medicine",
+      "targetWord": "beetle",
+      "pathLength": 6
+    },
+    {
+      "startWord": "outset",
+      "targetWord": "merit",
+      "pathLength": 5
+    },
+    {
+      "startWord": "glitter",
+      "targetWord": "unintelligent",
+      "pathLength": 6
+    },
+    {
+      "startWord": "brown",
+      "targetWord": "dot",
+      "pathLength": 6
+    },
+    {
+      "startWord": "trashy",
+      "targetWord": "fowl",
+      "pathLength": 4
+    },
+    {
+      "startWord": "structural",
+      "targetWord": "tongue",
+      "pathLength": 5
+    },
+    {
+      "startWord": "strength",
+      "targetWord": "ensure",
+      "pathLength": 6
+    },
+    {
+      "startWord": "simulate",
+      "targetWord": "fiction",
+      "pathLength": 5
+    },
+    {
+      "startWord": "disregard",
+      "targetWord": "background",
+      "pathLength": 5
+    },
+    {
+      "startWord": "nucleus",
+      "targetWord": "like",
+      "pathLength": 6
+    },
+    {
+      "startWord": "embassy",
+      "targetWord": "imagery",
+      "pathLength": 4
+    },
+    {
+      "startWord": "perforate",
+      "targetWord": "pause",
+      "pathLength": 5
+    },
+    {
+      "startWord": "dedicate",
+      "targetWord": "weep",
+      "pathLength": 4
+    },
+    {
+      "startWord": "design",
+      "targetWord": "disease",
+      "pathLength": 6
+    },
+    {
+      "startWord": "thermometer",
+      "targetWord": "disappear",
+      "pathLength": 4
+    },
+    {
+      "startWord": "cottage",
+      "targetWord": "shellfish",
+      "pathLength": 6
+    },
+    {
+      "startWord": "lapse",
+      "targetWord": "hoop",
+      "pathLength": 6
+    },
+    {
+      "startWord": "counterproductive",
+      "targetWord": "seagoing",
+      "pathLength": 6
+    },
+    {
+      "startWord": "socioeconomic",
+      "targetWord": "theoretical",
+      "pathLength": 4
+    },
+    {
+      "startWord": "erect",
+      "targetWord": "luxury",
+      "pathLength": 6
+    },
+    {
+      "startWord": "hire",
+      "targetWord": "erotic",
+      "pathLength": 5
+    },
+    {
+      "startWord": "inherit",
+      "targetWord": "myriad",
+      "pathLength": 6
+    },
+    {
+      "startWord": "mechanic",
+      "targetWord": "chairman",
+      "pathLength": 5
+    },
+    {
+      "startWord": "spoon",
+      "targetWord": "owner",
+      "pathLength": 5
+    },
+    {
+      "startWord": "mint",
+      "targetWord": "wednesday",
+      "pathLength": 6
+    },
+    {
+      "startWord": "chafe",
+      "targetWord": "cafe",
+      "pathLength": 5
+    },
+    {
+      "startWord": "cushion",
+      "targetWord": "snowy",
+      "pathLength": 6
+    },
+    {
+      "startWord": "rug",
+      "targetWord": "slip",
+      "pathLength": 4
+    },
+    {
+      "startWord": "unsound",
+      "targetWord": "romance",
+      "pathLength": 6
+    },
+    {
+      "startWord": "ruddy",
+      "targetWord": "enemy",
+      "pathLength": 5
+    },
+    {
+      "startWord": "clear",
+      "targetWord": "grease",
+      "pathLength": 5
+    },
+    {
+      "startWord": "waltz",
+      "targetWord": "evacuate",
+      "pathLength": 5
+    },
+    {
+      "startWord": "slip",
+      "targetWord": "seamless",
+      "pathLength": 5
+    },
+    {
+      "startWord": "bloom",
+      "targetWord": "doubt",
+      "pathLength": 6
+    },
+    {
+      "startWord": "strikingly",
+      "targetWord": "misunderstand",
+      "pathLength": 5
+    },
+    {
+      "startWord": "party",
+      "targetWord": "scan",
+      "pathLength": 6
+    },
+    {
+      "startWord": "motionless",
+      "targetWord": "scold",
+      "pathLength": 6
+    },
+    {
+      "startWord": "excel",
+      "targetWord": "titular",
+      "pathLength": 5
+    },
+    {
+      "startWord": "calculus",
+      "targetWord": "coast",
+      "pathLength": 6
+    },
+    {
+      "startWord": "nude",
+      "targetWord": "shiver",
+      "pathLength": 5
+    },
+    {
+      "startWord": "thrust",
+      "targetWord": "pertain",
+      "pathLength": 6
+    },
+    {
+      "startWord": "concord",
+      "targetWord": "intend",
+      "pathLength": 4
+    },
+    {
+      "startWord": "parry",
+      "targetWord": "news",
+      "pathLength": 5
+    },
+    {
+      "startWord": "resound",
+      "targetWord": "inaccessible",
+      "pathLength": 6
+    },
+    {
+      "startWord": "periphery",
+      "targetWord": "simultaneous",
+      "pathLength": 5
+    },
+    {
+      "startWord": "oft",
+      "targetWord": "clad",
+      "pathLength": 6
+    },
+    {
+      "startWord": "fellow",
+      "targetWord": "earn",
+      "pathLength": 4
+    },
+    {
+      "startWord": "knowledge",
+      "targetWord": "dig",
+      "pathLength": 4
+    },
+    {
+      "startWord": "longitude",
+      "targetWord": "converge",
+      "pathLength": 4
+    },
+    {
+      "startWord": "caprice",
+      "targetWord": "vigor",
+      "pathLength": 5
+    },
+    {
+      "startWord": "unattainable",
+      "targetWord": "judicial",
+      "pathLength": 5
+    },
+    {
+      "startWord": "vain",
+      "targetWord": "wrestle",
+      "pathLength": 6
+    },
+    {
+      "startWord": "neighbor",
+      "targetWord": "gear",
+      "pathLength": 5
+    },
+    {
+      "startWord": "graduate",
+      "targetWord": "psychology",
+      "pathLength": 6
+    },
+    {
+      "startWord": "fortuitous",
+      "targetWord": "vulgarity",
+      "pathLength": 6
+    },
+    {
+      "startWord": "deleterious",
+      "targetWord": "drowsy",
+      "pathLength": 6
+    },
+    {
+      "startWord": "brace",
+      "targetWord": "venison",
+      "pathLength": 6
+    },
+    {
+      "startWord": "liquefy",
+      "targetWord": "rupture",
+      "pathLength": 5
+    },
+    {
+      "startWord": "petition",
+      "targetWord": "poetry",
+      "pathLength": 5
+    },
+    {
+      "startWord": "unrelated",
+      "targetWord": "okay",
+      "pathLength": 6
+    },
+    {
+      "startWord": "framework",
+      "targetWord": "innermost",
+      "pathLength": 5
+    },
+    {
+      "startWord": "autonomy",
+      "targetWord": "home",
+      "pathLength": 5
+    },
+    {
+      "startWord": "sort",
+      "targetWord": "baritone",
+      "pathLength": 6
+    },
+    {
+      "startWord": "tan",
+      "targetWord": "proceed",
+      "pathLength": 5
+    },
+    {
+      "startWord": "biweekly",
+      "targetWord": "precept",
+      "pathLength": 6
+    },
+    {
+      "startWord": "genetic",
+      "targetWord": "attest",
+      "pathLength": 6
+    },
+    {
+      "startWord": "loath",
+      "targetWord": "unintentional",
+      "pathLength": 5
+    },
+    {
+      "startWord": "drain",
+      "targetWord": "surrender",
+      "pathLength": 6
+    },
+    {
+      "startWord": "mosaic",
+      "targetWord": "maybe",
+      "pathLength": 5
+    },
+    {
+      "startWord": "sand",
+      "targetWord": "disintegration",
+      "pathLength": 6
+    },
+    {
+      "startWord": "uncontroversial",
+      "targetWord": "awake",
+      "pathLength": 6
+    },
+    {
+      "startWord": "burnt",
+      "targetWord": "incompetent",
+      "pathLength": 5
+    },
+    {
+      "startWord": "enhance",
+      "targetWord": "break",
+      "pathLength": 6
+    },
+    {
+      "startWord": "salve",
+      "targetWord": "belong",
+      "pathLength": 5
+    },
+    {
+      "startWord": "avert",
+      "targetWord": "recurrent",
+      "pathLength": 4
+    },
+    {
+      "startWord": "unravel",
+      "targetWord": "midst",
+      "pathLength": 6
+    },
+    {
+      "startWord": "august",
+      "targetWord": "disengagement",
+      "pathLength": 6
+    },
+    {
+      "startWord": "manuscript",
+      "targetWord": "jerk",
+      "pathLength": 6
+    },
+    {
+      "startWord": "last",
+      "targetWord": "vagueness",
+      "pathLength": 6
+    },
+    {
+      "startWord": "stamp",
+      "targetWord": "uncover",
+      "pathLength": 6
+    },
+    {
+      "startWord": "wicked",
+      "targetWord": "subservient",
+      "pathLength": 5
+    },
+    {
+      "startWord": "transcribe",
+      "targetWord": "inconclusive",
+      "pathLength": 5
+    },
+    {
+      "startWord": "idle",
+      "targetWord": "mystery",
+      "pathLength": 6
+    },
+    {
+      "startWord": "radiant",
+      "targetWord": "extrapolate",
+      "pathLength": 6
+    },
+    {
+      "startWord": "isolate",
+      "targetWord": "text",
+      "pathLength": 6
+    },
+    {
+      "startWord": "band",
+      "targetWord": "procreate",
+      "pathLength": 5
+    },
+    {
+      "startWord": "memory",
+      "targetWord": "white",
+      "pathLength": 5
+    },
+    {
+      "startWord": "clinical",
+      "targetWord": "juice",
+      "pathLength": 5
+    },
+    {
+      "startWord": "induce",
+      "targetWord": "tremble",
+      "pathLength": 6
+    },
+    {
+      "startWord": "ventricular",
+      "targetWord": "ton",
+      "pathLength": 6
+    },
+    {
+      "startWord": "aim",
+      "targetWord": "sentence",
+      "pathLength": 4
+    },
+    {
+      "startWord": "document",
+      "targetWord": "relapse",
+      "pathLength": 5
+    },
+    {
+      "startWord": "plant",
+      "targetWord": "fascinate",
+      "pathLength": 5
+    },
+    {
+      "startWord": "nuisance",
+      "targetWord": "grab",
+      "pathLength": 5
+    },
+    {
+      "startWord": "digestion",
+      "targetWord": "froth",
+      "pathLength": 5
+    },
+    {
+      "startWord": "offer",
+      "targetWord": "determine",
+      "pathLength": 4
+    },
+    {
+      "startWord": "heat",
+      "targetWord": "decompose",
+      "pathLength": 4
+    },
+    {
+      "startWord": "mannequin",
+      "targetWord": "vex",
+      "pathLength": 4
+    },
+    {
+      "startWord": "compulsion",
+      "targetWord": "contradict",
+      "pathLength": 4
+    },
+    {
+      "startWord": "superficial",
+      "targetWord": "daylight",
+      "pathLength": 4
+    },
+    {
+      "startWord": "strongly",
+      "targetWord": "hoarse",
+      "pathLength": 4
+    },
+    {
+      "startWord": "dip",
+      "targetWord": "spread",
+      "pathLength": 4
+    },
+    {
+      "startWord": "remote",
+      "targetWord": "sound",
+      "pathLength": 4
+    },
+    {
+      "startWord": "lipstick",
+      "targetWord": "marble",
+      "pathLength": 4
+    }
+  ]
+}

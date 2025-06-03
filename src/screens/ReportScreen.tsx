@@ -26,6 +26,7 @@ import WordDefinitionDialog from "../components/WordDefinitionDialog";
 import {
   shareChallenge,
   generateGameDeepLink,
+  generateDailyChallengeDeepLink,
 } from "../services/SharingService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -106,7 +107,7 @@ const ReportScreen = () => {
     }
 
     try {
-      const { startWord, endWord, playerPath } = gameReport;
+      const { startWord, targetWord, playerPath } = gameReport;
 
       const pathLength = playerPath.length - 1;
 
@@ -120,7 +121,17 @@ const ReportScreen = () => {
 
       // For web, show the challenge link in a dialog
       if (Platform.OS === "web") {
-        const link = generateGameDeepLink(startWord, endWord);
+        // Check if this is a daily challenge and generate appropriate link
+        let link: string;
+        if (gameReport.isDailyChallenge && gameReport.dailyChallengeId) {
+          link = generateDailyChallengeDeepLink(
+            gameReport.dailyChallengeId,
+            startWord,
+            targetWord
+          );
+        } else {
+          link = generateGameDeepLink(startWord, targetWord);
+        }
         setChallengeLink(link);
         setChallengeDialogVisible(true);
         return;
@@ -129,7 +140,7 @@ const ReportScreen = () => {
       // For native platforms, use the sharing APIs
       const success = await shareChallenge({
         startWord,
-        targetWord: endWord,
+        targetWord: targetWord,
         playerPath,
         screenshotRef: graphPreviewRef, // Use the graph preview ref for sharing
         steps: pathLength,
@@ -175,6 +186,7 @@ const ReportScreen = () => {
             optimalChoices={gameReport.optimalChoices}
             suggestedPath={gameReport.suggestedPath}
             onWordDefinition={showWordDefinition}
+            targetWord={gameReport.targetWord}
           />
         )}
 

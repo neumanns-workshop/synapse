@@ -14,11 +14,11 @@ import { Circle, CircleProps } from "react-native-svg";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-interface TouchableCircleProps extends Omit<CircleProps, "r" | "onPress"> {
+interface TouchableCircleProps extends Omit<CircleProps, "r" | "onPress" | "fill"> {
   cx: number;
   cy: number;
   initialRadius: number; // This is the key prop that was missing
-  fill: string;
+  targetFill: string; // New prop for the target fill color
   stroke: string;
   strokeWidth: number;
   onPress: () => void;
@@ -26,13 +26,14 @@ interface TouchableCircleProps extends Omit<CircleProps, "r" | "onPress"> {
   isCurrent?: boolean;
   focusedRadius: number;
   defaultRadius: number;
+  animationDuration?: number; // Optional duration for fill animation
 }
 
 const TouchableCircle: React.FC<TouchableCircleProps> = ({
   cx,
   cy,
   initialRadius,
-  fill,
+  targetFill,
   stroke,
   strokeWidth,
   onPress,
@@ -40,9 +41,19 @@ const TouchableCircle: React.FC<TouchableCircleProps> = ({
   isCurrent,
   focusedRadius,
   defaultRadius,
+  animationDuration = 300, // Default fill animation duration
   ...otherProps // To pass through other SVG props if any
 }) => {
   const animatedRadius = useSharedValue(initialRadius);
+  const animatedFillColor = useSharedValue(targetFill); // Initialize with the first targetFill
+
+  useEffect(() => {
+    // Animate fill color when targetFill changes
+    animatedFillColor.value = withTiming(targetFill, {
+      duration: animationDuration,
+      easing: Easing.inOut(Easing.ease),
+    });
+  }, [targetFill, animationDuration, animatedFillColor]);
 
   useEffect(() => {
     if (isCurrent === true) {
@@ -92,7 +103,8 @@ const TouchableCircle: React.FC<TouchableCircleProps> = ({
   const animatedPropsObject = useAnimatedProps(() => {
     return {
       r: animatedRadius.value,
-    } as { r: number }; // Explicitly type the return for animatedProps
+      fill: animatedFillColor.value, // Use the animated fill color
+    } as { r: number; fill: string }; // Explicitly type the return for animatedProps
   });
 
   const pressHandler =
@@ -102,7 +114,6 @@ const TouchableCircle: React.FC<TouchableCircleProps> = ({
     <AnimatedCircle
       cx={cx}
       cy={cy}
-      fill={fill}
       stroke={stroke}
       strokeWidth={strokeWidth}
       fillOpacity={fillOpacity}

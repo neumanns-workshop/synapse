@@ -8,6 +8,7 @@ import {
   useTheme,
   Portal,
   Snackbar,
+  Button,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,8 +19,10 @@ import GraphVisualization from "../components/GraphVisualization";
 import PathDisplayConfigurator from "../components/PathDisplayConfigurator";
 import PlayerPathDisplay from "../components/PlayerPathDisplay";
 import WordDefinitionDialog from "../components/WordDefinitionDialog";
+import UpgradePrompt from "../components/UpgradePrompt";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import { useTutorial } from "../context/TutorialContext";
 
 const GameScreen = () => {
   // const navigation = useNavigation<NavigationProp>(); // Removing unused navigation variable
@@ -66,6 +69,26 @@ const GameScreen = () => {
     (state) => state.startChallengeGame,
   );
   const isChallenge = useGameStore((state) => state.isChallenge);
+  const isDailyChallenge = useGameStore((state) => state.isDailyChallenge);
+
+  // Upgrade prompt state
+  const upgradePromptVisible = useGameStore((state) => state.upgradePromptVisible);
+  const upgradePromptMessage = useGameStore((state) => state.upgradePromptMessage);
+  const hideUpgradePrompt = useGameStore((state) => state.hideUpgradePrompt);
+  const showUpgradePrompt = useGameStore((state) => state.showUpgradePrompt);
+  const remainingFreeGames = useGameStore((state) => state.remainingFreeGames);
+
+  // Debug logging for upgrade prompt
+  console.log('GameScreen: upgradePromptVisible =', upgradePromptVisible);
+  console.log('GameScreen: upgradePromptMessage =', upgradePromptMessage);
+  console.log('GameScreen: About to render UpgradePrompt with visible =', upgradePromptVisible);
+
+  // Add useEffect to track upgradePromptVisible changes
+  useEffect(() => {
+    console.log('GameScreen: upgradePromptVisible changed to:', upgradePromptVisible);
+  }, [upgradePromptVisible]);
+
+  const { startTutorial } = useTutorial();
 
   // Load initial data on mount and check if a game was restored.
   useEffect(() => {
@@ -87,6 +110,7 @@ const GameScreen = () => {
   // 3. A game was NOT restored during the initial load.
   // 4. Game status is 'idle' or 'loading'.
   // 5. And there's no pending challenge to start
+  // 6. And there's no upgrade prompt currently visible
   useEffect(() => {
     const currentError = useGameStore.getState().errorLoadingData; // Get latest error state
 
@@ -94,6 +118,7 @@ const GameScreen = () => {
       initialLoadComplete &&
       graphData &&
       !gameWasRestored &&
+      !upgradePromptVisible && // Don't auto-start if upgrade prompt is visible
       ((gameStatus === "idle" && !hasPendingChallenge && !currentError) || // If idle, ensure no pending/error
         (gameStatus === "loading" && !hasPendingChallenge && !currentError)) && // If loading, also ensure not due to pending/error
       !isChallenge // And not currently in a challenge game that might be loading
@@ -109,6 +134,7 @@ const GameScreen = () => {
     hasPendingChallenge,
     errorLoadingData,
     isChallenge,
+    upgradePromptVisible, // Add this dependency
   ]);
 
   // Handle challenge game from deep link if pending
@@ -125,26 +151,20 @@ const GameScreen = () => {
         pendingChallengeWords.targetWord,
       )
         .then(() => {
-          // After the attempt, check for an error set by the store
-          const currentError = useGameStore.getState().errorLoadingData;
-
-          if (currentError) {
-            setSnackbarMessage(currentError); // Show error to user
-            setSnackbarVisible(true);
-
-            // Fallback: attempt to start a new random game after showing the error.
-            startGame(); // Call startGame to fall back to a random game
-          } else {
-            // If successful, store would have set isChallenge, gameStatus etc.
-            // Store also clears pending flags.
-          }
+          // If successful, the store would have set isChallenge, gameStatus etc.
+          // Store also clears pending flags. No explicit action needed here if store manages state correctly.
         })
-        .catch((_err) => {
-          // Should not happen if store handles errors, but as a safeguard:
-          setSnackbarMessage(
-            "An unexpected error occurred with the challenge.",
-          );
+        .catch((_actionError) => { // Catch rejection from startChallengeGameAction
+          // The action itself should ideally set errorLoadingData in the store upon failure.
+          // We check the store for that error message.
+          const currentErrorFromStore = useGameStore.getState().errorLoadingData;
+          const messageToShow = currentErrorFromStore || "Failed to start challenge. Trying a random game.";
+
+          setSnackbarMessage(messageToShow);
           setSnackbarVisible(true);
+
+          // Fallback: attempt to start a new random game after showing the error.
+          startGame(); // Call startGame to fall back to a random game
         });
     }
   }, [
@@ -230,116 +250,125 @@ const GameScreen = () => {
     );
   };
 
-  // If still checking persistence or loading data, show loading indicator
-  if (!initialLoadComplete || isLoading) {
+  // Handle upgrade prompt actions
+  const handleUpgrade = () => {
+    // TODO: Implement IAP upgrade flow
+    console.log('Upgrade to premium requested');
+    hideUpgradePrompt();
+  };
+
+  const handleUpgradeDismiss = () => {
+    hideUpgradePrompt();
+  };
+
+  // Render loading indicator if data is loading or game status is loading
+  if (isLoading) {
     return (
-      <SafeAreaView
-        style={[
-          styles.loadingContainer,
-          { backgroundColor: colors.background },
-        ]}
-      >
-        <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.onBackground }]}>
-          Loading game data...
-        </Text>
+      <SafeAreaView style={styles.centeredContainer}>
+        <ActivityIndicator testID="activity-indicator" animating size="large" />
+        <Text style={styles.loadingText}>Loading Game...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <>
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
-      >
-        {/* App Bar/Header */}
-        <AppHeader
-          onNewGame={startGame}
-          onGiveUp={handleGiveUp}
-          newGameDisabled={gameStatus === "playing"}
-          giveUpDisabled={gameStatus !== "playing"}
-        />
-        {showReport ? (
-          <ReportScreen />
-        ) : (
-          <>
-            <View style={styles.gameContainer}>
-              <View
-                style={[styles.graphContainer, styles.transparentBackground]}
-              >
-                {isLoading ? (
-                  <ActivityIndicator
-                    size="large"
-                    animating={true}
-                    color={colors.onSurface}
-                  />
-                ) : (
-                  <GraphVisualization />
-                )}
-              </View>
-              {/* Player Path Container */}
-              <View style={[styles.pathCard, styles.transparentBackground]}>
-                <View style={styles.transparentContent}>
-                  <PlayerPathDisplay
-                    playerPath={playerPath}
-                    optimalChoices={optimalChoices}
-                    suggestedPath={suggestedPathFromCurrent}
-                    onWordDefinition={handleShowDefinition}
-                  />
-                </View>
-              </View>
-              {/* Optimal Path Container (only shown when game is over) */}
-              {showPathOptions && (
-                <View style={[styles.pathCard, styles.transparentBackground]}>
-                  {renderOptimalPath()}
-                </View>
-              )}
-              {/* Available Words Display (only shown when playing) */}
-              {gameStatus === "playing" && (
-                <AvailableWordsDisplay onWordSelect={handleSelectWord} />
-              )}
-              {/* Only show path display options when game is over */}
-              {showPathOptions && (
-                <Card
-                  style={[
-                    styles.optionsCard,
-                    { backgroundColor: colors.surface },
-                  ]}
-                >
-                  <Card.Content>
-                    <Text
-                      variant="labelMedium"
-                      style={[styles.optionsLabel, { color: colors.onSurface }]}
-                    >
-                      Path Display:
-                    </Text>
-                    <PathDisplayConfigurator compact={true} />
-                  </Card.Content>
-                </Card>
+    <SafeAreaView style={styles.container}>
+      <AppHeader
+        onNewGame={startGame}
+        onGiveUp={handleGiveUp}
+        newGameDisabled={gameStatus === "playing"}
+        giveUpDisabled={gameStatus !== "playing"}
+      />
+      {showReport ? (
+        <ReportScreen />
+      ) : (
+        <>
+          <View style={styles.gameContainer}>
+            <View
+              style={[styles.graphContainer, styles.transparentBackground]}
+            >
+              {isLoading ? (
+                <ActivityIndicator
+                  size="large"
+                  animating={true}
+                  color={colors.onSurface}
+                />
+              ) : (
+                <GraphVisualization />
               )}
             </View>
-            {/* Dialogs and Portals */}
-            <Portal>
-              {/* Word Definition Dialog */}
-              <WordDefinitionDialog
-                word={selectedWord || ""}
-                pathIndexInPlayerPath={selectedWordPathIndex}
-                visible={definitionVisible}
-                onDismiss={handleDismissDefinition}
-              />
-              {/* Snackbar for messages */}
-              <Snackbar
-                visible={snackbarVisible}
-                onDismiss={onDismissSnackbar}
-                style={{ backgroundColor: colors.surface }}
+            {/* Player Path Container */}
+            <View style={[styles.pathCard, styles.transparentBackground]}>
+              <View style={styles.transparentContent}>
+                <PlayerPathDisplay
+                  playerPath={playerPath}
+                  optimalChoices={optimalChoices}
+                  suggestedPath={suggestedPathFromCurrent}
+                  onWordDefinition={handleShowDefinition}
+                />
+              </View>
+            </View>
+            {/* Optimal Path Container (only shown when game is over) */}
+            {showPathOptions && (
+              <View style={[styles.pathCard, styles.transparentBackground]}>
+                {renderOptimalPath()}
+              </View>
+            )}
+            {/* Available Words Display (only shown when playing) */}
+            {gameStatus === "playing" && (
+              <AvailableWordsDisplay onWordSelect={handleSelectWord} />
+            )}
+            {/* Only show path display options when game is over */}
+            {showPathOptions && (
+              <Card
+                style={[
+                  styles.optionsCard,
+                  { backgroundColor: colors.surface },
+                ]}
               >
-                {snackbarMessage}
-              </Snackbar>
-            </Portal>
-          </>
-        )}
-      </SafeAreaView>
-    </>
+                <Card.Content>
+                  <Text
+                    variant="labelMedium"
+                    style={[styles.optionsLabel, { color: colors.onSurface }]}
+                  >
+                    Path Display:
+                  </Text>
+                  <PathDisplayConfigurator compact={true} />
+                </Card.Content>
+              </Card>
+            )}
+          </View>
+          {/* Dialogs and Portals */}
+          <Portal>
+            {/* Word Definition Dialog */}
+            <WordDefinitionDialog
+              visible={definitionVisible}
+              word={selectedWord || ""}
+              pathIndexInPlayerPath={selectedWordPathIndex}
+              onDismiss={handleDismissDefinition}
+            />
+            {/* Snackbar for messages */}
+            <Snackbar
+              visible={snackbarVisible}
+              onDismiss={onDismissSnackbar}
+              style={{ backgroundColor: colors.surface }}
+            >
+              {snackbarMessage}
+            </Snackbar>
+          </Portal>
+        </>
+      )}
+      
+      {/* Global Portals - Available in all states */}
+      <Portal>
+        <UpgradePrompt
+          visible={upgradePromptVisible}
+          onDismiss={handleUpgradeDismiss}
+          onUpgrade={handleUpgrade}
+          remainingFreeGames={remainingFreeGames}
+        />
+      </Portal>
+    </SafeAreaView>
   );
 };
 
@@ -445,6 +474,16 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 10,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  centeredContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorText: {
+    marginBottom: 10,
     fontSize: 16,
     fontWeight: "bold",
   },

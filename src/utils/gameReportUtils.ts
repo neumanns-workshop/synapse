@@ -2,7 +2,7 @@ import type { Achievement } from "../features/achievements";
 import { GraphData, WordFrequencies } from "../services/dataLoader";
 
 // Mirroring PotentialRarestMove from useGameStore for clarity, or it could be imported
-interface PotentialRarestMove {
+export interface PotentialRarestMove {
   word: string;
   frequency: number;
   playerChoseThisRarestOption: boolean;
@@ -16,7 +16,7 @@ export interface OptimalChoice {
   isGlobalOptimal: boolean;
   isLocalOptimal: boolean;
   usedAsCheckpoint?: boolean; // Track if this optimal move has been used as a checkpoint for backtracking
-  hopsFromPlayerPositionToEnd?: number; // Hops from playerPosition on this choice to endWord via suggested path
+  hopsFromPlayerPositionToEnd?: number; // Hops from playerPosition on this choice to targetWord via suggested path
   choseMostSimilarNeighbor?: boolean; // Was this choice the most similar among available direct neighbors?
   choseLeastSimilarNeighbor?: boolean; // Was this choice the least similar among available direct neighbors?
   choseRarestNeighbor?: boolean; // Added field
@@ -48,23 +48,31 @@ export interface GameReport {
   timestamp: number; // This is the end timestamp
   startTime?: number; // Added optional startTime
   startWord: string;
-  endWord: string;
+  targetWord: string; // Changed from targetWord to targetWord for consistency
   status: "won" | "given_up";
   pathEfficiency: number;
+  // Daily challenge fields
+  isDailyChallenge?: boolean; // Flag to identify daily challenge games
+  dailyChallengeId?: string; // Store the daily challenge ID directly
+  aiPath?: string[]; // AI solution path for daily challenges
+  aiModel?: string | null; // AI model that generated the solution
 }
 
 // Helper to calculate semantic distance between two words
-const getSemanticDistance = (
+export const getSemanticDistance = (
   graphData: GraphData,
   word1: string,
   word2: string,
 ): number => {
-  if (!graphData[word1]?.edges[word2]) return 1; // Max distance if no direct connection
-  return 1 - graphData[word1].edges[word2]; // Convert similarity to distance
+  // Check if word1 exists and has an edges property, and if word2 is a key in those edges
+  if (graphData[word1] && graphData[word1].edges && graphData[word1].edges[word2] !== undefined) {
+    return 1 - graphData[word1].edges[word2]; // Convert similarity to distance
+  }
+  return 1; // Max distance if no direct connection or word/edge doesn't exist
 };
 
 // Helper to calculate total semantic distance of a path
-const calculatePathDistance = (
+export const calculatePathDistance = (
   graphData: GraphData,
   path: string[],
 ): number => {
@@ -76,7 +84,7 @@ const calculatePathDistance = (
 };
 
 // Helper to calculate average similarity per move
-const calculateAverageSimilarity = (
+export const calculateAverageSimilarity = (
   graphData: GraphData,
   path: string[],
 ): number | null => {
@@ -98,7 +106,7 @@ export const trackOptimalChoice = (
   playerChoice: string,
   optimalPath: string[],
   suggestedPath: string[],
-  endWord: string,
+  targetWord: string,
   findShortestPathFn: (
     graphData: GraphData | null,
     start: string,
@@ -106,8 +114,15 @@ export const trackOptimalChoice = (
   ) => string[],
   wordFrequencies: WordFrequencies | null,
 ): OptimalChoice => {
-  const hopsToEnd =
-    suggestedPath.length > 0 ? suggestedPath.length - 1 : Infinity;
+  // Calculate hops from playerPosition to targetWord via suggested path
+  const suggestedPathFromPosition = findShortestPathFn(
+    graphData,
+    playerPosition,
+    targetWord,
+  );
+  const hopsToEnd = suggestedPathFromPosition
+    ? suggestedPathFromPosition.length - 1
+    : -1;
 
   const optimalNextMove = optimalPath[optimalPath.indexOf(playerPosition) + 1];
   const suggestedNextMove =
@@ -198,7 +213,7 @@ export const generateGameReport = (
   playerPath: string[],
   optimalPathGlobal: string[],
   recordedOptimalChoices: OptimalChoice[],
-  endWord: string,
+  targetWord: string,
   findShortestPathByHopsFn: (
     graphData: GraphData | null,
     start: string,
@@ -211,6 +226,11 @@ export const generateGameReport = (
   ) => string[],
   backtrackEvents: BacktrackReportEntry[],
   potentialRarestMovesInput?: PotentialRarestMove[], // Added parameter
+  // New daily challenge parameters
+  isDailyChallenge?: boolean,
+  dailyChallengeId?: string, // Add dailyChallengeId parameter
+  aiPath?: string[],
+  aiModel?: string | null,
 ): GameReport => {
   const playerSemanticDistanceTotal = calculatePathDistance(
     graphData,
@@ -232,10 +252,10 @@ export const generateGameReport = (
   const suggestedPathFromFinalPosition = findShortestPathByHopsFn(
     graphData,
     playerPath[playerPath.length - 1],
-    endWord,
+    targetWord,
   );
   const gameStatus: GameReport["status"] =
-    playerPath[playerPath.length - 1] === endWord ? "won" : "given_up"; // Assuming 'lost' is not used or handled elsewhere
+    playerPath[playerPath.length - 1] === targetWord ? "won" : "given_up"; // Assuming 'lost' is not used or handled elsewhere
 
   // Calculate metrics (simplified for brevity, assuming they exist)
   const pathEfficiency =
@@ -258,7 +278,7 @@ export const generateGameReport = (
 
   // Determine the denominator for efficiency calculation
   let efficiencyDenominator = playerSemanticDistanceTotal;
-  const playerReachedEnd = playerPath[playerPath.length - 1] === endWord;
+  const playerReachedEnd = playerPath[playerPath.length - 1] === targetWord;
 
   if (!playerReachedEnd && suggestedPathFromFinalPosition.length > 0) {
     // Construct hypothetical full path: player's actual path up to the last word, then the suggested path from there.
@@ -295,7 +315,7 @@ export const generateGameReport = (
     timestamp: Date.now(),
     startTime: Date.now(),
     startWord: playerPath[0],
-    endWord: endWord,
+    targetWord,
     playerPath: playerPath,
     optimalPath: optimalPathGlobal,
     suggestedPath: finalSuggestedPath,
@@ -313,6 +333,10 @@ export const generateGameReport = (
     earnedAchievements: [],
     pathEfficiency: pathEfficiency,
     potentialRarestMoves: potentialRarestMovesInput, // Assign to report
+    isDailyChallenge,
+    dailyChallengeId,
+    aiPath,
+    aiModel,
   };
 };
 

@@ -9,21 +9,21 @@ const synapseColors = {
   tertiary: "#FFD3B6", // Pastel Orange (Greedy/Strategic)
 
   // Path colors - chalk pastel palette
-  startNodeColor: "#A8E6CF", // Pastel Green
-  endNodeColor: "#FF8B94", // Pastel Coral
-  currentNodeColor: "#A0CED9", // Pastel Blue
-  pathNodeColor: "#D6D6D6", // Pastel Gray
-  globalOptimalNodeColor: "#FFF6A3", // Pastel Yellow
-  localOptimalNodeColor: "#CBAACB", // Pastel Purple
+  startNodeColor: "#90EEBB", // Pastel Green (Adjusted)
+  endNodeColor: "#FF8787", // Pastel Coral (Adjusted)
+  currentNodeColor: "#87CEEB", // Pastel Blue
+  pathNodeColor: "#EAEAEA", // Very Light Gray (Adjusted for player path)
+  globalOptimalNodeColor: "#FFEE77", // Pastel Yellow
+  localOptimalNodeColor: "#B19CD9", // Pastel Purple
   greedyMoveColor: "#FFD3B6", // Pastel Orange
   strategicRepositioningMoveColor: "#FFD3B6", // Pastel Orange (alt)
 
   // Stats modal colors
   warningColor: "#FF8B94", // Same as endNodeColor for consistency
-  achievementChipColor: "#FFF6A3", // Same as globalOptimalNodeColor
-  achievementIconColor: "#FFF6A3", // Same as globalOptimalNodeColor
+  achievementChipColor: "#FFF6A3", // Same as globalOptimalNodeColor (before update)
+  achievementIconColor: "#FFF6A3", // Same as globalOptimalNodeColor (before update)
   progressBadgeColor: "#A8E6CF", // Same as startNodeColor
-  collectedWordChipColor: "#A0CED9", // Same as currentNodeColor
+  collectedWordChipColor: "#A0CED9", // Same as currentNodeColor (before update)
 };
 
 // Define the extended theme structure
@@ -67,12 +67,12 @@ export const SynapseLightTheme: ExtendedTheme = {
     localOptimalNode: synapseColors.localOptimalNodeColor,
     greedyMove: synapseColors.greedyMoveColor,
     strategicRepositioningMove: synapseColors.strategicRepositioningMoveColor,
-    // New colors for stats modal
-    warningColor: synapseColors.warningColor,
-    achievementChip: synapseColors.achievementChipColor,
-    achievementIcon: synapseColors.achievementIconColor,
-    progressBadge: synapseColors.progressBadgeColor,
-    collectedWordChip: synapseColors.collectedWordChipColor,
+    // For stats modal, let's update these to use the new, more saturated colors as well
+    warningColor: synapseColors.warningColor, // Stays the same (Pastel Coral)
+    achievementChip: synapseColors.globalOptimalNodeColor, // Updated Pastel Yellow
+    achievementIcon: synapseColors.globalOptimalNodeColor, // Updated Pastel Yellow
+    progressBadge: synapseColors.startNodeColor, // Stays the same (Pastel Green)
+    collectedWordChip: synapseColors.currentNodeColor, // Updated Pastel Blue
   },
 };
 
@@ -97,12 +97,12 @@ export const SynapseDarkTheme: ExtendedTheme = {
     localOptimalNode: synapseColors.localOptimalNodeColor,
     greedyMove: synapseColors.greedyMoveColor,
     strategicRepositioningMove: synapseColors.strategicRepositioningMoveColor,
-    // New colors for stats modal
-    warningColor: synapseColors.warningColor,
-    achievementChip: synapseColors.achievementChipColor,
-    achievementIcon: synapseColors.achievementIconColor,
-    progressBadge: synapseColors.progressBadgeColor,
-    collectedWordChip: synapseColors.collectedWordChipColor,
+    // For stats modal, let's update these to use the new, more saturated colors as well
+    warningColor: synapseColors.warningColor, // Stays the same (Pastel Coral)
+    achievementChip: synapseColors.globalOptimalNodeColor, // Updated Pastel Yellow
+    achievementIcon: synapseColors.globalOptimalNodeColor, // Updated Pastel Yellow
+    progressBadge: synapseColors.startNodeColor, // Stays the same (Pastel Green)
+    collectedWordChip: synapseColors.currentNodeColor, // Updated Pastel Blue
   },
 };
 

@@ -17,17 +17,19 @@ export interface LifetimeStats {
   totalGamesPlayed: number;
   totalWins: number;
   totalGaveUps: number;
+  achievementsUnlocked: number;
+  cumulativeMoveAccuracySum: number;
   // For now, keep it simple. More stats can be added later.
-  // totalMovesMade: number;
   // totalOptimalPathMoves: number;
   // totalBacktracksUsed: number;
-  // achievementsUnlockedCount: number;
 }
 
 const initialLifetimeStats: LifetimeStats = {
   totalGamesPlayed: 0,
   totalWins: 0,
   totalGaveUps: 0,
+  achievementsUnlocked: 0,
+  cumulativeMoveAccuracySum: 0,
 };
 
 // --- Game History ---
@@ -71,6 +73,7 @@ export const updateLifetimeStatsOnGameEnd = async (
     const newStats: LifetimeStats = {
       ...currentStats,
       totalGamesPlayed: (currentStats.totalGamesPlayed || 0) + 1,
+      cumulativeMoveAccuracySum: (currentStats.cumulativeMoveAccuracySum || 0) + (gameReport.moveAccuracy || 0),
     };
     if (gameReport.status === "won") {
       newStats.totalWins = (currentStats.totalWins || 0) + 1;
@@ -104,6 +107,14 @@ export const markAchievementAsUnlocked = async (
         JSON.stringify(updatedAchievements),
       );
       // console.log(`Achievement unlocked: ${achievementId}`); // Keep this for next edit pass
+
+      // Update lifetime stats for achievements unlocked
+      const currentStats = await getLifetimeStats();
+      const newStats: LifetimeStats = {
+        ...currentStats,
+        achievementsUnlocked: (currentStats.achievementsUnlocked || 0) + 1,
+      };
+      await AsyncStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(newStats));
     }
   } catch (e) {}
 };
@@ -112,6 +123,7 @@ export const markAchievementAsUnlocked = async (
 export const recordEndedGame = async (
   gameReport: GameReport,
   isChallenge = false,
+  isDailyChallenge = false,
 ): Promise<void> => {
   // Ensure gameReport has an id and timestamp, if not added during generation
   const reportToSave = {
@@ -119,6 +131,7 @@ export const recordEndedGame = async (
     id: gameReport.id || Date.now().toString(),
     timestamp: gameReport.timestamp || Date.now(),
     isChallenge: isChallenge, // Add flag to identify challenge games in history
+    isDailyChallenge: isDailyChallenge, // Add flag to identify daily challenge games
   };
 
   await saveGameToHistory(reportToSave);
@@ -222,7 +235,7 @@ export const checkAndRecordWordForCollections = async (
 // Define what we need to persist from the game state
 export interface PersistentGameState {
   startWord: string | null;
-  endWord: string | null;
+  targetWord: string | null;
   currentWord: string | null;
   playerPath: string[];
   optimalPath: string[];
@@ -233,6 +246,10 @@ export interface PersistentGameState {
   pathDisplayMode: GameState["pathDisplayMode"];
   startTime: number; // Add timestamp of when the game started
   isChallenge?: boolean; // New flag to mark challenge games
+  isDailyChallenge?: boolean; // Flag to mark daily challenge games
+  aiPath?: string[]; // AI solution path for daily challenges
+  aiModel?: string | null; // AI model that generated the solution
+  currentDailyChallengeId?: string; // ID of the current daily challenge
   potentialRarestMovesThisGame?: GameState["potentialRarestMovesThisGame"]; // Preserve this data if it exists
 }
 
@@ -330,3 +347,36 @@ export const restoreTempGame =
       return null;
     }
   };
+
+// New function to clear all player data
+export const resetAllPlayerData = async (): Promise<void> => {
+  try {
+    const keys = [
+      LIFETIME_STATS_KEY,
+      GAME_HISTORY_KEY,
+      UNLOCKED_ACHIEVEMENTS_KEY,
+      WORD_COLLECTIONS_PROGRESS_KEY,
+      CURRENT_GAME_KEY,
+      CHALLENGE_GAME_KEY,
+      TEMP_SAVED_GAME_KEY,
+      'tutorialComplete',  // Add tutorial-related keys
+      'hasPlayedBefore',
+      'tutorialStep',
+      'tutorialShown',
+    ];
+    await AsyncStorage.multiRemove(keys);
+
+    // Reset daily challenge data using the service method
+    const { dailyChallengesService } = await import('./DailyChallengesService');
+    await dailyChallengesService.resetDailyChallengeData();
+
+    console.log("All player data cleared from AsyncStorage.");
+
+    // Explicitly re-initialize lifetime stats to ensure it's reset to default values
+    await AsyncStorage.setItem(LIFETIME_STATS_KEY, JSON.stringify(initialLifetimeStats));
+    console.log("Lifetime stats re-initialized.");
+
+  } catch (e) {
+    console.error("Error clearing player data:", e);
+  }
+};

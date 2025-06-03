@@ -1,0 +1,32 @@
+import type { WordCollection } from "../collection.types";
+
+export const fogFrostCollection: WordCollection = {
+  id: "fog-frost",
+  title: "Fog & First Frost",
+  icon: "weather-fog",
+  isWordlistViewable: true,
+  startDate: new Date(2024, 10, 1), // November 1st
+  endDate: new Date(2024, 10, 30),   // November 30th
+  words: [
+    // Fog & Mist
+    "fog", "mist", "haze", "vapor", "shroud", "veil", "blanket", "curtain",
+    "swirling", "drifting", "rolling", "creeping", "engulfing", "enveloping", "obscuring", "veiling",
+    
+    // Frost & Cold
+    "frost", "ice", "crystal", "hoarfrost", "rime", "glaze", "frozen", "brittle",
+    "sharp", "delicate", "intricate", "patterns", "feathery", "lacy", "silvery", "white",
+    
+    // Muted Landscapes
+    "muted", "subdued", "gray", "grey", "monochrome", "sepia", "faded", "pale",
+    "bare", "stark", "skeletal", "silhouette", "outline", "shadow", "ghost", "whisper",
+    
+    // Early Dusk & Short Days
+    "dusk", "twilight", "gloaming", "dimming", "darkening", "fading", "shortening", "brief",
+    "early", "premature", "hurried", "fleeting", "transient", "passing", "temporary", "momentary",
+    
+    // Quiet Contemplation
+    "quiet", "still", "silent", "hushed", "muffled", "softened", "peaceful", "serene",
+    "contemplative", "reflective", "pensive", "thoughtful", "meditative", "introspective", "solitary", "alone",
+    "bare", "empty", "hollow", "vacant", "barren", "desolate", "austere", "minimal"
+  ]
+}; 

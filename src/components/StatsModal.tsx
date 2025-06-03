@@ -31,12 +31,16 @@ import GameReportDisplay from "./GameReportDisplay";
 import GraphVisualization from "./GraphVisualization";
 import PlayerPathDisplay from "./PlayerPathDisplay";
 import WordDefinitionDialog from "./WordDefinitionDialog";
+import DailyChallengesCalendar from "./DailyChallengesCalendar";
+import DailyChallengeReport from "./DailyChallengeReport";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
 import { allAchievements, Achievement } from "../features/achievements";
 import type { WordCollection } from "../features/wordCollections";
+import type { DailyChallenge } from "../types/dailyChallenges";
 import {
   shareChallenge,
   generateGameDeepLink,
+  generateDailyChallengeDeepLink,
 } from "../services/SharingService";
 import {
   loadGameHistory,
@@ -46,6 +50,7 @@ import {
   getWordCollectionsProgress,
   WordCollectionProgress,
 } from "../services/StorageService";
+import { dailyChallengesService } from "../services/DailyChallengesService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type { GameReport } from "../utils/gameReportUtils";
@@ -95,7 +100,7 @@ const GameHistoryCard = ({
                   { color: theme.colors.primary },
                 ]}
               >
-                {report.startWord} → {report.endWord}
+                {report.startWord} → {report.targetWord}
               </Text>
               <View
                 style={[styles.statusBadge, { backgroundColor: statusColor }]}
@@ -433,6 +438,51 @@ const WordCollectionCard = ({
   );
 };
 
+// Add new HighlightStatBox component
+const HighlightStatBox = ({ label, value, unit = "", icon, iconColor }) => {
+  const { theme: appTheme } = useAppTheme();
+  
+  return (
+    <View style={[styles.highlightStatBox, { backgroundColor: appTheme.colors.surface }]}>
+      <View style={styles.highlightStatHeader}>
+        <Icon source={icon} size={20} color={iconColor} />
+        <Text style={[styles.highlightStatLabel, { color: appTheme.colors.onSurfaceVariant }]}>
+          {label}
+        </Text>
+      </View>
+      <View style={styles.highlightStatValueContainer}>
+        <Text style={[styles.highlightStatValue, { color: appTheme.colors.onSurface }]}>
+          {value}
+        </Text>
+        {unit && (
+          <Text style={[styles.highlightStatUnit, { color: appTheme.colors.onSurfaceVariant }]}>
+            {unit}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+};
+
+// Component for W/L Ratio Display
+const WLRatioDisplay = ({ wins: winCountInput, totalGames: totalGamesInput, theme }) => {
+  const currentTotalGames = totalGamesInput || 0;
+  const currentWins = winCountInput || 0;
+  const currentLosses = currentTotalGames - currentWins;
+
+  const winPercentage = currentTotalGames > 0 ? (currentWins / currentTotalGames) * 100 : 0;
+  const lossPercentage = currentTotalGames > 0 ? (currentLosses / currentTotalGames) * 100 : (currentTotalGames === 0 ? 100 : 0);
+
+  return (
+    <View style={styles.wlRatioBarWithLabels}>
+      <View style={[styles.wlRatioLine, { borderColor: theme.colors.outline }]}> 
+        <View style={[styles.wlRatioWinsSegment, { width: `${winPercentage}%`, backgroundColor: theme.customColors.startNode }]} />
+        <View style={[styles.wlRatioLossesSegment, { width: `${lossPercentage}%`, backgroundColor: currentTotalGames > 0 ? theme.customColors.warningColor : theme.colors.surfaceDisabled }]} />
+      </View>
+    </View>
+  );
+};
+
 // --- Main StatsModal ---
 const StatsModal = () => {
   const {
@@ -484,23 +534,35 @@ const StatsModal = () => {
     setHistoricalChallengeDialogVisible,
   ] = useState(false);
 
+  // State for daily challenge selection
+  const [selectedDailyChallenge, setSelectedDailyChallenge] = useState<DailyChallenge | null>(null);
+  const [dailyChallengeProgress, setDailyChallengeProgress] = useState<Record<string, any>>({});
+
   // Load data when modal opens
   useEffect(() => {
     if (statsModalVisible) {
       const loadData = async () => {
-        setLoading(true);
         try {
-          const [history, stats, achievementIds, progress] = await Promise.all([
+          const [
+            historyData,
+            lifetimeData,
+            achievementIds,
+            collectionsData,
+          ] = await Promise.all([
             loadGameHistory(),
             getLifetimeStats(),
             getUnlockedAchievementIds(),
             getWordCollectionsProgress(),
           ]);
 
-          setGameHistory(history);
-          setLifetimeStats(stats);
+          // Load daily challenge progress
+          const dailyProgress = await dailyChallengesService.getDailyChallengeProgress();
+
+          setGameHistory(historyData);
+          setLifetimeStats(lifetimeData);
           setUnlockedAchievementIds(achievementIds);
-          setCollectionsProgress(progress);
+          setCollectionsProgress(collectionsData);
+          setDailyChallengeProgress(dailyProgress);
         } catch (error) {
           console.error("Error loading stats data:", error);
         } finally {
@@ -592,7 +654,7 @@ const StatsModal = () => {
     }
 
     try {
-      const { startWord, endWord, playerPath } = selectedReport;
+      const { startWord, targetWord, playerPath } = selectedReport;
       const pathLength = playerPath ? playerPath.length - 1 : 0;
       // const timeInSeconds = (timestamp - (selectedReport.startTime || timestamp)) / 1000;
 
@@ -600,13 +662,23 @@ const StatsModal = () => {
       prepareHistoricalGraphPreview();
 
       if (Platform.OS === "web") {
-        const link = generateGameDeepLink(startWord, endWord);
+        // Check if this is a daily challenge and generate appropriate link
+        let link: string;
+        if (selectedReport.isDailyChallenge && selectedReport.dailyChallengeId) {
+          link = generateDailyChallengeDeepLink(
+            selectedReport.dailyChallengeId,
+            startWord,
+            targetWord
+          );
+        } else {
+          link = generateGameDeepLink(startWord, targetWord);
+        }
         setHistoricalChallengeLink(link);
         setHistoricalChallengeDialogVisible(true);
       } else {
         const success = await shareChallenge({
           startWord,
-          targetWord: endWord,
+          targetWord,
           playerPath,
           screenshotRef: graphPreviewRef, // Use the graph preview ref for sharing
           steps: pathLength,
@@ -625,6 +697,107 @@ const StatsModal = () => {
       setSnackbarVisible(true);
     }
   };
+
+  // Aggregate lifetime stats from gameHistory
+  const aggregateStats = (history: GameReport[]): {
+    totalGamesPlayed: number;
+    totalWins: number;
+    totalGaveUps: number;
+    totalMoves: number;
+    averageMovesPerGame: string;
+    averageMoveAccuracy: string;
+    averageSemanticPathEfficiency: string;
+    averageSimilarityPerMove: string;
+    totalBacktracks: number;
+    totalDistanceTraveled: string;
+    averageDistanceTraveled: string;
+    optimalGames: number;
+    bestGame: GameReport | null;
+  } => {
+    if (!history || history.length === 0) {
+      return {
+        totalGamesPlayed: 0,
+        totalWins: 0,
+        totalGaveUps: 0,
+        totalMoves: 0,
+        averageMovesPerGame: '0.00',
+        averageMoveAccuracy: '0.0',
+        averageSemanticPathEfficiency: '0.0',
+        averageSimilarityPerMove: '0.000',
+        totalBacktracks: 0,
+        totalDistanceTraveled: '0.00',
+        averageDistanceTraveled: '0.00',
+        optimalGames: 0,
+        bestGame: null,
+      };
+    }
+    let totalMoves = 0;
+    let totalMoveAccuracy = 0;
+    let totalSemanticPathEfficiency = 0;
+    let totalSimilarity = 0;
+    let similarityCount = 0;
+    let totalBacktracks = 0;
+    let totalDistanceTraveled = 0;
+    let totalWins = 0;
+    let totalGaveUps = 0;
+    let optimalGames = 0;
+    let bestGame: GameReport | null = null;
+    let bestEfficiency = -1;
+    let bestMoves = Infinity;
+    history.forEach((game, idx) => {
+      totalMoves += game.totalMoves || 0;
+      totalMoveAccuracy += game.moveAccuracy || 0;
+      totalSemanticPathEfficiency += game.semanticPathEfficiency || 0;
+      if (typeof game.averageSimilarity === 'number') {
+        totalSimilarity += game.averageSimilarity;
+        similarityCount++;
+      }
+      if (game.backtrackEvents && Array.isArray(game.backtrackEvents)) {
+        totalBacktracks += game.backtrackEvents.length;
+      }
+      totalDistanceTraveled += game.playerSemanticDistance || 0;
+      if (game.status === 'won') totalWins++;
+      if (game.status === 'given_up') totalGaveUps++;
+      // Optimal game: playerPath matches optimalPath
+      if (
+        Array.isArray(game.playerPath) &&
+        Array.isArray(game.optimalPath) &&
+        game.playerPath.length === game.optimalPath.length &&
+        game.playerPath.every((w, i) => w === game.optimalPath[i])
+      ) {
+        optimalGames++;
+      }
+      // Best game: highest semanticPathEfficiency, then fewest moves
+      const eff = game.semanticPathEfficiency ?? -1;
+      if (
+        eff > bestEfficiency ||
+        (eff === bestEfficiency && (game.totalMoves || Infinity) < bestMoves)
+      ) {
+        bestEfficiency = eff;
+        bestMoves = game.totalMoves || Infinity;
+        // Always use the reference from gameHistory
+        bestGame = history[idx];
+      }
+    });
+    const totalGamesPlayed = history.length;
+    return {
+      totalGamesPlayed,
+      totalWins,
+      totalGaveUps,
+      totalMoves,
+      averageMovesPerGame: totalGamesPlayed > 0 ? (totalMoves / totalGamesPlayed).toFixed(2) : '0.00',
+      averageMoveAccuracy: totalGamesPlayed > 0 ? (totalMoveAccuracy / totalGamesPlayed).toFixed(1) : '0.0',
+      averageSemanticPathEfficiency: totalGamesPlayed > 0 ? (totalSemanticPathEfficiency / totalGamesPlayed).toFixed(1) : '0.0',
+      averageSimilarityPerMove: similarityCount > 0 ? (totalSimilarity / similarityCount).toFixed(3) : '0.000',
+      totalBacktracks,
+      totalDistanceTraveled: totalDistanceTraveled.toFixed(2),
+      averageDistanceTraveled: totalGamesPlayed > 0 ? (totalDistanceTraveled / totalGamesPlayed).toFixed(2) : '0.00',
+      optimalGames,
+      bestGame,
+    };
+  };
+
+  const stats = aggregateStats(gameHistory);
 
   // Tab content components
   const renderHistoryTab = () => {
@@ -647,6 +820,7 @@ const StatsModal = () => {
             optimalChoices={selectedReport.optimalChoices}
             suggestedPath={selectedReport.suggestedPath}
             onWordDefinition={showWordDefinition}
+            targetWord={selectedReport.targetWord}
           />
 
           <GameReportDisplay
@@ -687,88 +861,97 @@ const StatsModal = () => {
   };
 
   const renderProgressTab = () => {
+    let completedCollectionsCount = 0;
+    if (wordCollections && Object.keys(collectionsProgress).length > 0) {
+      wordCollections.forEach(collection => {
+        const progress = collectionsProgress[collection.id];
+        if (collection.words && collection.words.length > 0 && progress && progress.collectedWords) {
+          if (progress.collectedWords.length === collection.words.length) {
+            completedCollectionsCount++;
+          }
+        }
+      });
+    }
+
+    const gamesPlayed = lifetimeStats?.totalGamesPlayed || 0;
+    const wins = lifetimeStats?.totalWins || 0;
+    // const losses = gamesPlayed - wins; // Calculated inside WLRatioDisplay
+
+    const averageMoveAccuracy =
+      lifetimeStats && gamesPlayed > 0
+        ? ((lifetimeStats.cumulativeMoveAccuracySum || 0) / gamesPlayed).toFixed(1)
+        : "0.0";
+
+    const actualAchievementsUnlocked = unlockedAchievementIds.length;
+
+    // Component for stat boxes in the highlight section with icon support
+    const HighlightStatBox = ({ label, value, unit = "", icon, iconColor }: { label: string, value: string | number, unit?: string, icon?: string, iconColor?: string }) => (
+      <View style={styles.highlightStatBox}>
+        <View style={styles.iconValueRow}>
+          {icon && (
+            <Icon
+              source={icon}
+              size={28}
+              color={iconColor || appTheme.colors.primary}
+            />
+          )}
+          <Text style={[styles.highlightStatValue, { color: appTheme.colors.primary, marginLeft: icon ? 8 : 0 }]}>{value}{unit}</Text>
+        </View>
+        <Text style={[styles.highlightStatLabel, { color: appTheme.colors.onSurfaceVariant }]}>{label}</Text>
+      </View>
+    );
+
+    // Component for W/L Ratio Display
+    const WLRatioDisplay = ({ wins: winCountInput, totalGames: totalGamesInput, theme }) => {
+      const currentTotalGames = totalGamesInput || 0;
+      const currentWins = winCountInput || 0;
+      const currentLosses = currentTotalGames - currentWins;
+    
+      const winPercentage = currentTotalGames > 0 ? (currentWins / currentTotalGames) * 100 : 0;
+      const lossPercentage = currentTotalGames > 0 ? (currentLosses / currentTotalGames) * 100 : (currentTotalGames === 0 ? 100 : 0);
+    
+      return (
+        <View style={styles.wlRatioBarWithLabels}>
+          <View style={[styles.wlRatioLine, { borderColor: theme.colors.outline }]}> 
+            <View style={[styles.wlRatioWinsSegment, { width: `${winPercentage}%`, backgroundColor: theme.customColors.startNode }]} />
+            <View style={[styles.wlRatioLossesSegment, { width: `${lossPercentage}%`, backgroundColor: currentTotalGames > 0 ? theme.customColors.warningColor : theme.colors.surfaceDisabled }]} />
+          </View>
+        </View>
+      );
+    };
+
     return (
       <ScrollView contentContainerStyle={styles.tabContentContainerPadded}>
-        <Card
-          style={[
-            styles.statsSummaryCard,
-            {
-              backgroundColor: appTheme.colors.surfaceVariant,
-              borderColor: appTheme.colors.outline,
-            },
-          ]}
-        >
-          <Card.Content>
-            <Text
-              style={[
-                styles.lifetimeStatsTitle,
-                { color: appTheme.colors.primary },
-              ]}
-            >
-              Lifetime Stats
-            </Text>
-            <View style={styles.statsGrid}>
-              <View style={styles.statBox}>
-                <Text
-                  style={[
-                    styles.statLabel,
-                    { color: appTheme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  Games Played
-                </Text>
-                <Text
-                  style={[
-                    styles.statValue,
-                    { color: appTheme.colors.onSurface },
-                  ]}
-                >
-                  {lifetimeStats?.totalGamesPlayed || 0}
-                </Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text
-                  style={[
-                    styles.statLabel,
-                    { color: appTheme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  Wins
-                </Text>
-                <Text
-                  style={[
-                    styles.statValue,
-                    { color: appTheme.colors.onSurface },
-                  ]}
-                >
-                  {lifetimeStats?.totalWins || 0}
-                </Text>
-              </View>
-              <View style={styles.statBox}>
-                <Text
-                  style={[
-                    styles.statLabel,
-                    { color: appTheme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  Win Rate
-                </Text>
-                <Text
-                  style={[
-                    styles.statValue,
-                    { color: appTheme.colors.onSurface },
-                  ]}
-                >
-                  {lifetimeStats && lifetimeStats.totalGamesPlayed > 0
-                    ? Math.round(
-                        (lifetimeStats.totalWins /
-                          lifetimeStats.totalGamesPlayed) *
-                          100,
-                      )
-                    : 0}
-                  %
-                </Text>
-              </View>
+        <Card style={[styles.statsSummaryCard, { backgroundColor: appTheme.colors.surfaceVariant, borderColor: appTheme.colors.outline }]}> 
+          <Card.Content style={styles.statsCardContent}>
+            <Text style={[styles.lifetimeStatsTitle, { color: appTheme.colors.primary }]}>Lifetime Stats</Text>
+            <View style={styles.statLineItemList}>
+              {(() => {
+                const statItems = [
+                  { label: 'Games Played', value: stats.totalGamesPlayed },
+                  { label: 'Wins', value: stats.totalWins },
+                  { label: 'Win Rate', value: stats.totalGamesPlayed > 0 ? Math.round((stats.totalWins / stats.totalGamesPlayed) * 100) + '%' : '0%' },
+                  { label: 'Games Given Up', value: stats.totalGaveUps },
+                  { label: 'Avg. Moves/Game', value: stats.averageMovesPerGame },
+                  { label: 'Avg. Move Accuracy', value: stats.averageMoveAccuracy + '%' },
+                  { label: 'Total Backtracks', value: stats.totalBacktracks },
+                  { label: 'Achievements', value: unlockedAchievementIds.length },
+                  { label: 'Total Distance', value: stats.totalDistanceTraveled },
+                  { label: 'Optimal Games', value: stats.optimalGames },
+                ];
+                return statItems.map((item, idx) => (
+                  <View
+                    key={item.label}
+                    style={[
+                      styles.statsLineItemRow,
+                      idx !== statItems.length - 1 && styles.statsLineItemDivider,
+                    ]}
+                  >
+                    <Text style={styles.statsLineItemLabel}>{item.label}</Text>
+                    <Text style={styles.statsLineItemValue}>{item.value}</Text>
+                  </View>
+                ));
+              })()}
             </View>
           </Card.Content>
         </Card>
@@ -792,13 +975,19 @@ const StatsModal = () => {
             onPress={showAchievementDetail}
           />
         ))}
-      </ScrollView>
-    );
-  };
 
-  const renderEventsTab = () => {
-    if (wordCollections.length === 0) {
-      return (
+        {/* Word Collections Section */}
+        <Text
+          style={[
+            styles.sectionTitle,
+            styles.achievementsSectionTitle,
+            { color: appTheme.colors.primary },
+          ]}
+        >
+          Word Collections
+        </Text>
+
+        {wordCollections.length === 0 ? (
         <View style={styles.emptyStateContainer}>
           <Icon
             source="card-search-outline"
@@ -815,12 +1004,8 @@ const StatsModal = () => {
             No word collections available. Play more to discover them!
           </Text>
         </View>
-      );
-    }
-
-    return (
-      <ScrollView contentContainerStyle={styles.tabContentContainerPadded}>
-        {wordCollections.map((collection) => {
+        ) : (
+          wordCollections.map((collection) => {
           const collectionProgress =
             collectionsProgress[collection.id]?.collectedWords || [];
 
@@ -832,7 +1017,56 @@ const StatsModal = () => {
               theme={appTheme}
             />
           );
-        })}
+          })
+        )}
+      </ScrollView>
+    );
+  };
+
+  const renderDailyChallengesTab = () => {
+    const handleChallengeSelect = async (challenge: DailyChallenge) => {
+      setSelectedDailyChallenge(challenge);
+    };
+
+    const handleBackToCalendar = () => {
+      setSelectedDailyChallenge(null);
+    };
+
+    // If a challenge is selected, show the report
+    if (selectedDailyChallenge) {
+      // Fix: Look up progress by challenge ID, not date
+      const progress = dailyChallengeProgress[selectedDailyChallenge.id];
+      
+      // Try to find a game report for this daily challenge
+      // Look for a game that was specifically marked as a daily challenge
+      const challengeGameReport = gameHistory.find(report => 
+        report.startWord === selectedDailyChallenge.startWord &&
+        report.targetWord === selectedDailyChallenge.targetWord && // Now both use targetWord
+        // Check if this was marked as a daily challenge
+        report.isDailyChallenge === true &&
+        // More flexible date matching - check multiple date formats
+        (new Date(report.timestamp).toDateString() === new Date(selectedDailyChallenge.date).toDateString() ||
+         new Date(report.timestamp).toISOString().split('T')[0] === selectedDailyChallenge.date)
+      );
+      
+      console.log('Daily Challenge:', selectedDailyChallenge.startWord, '→', selectedDailyChallenge.targetWord);
+      console.log('Found Report:', challengeGameReport ? `${challengeGameReport.startWord} → ${challengeGameReport.targetWord}` : 'NONE');
+
+      return (
+        <DailyChallengeReport
+          challenge={selectedDailyChallenge}
+          progress={progress}
+          gameReport={challengeGameReport}
+          onBack={handleBackToCalendar}
+          onWordDefinition={showWordDefinition}
+          onAchievementPress={showAchievementDetail}
+        />
+      );
+    }
+
+    return (
+      <ScrollView contentContainerStyle={styles.tabContentContainerPadded}>
+        <DailyChallengesCalendar onChallengeSelect={handleChallengeSelect} />
       </ScrollView>
     );
   };
@@ -860,7 +1094,7 @@ const StatsModal = () => {
       case "progress":
         return renderProgressTab();
       case "events":
-        return renderEventsTab();
+        return renderDailyChallengesTab();
       default:
         return null;
     }
@@ -897,7 +1131,7 @@ const StatsModal = () => {
           buttons={[
             { value: "history", label: "History" },
             { value: "progress", label: "Progress" },
-            { value: "events", label: "Word Lists" },
+            { value: "events", label: "Daily Challenges" },
           ]}
           style={styles.segmentedButtons}
         />
@@ -1009,12 +1243,12 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 15,
     borderRadius: 12,
-    maxHeight: "90%",
+    maxHeight: '90%',
     flex: 1,
     borderWidth: 1,
     maxWidth: 700,
-    width: "100%",
-    alignSelf: "center",
+    width: '100%',
+    alignSelf: 'center',
   },
   header: {
     flexDirection: "row",
@@ -1092,22 +1326,104 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderWidth: 1,
   },
-  statsGrid: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  statsCardContent: { 
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
-  statBox: {
+  lifetimeStatsTitle: {
+    fontWeight: "bold",
+    fontSize: 20,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  highlightSection: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 16,
+  },
+  highlightStatBox: {
     alignItems: "center",
     flex: 1,
-    padding: 10,
+    padding: 8,
   },
-  sectionTitle: {
-    fontSize: 18,
+  iconValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 2,
+  },
+  highlightStatValue: {
+    fontSize: 26,
     fontWeight: "bold",
-    marginBottom: 10,
   },
-  achievementsSectionTitle: {
+  highlightStatLabel: {
+    fontSize: 12,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: 12,
+  },
+  wlRatioBar: {
+    flexDirection: 'row',
+    height: 22,
+    width: '100%',
+    borderRadius: 11,
+    overflow: 'hidden',
+    borderWidth: 1,
+    marginBottom: 6,
+  },
+  wlRatioBarRow: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  wlRatioBarWithLabels: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '80%',
+    maxWidth: 400,
+    minWidth: 120,
+    marginTop: 8,
+  },
+  wlRatioLine: {
+    flexDirection: 'row',
+    height: 2,
+    width: '100%',
+    overflow: 'hidden',
+    borderWidth: 0,
+    marginHorizontal: 12,
+  },
+  wlRatioWinsSegment: {
+    height: '100%',
+  },
+  wlRatioLossesSegment: {
+    height: '100%',
+  },
+  wlRatioPercentage: {
+    fontSize: 14,
+    marginLeft: 8,
+  },
+  historyCardTitleText: {
+    fontWeight: "bold",
+  },
+  historyCardInfoText: {
+    fontSize: 12,
+  },
+  trophyIconTouchable: {
+    marginLeft: 4,
+  },
+  emptyTabText: {
+    textAlign: "center",
+  },
+  historyListEmpty: {
+    marginTop: 20,
+  },
+  eventsTabEmptyText: {
     marginTop: 16,
+  },
+  loadingTabText: {
+    marginTop: 10,
   },
   achievementCard: {
     marginBottom: 8,
@@ -1212,7 +1528,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   wordDialogScrollView: {
-    maxHeight: 400,
+    maxHeight: '60%',
   },
   wordDialogChip: {
     margin: 4,
@@ -1233,11 +1549,12 @@ const styles = StyleSheet.create({
   },
   wordCollectionDialogContainer: {
     padding: 20,
-    margin: 20,
+    margin: 16,
     borderRadius: 8,
     maxWidth: 700,
-    width: "100%",
-    alignSelf: "center",
+    width: '90%',
+    maxHeight: '90%',
+    alignSelf: 'center',
     borderWidth: 1,
   },
   dialogStyle: {
@@ -1266,37 +1583,54 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.1)",
   },
-  historyCardTitleText: {
-    fontWeight: "bold",
+  highlightStatHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
   },
-  historyCardInfoText: {
-    fontSize: 12,
+  highlightStatValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
   },
-  trophyIconTouchable: {
+  highlightStatUnit: {
+    fontSize: 16,
     marginLeft: 4,
   },
-  lifetimeStatsTitle: {
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
   },
-  statLabel: {
-    fontSize: 12,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  emptyTabText: {
-    textAlign: "center",
-  },
-  historyListEmpty: {
-    marginTop: 20,
-  },
-  eventsTabEmptyText: {
+  achievementsSectionTitle: {
     marginTop: 16,
   },
-  loadingTabText: {
-    marginTop: 10,
+  statLineItemList: {
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  statsLineItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 28,
+    paddingVertical: 4,
+    justifyContent: 'space-between',
+  },
+  statsLineItemLabel: {
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'left',
+    flex: 1,
+  },
+  statsLineItemValue: {
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'right',
+    minWidth: 40,
+    fontVariant: ['tabular-nums'],
+  },
+  statsLineItemDivider: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#8886',
   },
 });
 

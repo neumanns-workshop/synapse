@@ -1,0 +1,33 @@
+import type { WordCollection } from "../collection.types";
+
+export const ciderEmberCollection: WordCollection = {
+  id: "cider-ember",
+  title: "Cider & Ember",
+  icon: "fire",
+  isWordlistViewable: true,
+  startDate: new Date(2024, 9, 1), // October 1st  
+  endDate: new Date(2024, 10, 1),   // November 1st
+  words: [
+    // Crisp Mornings & Autumn Weather
+    "crisp", "brisk", "sharp", "invigorating", "refreshing", "chilly", "cool", "frosty",
+    "morning", "dawn", "mist", "fog", "vapor", "breath", "steam", "condensation",
+    
+    // Fire & Warmth
+    "ember", "spark", "flame", "blaze", "glow", "flicker", "crackle", "pop",
+    "bonfire", "fireplace", "hearth", "mantle", "chimney", "smoke", "ash", "coal",
+    
+    // Autumn Flavors & Comfort
+    "cider", "spice", "cinnamon", "nutmeg", "clove", "cardamom", "apple", "pear",
+    "warm", "steaming", "mulled", "fragrant", "aromatic", "comforting", "cozy", "snug",
+    
+    // Gatherings & Community
+    "gathering", "huddle", "circle", "storytelling", "tradition", "ritual", "ceremony", "celebration",
+    "lantern", "candle", "torch", "beacon", "illuminate", "shadow", "silhouette", "flicker",
+    
+    // Halloween/Spooky Elements (woven naturally)
+    "mysterious", "enchanting", "mystical", "haunting", "eerie", "ghostly", "spectral", "phantom",
+    "witch", "cauldron", "potion", "spell", "magic", "brew", "concoction", "elixir",
+    "pumpkin", "gourd", "harvest", "mask", "costume", "disguise", "transform", "metamorphosis",
+    "moon", "night", "darkness", "twilight", "dusk", "shadows", "whisper", "rustle"
+  ]
+}; 

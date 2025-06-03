@@ -4,7 +4,7 @@ This document outlines a potential phased approach for building the Synapse Reac
 
 ## Goal
 
-To incrementally build a robust, user-friendly, and cross-platform word navigation game with features like scoring, persistence, and sharing.
+To incrementally build a robust, user-friendly, and cross-platform word navigation game with features like scoring, persistence, sharing, daily challenges, seasonal collections, and monetization.
 
 ## Key Technologies Utilized
 
@@ -100,7 +100,7 @@ To incrementally build a robust, user-friendly, and cross-platform word navigati
 
 ---
 
-## Phase 3: Scoring, Stats, Achievements, Gamified Events, Persistence & Sharing - 🔄 IN PROGRESS
+## Phase 3: Scoring, Stats, Achievements, Gamified Events, Persistence & Sharing - ✅ COMPLETE
 
 **Goal:** Add features related to saving progress, tracking scores, achievements, and sharing results.
 
@@ -112,8 +112,17 @@ To incrementally build a robust, user-friendly, and cross-platform word navigati
     *   **Achievements System:**
         *   Define a set of achievements (e.g., "First Win," "Perfect Game," "Completed X Games," "Found Y Secret Words"). - ✅ COMPLETE
         *   Implement logic to unlock and record achievements. - ✅ COMPLETE
+        *   **Progressive Achievement System:** - ✅ COMPLETE
+            *   Implemented tiered achievements with multiple levels (e.g., Seasonal Explorer: Spring Awakener → Eternal Cycle Keeper) - ✅
+            *   Created Word Collector achievement with 6 tiers based on always-available collection completion - ✅
+            *   Added achievement tier tracking and display in UI - ✅
     *   **Collection Events (Based on "Secret Word Hunt" idea):** - ✅ COMPLETE
         *   Implement themed wordlists for collection events. - ✅ COMPLETE
+        *   **Comprehensive Seasonal Collections System:** - ✅ COMPLETE
+            *   Created 12 seasonal collections covering the entire year with culturally-sensitive themes - ✅
+            *   Implemented date-based collection activation (Renewal & Reflection, Affection & Kinship, Greening Earth, etc.) - ✅
+            *   Added year-round collections (Equinox & Solstice, Gratitude & Gathering) - ✅
+            *   Replaced old Halloween/Valentine's collections with integrated seasonal approach - ✅
         *   Track "collected" items/words. - ✅ COMPLETE
     *   **Rewards:** Define and link rewards to achievements/collections (e.g., visual badges, UI theme unlocks). - ✅ COMPLETE
     *   **UI Display:** - ✅ COMPLETE
@@ -138,23 +147,78 @@ To incrementally build a robust, user-friendly, and cross-platform word navigati
 
 ---
 
-## Phase 4: Polish & Refinement - 🔄 IN PROGRESS
+## Phase 4: Daily Challenges & Calendar System - ✅ COMPLETE
+
+**Goal:** Implement daily challenges with calendar interface and monetization features.
+
+1.  **Daily Challenge System:** - ✅ COMPLETE
+    *   **Core Infrastructure:** - ✅ COMPLETE
+        *   Implemented `DailyChallenge` interface with date-based IDs and word pairs - ✅
+        *   Created `generateDailyChallenge` function with deterministic seeded random generation - ✅
+        *   Added daily challenge state management in Zustand store - ✅
+        *   Integrated daily challenge completion tracking and persistence - ✅
+    *   **Calendar Interface:** - ✅ COMPLETE
+        *   Built comprehensive calendar component with month/year navigation - ✅
+        *   Implemented challenge status indicators (completed, today, missed, future, locked) - ✅
+        *   Added visual event indicators for seasonal collections and celestial events - ✅
+        *   **Seasonal Collection Integration:** - ✅ COMPLETE
+            *   Added colored timeline bars at bottom of calendar days to show active seasonal collections - ✅
+            *   Implemented comprehensive legend explaining all calendar indicators - ✅
+        *   **Celestial Event Integration:** - ✅ COMPLETE
+            *   Added gold 4-pointed star indicators for equinoxes and solstices - ✅
+            *   Implemented date-specific celestial event detection for 2025-2026 - ✅
+            *   Added bold text styling for celestial event dates - ✅
+    *   **Business Model Integration:** - ✅ COMPLETE
+        *   Daily challenges are free only on their specific day - ✅
+        *   Past incomplete challenges require upgrade (locked status) - ✅
+        *   Completed challenges remain accessible regardless of date - ✅
+        *   Challenge links bypass free game limits for viral sharing - ✅
+2.  **Monetization & Upgrade System:** - ✅ COMPLETE
+    *   **Free Game Limits:** - ✅ COMPLETE
+        *   Implemented 2 free random games per day limit - ✅
+        *   Added game count tracking and daily reset logic - ✅
+        *   Integrated upgrade prompts when limits are reached - ✅
+    *   **Upgrade Dialog:** - ✅ COMPLETE
+        *   Created comprehensive upgrade prompt with feature list - ✅
+        *   Added "Access to all past daily challenges" as key premium feature - ✅
+        *   Integrated upgrade triggers throughout the app (game limits, locked challenges) - ✅
+        *   Prepared infrastructure for payment processing integration - ✅
+    *   **Viral Sharing Mechanism:** - ✅ COMPLETE
+        *   Challenge links bypass recipient's free game limits - ✅
+        *   Encourages social sharing instead of immediate payment - ✅
+        *   Creates user acquisition through social networks - ✅
+3.  **Daily Challenge Link Generation:** - ✅ COMPLETE
+    *   **Proper URL Format:** - ✅ COMPLETE
+        *   Fixed daily challenge links to use `/dailychallenge?id=YYYY-MM-DD&start=...&target=...` format - ✅
+        *   Added `dailyChallengeId` field to GameReport interface for proper link generation - ✅
+        *   Updated game store to pass daily challenge ID through completion flow - ✅
+        *   Modified ReportScreen and StatsModal to generate correct daily challenge links - ✅
+
+---
+
+## Phase 5: Polish & Refinement - ✅ COMPLETE
 
 **Goal:** Enhance the user experience with animations, better UI flow, and additional features.
 
-1.  **Animations & Transitions:**
-    *   Use `react-native-reanimated` to add smooth transitions between screens or animations within the game (e.g., highlighting paths, node selection feedback).
+1.  **Animations & Transitions:** - ✅ COMPLETE
+    *   In-game animations (e.g., graph path highlighting, node selection feedback) are considered complete. - ✅
+    *   Use `react-native-reanimated` to add smooth transitions between screens. - ✅ (User opted to consider current state sufficient)
 2.  **UI/UX Improvements:** - ✅ COMPLETE
     *   Refined UI using `react-native-paper` components: - ✅
         *   Consistent styling for `Dialogs` (`WordDefinitionDialog`, `AboutModal`), `Modal` (`StatsModal`), and `Card` (`GameReportDisplay`) containers (surface background, outline border). - ✅
         *   Standardized title styling (primary color, bold). - ✅
         *   Cohesive button styling (text buttons with primary color for main actions). - ✅
-    *   Implement a tutorial or onboarding flow for new users.
+    *   **Calendar UI Refinements:** - ✅ COMPLETE
+        *   Fixed upgrade dialog positioning and visibility issues - ✅
+        *   Moved event indicators from conflicting top-right to bottom timeline format - ✅
+        *   Corrected calendar legend to reflect actual business model - ✅
+        *   Enhanced visual hierarchy with proper status colors and indicators - ✅
+    *   Revise `AboutModal` to serve as a tutorial; trigger automatically for new users (no game history) or if last game was > 1 month ago.
     *   ~~Consider adding game difficulty options~~ (**Removed**: No difficulty concept as each word pair has its own intrinsic challenge based on semantic distance). - ✅
 3.  **Styling & Theming:** - ✅ COMPLETE
     *   Leveraged `react-native-paper`'s theming capabilities for consistent styling across `WordDefinitionDialog`, `GameReportDisplay`, `AboutModal`, and `StatsModal`. - ✅
     *   Ensured layouts are responsive and look good across different device sizes (mobile and web).
-4.  **Repository Cleanup:** (New item)
+4.  **Repository Cleanup:** (New item) - ✅ COMPLETE
     *   Review and remove any unused code, comments, or assets.
     *   Ensure consistent formatting and linting across the codebase.
     *   Check for and update outdated dependencies if feasible and safe.
@@ -162,25 +226,45 @@ To incrementally build a robust, user-friendly, and cross-platform word navigati
 
 ---
 
-## Phase 5: Testing & Deployment
+## Phase 6: Final Review & Enhancements - 🔄 IN PROGRESS
 
-**Goal:** Ensure application stability, performance, and prepare for release.
+**Goal:** Ensure application stability, conduct final reviews, and incorporate any planned pre-deployment enhancements.
 
-1.  **Testing:**
-    *   Write unit tests (Jest) for critical game logic, utility functions, and storage services.
-    *   Write component tests (`@testing-library/react-native`) for key UI components and screens.
-    *   Perform manual testing across target platforms (iOS, Android specific versions, various Web browsers).
-    *   Consider setting up end-to-end tests (e.g., Maestro, Detox) if desired.
-2.  **Performance Optimization:**
-    *   Profile the app on native devices and web.
-    *   Optimize SVG rendering performance for large graphs if necessary.
-    *   Analyze web build bundle size and optimize using Expo build profiles or other techniques.
-3.  **Documentation & Finalization:**
-    *   Ensure the `README.md` is up-to-date with final build/run instructions.
-    *   Add any necessary code comments or documentation.
-4.  **Deployment:**
+1.  **Testing:** - ✅ COMPLETE
+    *   Write unit tests (Jest) for critical game logic, utility functions, and storage services. - ✅
+    *   Write component tests (`@testing-library/react-native`) for key UI components and screens. - ✅
+    *   Perform manual testing across target platforms (iOS, Android specific versions, various Web browsers). - ✅
+    *   Consider setting up end-to-end tests (e.g., Maestro, Detox) if desired. - ✅
+    *   **Note:** Replaced placeholder test file (`gameMechanics2.test.ts`) with a proper test file (`gameMechanics.test.ts`). - ✅
+2.  **Performance Optimization:** - ✅ COMPLETE
+    *   Profile the app on native devices and web. - ✅
+    *   Optimize SVG rendering performance for large graphs if necessary. - ✅
+    *   Analyze web build bundle size and optimize using Expo build profiles or other techniques. - ✅
+3.  **Documentation & Finalization:** - ✅ COMPLETE
+    *   Ensure the `README.md` is up-to-date with final build/run instructions. - ✅
+    *   Add any necessary code comments or documentation. - ✅
+4.  **Future Architecture Planning:** - 🔄 IN PROGRESS
+    *   **Supabase Integration Planning:** - 📋 PLANNED
+        *   User accounts and authentication system - 📋
+        *   Cross-device game state synchronization - 📋
+        *   Global daily challenge analytics and leaderboards - 📋
+        *   Payment status tracking and subscription management - 📋
+        *   Social features (friends, sharing, competitions) - 📋
+
+---
+
+## Phase 7: Deployment - 🔄 IN PROGRESS
+
+**Goal:** Prepare and execute the release of the application.
+
+1.  **Deployment Preparation:**
     *   Build release versions for iOS and Android (App Store / Play Store submission).
     *   Build and deploy the final web version to the chosen hosting provider (Vercel, Netlify, etc.).
+2.  **Payment Integration:** - 📋 PLANNED
+    *   Integrate React Native IAP for mobile app purchases
+    *   OR implement Supabase-based subscription system for cross-platform consistency
+    *   Set up App Store Connect and Google Play Console for in-app purchases
+    *   Implement receipt validation and subscription status management
 
 ---
 
@@ -254,6 +338,22 @@ This section outlines features and improvements planned for after the initial V1
     *   Implement screenshot sharing using `react-native-view-shot` for general results/achievements (distinct from challenge graph previews).
 *   **General Share Buttons:**
     *   Add general share buttons to relevant UI sections (e.g., for achievements, overall stats).
+
+### Supabase Backend Integration
+
+*   **User Authentication & Profiles:**
+    *   Implement Supabase Auth for user registration, login, and profile management
+    *   Enable cross-device game state synchronization
+    *   Track user email addresses for marketing and support
+*   **Subscription Management:**
+    *   Replace local IAP receipts with Supabase-based subscription tracking
+    *   Enable cross-platform subscription access (iOS, Android, Web)
+    *   Implement subscription status validation and renewal handling
+*   **Global Analytics & Social Features:**
+    *   Track global daily challenge completion rates and statistics
+    *   Implement leaderboards and social comparison features
+    *   Enable friend systems and challenge sharing between users
+    *   Collect anonymized gameplay analytics for game improvement
 
 ### Other Potential Enhancements
 *(Placeholder for other future ideas)* 

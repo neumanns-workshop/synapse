@@ -43,6 +43,11 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
   const { customColors, colors } = useTheme() as ExtendedTheme;
   const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
   const currentPathDisplayMode = useGameStore((state) => state.pathDisplayMode);
+  
+  // Use AI path data from the report instead of the store
+  const isDailyChallenge = report.isDailyChallenge || false;
+  const aiPath = report.aiPath || [];
+  const aiModel = report.aiModel;
 
   const handleOptimalPathPress = () => {
     setPathDisplayMode({
@@ -55,6 +60,13 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
     setPathDisplayMode({
       ...currentPathDisplayMode,
       suggested: !currentPathDisplayMode.suggested,
+    });
+  };
+
+  const handleAiPathPress = () => {
+    setPathDisplayMode({
+      ...currentPathDisplayMode,
+      ai: !currentPathDisplayMode.ai,
     });
   };
 
@@ -102,6 +114,27 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                   {renderTextPath(
                     report.suggestedPath,
                     customColors.localOptimalNode,
+                    styles.pathWord,
+                    styles.pathArrow,
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {isDailyChallenge && aiPath && aiPath.length > 0 && (
+            <View style={styles.section}>
+              <TouchableOpacity onPress={handleAiPathPress}>
+                <View style={styles.pathRow}>
+                  <Text
+                    variant="titleMedium"
+                    style={[styles.pathTitle, { color: colors.primary }]}
+                  >
+                    AI Path
+                  </Text>
+                  {renderTextPath(
+                    aiPath,
+                    "#FF6B35", // Orange color for AI path
                     styles.pathWord,
                     styles.pathArrow,
                   )}

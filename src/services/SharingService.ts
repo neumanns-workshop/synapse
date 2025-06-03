@@ -36,6 +36,19 @@ interface ShareChallengeOptions {
   steps?: number;
 }
 
+interface ShareDailyChallengeOptions {
+  challengeId: string;
+  startWord: string;
+  targetWord: string;
+  aiSteps: number;
+  userSteps?: number;
+  userCompleted?: boolean;
+  userGaveUp?: boolean;
+  challengeDate: string;
+  screenshotRef?: React.RefObject<View | null>;
+  includeScreenshot?: boolean;
+}
+
 /**
  * Share a challenge with friends
  */
@@ -127,6 +140,103 @@ export const shareChallenge = async ({
       } else {
         // If no screenshot URI, ensure the deep link is in the message for all native platforms
         shareContent.message = `${challengeMessage}\n\nPlay here: ${deepLink}`;
+      }
+    }
+
+    // Show the share dialog
+    const result = await Share.share(shareContent, shareDialogOptions);
+    return result.action !== Share.dismissedAction;
+  } catch (error) {
+    return false;
+  }
+};
+
+/**
+ * Share a daily challenge with friends using taunting message
+ */
+export const shareDailyChallenge = async ({
+  challengeId,
+  startWord,
+  targetWord,
+  aiSteps,
+  userSteps,
+  userCompleted,
+  userGaveUp,
+  challengeDate,
+  screenshotRef,
+  includeScreenshot = true,
+}: ShareDailyChallengeOptions): Promise<boolean> => {
+  try {
+    // Generate the daily challenge deep link
+    const deepLink = generateDailyChallengeDeepLink(challengeId, startWord, targetWord);
+
+    // Generate taunting message
+    const tauntMessage = generateDailyChallengeTaunt({
+      startWord,
+      targetWord,
+      aiSteps,
+      userSteps,
+      userCompleted,
+      userGaveUp,
+      challengeDate,
+    });
+
+    // Web-specific sharing handling
+    if (Platform.OS === "web") {
+      // Check if Web Share API is supported
+      if (typeof navigator !== "undefined" && navigator.share) {
+        try {
+          await navigator.share({
+            title: "Synapse Daily Challenge",
+            text: tauntMessage,
+            url: deepLink,
+          });
+          return true;
+        } catch (error) {
+          // Fall through to clipboard fallback
+        }
+      }
+
+      // Fallback: copy to clipboard with a confirmation
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        try {
+          const textToCopy = `${tauntMessage}\n\n${deepLink}`;
+          await navigator.clipboard.writeText(textToCopy);
+          return true;
+        } catch (clipboardError) {
+          throw new Error("Could not copy daily challenge link to clipboard");
+        }
+      }
+    }
+
+    // Native platform sharing
+    const shareContent: { message: string; title?: string; url?: string } = {
+      message: tauntMessage,
+      title: "Synapse Daily Challenge",
+    };
+    const shareDialogOptions: ShareOptions = {};
+
+    // If screenshot is requested and we have a reference - only for native platforms
+    if (
+      Platform.OS !== "web" &&
+      includeScreenshot &&
+      screenshotRef &&
+      screenshotRef.current
+    ) {
+      const uri = await captureGameScreen(screenshotRef);
+      if (uri) {
+        // On iOS, we can share both text and image (image via url)
+        if (Platform.OS === "ios") {
+          shareContent.url = uri;
+          shareContent.message = tauntMessage;
+        }
+        // On Android, sharing text with an image URI in shareContent.url might not work as expected.
+        else {
+          shareContent.message = `${tauntMessage}\n\nPlay here: ${deepLink}`;
+        }
+      } else {
+        // If no screenshot URI, ensure the deep link is in the message for all native platforms
+        shareContent.message = `${tauntMessage}\n\nPlay here: ${deepLink}`;
       }
     }
 
@@ -234,6 +344,73 @@ export const generateGameDeepLink = (
 };
 
 /**
+ * Generate a deep link for daily challenge sharing with taunting message
+ */
+export const generateDailyChallengeDeepLink = (
+  challengeId: string,
+  startWord: string,
+  targetWord: string,
+): string => {
+  // Use the app's scheme for deep linking
+  // For web, use the web URL format
+  if (Platform.OS === "web") {
+    // Use current origin or a fixed URL for the web version
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "https://synapse-game.example.com";
+    return `${origin}/dailychallenge?id=${encodeURIComponent(challengeId)}&start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}`;
+  }
+
+  // For native apps, use the custom scheme
+  return `synapse://dailychallenge?id=${encodeURIComponent(challengeId)}&start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}`;
+};
+
+/**
+ * Generate a taunting message for daily challenge sharing based on AI performance
+ */
+interface DailyChallengeTauntOptions {
+  startWord: string;
+  targetWord: string;
+  aiSteps: number;
+  userSteps?: number;
+  userCompleted?: boolean;
+  userGaveUp?: boolean;
+  challengeDate: string;
+}
+
+export const generateDailyChallengeTaunt = (
+  options: DailyChallengeTauntOptions,
+): string => {
+  const { startWord, targetWord, aiSteps, userSteps, userCompleted, userGaveUp, challengeDate } = options;
+  
+  const dateObj = new Date(challengeDate);
+  const formattedDate = dateObj.toLocaleDateString('en-US', { 
+    month: 'long', 
+    day: 'numeric' 
+  });
+
+  // If user completed it, compare with AI
+  if (userCompleted && userSteps) {
+    if (userSteps < aiSteps) {
+      return `I crushed the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} moves (AI took ${aiSteps}). Think you can beat me?`;
+    } else if (userSteps === aiSteps) {
+      return `I matched the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} moves. Can you do better?`;
+    } else {
+      return `I got ${formattedDate}'s challenge in ${userSteps} moves ("${startWord}" → "${targetWord}"). The AI did it in ${aiSteps}... can you beat us both?`;
+    }
+  }
+  
+  // If user gave up, acknowledge that but still challenge them
+  if (userGaveUp && userSteps) {
+    return `I gave up on ${formattedDate}'s challenge after ${userSteps} moves ("${startWord}" → "${targetWord}"), but the AI got it in ${aiSteps}. Think you can beat the AI?`;
+  }
+  
+  // If user hasn't attempted it or no steps recorded, just taunt with AI score
+  return `I beat the AI in ${aiSteps} moves on ${formattedDate}'s challenge ("${startWord}" → "${targetWord}"). Can you do better?`;
+};
+
+/**
  * Parse a deep link to extract game parameters
  */
 export const parseGameDeepLink = (
@@ -257,6 +434,31 @@ export const parseGameDeepLink = (
       return {
         startWord: decodeURIComponent(match[1]),
         targetWord: decodeURIComponent(match[2]),
+      };
+    }
+
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
+ * Parse a daily challenge deep link to extract challenge parameters
+ */
+export const parseDailyChallengeDeepLink = (
+  url: string,
+): { challengeId?: string; startWord?: string; targetWord?: string } | null => {
+  try {
+    // Handle both web URLs and custom scheme URLs for daily challenges
+    const regex = /(?:\/\/|\/+)dailychallenge\?id=([^&]+)&start=([^&]+)&target=([^&]+)/;
+    const match = url.match(regex);
+
+    if (match && match.length >= 4) {
+      return {
+        challengeId: decodeURIComponent(match[1]),
+        startWord: decodeURIComponent(match[2]),
+        targetWord: decodeURIComponent(match[3]),
       };
     }
 

@@ -11,6 +11,23 @@ interface GraphData {
   [word: string]: NodeData;
 }
 
+// List of words to filter out
+const FILTERED_WORDS = new Set([
+  "retard",
+  "african",
+  "gay",
+]);
+
+/**
+ * Filters out specific words from a list
+ * 
+ * @param words - Array of words to filter
+ * @returns Array of words with filtered words removed
+ */
+function filterOutWords(words: string[]): string[] {
+  return words.filter(word => !FILTERED_WORDS.has(word.toLowerCase()));
+}
+
 /**
  * Filters a list of words against the game's graph data
  *
@@ -32,6 +49,9 @@ async function filterWordList(
   const graphPath = graphDataPath || defaultPath;
 
   try {
+    // First filter out specific words
+    const filteredWords = filterOutWords(words);
+    
     // Load graph data
     console.log(`Loading graph data from ${graphPath}...`);
     const graphRawData = JSON.parse(fs.readFileSync(graphPath, "utf-8"));
@@ -54,7 +74,7 @@ async function filterWordList(
     const validWords: string[] = [];
     const invalidWords: string[] = [];
 
-    for (const word of words) {
+    for (const word of filteredWords) {
       const normalizedWord = word.trim().toLowerCase();
       if (validGraphWords.has(normalizedWord)) {
         validWords.push(normalizedWord);

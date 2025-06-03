@@ -15,9 +15,13 @@ const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({
   const pathDisplayMode = useGameStore((state) => state.pathDisplayMode);
   const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
   const gameStatus = useGameStore((state) => state.gameStatus);
+  const isDailyChallenge = useGameStore((state) => state.isDailyChallenge);
 
   // Only show optimal/suggested paths options if the game is over
   const showAdvancedOptions = gameStatus === "given_up" || gameStatus === "won";
+  
+  // Only show AI path option for daily challenges
+  const showAiPathOption = isDailyChallenge;
 
   const handleTogglePlayerPath = () => {
     setPathDisplayMode({ player: !pathDisplayMode.player });
@@ -29,6 +33,10 @@ const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({
 
   const handleToggleSuggestedPath = () => {
     setPathDisplayMode({ suggested: !pathDisplayMode.suggested });
+  };
+
+  const handleToggleAiPath = () => {
+    setPathDisplayMode({ ai: !pathDisplayMode.ai });
   };
 
   if (compact) {
@@ -61,6 +69,16 @@ const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({
               />
             </View>
           </>
+        )}
+
+        {showAiPathOption && (
+          <View style={styles.compactOption}>
+            <Text style={styles.compactLabel}>AI Path</Text>
+            <Switch
+              value={pathDisplayMode.ai}
+              onValueChange={handleToggleAiPath}
+            />
+          </View>
         )}
       </View>
     );
@@ -98,6 +116,16 @@ const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({
             />
           </View>
         </>
+      )}
+
+      {showAiPathOption && (
+        <View style={styles.option}>
+          <Text>AI Path</Text>
+          <Switch
+            value={pathDisplayMode.ai}
+            onValueChange={handleToggleAiPath}
+          />
+        </View>
       )}
     </View>
   );

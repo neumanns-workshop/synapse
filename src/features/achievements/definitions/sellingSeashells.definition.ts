@@ -22,7 +22,11 @@ export const sellingSeashellsAchievement: Achievement = {
       const firstLetter2 = path[i + 1].charAt(0).toLowerCase();
       const firstLetter3 = path[i + 2].charAt(0).toLowerCase();
 
-      if (firstLetter1 === firstLetter2 && firstLetter2 === firstLetter3) {
+      if (
+        firstLetter1 && // Ensure not an empty string
+        firstLetter1 === firstLetter2 &&
+        firstLetter2 === firstLetter3
+      ) {
         return true;
       }
     }

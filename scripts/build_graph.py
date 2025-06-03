@@ -19,6 +19,15 @@ OUTPUT_DIR = os.path.join("client", "public", "data")
 OUTPUT_GRAPH_PATH = os.path.join(OUTPUT_DIR, "graph.json")
 OUTPUT_DEFS_PATH = os.path.join(OUTPUT_DIR, "definitions.json") # Path for definitions
 
+# List of words to filter out
+FILTERED_WORDS = {
+    "retard",
+    "african",
+    "gay",
+    "lynch",
+    "cluster",
+}
+
 # --- WordNet Definition Function ---
 # Ensure WordNet data is available before calling this
 try:
@@ -57,14 +66,20 @@ def build_graph(k_neighbors):
     initial_word_count = len(embeddings_dict)
     print(f"Loaded embeddings for {initial_word_count} words.")
 
-    # --- Filter Words Based on Definitions ---
+    # --- Filter Words Based on Definitions and Filtered Words List ---
     print("Fetching definitions and filtering words...")
     filtered_embeddings_dict = {}
     final_definitions = {}
     definition_not_found_count = 0
+    filtered_words_count = 0
     words_processed = 0
 
     for word, embedding in embeddings_dict.items():
+        # Skip words in the filtered list
+        if word.lower() in FILTERED_WORDS:
+            filtered_words_count += 1
+            continue
+            
         definitions_list = get_wordnet_definition(word)
         if definitions_list: # Keep only words with definitions
             filtered_embeddings_dict[word] = embedding
@@ -79,6 +94,7 @@ def build_graph(k_neighbors):
     filtered_word_count = len(filtered_embeddings_dict)
     print(f"Finished definition check. Kept {filtered_word_count} words with definitions.")
     print(f"Removed {definition_not_found_count} words without definitions.")
+    print(f"Removed {filtered_words_count} words from filtered words list.")
     # --- End Filter ---
 
     # Continue with the filtered dictionary

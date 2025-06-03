@@ -1,15 +1,23 @@
 import React from "react";
-import { ScrollView, StyleSheet, type ViewStyle } from "react-native";
+import { ScrollView, StyleSheet, type ViewStyle, View } from "react-native";
 
 import {
-  Dialog,
-  Button,
   Text,
   List,
   Divider,
   useTheme,
+  Portal,
+  Modal,
+  Dialog as PaperDialog,
 } from "react-native-paper";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
 
+import AnimatedPaperButton from "./AnimatedButton";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 
@@ -26,7 +34,9 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
   onDismiss,
   pathIndexInPlayerPath,
 }) => {
-  const { colors } = useTheme() as ExtendedTheme;
+  const theme = useTheme() as ExtendedTheme;
+  const { colors } = theme;
+
   const definitionsData = useGameStore((state) => state.definitionsData);
   const playerPath = useGameStore((state) => state.playerPath);
   const optimalChoices = useGameStore((state) => state.optimalChoices);
@@ -34,7 +44,29 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
   const backtrackToWord = useGameStore((state) => state.backtrackToWord);
   const backtrackHistory = useGameStore((state) => state.backtrackHistory);
 
-  // Memoize the function for List.Item left prop to avoid unstable nested component warning
+  const scale = useSharedValue(0.9);
+  const opacity = useSharedValue(0);
+
+  React.useEffect(() => {
+    if (visible) {
+      scale.value = withTiming(1, { 
+        duration: 250, 
+        easing: Easing.out(Easing.back(1.5)) 
+      });
+      opacity.value = withTiming(1, { duration: 250 });
+    } else {
+      scale.value = withTiming(0.9, { duration: 150, easing: Easing.in(Easing.ease) });
+      opacity.value = withTiming(0, { duration: 150 });
+    }
+  }, [visible, scale, opacity]);
+
+  const animatedContentStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+      opacity: opacity.value,
+    };
+  });
+
   const renderListItemIcon = React.useCallback(
     (props: { color: string; style: ViewStyle }) => (
       <List.Icon {...props} icon="book-open-variant" color={colors.onSurface} />
@@ -42,23 +74,15 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
     [colors.onSurface],
   );
 
-  // Check if this word is a valid backtracking point
   const canBacktrackToWord = React.useMemo(() => {
-    // Use pathIndexInPlayerPath directly if it's a valid number
     const wordIndex =
       typeof pathIndexInPlayerPath === "number"
         ? pathIndexInPlayerPath
         : playerPath.indexOf(word);
-
-    if (gameStatus !== "playing" || !playerPath || playerPath.length <= 1)
-      return false;
-
-    if (wordIndex <= 0 || wordIndex >= playerPath.length - 1) return false; // Can't backtrack to first or last word
-
-    // Check if it's an optimal choice that hasn't been used
+    if (gameStatus !== "playing" || !playerPath || playerPath.length <= 1) return false;
+    if (wordIndex <= 0 || wordIndex >= playerPath.length - 1) return false;
     const choiceIndex = wordIndex - 1;
     if (choiceIndex < 0 || choiceIndex >= optimalChoices.length) return false;
-
     const choice = optimalChoices[choiceIndex];
     return (
       (choice.isGlobalOptimal || choice.isLocalOptimal) &&
@@ -76,109 +100,130 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
 
   const handleBacktrack = () => {
     if (!canBacktrackToWord) return;
-
-    // Use pathIndexInPlayerPath directly if it's a valid number
     const wordIndex =
       typeof pathIndexInPlayerPath === "number"
         ? pathIndexInPlayerPath
         : playerPath.indexOf(word);
-
-    // Ensure wordIndex is valid before proceeding
     if (wordIndex === -1) {
       console.warn("Word not found in player path for backtracking.");
       return;
     }
-
     backtrackToWord(word, wordIndex);
-    onDismiss(); // Close the dialog after backtracking
+    onDismiss(); 
   };
 
   if (!definitionsData || !word) {
     return null;
   }
-
   const definitions = definitionsData[word] || [];
 
+  if (!visible && opacity.value === 0) {
+    return null;
+  }
+
+  const buttonTextColor = theme.dark ? colors.onSurface : colors.primary;
+
   return (
-    <Dialog
-      visible={visible}
-      onDismiss={onDismiss}
-      style={[
-        styles.dialog,
-        {
-          backgroundColor: colors.surface,
-          borderColor: colors.outline,
-        },
-      ]}
-    >
-      <Dialog.Title style={[styles.dialogTitle, { color: colors.primary }]}>
-        {word}
-      </Dialog.Title>
-      <Dialog.Content>
-        <ScrollView style={styles.scrollView}>
-          {definitions.length > 0 ? (
-            definitions.map((definition, index) => (
-              <React.Fragment key={index}>
-                {index > 0 && (
-                  <Divider
-                    style={[
-                      styles.divider,
-                      { backgroundColor: colors.outline },
-                    ]}
-                  />
-                )}
-                <List.Item
-                  title={`Definition ${index + 1}`}
-                  description={definition}
-                  descriptionNumberOfLines={10}
-                  descriptionStyle={[
-                    styles.definition,
-                    { color: colors.onSurface },
-                  ]}
-                  titleStyle={{ color: colors.onSurface }}
-                  left={renderListItemIcon}
-                />
-              </React.Fragment>
-            ))
-          ) : (
-            <Text style={[styles.noDefinition, { color: colors.onSurface }]}>
-              No definition available for this word.
-            </Text>
-          )}
-        </ScrollView>
-      </Dialog.Content>
-      <Dialog.Actions>
-        {canBacktrackToWord && (
-          <Button
-            mode="text"
-            onPress={handleBacktrack}
-            icon="step-backward"
-            textColor={colors.primary}
+    <Portal>
+      <Modal
+        visible={visible}
+        onDismiss={onDismiss}
+        contentContainerStyle={styles.modalContentContainer}
+      >
+        <Animated.View style={[styles.animatedDialogContainer, animatedContentStyle]}>
+          <View
+            style={[
+              styles.dialogBase,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.outline,
+              },
+            ]}
           >
-            Backtrack
-          </Button>
-        )}
-        <Button onPress={onDismiss} textColor={colors.primary}>
-          Close
-        </Button>
-      </Dialog.Actions>
-    </Dialog>
+            <PaperDialog.Title style={[styles.dialogTitle, { color: colors.primary }]}>
+              {word}
+            </PaperDialog.Title>
+            <PaperDialog.Content>
+              <ScrollView 
+                style={styles.scrollView}
+                showsVerticalScrollIndicator={true}
+                contentContainerStyle={{ paddingBottom: 16 }}
+              >
+                {definitions.length > 0 ? (
+                  definitions.map((definition, index) => (
+                    <React.Fragment key={index}>
+                      {index > 0 && (
+                        <Divider
+                          style={[
+                            styles.divider,
+                            { backgroundColor: colors.outline },
+                          ]}
+                        />
+                      )}
+                      <List.Item
+                        title={`Definition ${index + 1}`}
+                        description={definition}
+                        descriptionNumberOfLines={0}
+                        descriptionStyle={[
+                          styles.definition,
+                          { color: colors.onSurface },
+                        ]}
+                        titleStyle={{ color: colors.onSurface }}
+                        left={renderListItemIcon}
+                      />
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <Text style={[styles.noDefinition, { color: colors.onSurface }]}>
+                    No definition available for this word.
+                  </Text>
+                )}
+              </ScrollView>
+            </PaperDialog.Content>
+            <PaperDialog.Actions>
+              {canBacktrackToWord && (
+                <AnimatedPaperButton
+                  mode="text"
+                  onPress={handleBacktrack}
+                  icon="step-backward"
+                  textColor={buttonTextColor}
+                >
+                  Backtrack
+                </AnimatedPaperButton>
+              )}
+              <AnimatedPaperButton onPress={onDismiss} textColor={buttonTextColor}>
+                Close
+              </AnimatedPaperButton>
+            </PaperDialog.Actions>
+          </View>
+        </Animated.View>
+      </Modal>
+    </Portal>
   );
 };
 
 const styles = StyleSheet.create({
-  dialog: {
-    maxHeight: "80%",
+  modalContentContainer: { 
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  animatedDialogContainer: { 
+    width: '90%',
     maxWidth: 700,
-    width: "100%",
-    alignSelf: "center",
+    maxHeight: '90%',
+  },
+  dialogBase: { 
+    width: "100%", 
     borderWidth: 1,
+    borderRadius: 8,
   },
   dialogTitle: {
     fontWeight: "bold",
   },
   scrollView: {
-    maxHeight: 300,
+    maxHeight: 400, // Fixed height instead of percentage to prevent cutoff
+    paddingHorizontal: 4, // Add some padding for better readability
   },
   definition: {
     fontSize: 14,

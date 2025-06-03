@@ -17,6 +17,8 @@ import { stealingSecondAchievement } from "./stealingSecond.definition";
 import { straightAndNarrowAchievement } from "./straightAndNarrow.definition";
 import { thoseWhoKnowAchievement } from "./thoseWhoKnow.definition";
 import type { Achievement } from "../achievement.types";
+import { seasonalExplorerAchievement } from "./seasonalExplorer.achievement";
+import { wordCollectorAchievement } from "./wordCollector.achievement";
 
 export const allAchievements: Achievement[] = [
   straightAndNarrowAchievement,
@@ -29,14 +31,16 @@ export const allAchievements: Achievement[] = [
   comebackKidAchievement,
   dejaVuAchievement,
   epicyclesUponEpicyclesAchievement,
-  slowAndSteadyAchievement, // This was an inline object, now imported
+  slowAndSteadyAchievement,
   looseCannonAchievement,
   looseCannonWinsAchievement,
-  stealingSecondAchievement, // This was an inline object, now imported
+  stealingSecondAchievement,
   sorryWrongRoomAchievement,
   thoseWhoKnowAchievement,
   puttingOnTheDogAchievement,
   sellingSeashellsAchievement,
+  seasonalExplorerAchievement,
+  wordCollectorAchievement,
 ];
 
 // Optionally, re-export all individual achievements if direct access is ever needed
@@ -59,4 +63,6 @@ export {
   thoseWhoKnowAchievement,
   puttingOnTheDogAchievement,
   sellingSeashellsAchievement,
+  seasonalExplorerAchievement,
+  wordCollectorAchievement,
 };

@@ -1,18 +1,24 @@
 import React, { useEffect } from "react";
 import { Platform, Linking } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { PaperProvider } from "react-native-paper";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import type { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import { Provider as PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import AboutModal from "./components/AboutModal";
 import StatsModal from "./components/StatsModal";
+import TutorialModal from "./components/TutorialModal";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import { TutorialProvider } from "./context/TutorialContext";
 import GameScreen from "./screens/GameScreen";
-import { parseGameDeepLink } from "./services/SharingService";
+import { gameFlowManager } from "./services/GameFlowManager";
 import { useGameStore } from "./stores/useGameStore";
+import { resetAllPlayerData } from './services/StorageService';
 
 // Define the root stack parameter list
 export type RootStackParamList = {
@@ -21,79 +27,72 @@ export type RootStackParamList = {
   History: undefined;
 };
 
+// Custom screen transition animations
+const customScreenOptions: Partial<NativeStackNavigationOptions> = {
+  animation: "fade",
+  animationDuration: 300, // in ms
+};
+
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const queryClient = new QueryClient();
 
 function AppContent() {
   const { theme } = useTheme();
   // Get the actions from the store
   const loadInitialData = useGameStore((state) => state.loadInitialData);
-  const startChallengeGame = useGameStore((state) => state.startChallengeGame);
   const aboutModalVisible = useGameStore((state) => state.aboutModalVisible);
   const setAboutModalVisible = useGameStore(
     (state) => state.setAboutModalVisible,
-  );
-  const setHasPendingChallenge = useGameStore(
-    (state) => state.setHasPendingChallenge,
-  );
-  const setPendingChallengeWords = useGameStore(
-    (state) => state.setPendingChallengeWords,
   );
 
   // Initialize web compatibility layers and load data
   useEffect(() => {
     const initializeApp = async () => {
+      // TEMPORARY: Reset all player data for testing
+      // Comment this out after testing
+      await resetAllPlayerData();
+      
+      let entryUrl = '';
+      
       if (Platform.OS === "web") {
-        // Check for challenge parameters in URL for web
-        if (typeof window !== "undefined" && window.location.search) {
-          const params = new URLSearchParams(window.location.search);
-          const startWord = params.get("start");
-          const targetWord = params.get("target");
-
-          if (startWord && targetWord) {
-            // Store these parameters for GameScreen to use
-            setPendingChallengeWords({ startWord, targetWord });
-            setHasPendingChallenge(true);
-          }
+        // Get URL from browser
+        if (typeof window !== "undefined") {
+          entryUrl = window.location.href;
         }
       } else {
         // Handle deep links for native platforms
         const initialUrl = await Linking.getInitialURL();
-        if (initialUrl) {
-          const params = parseGameDeepLink(initialUrl);
-
-          if (params && params.startWord && params.targetWord) {
-            // Store these parameters for GameScreen to use
-            setPendingChallengeWords({
-              startWord: params.startWord,
-              targetWord: params.targetWord,
-            });
-            setHasPendingChallenge(true);
-          }
-        }
+        entryUrl = initialUrl || '';
       }
+
+      // Parse the entry URL to determine the type and extract challenge data
+      const { entryType, challengeData } = gameFlowManager.parseEntryUrl(entryUrl);
 
       // Load graph/definitions data when the app mounts
       try {
         await loadInitialData();
-      } catch (error) {}
+        
+        // Determine and execute the appropriate game flow
+        const flowDecision = await gameFlowManager.determineGameFlow(entryType, challengeData);
+        await gameFlowManager.executeFlowDecision(flowDecision);
+      } catch (error) {
+        console.error('Error initializing app:', error);
+      }
     };
 
     initializeApp();
-  }, [loadInitialData, setPendingChallengeWords, setHasPendingChallenge]);
+  }, [loadInitialData]);
 
   // Set up deep link handling for when app is already open
   useEffect(() => {
     // Function to handle incoming links
     const handleDeepLink = async (event: { url: string }) => {
-      const params = parseGameDeepLink(event.url);
-
-      if (params && params.startWord && params.targetWord) {
-        setPendingChallengeWords({
-          startWord: params.startWord,
-          targetWord: params.targetWord,
-        });
-        setHasPendingChallenge(true);
-      }
+      const { entryType, challengeData } = gameFlowManager.parseEntryUrl(event.url);
+      
+      // Determine and execute the appropriate game flow
+      const flowDecision = await gameFlowManager.determineGameFlow(entryType, challengeData);
+      await gameFlowManager.executeFlowDecision(flowDecision);
     };
 
     // Handle links when app is already open (only for native)
@@ -101,7 +100,7 @@ function AppContent() {
       const subscription = Linking.addEventListener("url", handleDeepLink);
       return () => subscription.remove();
     }
-  }, [startChallengeGame, setPendingChallengeWords, setHasPendingChallenge]);
+  }, []);
 
   return (
     <PaperProvider theme={theme}>
@@ -111,7 +110,8 @@ function AppContent() {
             initialRouteName="Synapse"
             screenOptions={{
               headerShown: false,
-              animation: "slide_from_right",
+              animation: customScreenOptions.animation,
+              animationDuration: customScreenOptions.animationDuration,
               contentStyle: { backgroundColor: theme.colors.background },
             }}
           >
@@ -122,6 +122,7 @@ function AppContent() {
             onDismiss={() => setAboutModalVisible(false)}
           />
           <StatsModal />
+          <TutorialModal />
         </NavigationContainer>
         <StatusBar style={theme.dark ? "light" : "dark"} />
       </SafeAreaProvider>
@@ -132,7 +133,9 @@ function AppContent() {
 export default function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <TutorialProvider>
+        <AppContent />
+      </TutorialProvider>
     </ThemeProvider>
   );
 }

@@ -19,6 +19,7 @@ interface PlayerPathDisplayProps {
   optimalChoices: OptimalChoice[];
   suggestedPath: string[];
   onWordDefinition: (word: string, pathIndex?: number) => void;
+  targetWord?: string;
 }
 
 const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
@@ -26,14 +27,18 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
   optimalChoices,
   suggestedPath,
   onWordDefinition,
+  targetWord: targetWordProp,
 }) => {
   const { colors, customColors } = useTheme() as ExtendedTheme;
   const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
   const currentPathDisplayMode = useGameStore((state) => state.pathDisplayMode);
-  const endWord = useGameStore((state) => state.endWord);
+  const storeTargetWord = useGameStore((state) => state.targetWord);
   const gameStatus = useGameStore((state) => state.gameStatus);
   const backtrackHistory = useGameStore((state) => state.backtrackHistory);
   const scrollViewRef = useRef<ScrollView>(null);
+
+  // Use the prop if provided, otherwise fall back to the store value
+  const targetWord = targetWordProp ?? storeTargetWord;
 
   const handlePlayerPathPress = () => {
     setPathDisplayMode({
@@ -203,7 +208,7 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
 
               if (isLastWordInPath) {
                 textStyle.fontWeight = "bold";
-                if (word === endWord) {
+                if (word === targetWord) {
                   textStyle.color = customColors.endNode;
                 } else {
                   if (
@@ -229,7 +234,7 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
               );
             })}
 
-            {lastWordOfPlayerPath !== endWord &&
+            {lastWordOfPlayerPath !== targetWord &&
               suggestedPath &&
               suggestedPath.length > 1 && (
                 <>
@@ -256,9 +261,9 @@ const PlayerPathDisplay: React.FC<PlayerPathDisplayProps> = ({
                       ...gameScreenStyles.suggestedEndWord,
                       color: customColors.endNode,
                     }}
-                    onPress={() => endWord && onWordDefinition(endWord)}
+                    onPress={() => targetWord && onWordDefinition(targetWord)}
                   >
-                    {endWord}
+                    {targetWord}
                   </Text>
                 </>
               )}
