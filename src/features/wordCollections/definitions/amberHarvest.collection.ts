@@ -6,26 +6,96 @@ export const amberHarvestCollection: WordCollection = {
   icon: "leaf-maple",
   isWordlistViewable: true,
   startDate: new Date(2024, 8, 1), // September 1st
-  endDate: new Date(2024, 8, 30),   // September 30th
+  endDate: new Date(2024, 8, 30), // September 30th
   words: [
     // Autumn Colors
-    "amber", "bronze", "copper", "rust", "scarlet", "crimson", "burgundy", "maroon",
-    "ochre", "sienna", "umber", "mahogany", "chestnut", "auburn", "russet", "tawny",
-    
+    "amber",
+    "bronze",
+    "copper",
+    "rust",
+    "scarlet",
+    "crimson",
+    "burgundy",
+    "maroon",
+    "ochre",
+    "sienna",
+    "umber",
+    "mahogany",
+    "chestnut",
+    "auburn",
+    "russet",
+    "tawny",
+
     // Falling Leaves
-    "falling", "drifting", "swirling", "tumbling", "cascading", "rustling", "crunching", "crackling",
-    "maple", "oak", "birch", "aspen", "elm", "sycamore", "poplar", "willow",
-    
+    "falling",
+    "drifting",
+    "swirling",
+    "tumbling",
+    "cascading",
+    "rustling",
+    "crunching",
+    "crackling",
+    "maple",
+    "oak",
+    "birch",
+    "aspen",
+    "elm",
+    "sycamore",
+    "poplar",
+    "willow",
+
     // Harvest & Abundance
-    "harvest", "grain", "grape", "vintage", "cider", "pressing", "abundance", "plenty",
-    "gathering", "reaping", "bounty", "cornucopia", "baskets", "bushels", "stores", "preservation",
-    
+    "harvest",
+    "grain",
+    "grape",
+    "vintage",
+    "cider",
+    "pressing",
+    "abundance",
+    "plenty",
+    "gathering",
+    "reaping",
+    "bounty",
+    "cornucopia",
+    "baskets",
+    "bushels",
+    "stores",
+    "preservation",
+
     // Equinox & Balance
-    "equinox", "balance", "equilibrium", "harmony", "transition", "turning", "pivot", "threshold",
-    "equal", "measured", "symmetry", "proportion", "scale", "middle", "center", "poise",
-    
+    "equinox",
+    "balance",
+    "equilibrium",
+    "harmony",
+    "transition",
+    "turning",
+    "pivot",
+    "threshold",
+    "equal",
+    "measured",
+    "symmetry",
+    "proportion",
+    "scale",
+    "middle",
+    "center",
+    "poise",
+
     // Atmosphere & Mood
-    "mellow", "muted", "subdued", "contemplative", "reflective", "pensive", "wistful", "nostalgic",
-    "crisp", "sharp", "clear", "brilliant", "vivid", "intense", "saturated", "rich"
-  ]
-}; 
+    "mellow",
+    "muted",
+    "subdued",
+    "contemplative",
+    "reflective",
+    "pensive",
+    "wistful",
+    "nostalgic",
+    "crisp",
+    "sharp",
+    "clear",
+    "brilliant",
+    "vivid",
+    "intense",
+    "saturated",
+    "rich",
+  ],
+};

@@ -62,7 +62,7 @@ export const shareChallenge = async ({
 }: ShareChallengeOptions): Promise<boolean> => {
   try {
     // Generate the deep link
-    const deepLink = generateGameDeepLink(startWord, targetWord);
+    const deepLink = generateSecureGameDeepLink(startWord, targetWord);
 
     // Generate challenge message
     const challengeMessage = generateChallengeMessage({
@@ -168,7 +168,11 @@ export const shareDailyChallenge = async ({
 }: ShareDailyChallengeOptions): Promise<boolean> => {
   try {
     // Generate the daily challenge deep link
-    const deepLink = generateDailyChallengeDeepLink(challengeId, startWord, targetWord);
+    const deepLink = generateSecureDailyChallengeDeepLink(
+      challengeId,
+      startWord,
+      targetWord,
+    );
 
     // Generate taunting message
     const tauntMessage = generateDailyChallengeTaunt({
@@ -323,6 +327,7 @@ const captureGameScreen = async (
 
 /**
  * Generate a deep link to share a specific game setup
+ * @deprecated Use generateSecureGameDeepLink instead - this function creates insecure URLs without hash validation
  */
 export const generateGameDeepLink = (
   startWord: string,
@@ -345,6 +350,7 @@ export const generateGameDeepLink = (
 
 /**
  * Generate a deep link for daily challenge sharing with taunting message
+ * @deprecated Use generateSecureDailyChallengeDeepLink instead - this function creates insecure URLs without hash validation
  */
 export const generateDailyChallengeDeepLink = (
   challengeId: string,
@@ -382,12 +388,20 @@ interface DailyChallengeTauntOptions {
 export const generateDailyChallengeTaunt = (
   options: DailyChallengeTauntOptions,
 ): string => {
-  const { startWord, targetWord, aiSteps, userSteps, userCompleted, userGaveUp, challengeDate } = options;
-  
+  const {
+    startWord,
+    targetWord,
+    aiSteps,
+    userSteps,
+    userCompleted,
+    userGaveUp,
+    challengeDate,
+  } = options;
+
   const dateObj = new Date(challengeDate);
-  const formattedDate = dateObj.toLocaleDateString('en-US', { 
-    month: 'long', 
-    day: 'numeric' 
+  const formattedDate = dateObj.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
   });
 
   // If user completed it, compare with AI
@@ -400,70 +414,239 @@ export const generateDailyChallengeTaunt = (
       return `I got ${formattedDate}'s challenge in ${userSteps} moves ("${startWord}" → "${targetWord}"). The AI did it in ${aiSteps}... can you beat us both?`;
     }
   }
-  
+
   // If user gave up, acknowledge that but still challenge them
   if (userGaveUp && userSteps) {
     return `I gave up on ${formattedDate}'s challenge after ${userSteps} moves ("${startWord}" → "${targetWord}"), but the AI got it in ${aiSteps}. Think you can beat the AI?`;
   }
-  
+
   // If user hasn't attempted it or no steps recorded, just taunt with AI score
   return `I beat the AI in ${aiSteps} moves on ${formattedDate}'s challenge ("${startWord}" → "${targetWord}"). Can you do better?`;
 };
 
 /**
- * Parse a deep link to extract game parameters
+ * Simple hash function for URL validation
+ */
+const generateUrlHash = (data: string): string => {
+  let hash = 0;
+  const secret = "synapse_challenge_2024"; // Simple secret salt
+  const combined = data + secret;
+
+  for (let i = 0; i < combined.length; i++) {
+    const char = combined.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+
+  return Math.abs(hash).toString(36).substring(0, 8); // 8-character hash
+};
+
+/**
+ * Validate a challenge URL hash
+ */
+const validateChallengeHash = (
+  startWord: string,
+  targetWord: string,
+  providedHash: string,
+): boolean => {
+  const data = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+  const expectedHash = generateUrlHash(data);
+  return expectedHash === providedHash;
+};
+
+/**
+ * Generate a secure deep link with hash validation
+ */
+export const generateSecureGameDeepLink = (
+  startWord: string,
+  targetWord: string,
+): string => {
+  const data = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+  const hash = generateUrlHash(data);
+
+  // Use the app's scheme for deep linking
+  // For web, use the web URL format
+  if (Platform.OS === "web") {
+    // Use current origin or a fixed URL for the web version
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "https://synapse-game.example.com";
+    return `${origin}/challenge?start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
+  }
+
+  // For native apps, use the custom scheme
+  return `synapse://challenge?start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
+};
+
+/**
+ * Validate a daily challenge URL hash
+ */
+const validateDailyChallengeHash = (
+  challengeId: string,
+  startWord: string,
+  targetWord: string,
+  providedHash: string,
+): boolean => {
+  const data = `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+  const expectedHash = generateUrlHash(data);
+  return expectedHash === providedHash;
+};
+
+/**
+ * Generate a secure daily challenge deep link with hash validation
+ */
+export const generateSecureDailyChallengeDeepLink = (
+  challengeId: string,
+  startWord: string,
+  targetWord: string,
+): string => {
+  const data = `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+  const hash = generateUrlHash(data);
+
+  // Use the app's scheme for deep linking
+  // For web, use the web URL format
+  if (Platform.OS === "web") {
+    // Use current origin or a fixed URL for the web version
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "https://synapse-game.example.com";
+    return `${origin}/dailychallenge?id=${encodeURIComponent(challengeId)}&start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
+  }
+
+  // For native apps, use the custom scheme
+  return `synapse://dailychallenge?id=${encodeURIComponent(challengeId)}&start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
+};
+
+/**
+ * Parse a deep link to extract game parameters with validation
  */
 export const parseGameDeepLink = (
   url: string,
-): { startWord?: string; targetWord?: string } | null => {
+): { startWord?: string; targetWord?: string; isValid?: boolean } | null => {
   try {
-    let regex;
+    console.log("🎮 parseGameDeepLink: Parsing URL:", url);
 
-    // Handle both web URLs and custom scheme URLs
-    if (url.includes("://challenge")) {
-      // Either custom scheme or web URL with /challenge path
-      regex = /(?:\/\/|\/+)challenge\?start=([^&]+)&target=([^&]+)/;
-    } else {
-      // Legacy or alternative format
-      regex = /(?:\/\/|\/+)game\?start=([^&]+)&target=([^&]+)/;
+    // Handle both web URLs and custom scheme URLs - REQUIRE hash validation
+    if (url.includes("://challenge") || url.includes("/challenge")) {
+      // Only accept hash-validated URLs
+      const secureRegex =
+        /(?:\/\/|\/+)challenge\?start=([^&]+)&target=([^&]+)&hash=([^&]+)/;
+      const secureMatch = url.match(secureRegex);
+
+      if (secureMatch && secureMatch.length >= 4) {
+        const startWord = decodeURIComponent(secureMatch[1]);
+        const targetWord = decodeURIComponent(secureMatch[2]);
+        const providedHash = secureMatch[3];
+
+        const isValid = validateChallengeHash(
+          startWord,
+          targetWord,
+          providedHash,
+        );
+        console.log("🎮 parseGameDeepLink: Hash validation result:", isValid);
+
+        if (!isValid) {
+          console.log("🎮 parseGameDeepLink: Invalid hash - rejecting URL");
+          return null; // Reject invalid URLs
+        }
+
+        return {
+          startWord,
+          targetWord,
+          isValid: true,
+        };
+      }
+
+      // Reject URLs without hash
+      console.log(
+        "🎮 parseGameDeepLink: No hash found in challenge URL - rejecting",
+      );
+      return null;
     }
 
-    const match = url.match(regex);
+    // Legacy format still supported for non-challenge URLs
+    const legacyRegex = /(?:\/\/|\/+)game\?start=([^&]+)&target=([^&]+)/;
+    console.log("🎮 parseGameDeepLink: Testing legacy regex");
+    const legacyMatch = url.match(legacyRegex);
 
-    if (match && match.length >= 3) {
-      return {
-        startWord: decodeURIComponent(match[1]),
-        targetWord: decodeURIComponent(match[2]),
-      };
+    if (legacyMatch && legacyMatch.length >= 3) {
+      console.log(
+        "🎮 parseGameDeepLink: Legacy URL format - rejecting (use /challenge with hash)",
+      );
+      return null; // Reject legacy URLs without hash
     }
 
+    console.log("🎮 parseGameDeepLink: No valid URL format found");
     return null;
   } catch (error) {
+    console.error("🎮 parseGameDeepLink: Error parsing URL:", error);
     return null;
   }
 };
 
 /**
- * Parse a daily challenge deep link to extract challenge parameters
+ * Parse a daily challenge deep link to extract challenge parameters with validation
  */
 export const parseDailyChallengeDeepLink = (
   url: string,
-): { challengeId?: string; startWord?: string; targetWord?: string } | null => {
+): {
+  challengeId?: string;
+  startWord?: string;
+  targetWord?: string;
+  isValid?: boolean;
+} | null => {
   try {
-    // Handle both web URLs and custom scheme URLs for daily challenges
-    const regex = /(?:\/\/|\/+)dailychallenge\?id=([^&]+)&start=([^&]+)&target=([^&]+)/;
-    const match = url.match(regex);
+    // Handle both web URLs and custom scheme URLs for daily challenges - REQUIRE hash validation
+    if (url.includes("://dailychallenge") || url.includes("/dailychallenge")) {
+      // Only accept hash-validated URLs
+      const secureRegex =
+        /(?:\/\/|\/+)dailychallenge\?id=([^&]+)&start=([^&]+)&target=([^&]+)&hash=([^&]+)/;
+      const secureMatch = url.match(secureRegex);
 
-    if (match && match.length >= 4) {
-      return {
-        challengeId: decodeURIComponent(match[1]),
-        startWord: decodeURIComponent(match[2]),
-        targetWord: decodeURIComponent(match[3]),
-      };
+      if (secureMatch && secureMatch.length >= 5) {
+        const challengeId = decodeURIComponent(secureMatch[1]);
+        const startWord = decodeURIComponent(secureMatch[2]);
+        const targetWord = decodeURIComponent(secureMatch[3]);
+        const providedHash = secureMatch[4];
+
+        const isValid = validateDailyChallengeHash(
+          challengeId,
+          startWord,
+          targetWord,
+          providedHash,
+        );
+        console.log(
+          "🎮 parseDailyChallengeDeepLink: Hash validation result:",
+          isValid,
+        );
+
+        if (!isValid) {
+          console.log(
+            "🎮 parseDailyChallengeDeepLink: Invalid hash - rejecting URL",
+          );
+          return null; // Reject invalid URLs
+        }
+
+        return {
+          challengeId,
+          startWord,
+          targetWord,
+          isValid: true,
+        };
+      }
+
+      // Reject URLs without hash
+      console.log(
+        "🎮 parseDailyChallengeDeepLink: No hash found in daily challenge URL - rejecting",
+      );
+      return null;
     }
 
     return null;
   } catch (error) {
+    console.error("🎮 parseDailyChallengeDeepLink: Error parsing URL:", error);
     return null;
   }
 };

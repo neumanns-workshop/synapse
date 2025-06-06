@@ -66,7 +66,7 @@ const bloomWordList = [
   "shower",
   "rain",
   "fall",
-  "drift"
+  "drift",
 ];
 
 export const bloomCollection: WordCollection = createCollection(
@@ -79,4 +79,4 @@ export const bloomCollection: WordCollection = createCollection(
     startDate: new Date(new Date().getFullYear(), 3, 20), // April 20th
     endDate: new Date(new Date().getFullYear(), 4, 31), // May 31st
   },
-); 
+);

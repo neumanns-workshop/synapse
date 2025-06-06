@@ -1,13 +1,20 @@
-import { loadGraphData, loadDefinitionsData, loadWordFrequencies } from '../../services/dataLoader';
-import { saveCurrentGame, recordEndedGame } from '../../services/StorageService';
+import {
+  loadGraphData,
+  loadDefinitionsData,
+  loadWordFrequencies,
+} from "../../services/dataLoader";
+import {
+  saveCurrentGame,
+  recordEndedGame,
+} from "../../services/StorageAdapter";
 // import { wordCollections } from '../../data/wordCollections';
 
-jest.mock('../../services/dataLoader');
-jest.mock('../../services/StorageService');
+jest.mock("../../services/dataLoader");
+jest.mock("../../services/StorageAdapter");
 // jest.mock('../../data/wordCollections');
 
-describe('Minimal test', () => {
-  it('should pass', () => {
+describe("Minimal test", () => {
+  it("should pass", () => {
     expect(true).toBe(true);
   });
-}); 
+});

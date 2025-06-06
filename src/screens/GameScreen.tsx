@@ -18,13 +18,23 @@ import AvailableWordsDisplay from "../components/AvailableWordsDisplay";
 import GraphVisualization from "../components/GraphVisualization";
 import PathDisplayConfigurator from "../components/PathDisplayConfigurator";
 import PlayerPathDisplay from "../components/PlayerPathDisplay";
-import WordDefinitionDialog from "../components/WordDefinitionDialog";
 import UpgradePrompt from "../components/UpgradePrompt";
+import WordDefinitionDialog from "../components/WordDefinitionDialog";
+import { useTutorial } from "../context/TutorialContext";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
-import { useTutorial } from "../context/TutorialContext";
 
-const GameScreen = () => {
+interface GameScreenProps {
+  onShowAuth?: () => void;
+  onShowAuthUpgrade?: () => void;
+  onShowAccount?: () => void;
+}
+
+const GameScreen: React.FC<GameScreenProps> = ({
+  onShowAuth,
+  onShowAuthUpgrade,
+  onShowAccount,
+}) => {
   // const navigation = useNavigation<NavigationProp>(); // Removing unused navigation variable
   const { customColors, colors } = useTheme() as ExtendedTheme;
 
@@ -72,20 +82,39 @@ const GameScreen = () => {
   const isDailyChallenge = useGameStore((state) => state.isDailyChallenge);
 
   // Upgrade prompt state
-  const upgradePromptVisible = useGameStore((state) => state.upgradePromptVisible);
-  const upgradePromptMessage = useGameStore((state) => state.upgradePromptMessage);
+  const upgradePromptVisible = useGameStore(
+    (state) => state.upgradePromptVisible,
+  );
+  const upgradePromptMessage = useGameStore(
+    (state) => state.upgradePromptMessage,
+  );
+  const upgradePromptContext = useGameStore(
+    (state) => state.upgradePromptContext,
+  );
+  const upgradePromptDismissedThisSession = useGameStore(
+    (state) => state.upgradePromptDismissedThisSession,
+  );
   const hideUpgradePrompt = useGameStore((state) => state.hideUpgradePrompt);
   const showUpgradePrompt = useGameStore((state) => state.showUpgradePrompt);
+  const resetUpgradePromptDismissal = useGameStore(
+    (state) => state.resetUpgradePromptDismissal,
+  );
   const remainingFreeGames = useGameStore((state) => state.remainingFreeGames);
 
   // Debug logging for upgrade prompt
-  console.log('GameScreen: upgradePromptVisible =', upgradePromptVisible);
-  console.log('GameScreen: upgradePromptMessage =', upgradePromptMessage);
-  console.log('GameScreen: About to render UpgradePrompt with visible =', upgradePromptVisible);
+  console.log("GameScreen: upgradePromptVisible =", upgradePromptVisible);
+  console.log("GameScreen: upgradePromptMessage =", upgradePromptMessage);
+  console.log(
+    "GameScreen: About to render UpgradePrompt with visible =",
+    upgradePromptVisible,
+  );
 
   // Add useEffect to track upgradePromptVisible changes
   useEffect(() => {
-    console.log('GameScreen: upgradePromptVisible changed to:', upgradePromptVisible);
+    console.log(
+      "GameScreen: upgradePromptVisible changed to:",
+      upgradePromptVisible,
+    );
   }, [upgradePromptVisible]);
 
   const { startTutorial } = useTutorial();
@@ -104,40 +133,7 @@ const GameScreen = () => {
     }
   }, [loadInitialData, initialLoadComplete]);
 
-  // Automatically start a new game if:
-  // 1. Initial data load is complete.
-  // 2. Graph data is available.
-  // 3. A game was NOT restored during the initial load.
-  // 4. Game status is 'idle' or 'loading'.
-  // 5. And there's no pending challenge to start
-  // 6. And there's no upgrade prompt currently visible
-  useEffect(() => {
-    const currentError = useGameStore.getState().errorLoadingData; // Get latest error state
-
-    if (
-      initialLoadComplete &&
-      graphData &&
-      !gameWasRestored &&
-      !upgradePromptVisible && // Don't auto-start if upgrade prompt is visible
-      ((gameStatus === "idle" && !hasPendingChallenge && !currentError) || // If idle, ensure no pending/error
-        (gameStatus === "loading" && !hasPendingChallenge && !currentError)) && // If loading, also ensure not due to pending/error
-      !isChallenge // And not currently in a challenge game that might be loading
-    ) {
-      startGame();
-    }
-  }, [
-    initialLoadComplete,
-    graphData,
-    gameWasRestored,
-    gameStatus,
-    startGame,
-    hasPendingChallenge,
-    errorLoadingData,
-    isChallenge,
-    upgradePromptVisible, // Add this dependency
-  ]);
-
-  // Handle challenge game from deep link if pending
+  // Handle challenge game from deep link if pending - THIS MUST RUN FIRST
   useEffect(() => {
     // Actions and state are now available from store hooks directly
     if (
@@ -146,6 +142,7 @@ const GameScreen = () => {
       hasPendingChallenge &&
       pendingChallengeWords
     ) {
+      console.log("🎮 GameScreen: Starting pending challenge");
       startChallengeGameAction(
         pendingChallengeWords.startWord,
         pendingChallengeWords.targetWord,
@@ -153,12 +150,17 @@ const GameScreen = () => {
         .then(() => {
           // If successful, the store would have set isChallenge, gameStatus etc.
           // Store also clears pending flags. No explicit action needed here if store manages state correctly.
+          console.log("🎮 GameScreen: Challenge started successfully");
         })
-        .catch((_actionError) => { // Catch rejection from startChallengeGameAction
+        .catch((_actionError) => {
+          // Catch rejection from startChallengeGameAction
           // The action itself should ideally set errorLoadingData in the store upon failure.
           // We check the store for that error message.
-          const currentErrorFromStore = useGameStore.getState().errorLoadingData;
-          const messageToShow = currentErrorFromStore || "Failed to start challenge. Trying a random game.";
+          const currentErrorFromStore =
+            useGameStore.getState().errorLoadingData;
+          const messageToShow =
+            currentErrorFromStore ||
+            "Failed to start challenge. Trying a random game.";
 
           setSnackbarMessage(messageToShow);
           setSnackbarVisible(true);
@@ -176,6 +178,60 @@ const GameScreen = () => {
     startGame,
     // No need to depend on setHasPendingChallenge or setPendingChallengeWords here
     // as we're reacting to the state values, and the store is responsible for setting them.
+  ]);
+
+  // Automatically start a new game if:
+  // 1. Initial data load is complete.
+  // 2. Graph data is available.
+  // 3. A game was NOT restored during the initial load.
+  // 4. Game status is 'idle' or 'loading'.
+  // 5. And there's no pending challenge to start
+  // 6. And there's no upgrade prompt currently visible
+  // 7. And the upgrade prompt hasn't been dismissed this session
+  // 8. This runs AFTER challenge handling to avoid interference
+  useEffect(() => {
+    const currentError = useGameStore.getState().errorLoadingData; // Get latest error state
+
+    if (
+      initialLoadComplete &&
+      graphData &&
+      !gameWasRestored &&
+      !hasPendingChallenge && // CRITICAL: Don't auto-start if there's a pending challenge
+      !upgradePromptVisible && // Don't auto-start if upgrade prompt is visible
+      !upgradePromptDismissedThisSession && // Don't auto-start if upgrade prompt was dismissed
+      ((gameStatus === "idle" && !currentError) || // If idle, ensure no error
+        (gameStatus === "loading" && !currentError)) && // If loading, also ensure not due to error
+      !isChallenge && // And not currently in a challenge game that might be loading
+      !isDailyChallenge // And not currently in a daily challenge
+    ) {
+      console.log("🎮 GameScreen: Auto-starting game");
+      startGame();
+    } else {
+      console.log("🎮 GameScreen: Skipping auto-start", {
+        initialLoadComplete,
+        graphData: !!graphData,
+        gameWasRestored,
+        hasPendingChallenge,
+        upgradePromptVisible,
+        upgradePromptDismissedThisSession,
+        gameStatus,
+        currentError,
+        isChallenge,
+        isDailyChallenge,
+      });
+    }
+  }, [
+    initialLoadComplete,
+    graphData,
+    gameWasRestored,
+    gameStatus,
+    startGame,
+    hasPendingChallenge,
+    errorLoadingData,
+    isChallenge,
+    isDailyChallenge, // Add this dependency
+    upgradePromptVisible, // Add this dependency
+    upgradePromptDismissedThisSession, // Add this dependency
   ]);
 
   // Determine if we should show the path display options
@@ -252,9 +308,20 @@ const GameScreen = () => {
 
   // Handle upgrade prompt actions
   const handleUpgrade = () => {
-    // TODO: Implement IAP upgrade flow
-    console.log('Upgrade to premium requested');
     hideUpgradePrompt();
+
+    // Don't call resetUpgradePromptDismissal() here - that would undo the dismissal
+    // and allow another upgrade prompt to fire immediately
+
+    // Add a delay to ensure the prompt is fully hidden before showing auth
+    setTimeout(() => {
+      if (onShowAuthUpgrade) {
+        onShowAuthUpgrade();
+      } else {
+        // Fallback: TODO: Implement direct IAP upgrade flow
+        console.log("Upgrade to premium requested - no auth handler provided");
+      }
+    }, 100); // Small delay to prevent timing conflicts
   };
 
   const handleUpgradeDismiss = () => {
@@ -276,17 +343,18 @@ const GameScreen = () => {
       <AppHeader
         onNewGame={startGame}
         onGiveUp={handleGiveUp}
+        onShowAuth={onShowAuth}
+                  onShowAccount={onShowAccount}
         newGameDisabled={gameStatus === "playing"}
         giveUpDisabled={gameStatus !== "playing"}
+        gameInProgress={gameStatus === "playing"}
       />
       {showReport ? (
         <ReportScreen />
       ) : (
         <>
           <View style={styles.gameContainer}>
-            <View
-              style={[styles.graphContainer, styles.transparentBackground]}
-            >
+            <View style={[styles.graphContainer, styles.transparentBackground]}>
               {isLoading ? (
                 <ActivityIndicator
                   size="large"
@@ -358,7 +426,7 @@ const GameScreen = () => {
           </Portal>
         </>
       )}
-      
+
       {/* Global Portals - Available in all states */}
       <Portal>
         <UpgradePrompt
@@ -366,6 +434,8 @@ const GameScreen = () => {
           onDismiss={handleUpgradeDismiss}
           onUpgrade={handleUpgrade}
           remainingFreeGames={remainingFreeGames}
+          context={upgradePromptContext}
+          customMessage={upgradePromptMessage}
         />
       </Portal>
     </SafeAreaView>

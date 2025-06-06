@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import Svg, { Path } from "react-native-svg";
 const SvgSocialLeaderboard48DpE3E3E3Fill0Wght400Grad0Opsz48 = (props) => (
   <Svg

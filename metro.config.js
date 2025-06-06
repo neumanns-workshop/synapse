@@ -5,25 +5,41 @@ const path = require('path');
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
-// Ensure project root is the only watch folder if needed
+// Ensure project root is the only watch folder
 config.watchFolders = [__dirname];
 
-// Custom source extensions can be merged if necessary, but getDefaultConfig is usually sufficient.
-// If you need to add specific extensions not covered by default:
-// config.resolver.sourceExts = Array.from(new Set([...
-//   ...config.resolver.sourceExts,
-//   'your_custom_ext' 
-// ]));
-// For now, let's rely on getDefaultConfig for sourceExts unless issues persist for specific files.
+// Add explicit resolver configuration
+config.resolver = {
+  ...config.resolver,
+  sourceExts: ['jsx', 'js', 'ts', 'tsx', 'json'],
+  assetExts: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
+  extraNodeModules: {
+    ...(config.resolver.extraNodeModules || {}),
+    '@babel/runtime': path.resolve(__dirname, 'node_modules/@babel/runtime'),
+  },
+  // Enable more detailed error reporting
+  enableGlobalPackages: true,
+  nodeModulesPaths: [path.resolve(__dirname, 'node_modules')],
+  // Exclude the old directory from being watched
+  blockList: [/old\/.*/],
+};
 
-// The following are often not needed if getDefaultConfig is working correctly
-// config.resolver.disableHierarchicalLookup = true; 
-// config.resolver.nodeModulesPaths = [path.resolve(__dirname, 'node_modules')];
+// Add transformer configuration
+config.transformer = {
+  ...config.transformer,
+  babelTransformerPath: require.resolve('metro-react-native-babel-transformer'),
+  assetPlugins: ['expo-asset/tools/hashAssetFiles'],
+};
 
-// Keep this if it was specifically added to solve a babel runtime issue
-config.resolver.extraNodeModules = {
-  ...(config.resolver.extraNodeModules || {}), // Preserve any existing extraNodeModules
-  '@babel/runtime': path.resolve(__dirname, 'node_modules/@babel/runtime'),
+// Enable more detailed logging
+config.server = {
+  ...config.server,
+  enhanceMiddleware: (middleware) => {
+    return (req, res, next) => {
+      console.log(`[Metro] Request: ${req.url}`);
+      return middleware(req, res, next);
+    };
+  },
 };
 
 module.exports = config; 

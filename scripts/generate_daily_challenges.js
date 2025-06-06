@@ -1,15 +1,22 @@
 const fs = require('fs');
 const path = require('path');
 
-// Load the solved puzzles from heuristic solver results
-const solvedPuzzlesPath = path.join(__dirname, 'llm_test_results', 'heuristic_results_20250603_043745.json');
+// Get the input file from command line argument
+const inputFile = process.argv[2];
+if (!inputFile) {
+  console.error('Please provide the path to the sampled results file as an argument');
+  process.exit(1);
+}
+
+// Load the sampled puzzles
+const solvedPuzzlesPath = path.join(__dirname, inputFile);
 const solvedPuzzles = JSON.parse(fs.readFileSync(solvedPuzzlesPath, 'utf8'));
 
-console.log(`Loaded ${solvedPuzzles.length} solved puzzles from heuristic solver`);
+console.log(`Loaded ${solvedPuzzles.length} sampled puzzles`);
 
 // Verify we have enough puzzles
 if (solvedPuzzles.length < 365) {
-  console.error(`Not enough solved puzzles: ${solvedPuzzles.length} < 365`);
+  console.error(`Not enough sampled puzzles: ${solvedPuzzles.length} < 365`);
   process.exit(1);
 }
 

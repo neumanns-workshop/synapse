@@ -64,7 +64,7 @@ const renewalWordList = [
   "potential",
   "energy",
   "vital",
-  "alive"
+  "alive",
 ];
 
 export const renewalCollection: WordCollection = createCollection(
@@ -77,4 +77,4 @@ export const renewalCollection: WordCollection = createCollection(
     startDate: new Date(new Date().getFullYear(), 0, 1), // January 1st
     endDate: new Date(new Date().getFullYear(), 0, 20), // January 20th
   },
-); 
+);

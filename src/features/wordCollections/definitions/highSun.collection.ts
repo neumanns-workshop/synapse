@@ -6,26 +6,96 @@ export const highSunCollection: WordCollection = {
   icon: "white-balance-sunny",
   isWordlistViewable: true,
   startDate: new Date(2024, 5, 1), // June 1st
-  endDate: new Date(2024, 6, 31),   // July 31st
+  endDate: new Date(2024, 6, 31), // July 31st
   words: [
     // Heat & Sun
-    "blazing", "scorching", "radiant", "luminous", "intense", "glowing", "burning", "searing",
-    "brilliant", "dazzling", "fiery", "molten", "sweltering", "sultry", "torrid", "blistering",
-    
+    "blazing",
+    "scorching",
+    "radiant",
+    "luminous",
+    "intense",
+    "glowing",
+    "burning",
+    "searing",
+    "brilliant",
+    "dazzling",
+    "fiery",
+    "molten",
+    "sweltering",
+    "sultry",
+    "torrid",
+    "blistering",
+
     // Sky & Weather
-    "thunderhead", "lightning", "tempest", "deluge", "downpour", "cloudbreak", "sunburst", "heatwave",
-    "horizon", "mirage", "shimmer", "haze", "vapor", "steam", "updraft", "thermal",
-    
+    "thunderhead",
+    "lightning",
+    "tempest",
+    "deluge",
+    "downpour",
+    "cloudbreak",
+    "sunburst",
+    "heatwave",
+    "horizon",
+    "mirage",
+    "shimmer",
+    "haze",
+    "vapor",
+    "steam",
+    "updraft",
+    "thermal",
+
     // Landscape & Nature
-    "prairie", "canyon", "mesa", "desert", "savanna", "grassland", "wildfire", "ember",
-    "drought", "parched", "withered", "crackling", "smoldering", "kindle", "ignite", "ablaze",
-    
+    "prairie",
+    "canyon",
+    "mesa",
+    "desert",
+    "savanna",
+    "grassland",
+    "wildfire",
+    "ember",
+    "drought",
+    "parched",
+    "withered",
+    "crackling",
+    "smoldering",
+    "kindle",
+    "ignite",
+    "ablaze",
+
     // Time & Light
-    "solstice", "meridian", "zenith", "pinnacle", "apex", "climax", "crescendo", "peak",
-    "endless", "eternal", "lingering", "stretched", "extended", "prolonged", "marathon", "enduring",
-    
+    "solstice",
+    "meridian",
+    "zenith",
+    "pinnacle",
+    "apex",
+    "climax",
+    "crescendo",
+    "peak",
+    "endless",
+    "eternal",
+    "lingering",
+    "stretched",
+    "extended",
+    "prolonged",
+    "marathon",
+    "enduring",
+
     // Energy & Movement
-    "surge", "pulse", "throb", "vibrant", "electric", "charged", "dynamic", "kinetic",
-    "rushing", "cascading", "torrential", "explosive", "erupting", "bursting", "unleashed", "wild"
-  ]
-}; 
+    "surge",
+    "pulse",
+    "throb",
+    "vibrant",
+    "electric",
+    "charged",
+    "dynamic",
+    "kinetic",
+    "rushing",
+    "cascading",
+    "torrential",
+    "explosive",
+    "erupting",
+    "bursting",
+    "unleashed",
+    "wild",
+  ],
+};

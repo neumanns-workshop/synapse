@@ -25,8 +25,8 @@ import PlayerPathDisplay from "../components/PlayerPathDisplay";
 import WordDefinitionDialog from "../components/WordDefinitionDialog";
 import {
   shareChallenge,
-  generateGameDeepLink,
-  generateDailyChallengeDeepLink,
+  generateSecureGameDeepLink,
+  generateSecureDailyChallengeDeepLink,
 } from "../services/SharingService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -124,13 +124,13 @@ const ReportScreen = () => {
         // Check if this is a daily challenge and generate appropriate link
         let link: string;
         if (gameReport.isDailyChallenge && gameReport.dailyChallengeId) {
-          link = generateDailyChallengeDeepLink(
+          link = generateSecureDailyChallengeDeepLink(
             gameReport.dailyChallengeId,
             startWord,
-            targetWord
+            targetWord,
           );
         } else {
-          link = generateGameDeepLink(startWord, targetWord);
+          link = generateSecureGameDeepLink(startWord, targetWord);
         }
         setChallengeLink(link);
         setChallengeDialogVisible(true);

@@ -19,7 +19,7 @@ const PathDisplayConfigurator: React.FC<PathDisplayConfiguratorProps> = ({
 
   // Only show optimal/suggested paths options if the game is over
   const showAdvancedOptions = gameStatus === "given_up" || gameStatus === "won";
-  
+
   // Only show AI path option for daily challenges
   const showAiPathOption = isDailyChallenge;
 

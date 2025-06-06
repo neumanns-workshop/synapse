@@ -1,12 +1,18 @@
 import { create } from "zustand";
 
+import type { UpgradeContext } from "../components/UpgradePrompt";
 import type { Achievement } from "../features/achievements";
 import { evaluateAchievements } from "../features/achievements";
-import type { WordCollection } from "../features/wordCollections";
+import type {
+  WordCollection,
+  WordCollectionWithStatus,
+} from "../features/wordCollections";
 import {
   getFilteredWordCollections,
+  getAllWordCollectionsWithStatus,
   allWordCollections,
 } from "../features/wordCollections";
+import { dailyChallengesService } from "../services/DailyChallengesService";
 import {
   loadGraphData,
   loadDefinitionsData,
@@ -23,8 +29,7 @@ import {
   saveTempGame,
   restoreTempGame,
   checkAndRecordWordForCollections,
-} from "../services/StorageService";
-import { dailyChallengesService } from "../services/DailyChallengesService";
+} from "../services/StorageAdapter";
 import type { DailyChallenge } from "../types/dailyChallenges";
 import {
   generateGameReport,
@@ -79,8 +84,15 @@ export interface GameState {
   gameReport: GameReport | null; // Add game report
   optimalChoices: OptimalChoice[]; // Track optimal choices
   backtrackHistory: BacktrackReportEntry[]; // Stores actual backtrack jumps (using imported type)
-  aboutModalVisible: boolean;
+
+  // Modal visibility states - replaced aboutModalVisible with separate modals
+  quickstartModalVisible: boolean;
+  newsModalVisible: boolean;
+  contactModalVisible: boolean;
+  labsModalVisible: boolean;
   statsModalVisible: boolean; // Renamed from historyModalVisible
+  dailiesModalVisible: boolean;
+
   // Definition Dialog State
   definitionDialogWord: string | null;
   definitionDialogPathIndex: number | null; // To pass path index to dialog for context
@@ -90,8 +102,8 @@ export interface GameState {
   selectedAchievement: Achievement | null;
   achievementDialogVisible: boolean;
 
-  // Word Collections
-  wordCollections: WordCollection[];
+  // Word Collections - Updated to use WordCollectionWithStatus
+  wordCollections: WordCollectionWithStatus[];
   activeWordCollections: WordCollection[];
 
   // Challenge Mode
@@ -103,22 +115,40 @@ export interface GameState {
   currentDailyChallenge: DailyChallenge | null;
   hasPlayedTodaysChallenge: boolean;
   remainingFreeGames: number;
+  initialDataLoaded: boolean; // Add flag to track initial data loading
+
+  // Challenge-related state
+  hasPendingChallenge: boolean;
+  pendingChallengeWords: { startWord: string; targetWord: string } | null;
 
   // Upgrade prompt state
   upgradePromptVisible: boolean;
   upgradePromptMessage: string;
+  upgradePromptContext: UpgradeContext | undefined;
+  upgradePromptDismissedThisSession: boolean;
 
   // Actions
   loadInitialData: () => Promise<boolean>;
   clearSavedData: () => void;
   startGame: () => void; // Start game action without difficulty
-  startChallengeGame: (startWord: string, targetWord: string) => Promise<void>; // New action for starting a challenge game
+  startChallengeGame: (
+    startWord: string,
+    targetWord: string,
+    dailyChallenge?: DailyChallenge,
+  ) => Promise<void>; // New action for starting a challenge game
   startDailyChallengeGame: () => Promise<void>; // New action for starting today's daily challenge
   selectWord: (word: string) => void;
   giveUp: () => void; // New action for giving up
   setPathDisplayMode: (mode: Partial<PathDisplayMode>) => void; // Action to change visibility
-  setAboutModalVisible: (visible: boolean) => void;
+
+  // Modal visibility actions - replaced setAboutModalVisible with separate actions
+  setQuickstartModalVisible: (visible: boolean) => void;
+  setNewsModalVisible: (visible: boolean) => void;
+  setContactModalVisible: (visible: boolean) => void;
+  setLabsModalVisible: (visible: boolean) => void;
   setStatsModalVisible: (visible: boolean) => void; // Renamed from setHistoryModalVisible
+  setDailiesModalVisible: (visible: boolean) => void;
+
   backtrackToWord: (word: string, index: number) => void; // New action for backtracking to a previous optimal word
   // Definition Dialog Actions
   showWordDefinition: (word: string, pathIndex?: number | null) => void;
@@ -130,16 +160,16 @@ export interface GameState {
   // Testing function for date-based collections
   testWordCollectionsForDate: (month: number, day: number) => Promise<void>;
 
-  hasPendingChallenge: boolean;
-  pendingChallengeWords: { startWord: string; targetWord: string } | null;
+  // Challenge actions
   setHasPendingChallenge: (hasPending: boolean) => void;
   setPendingChallengeWords: (
     words: { startWord: string; targetWord: string } | null,
   ) => void;
 
   // Upgrade prompt actions
-  showUpgradePrompt: (message: string) => void;
+  showUpgradePrompt: (message: string, context?: UpgradeContext) => void;
   hideUpgradePrompt: () => void;
+  resetUpgradePromptDismissal: () => void;
 
   // Dialog visibility actions
   setDefinitionDialogWord: (word) => void;
@@ -147,6 +177,12 @@ export interface GameState {
   setDefinitionDialogVisible: (visible) => void;
   setSelectedAchievement: (achievement) => void;
   setAchievementDialogVisible: (visible) => void;
+
+  // Function to refresh user's game access state after sign-in
+  refreshGameAccessState: () => Promise<{ success: boolean; error?: string }>;
+
+  // Add a reset function to restore the store to its initial state
+  reset: () => void;
 }
 
 // Moved and exported for testing
@@ -164,11 +200,11 @@ export const findValidWordPair = (
   }
 
   // Define constraints
-  const MIN_PATH_LENGTH = 4; // Minimum number of steps (Changed from 3)
-  const MAX_PATH_LENGTH = 7; // Maximum number of steps (Changed from 6)
+  const MIN_PATH_LENGTH = 4; // 3 steps (4 nodes)
+  const MAX_PATH_LENGTH = 7; // 6 steps (7 nodes)
   const MAX_ATTEMPTS = 100; // Increased attempts slightly due to new constraint
-  const MIN_NODE_DEGREE = 3; // Minimum connections for a word to be start/end
-  const MIN_TSNE_DISTANCE_SQUARED = 50 * 50; // Adjusted: Words must be at least 50 t-SNE units apart (was 60 * 60)
+  const MIN_NODE_DEGREE = 2; // Reduced from 3 for more lenient generation
+  const MIN_TSNE_DISTANCE_SQUARED = 30 * 30; // Reduced from 50 * 50 for more lenient generation
 
   // Try to find a valid word pair
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
@@ -192,7 +228,9 @@ export const findValidWordPair = (
       const dx = startNodeData.tsne[0] - endNodeData.tsne[0];
       const dy = startNodeData.tsne[1] - endNodeData.tsne[1];
       const distSquared = dx * dx + dy * dy;
-      if (distSquared < MIN_TSNE_DISTANCE_SQUARED) {
+
+      // Use base distance first, we'll adjust for path length later
+      if (distSquared < MIN_TSNE_DISTANCE_SQUARED / 2) {
         continue;
       }
     }
@@ -201,6 +239,7 @@ export const findValidWordPair = (
     const startDegree = Object.keys(startNodeData?.edges || {}).length;
     const endDegree = Object.keys(endNodeData?.edges || {}).length;
 
+    // Use base degree first, we'll adjust for path length later
     if (startDegree < MIN_NODE_DEGREE || endDegree < MIN_NODE_DEGREE) {
       continue; // Skip this pair if either word doesn't have enough connections
     }
@@ -210,6 +249,19 @@ export const findValidWordPair = (
 
     // Check if there is a valid path of appropriate length
     if (path.length >= MIN_PATH_LENGTH && path.length <= MAX_PATH_LENGTH) {
+      // Now that we have the path, check if we need to be more lenient
+      if (path.length <= 5) {
+        // For shorter paths (3-4 steps), be more lenient with t-SNE distance
+        if (startNodeData?.tsne && endNodeData?.tsne) {
+          const dx = startNodeData.tsne[0] - endNodeData.tsne[0];
+          const dy = startNodeData.tsne[1] - endNodeData.tsne[1];
+          const distSquared = dx * dx + dy * dy;
+          if (distSquared < MIN_TSNE_DISTANCE_SQUARED / 2) {
+            continue;
+          }
+        }
+      }
+
       // Check for alternate approach near the end, similar to old implementation
       let hasAlternateApproach = false;
       if (path.length >= 2) {
@@ -281,44 +333,79 @@ export const useGameStore = create<GameState>((set, get) => ({
   gameReport: null,
   optimalChoices: [],
   backtrackHistory: [],
-  aboutModalVisible: false,
+
+  // Modal visibility states - replaced aboutModalVisible with separate modals
+  quickstartModalVisible: false,
+  newsModalVisible: false,
+  contactModalVisible: false,
+  labsModalVisible: false,
   statsModalVisible: false,
+  dailiesModalVisible: false,
+
+  // Definition Dialog State
   definitionDialogWord: null,
   definitionDialogPathIndex: null,
   definitionDialogVisible: false,
+
+  // Achievement Detail Dialog State
   selectedAchievement: null,
   achievementDialogVisible: false,
+
+  // Word Collections - Updated to use WordCollectionWithStatus
   wordCollections: [],
   activeWordCollections: [],
-  isChallenge: false, // Initialize challenge mode as false
-  shouldRestoreTempGame: false, // Initialize shouldRestoreTempGame as false
-  hasPendingChallenge: false,
-  pendingChallengeWords: null,
+
+  // Challenge Mode
+  isChallenge: false,
+  shouldRestoreTempGame: false,
+
+  // Daily Challenges
   isDailyChallenge: false,
   currentDailyChallenge: null,
   hasPlayedTodaysChallenge: false,
   remainingFreeGames: 0,
+  initialDataLoaded: false, // Add flag to track initial data loading
+
+  // Challenge-related state
+  hasPendingChallenge: false,
+  pendingChallengeWords: null,
 
   // Upgrade prompt state
   upgradePromptVisible: false,
-  upgradePromptMessage: '',
+  upgradePromptMessage: "",
+  upgradePromptContext: undefined,
+  upgradePromptDismissedThisSession: false,
 
   loadInitialData: async (): Promise<boolean> => {
     try {
+      console.log("🎮 loadInitialData: Starting");
       set({
         isLoadingData: true,
         errorLoadingData: null,
         potentialRarestMovesThisGame: [],
       }); // Reset on load
 
-      const [graphData, definitionsData, wordFrequencies, savedGame, dailyChallengeState] =
-        await Promise.all([
-          loadGraphData(),
-          loadDefinitionsData(),
-          loadWordFrequencies(),
-          loadCurrentGame(),
-          dailyChallengesService.getDailyChallengeState(),
-        ]);
+      const [
+        graphData,
+        definitionsData,
+        wordFrequencies,
+        savedGame,
+        dailyChallengeState,
+      ] = await Promise.all([
+        loadGraphData(),
+        loadDefinitionsData(),
+        loadWordFrequencies(),
+        loadCurrentGame(),
+        dailyChallengesService.getDailyChallengeState(),
+      ]);
+
+      console.log("🎮 loadInitialData: Daily challenge state loaded:", {
+        todaysChallenge: !!dailyChallengeState.todaysChallenge,
+        challengeId: dailyChallengeState.todaysChallenge?.id,
+        hasPlayedToday: dailyChallengeState.hasPlayedToday,
+        remainingFreeGames: dailyChallengeState.remainingFreeGames,
+        willPreventAutoStart: dailyChallengeState.remainingFreeGames === 0,
+      });
 
       set({
         graphData,
@@ -329,27 +416,67 @@ export const useGameStore = create<GameState>((set, get) => ({
         currentDailyChallenge: dailyChallengeState.todaysChallenge,
         hasPlayedTodaysChallenge: dailyChallengeState.hasPlayedToday,
         remainingFreeGames: dailyChallengeState.remainingFreeGames,
+        initialDataLoaded: true,
       });
 
+      console.log(
+        "🎮 loadInitialData: Store state updated with daily challenge data",
+      );
+
       if (graphData) {
-        const filteredCollections = await getFilteredWordCollections(
+        const allCollectionsWithStatus = await getAllWordCollectionsWithStatus(
           allWordCollections,
           graphData,
         );
 
+        // For activeWordCollections, filter to only currently available ones and cast to WordCollection[]
+        const currentlyActiveCollections: WordCollection[] =
+          allCollectionsWithStatus
+            .filter((collection) => collection.isCurrentlyAvailable)
+            .map(({ isCurrentlyAvailable, ...collection }) => collection);
+
         if (savedGame && savedGame.gameStatus === "playing") {
+          console.log("🎮 loadInitialData: Restoring saved game");
+
+          // Check if this is a completed daily challenge that shouldn't be restored
+          if (savedGame.isDailyChallenge && savedGame.currentDailyChallengeId) {
+            const hasCompletedThisChallenge =
+              await dailyChallengesService.hasCompletedTodaysChallenge();
+            if (
+              hasCompletedThisChallenge &&
+              savedGame.currentDailyChallengeId ===
+                dailyChallengeState.todaysChallenge?.id
+            ) {
+              console.log(
+                "🎮 loadInitialData: Daily challenge already completed, clearing saved game",
+              );
+              await clearCurrentGame(false); // Clear the completed daily challenge game from regular storage
+              // Don't restore the game, just set the collections and continue
+              set((state) => ({
+                ...state,
+                wordCollections: allCollectionsWithStatus,
+                activeWordCollections: currentlyActiveCollections,
+                potentialRarestMovesThisGame: [], // Ensure reset if no saved game
+              }));
+              console.log("🎮 loadInitialData: Completed, returning false");
+              return false;
+            }
+          }
+
           const suggested = findShortestPath(
             graphData,
             savedGame.currentWord || "",
             savedGame.targetWord || "",
           );
-          
+
           // If this is a daily challenge, restore the challenge data
           let restoredDailyChallenge: DailyChallenge | null = null;
           if (savedGame.isDailyChallenge && savedGame.currentDailyChallengeId) {
-            restoredDailyChallenge = dailyChallengesService.getChallengeForDate(savedGame.currentDailyChallengeId);
+            restoredDailyChallenge = dailyChallengesService.getChallengeForDate(
+              savedGame.currentDailyChallengeId,
+            );
           }
-          
+
           set({
             startWord: savedGame.startWord,
             targetWord: savedGame.targetWord,
@@ -367,28 +494,36 @@ export const useGameStore = create<GameState>((set, get) => ({
               ...savedGame.pathDisplayMode,
               suggested: false,
             },
-            wordCollections: filteredCollections,
-            activeWordCollections: filteredCollections,
+            wordCollections: allCollectionsWithStatus,
+            activeWordCollections: currentlyActiveCollections,
             // Restore daily challenge state
             isChallenge: savedGame.isChallenge || false,
             isDailyChallenge: savedGame.isDailyChallenge || false,
             aiPath: savedGame.aiPath || [],
             aiModel: savedGame.aiModel || null,
-            currentDailyChallenge: restoredDailyChallenge,
+            // Only override currentDailyChallenge if this is a daily challenge game
+            // Otherwise preserve the daily challenge data loaded earlier
+            ...(savedGame.isDailyChallenge
+              ? { currentDailyChallenge: restoredDailyChallenge }
+              : {}),
           });
 
+          console.log("🎮 loadInitialData: Game restored, returning true");
           return true;
         } else {
+          console.log("🎮 loadInitialData: No saved game to restore");
           set((state) => ({
             ...state,
-            wordCollections: filteredCollections,
-            activeWordCollections: filteredCollections,
+            wordCollections: allCollectionsWithStatus,
+            activeWordCollections: currentlyActiveCollections,
             potentialRarestMovesThisGame: [], // Ensure reset if no saved game
           }));
         }
       }
+      console.log("🎮 loadInitialData: Completed, returning false");
       return false;
     } catch (error) {
+      console.error("🎮 loadInitialData: Error:", error);
       set({
         isLoadingData: false,
         errorLoadingData:
@@ -410,117 +545,233 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   startGame: async () => {
-    const { graphData, shouldRestoreTempGame, hasPlayedTodaysChallenge, currentDailyChallenge, remainingFreeGames, upgradePromptVisible } = get();
-    
+    const {
+      graphData,
+      shouldRestoreTempGame,
+      hasPlayedTodaysChallenge,
+      currentDailyChallenge,
+      remainingFreeGames,
+      upgradePromptVisible,
+      upgradePromptDismissedThisSession,
+      initialDataLoaded,
+    } = get();
+
     // Prevent calling startGame if upgrade prompt is already visible
     if (upgradePromptVisible) {
-      console.log('startGame: upgrade prompt already visible, skipping');
+      console.log("startGame: upgrade prompt already visible, skipping");
       return;
     }
-    
+
+    // **FIX:** Check for premium status EARLIER to override dismissal logic
+    const isPremium = await dailyChallengesService.isPremiumUser();
+
+    // Prevent calling startGame if upgrade prompt was dismissed this session and user has no free games
+    // This should NOT apply to premium users.
+    if (!isPremium && upgradePromptDismissedThisSession && remainingFreeGames <= 0) {
+      console.log("startGame: upgrade prompt was dismissed and no free games, skipping for non-premium user");
+      set({ gameStatus: "idle" });
+      return;
+    }
+
+    // Ensure initial data is loaded before proceeding
+    if (!initialDataLoaded) {
+      console.log("startGame: initial data not loaded yet, waiting...");
+      // Wait for initial data to load
+      await get().loadInitialData();
+      // Get updated values after loading
+      const updatedState = get();
+      if (!updatedState.initialDataLoaded) {
+        console.log("startGame: failed to load initial data");
+        set({
+          gameStatus: "idle",
+          errorLoadingData: "Failed to load initial data.",
+        });
+        return;
+      }
+    }
+
     // Add debugging
-    console.log('Starting game with:', {
-      remainingFreeGames,
-      hasPlayedTodaysChallenge,
-      currentDailyChallenge: !!currentDailyChallenge,
-      shouldRestoreTempGame
+    console.log("Starting game with:", {
+      remainingFreeGames: get().remainingFreeGames, // Get fresh value
+      hasPlayedTodaysChallenge: get().hasPlayedTodaysChallenge,
+      currentDailyChallenge: !!get().currentDailyChallenge,
+      shouldRestoreTempGame,
+      initialDataLoaded: get().initialDataLoaded,
     });
-    
+
     if (!graphData) {
       set({ gameStatus: "idle", errorLoadingData: "Graph data missing." });
       return;
     }
 
-    // Check free game limits for random games (daily challenges and player challenges are always free)
-    if (remainingFreeGames <= 0) {
-      // Show upgrade prompt instead of starting a game
-      console.log('Showing upgrade prompt - no free games remaining');
-      get().showUpgradePrompt("You've used all your free games for today! Upgrade for unlimited play, or try daily challenges which are always free.");
-      return;
+    // Get fresh remaining free games value
+    const currentRemainingFreeGames = get().remainingFreeGames;
+
+    // Check if user has free games left, or is premium
+    if (!isPremium && currentRemainingFreeGames <= 0) {
+      // User is not premium and has no free games
+      console.log(
+        "startGame: No free games remaining. Showing upgrade prompt.",
+      );
+      get().showUpgradePrompt(
+        "You're out of free games for today. Upgrade to Synapse Premium for unlimited play!",
+        "freeGamesLimited",
+      );
+      return; // Stop game start process
     }
 
-    // TEMPORARY: For testing the upgrade prompt, uncomment the line below to force it to show
-    // get().showUpgradePrompt("Test upgrade prompt - remove this line after testing!"); return;
-
-    // TEMPORARY: Force show upgrade prompt for testing (set to true to test)
-    const FORCE_UPGRADE_PROMPT = false;
-    if (FORCE_UPGRADE_PROMPT) {
-      console.log('FORCING upgrade prompt for testing');
-      get().showUpgradePrompt("Test upgrade prompt - this is for testing the UI!");
-      return;
-    }
-
-    // Check if we should restore a temporary saved game
+    // Restore temporary game if needed
     if (shouldRestoreTempGame) {
-      const tempGame = await restoreTempGame();
-      if (tempGame) {
-        set({
-          startWord: tempGame.startWord,
-          targetWord: tempGame.targetWord,
-          currentWord: tempGame.currentWord,
-          playerPath: tempGame.playerPath || [],
-          optimalPath: tempGame.optimalPath || [],
-          suggestedPathFromCurrent: tempGame.suggestedPathFromCurrent || [],
-          gameStatus: tempGame.gameStatus,
-          optimalChoices: tempGame.optimalChoices || [],
-          backtrackHistory: tempGame.backtrackHistory || [],
-          potentialRarestMovesThisGame:
-            tempGame.potentialRarestMovesThisGame || [],
-          pathDisplayMode: tempGame.pathDisplayMode || {
-            player: true,
-            optimal: false,
-            suggested: false,
-            ai: false,
-          },
-          isChallenge: false,
-          isDailyChallenge: false,
-          shouldRestoreTempGame: false,
-        });
+      const restored = await restoreTempGame();
+      if (restored) {
+        // Find suggested path for restored game
+        const suggested = findShortestPath(
+          graphData,
+          restored.currentWord || "",
+          restored.targetWord || "",
+        );
 
-        return;
+        set({
+          startWord: restored.startWord,
+          targetWord: restored.targetWord,
+          currentWord: restored.currentWord,
+          playerPath: restored.playerPath,
+          optimalPath: restored.optimalPath,
+          suggestedPathFromCurrent: suggested,
+          gameStatus: "playing",
+          optimalChoices: restored.optimalChoices,
+          backtrackHistory: restored.backtrackHistory,
+          potentialRarestMovesThisGame:
+            restored.potentialRarestMovesThisGame || [],
+          pathDisplayMode: {
+            ...restored.pathDisplayMode,
+            suggested: false,
+          },
+          isChallenge: restored.isChallenge || false,
+          shouldRestoreTempGame: false, // Reset flag
+        });
+        await clearCurrentGame(true); // Clear temp storage
+        return; // Game restored, exit function
       }
+      // If restoration fails, fall through to start a new game
+      set({ shouldRestoreTempGame: false }); // Reset flag
     }
 
     // Check if we should prioritize today's daily challenge
     // Priority: if user hasn't played today's challenge and there is one available
-    if (!hasPlayedTodaysChallenge && currentDailyChallenge) {
-      // Start today's daily challenge instead of a random game
-      console.log('Starting daily challenge instead of random game');
-      await get().startDailyChallengeGame();
-      return;
+    // BUT only if we're not already in a game (to avoid overwriting unfinished games)
+    // AND only if this is the initial game start (not a user-requested random game after completing daily challenge)
+    const currentGameStatus = get().gameStatus;
+    const freshHasPlayedTodaysChallenge = get().hasPlayedTodaysChallenge;
+    const freshCurrentDailyChallenge = get().currentDailyChallenge;
+
+    console.log("🎮 startGame: Checking daily challenge priority:", {
+      currentGameStatus,
+      freshHasPlayedTodaysChallenge,
+      freshCurrentDailyChallenge: !!freshCurrentDailyChallenge,
+      challengeId: freshCurrentDailyChallenge?.id,
+      challengeDate: freshCurrentDailyChallenge?.date,
+      upgradePromptVisible: get().upgradePromptVisible,
+      upgradePromptDismissedThisSession:
+        get().upgradePromptDismissedThisSession,
+      isDailyChallenge: get().isDailyChallenge,
+      isChallenge: get().isChallenge,
+      hasPendingChallenge: get().hasPendingChallenge,
+      pendingChallengeWords: get().pendingChallengeWords,
+    });
+
+    // Only auto-start daily challenge if:
+    // 1. Game status is idle, won, given_up, or lost (not currently playing)
+    // 2. User hasn't played today's challenge according to persistent storage
+    // 3. There is a daily challenge available
+    // 4. The previous game wasn't a daily challenge that was just completed
+    // 5. Upgrade prompt wasn't dismissed this session (respect user's intent to not auto-start)
+    if (
+      (currentGameStatus === "idle" || currentGameStatus === "won" || currentGameStatus === "given_up" || currentGameStatus === "lost") &&
+      !freshHasPlayedTodaysChallenge &&
+      freshCurrentDailyChallenge &&
+      !upgradePromptDismissedThisSession
+    ) {
+      // Check persistent storage to see if the challenge was actually completed
+      const hasCompletedPersistent =
+        await dailyChallengesService.hasCompletedTodaysChallenge();
+
+      // If persistent storage shows completion but store doesn't, sync the store state
+      if (hasCompletedPersistent) {
+        console.log(
+          "🎮 startGame: Syncing completion state from persistent storage",
+        );
+        set({ hasPlayedTodaysChallenge: true });
+      } else {
+        // Only start daily challenge if not completed in persistent storage
+        console.log(
+          "🎮 startGame: Starting daily challenge instead of random game",
+        );
+        await get().startDailyChallengeGame();
+        return;
+      }
+    } else if (currentGameStatus === "playing") {
+      console.log(
+        "🎮 startGame: Already in a game, not overriding with daily challenge",
+      );
+      return; // Don't start a new game if already playing
+    } else if (upgradePromptDismissedThisSession) {
+      console.log(
+        "🎮 startGame: Skipping daily challenge auto-start because upgrade prompt was dismissed",
+      );
     }
 
     // Consume a free game before starting (since we passed the limit check)
-    console.log('Consuming free game, remaining before:', remainingFreeGames);
-    await dailyChallengesService.consumeFreeGame();
-    
-    // Update the store with the new remaining count
-    const newRemainingFreeGames = await dailyChallengesService.getRemainingFreeGames();
-    console.log('Free games remaining after consumption:', newRemainingFreeGames);
-    set({ remainingFreeGames: newRemainingFreeGames });
+    // Only consume for non-premium users
+    if (!isPremium) {
+      console.log(
+        "Consuming free game, remaining before:",
+        currentRemainingFreeGames,
+      );
+      await dailyChallengesService.consumeFreeGame();
+
+      // Update the store with the new remaining count
+      const newRemainingFreeGames =
+        await dailyChallengesService.getRemainingFreeGames();
+      console.log(
+        "Free games remaining after consumption:",
+        newRemainingFreeGames,
+      );
+      set({ remainingFreeGames: newRemainingFreeGames });
+    } else {
+      console.log("Premium user - not consuming free game");
+    }
 
     // If no restoration or it failed, continue with normal game start
     await clearCurrentGame(false); // Clear regular game, not challenge
 
+    // ** CRITICAL: Reset all game-related state for a clean slate **
+    const defaultState = useGameStore.getInitialState();
     set({
+      ...defaultState,
+      // But preserve essential data that shouldn't be reset
+      graphData: get().graphData,
+      definitionsData: get().definitionsData,
+      wordFrequencies: get().wordFrequencies,
+      initialDataLoaded: get().initialDataLoaded,
+      wordCollections: get().wordCollections,
+      activeWordCollections: get().activeWordCollections,
+      // And the modal states
+      quickstartModalVisible: get().quickstartModalVisible,
+      newsModalVisible: get().newsModalVisible,
+      contactModalVisible: get().contactModalVisible,
+      labsModalVisible: get().labsModalVisible,
+      statsModalVisible: get().statsModalVisible,
+      dailiesModalVisible: get().dailiesModalVisible,
+      // And daily challenge/free game status
+      currentDailyChallenge: get().currentDailyChallenge,
+      hasPlayedTodaysChallenge: get().hasPlayedTodaysChallenge,
+      remainingFreeGames: get().remainingFreeGames,
+      upgradePromptDismissedThisSession: get().upgradePromptDismissedThisSession,
+      
+      // Now, set the loading status for the new game
       gameStatus: "loading",
       errorLoadingData: null,
-      playerPath: [],
-      optimalPath: [],
-      suggestedPathFromCurrent: [],
-      gameReport: null,
-      optimalChoices: [],
-      backtrackHistory: [],
-      potentialRarestMovesThisGame: [], // Reset for new game
-      pathDisplayMode: {
-        player: true,
-        optimal: false,
-        suggested: false,
-        ai: false,
-      },
-      isChallenge: false,
-      isDailyChallenge: false,
-      shouldRestoreTempGame: false,
     });
 
     const { start, end } = findValidWordPair(graphData);
@@ -565,12 +816,17 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  startChallengeGame: async (startWord: string, targetWord: string) => {
+  startChallengeGame: async (
+    startWord: string,
+    targetWord: string,
+    dailyChallenge?: DailyChallenge,
+  ) => {
     const { graphData } = get();
     if (!graphData) {
       set({
         gameStatus: "idle",
         errorLoadingData: "Graph data missing.",
+        // Clear pending challenge state on failure
         hasPendingChallenge: false,
         pendingChallengeWords: null,
       });
@@ -581,7 +837,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (!graphData[startWord] || !graphData[targetWord]) {
       set({
         gameStatus: "idle",
-        errorLoadingData: "Invalid challenge words.",
+        errorLoadingData: "Challenge words not found in graph.",
+        // Clear pending challenge state on failure
         hasPendingChallenge: false,
         pendingChallengeWords: null,
       });
@@ -591,10 +848,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     // Check if a path exists between the words
     const pathBetweenWords = findShortestPath(graphData, startWord, targetWord);
     if (pathBetweenWords.length === 0) {
-      // Or pathBetweenWords.length < 2 if start === end is not allowed
       set({
         gameStatus: "idle",
         errorLoadingData: "No path exists for this challenge.",
+        // Clear pending challenge state on failure
         hasPendingChallenge: false,
         pendingChallengeWords: null,
       });
@@ -609,8 +866,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
 
     // Clear any existing challenge game
-    await clearCurrentGame(true); // Clear challenge game storage
+    await clearCurrentGame(!dailyChallenge); // Clear challenge storage for player challenges, regular storage for daily challenges
 
+    // Clear pending challenge state and upgrade prompt dismissal when starting challenge
+    // Challenges should always be playable regardless of upgrade prompt state
     set({
       gameStatus: "loading",
       errorLoadingData: null,
@@ -627,11 +886,23 @@ export const useGameStore = create<GameState>((set, get) => ({
         suggested: false,
         ai: false,
       },
-      isChallenge: true, // Mark as challenge
+      isChallenge: !dailyChallenge, // Only true for regular challenges, false for daily challenges
+      isDailyChallenge: !!dailyChallenge, // Mark as daily challenge if provided
+      currentDailyChallenge: dailyChallenge || null,
+      // Clear pending challenge state on successful start
+      hasPendingChallenge: false,
+      pendingChallengeWords: null,
+      // Hide any upgrade prompt and reset dismissal state for challenges
+      upgradePromptVisible: false,
+      upgradePromptMessage: "",
+      upgradePromptDismissedThisSession: false,
     });
 
     const optimal = findShortestPath(graphData, startWord, targetWord);
     const suggested = findShortestPath(graphData, startWord, targetWord);
+
+    // Get AI solution path from daily challenge data if available
+    const aiSolutionPath = dailyChallenge?.aiSolution?.path || [];
 
     set({
       startWord,
@@ -640,6 +911,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       playerPath: [startWord],
       optimalPath: optimal,
       suggestedPathFromCurrent: suggested,
+      aiPath: aiSolutionPath,
+      aiModel: dailyChallenge?.aiSolution?.model || null,
       gameStatus: "playing",
     });
 
@@ -660,15 +933,21 @@ export const useGameStore = create<GameState>((set, get) => ({
         suggested: false,
         ai: false,
       },
-      isChallenge: true,
+      isChallenge: !dailyChallenge, // Only true for regular challenges, false for daily challenges
+      isDailyChallenge: !!dailyChallenge, // Mark as daily challenge if provided
+      aiPath: aiSolutionPath, // Include AI path
+      aiModel: dailyChallenge?.aiSolution?.model || null, // Include AI model
+      currentDailyChallengeId: dailyChallenge?.id, // Include challenge ID if available
       startTime: Date.now(),
     };
     await saveCurrentGame(gameState);
   },
 
   startDailyChallengeGame: async () => {
+    console.log("🎮 startDailyChallengeGame called");
     const { graphData } = get();
     if (!graphData) {
+      console.log("🎮 startDailyChallengeGame: No graph data");
       set({
         gameStatus: "idle",
         errorLoadingData: "Graph data missing.",
@@ -678,7 +957,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     // Get today's challenge
     const todaysChallenge = dailyChallengesService.getTodaysChallenge();
+    console.log(
+      "🎮 startDailyChallengeGame: Today's challenge:",
+      todaysChallenge,
+    );
     if (!todaysChallenge) {
+      console.log("🎮 startDailyChallengeGame: No daily challenge available");
       set({
         gameStatus: "idle",
         errorLoadingData: "No daily challenge available for today.",
@@ -686,18 +970,29 @@ export const useGameStore = create<GameState>((set, get) => ({
       return;
     }
 
-    // Check if already completed today's challenge
-    const hasCompleted = await dailyChallengesService.hasCompletedTodaysChallenge();
+    // Allow replaying daily challenges, but warn if already completed
+    const hasCompleted =
+      await dailyChallengesService.hasCompletedTodaysChallenge();
+    console.log(
+      "🎮 startDailyChallengeGame: Has completed today's challenge:",
+      hasCompleted,
+    );
     if (hasCompleted) {
-      set({
-        gameStatus: "idle",
-        errorLoadingData: "Today's challenge has already been completed.",
-      });
-      return;
+      console.log(
+        "🎮 startDailyChallengeGame: Starting daily challenge replay (already completed)",
+      );
+      // Allow replay but mark as completed in store to prevent auto-prioritization
+      set({ hasPlayedTodaysChallenge: true });
     }
 
     // Verify words exist in the graph
-    if (!graphData[todaysChallenge.startWord] || !graphData[todaysChallenge.targetWord]) {
+    if (
+      !graphData[todaysChallenge.startWord] ||
+      !graphData[todaysChallenge.targetWord]
+    ) {
+      console.log(
+        "🎮 startDailyChallengeGame: Challenge words not found in graph",
+      );
       set({
         gameStatus: "idle",
         errorLoadingData: "Daily challenge words not found in graph.",
@@ -706,14 +1001,21 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
 
     // Check if a path exists between the words
-    const pathBetweenWords = findShortestPath(graphData, todaysChallenge.startWord, todaysChallenge.targetWord);
+    const pathBetweenWords = findShortestPath(
+      graphData,
+      todaysChallenge.startWord,
+      todaysChallenge.targetWord,
+    );
     if (pathBetweenWords.length === 0) {
+      console.log("🎮 startDailyChallengeGame: No path exists for challenge");
       set({
         gameStatus: "idle",
         errorLoadingData: "No path exists for today's challenge.",
       });
       return;
     }
+
+    console.log("🎮 startDailyChallengeGame: Starting daily challenge game");
 
     // Check for existing game to save temporarily
     const currentGame = await loadCurrentGame(false); // Load regular game
@@ -722,8 +1024,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       set({ shouldRestoreTempGame: true });
     }
 
-    // Clear any existing challenge game
-    await clearCurrentGame(true); // Clear challenge game storage
+    // Clear any existing daily challenge game (use regular storage since daily challenges have isChallenge: false)
+    await clearCurrentGame(false); // Clear regular storage for daily challenges
 
     set({
       gameStatus: "loading",
@@ -741,14 +1043,22 @@ export const useGameStore = create<GameState>((set, get) => ({
         suggested: false,
         ai: false,
       },
-      isChallenge: true, // Mark as challenge
+      isChallenge: false, // Daily challenges are NOT challenges
       isDailyChallenge: true, // Mark as daily challenge
       currentDailyChallenge: todaysChallenge,
     });
 
-    const optimal = findShortestPath(graphData, todaysChallenge.startWord, todaysChallenge.targetWord);
-    const suggested = findShortestPath(graphData, todaysChallenge.startWord, todaysChallenge.targetWord);
-    
+    const optimal = findShortestPath(
+      graphData,
+      todaysChallenge.startWord,
+      todaysChallenge.targetWord,
+    );
+    const suggested = findShortestPath(
+      graphData,
+      todaysChallenge.startWord,
+      todaysChallenge.targetWord,
+    );
+
     // Get AI solution path from daily challenge data
     const aiSolutionPath = todaysChallenge.aiSolution?.path || [];
 
@@ -781,7 +1091,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         suggested: false,
         ai: false,
       },
-      isChallenge: true,
+      isChallenge: false, // Daily challenges are NOT challenges
       isDailyChallenge: true, // Mark as daily challenge
       aiPath: aiSolutionPath, // Include AI path
       aiModel: todaysChallenge.aiSolution?.model || null, // Include AI model
@@ -789,6 +1099,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       startTime: Date.now(),
     };
     await saveCurrentGame(gameState);
+
+    console.log(
+      "🎮 startDailyChallengeGame: Daily challenge game started successfully",
+    );
   },
 
   selectWord: async (selectedWord: string) => {
@@ -903,7 +1217,12 @@ export const useGameStore = create<GameState>((set, get) => ({
       set({
         gameStatus: "won",
         gameReport: report,
-        pathDisplayMode: { player: true, optimal: true, suggested: false, ai: false },
+        pathDisplayMode: {
+          player: true,
+          optimal: true,
+          suggested: false,
+          ai: false,
+        },
       });
       await recordEndedGame(report, isChallenge, get().isDailyChallenge);
 
@@ -923,9 +1242,9 @@ export const useGameStore = create<GameState>((set, get) => ({
               playerMoves: playerPath.length - 1,
               playerPath: playerPath,
               // No score for winning
-            }
+            },
           );
-          
+
           // Update the store state to reflect completion
           set({ hasPlayedTodaysChallenge: true });
         }
@@ -977,7 +1296,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     } = get();
     if (!graphData || !targetWord) return;
 
-    await clearCurrentGame();
+    await clearCurrentGame(isChallenge);
 
     const report = generateGameReport(
       graphData,
@@ -1001,7 +1320,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({
       gameStatus: "given_up",
       gameReport: report,
-      pathDisplayMode: { player: true, optimal: false, suggested: true, ai: false },
+      pathDisplayMode: {
+        player: true,
+        optimal: false,
+        suggested: true,
+        ai: false,
+      },
     });
     await recordEndedGame(report, isChallenge, isDailyChallenge);
 
@@ -1017,9 +1341,9 @@ export const useGameStore = create<GameState>((set, get) => ({
             playerMoves: playerPath.length - 1,
             playerPath: playerPath,
             // No score for giving up
-          }
+          },
         );
-        
+
         // Update the store state to reflect completion
         set({ hasPlayedTodaysChallenge: true });
       }
@@ -1032,8 +1356,13 @@ export const useGameStore = create<GameState>((set, get) => ({
     }));
   },
 
-  setAboutModalVisible: (visible) => set({ aboutModalVisible: visible }),
+  setQuickstartModalVisible: (visible) =>
+    set({ quickstartModalVisible: visible }),
+  setNewsModalVisible: (visible) => set({ newsModalVisible: visible }),
+  setContactModalVisible: (visible) => set({ contactModalVisible: visible }),
+  setLabsModalVisible: (visible) => set({ labsModalVisible: visible }),
   setStatsModalVisible: (visible) => set({ statsModalVisible: visible }),
+  setDailiesModalVisible: (visible) => set({ dailiesModalVisible: visible }),
 
   backtrackToWord: async (word: string, index: number) => {
     const {
@@ -1177,14 +1506,21 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     try {
       const testDate = new Date(new Date().getFullYear(), month - 1, day);
-      const collections = await getFilteredWordCollections(
+      const allCollectionsWithStatus = await getAllWordCollectionsWithStatus(
         allWordCollections,
         graphData,
         testDate,
       );
+
+      // For activeWordCollections, filter to only currently available ones and cast to WordCollection[]
+      const currentlyActiveCollections: WordCollection[] =
+        allCollectionsWithStatus
+          .filter((collection) => collection.isCurrentlyAvailable)
+          .map(({ isCurrentlyAvailable, ...collection }) => collection);
+
       set({
-        wordCollections: collections,
-        activeWordCollections: collections,
+        wordCollections: allCollectionsWithStatus,
+        activeWordCollections: currentlyActiveCollections,
       });
     } catch (error) {}
   },
@@ -1195,15 +1531,100 @@ export const useGameStore = create<GameState>((set, get) => ({
   setPendingChallengeWords: (words) => set({ pendingChallengeWords: words }),
 
   // Upgrade prompt actions
-  showUpgradePrompt: (message: string) => {
-    console.log('showUpgradePrompt called with message:', message);
-    set({ upgradePromptVisible: true, upgradePromptMessage: message });
-    console.log('showUpgradePrompt state updated - visible should be true');
+  showUpgradePrompt: (message: string, context?: UpgradeContext) => {
+    console.log("🔍 showUpgradePrompt called with:", {
+      message,
+      context,
+      currentGameStatus: get().gameStatus,
+      hasActiveGame: !!(get().startWord && get().targetWord),
+      remainingFreeGames: get().remainingFreeGames
+    });
+    set({
+      upgradePromptVisible: true,
+      upgradePromptMessage: message,
+      upgradePromptContext: context,
+      // IMPORTANT: Set game status to idle to prevent race conditions with auto-start logic
+      gameStatus: "idle",
+      errorLoadingData: null, // Clear any error state
+    });
+    console.log("showUpgradePrompt state updated - visible should be true");
   },
   hideUpgradePrompt: () => {
-    console.log('hideUpgradePrompt called');
-    console.trace('hideUpgradePrompt stack trace:'); // This will show us what called it
-    set({ upgradePromptVisible: false, upgradePromptMessage: '' });
+    console.log("hideUpgradePrompt called");
+    const currentContext = get().upgradePromptContext;
+    const currentGameStatus = get().gameStatus;
+    const hasActiveGame = get().startWord && get().targetWord;
+    
+    console.log("🔍 hideUpgradePrompt debug:", {
+      currentContext,
+      currentGameStatus,
+      hasActiveGame,
+      startWord: get().startWord,
+      targetWord: get().targetWord,
+      playerPath: get().playerPath?.length || 0
+    });
+    
+    // Only clear game state if this was a "no free games" upgrade prompt
+    // Don't clear state for general upgrades, experimental features, etc.
+    // Also don't clear if user has an active game in progress (they should be able to continue)
+    const shouldClearGameState = currentContext === "freeGamesLimited" && 
+                                 currentGameStatus !== "playing" && 
+                                 currentGameStatus !== "won";
+    
+    console.log("🔍 shouldClearGameState:", shouldClearGameState, "because:", {
+      isFreeGamesLimited: currentContext === "freeGamesLimited",
+      notPlaying: currentGameStatus !== "playing",
+      notWon: currentGameStatus !== "won"
+    });
+    
+    if (shouldClearGameState) {
+      // User hit free games limit and dismissed - clear partial game state
+      set({
+        upgradePromptVisible: false,
+        upgradePromptMessage: "",
+        upgradePromptDismissedThisSession: true, // Mark as dismissed for this session
+        upgradePromptContext: undefined,
+        // Ensure we're in idle state when dismissed to prevent loading text
+        gameStatus: "idle",
+        errorLoadingData: null, // Clear any error state
+        // Clear any partial game state that might be confusing
+        startWord: null,
+        targetWord: null,
+        currentWord: null,
+        playerPath: [],
+        optimalPath: [],
+        suggestedPathFromCurrent: [],
+        gameReport: null,
+        optimalChoices: [],
+        backtrackHistory: [],
+        potentialRarestMovesThisGame: [],
+        // Reset path display mode to default
+        pathDisplayMode: {
+          player: true,
+          optimal: false,
+          suggested: false,
+          ai: false,
+        },
+        // Clear challenge state
+        isChallenge: false,
+        isDailyChallenge: false,
+        hasPendingChallenge: false,
+        pendingChallengeWords: null,
+      });
+    } else {
+      // For other upgrade contexts (general, experimental features, etc.)
+      // Just hide the prompt without clearing game state
+      set({
+        upgradePromptVisible: false,
+        upgradePromptMessage: "",
+        upgradePromptDismissedThisSession: true, // Always mark as dismissed
+        upgradePromptContext: undefined,
+        // Don't change game status or clear game state for non-blocking upgrade prompts
+      });
+    }
+  },
+  resetUpgradePromptDismissal: () => {
+    set({ upgradePromptDismissedThisSession: false });
   },
 
   // Dialog visibility actions
@@ -1216,4 +1637,76 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ selectedAchievement: achievement }),
   setAchievementDialogVisible: (visible) =>
     set({ achievementDialogVisible: visible }),
+
+  // Function to refresh user's game access state after sign-in
+  refreshGameAccessState: async () => {
+    console.log("🔄 Refreshing game access state after sign-in...");
+    
+    try {
+      // Get fresh daily challenge state (includes premium status and free games)
+      const dailyChallengeState = await dailyChallengesService.getDailyChallengeState();
+      
+      console.log("🔄 Fresh daily challenge state:", {
+        isPremium: dailyChallengeState.isPremium,
+        remainingFreeGames: dailyChallengeState.remainingFreeGames,
+        hasPlayedToday: dailyChallengeState.hasPlayedToday,
+        todaysChallengeId: dailyChallengeState.todaysChallenge?.id,
+        progressKeys: Object.keys(dailyChallengeState.progress),
+      });
+      
+      // Update store with fresh data
+      set({
+        currentDailyChallenge: dailyChallengeState.todaysChallenge,
+        hasPlayedTodaysChallenge: dailyChallengeState.hasPlayedToday,
+        remainingFreeGames: dailyChallengeState.remainingFreeGames,
+      });
+      
+      // If user now has access to games (premium or free games available), 
+      // reset the upgrade prompt dismissal state
+      const hasGameAccess = dailyChallengeState.isPremium || dailyChallengeState.remainingFreeGames > 0;
+      
+      if (hasGameAccess) {
+        console.log("🎮 User now has game access - resetting upgrade prompt dismissal");
+        set({ 
+          upgradePromptDismissedThisSession: false,
+          upgradePromptVisible: false, // Hide any visible upgrade prompt
+          upgradePromptMessage: "",
+          upgradePromptContext: undefined,
+        });
+      }
+      
+      console.log("✅ Game access state refreshed successfully");
+      return { success: true };
+    } catch (error) {
+      console.error("❌ Error refreshing game access state:", error);
+      return { success: false, error: (error as Error).message || "An unknown error occurred" };
+    }
+  },
+
+  // Reset function implementation - CONSERVATIVE: Only clear UI state, preserve all user data
+  reset: () => {
+    console.log("🔄 Resetting useGameStore UI state only (preserving all user data)");
+    set({
+      // ONLY clear UI state that might show stale "logged in" appearance
+      
+      // Close all modals and dialogs
+      quickstartModalVisible: false,
+      newsModalVisible: false,
+      contactModalVisible: false,
+      labsModalVisible: false,
+      statsModalVisible: false,
+      dailiesModalVisible: false,
+      definitionDialogWord: null,
+      definitionDialogPathIndex: null,
+      definitionDialogVisible: false,
+      selectedAchievement: null,
+      achievementDialogVisible: false,
+
+      // Clear any current upgrade prompts
+      upgradePromptVisible: false,
+      upgradePromptMessage: "",
+      upgradePromptContext: undefined,
+      upgradePromptDismissedThisSession: false,
+    });
+  },
 }));

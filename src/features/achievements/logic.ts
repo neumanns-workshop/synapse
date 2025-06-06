@@ -1,5 +1,6 @@
 import type { Achievement } from "./achievement.types"; // Adjusted path
 import { allAchievements } from "./definitions"; // Adjusted path
+import { unifiedDataStore } from "../../services/UnifiedDataStore";
 import type { GameState } from "../../stores/useGameStore";
 import type { GameReport } from "../../utils/gameReportUtils";
 
@@ -17,4 +18,35 @@ export const evaluateAchievements = (
   return allAchievements.filter((achievement) =>
     achievement.check(gameReport, gameStatus),
   );
+};
+
+// Function to handle progressive achievements - increment counters for achievements that were earned
+export const handleProgressiveAchievements = async (
+  gameReport: GameReport,
+  gameStatus: GameState["gameStatus"],
+): Promise<string[]> => {
+  if (!gameReport) {
+    return [];
+  }
+
+  const progressiveAchievementsTriggered: string[] = [];
+
+  // Check each progressive achievement
+  for (const achievement of allAchievements) {
+    if (
+      achievement.isProgressive &&
+      achievement.check(gameReport, gameStatus)
+    ) {
+      // Increment the counter for this progressive achievement
+      const newCount = await unifiedDataStore.incrementProgressiveAchievement(
+        achievement.id,
+      );
+      progressiveAchievementsTriggered.push(achievement.id);
+      console.log(
+        `Progressive achievement ${achievement.id} incremented to ${newCount}x`,
+      );
+    }
+  }
+
+  return progressiveAchievementsTriggered;
 };

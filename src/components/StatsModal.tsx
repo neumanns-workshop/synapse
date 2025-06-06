@@ -17,7 +17,6 @@ import {
   Card,
   SegmentedButtons,
   ActivityIndicator,
-  Icon,
   Surface,
   Chip,
   ProgressBar,
@@ -25,32 +24,35 @@ import {
   TextInput,
   Snackbar,
 } from "react-native-paper";
+import CustomIcon from "./CustomIcon";
 
 import AchievementDetailDialog from "./AchievementDetailDialog";
 import GameReportDisplay from "./GameReportDisplay";
 import GraphVisualization from "./GraphVisualization";
 import PlayerPathDisplay from "./PlayerPathDisplay";
 import WordDefinitionDialog from "./WordDefinitionDialog";
-import DailyChallengesCalendar from "./DailyChallengesCalendar";
-import DailyChallengeReport from "./DailyChallengeReport";
+import { useAuth } from "../context/AuthContext";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
 import { allAchievements, Achievement } from "../features/achievements";
-import type { WordCollection } from "../features/wordCollections";
-import type { DailyChallenge } from "../types/dailyChallenges";
+import type {
+  WordCollection,
+  WordCollectionWithStatus,
+} from "../features/wordCollections";
 import {
   shareChallenge,
-  generateGameDeepLink,
-  generateDailyChallengeDeepLink,
+  generateSecureGameDeepLink,
+  generateSecureDailyChallengeDeepLink,
 } from "../services/SharingService";
 import {
   loadGameHistory,
   getLifetimeStats,
-  LifetimeStats,
   getUnlockedAchievementIds,
   getWordCollectionsProgress,
-  WordCollectionProgress,
-} from "../services/StorageService";
-import { dailyChallengesService } from "../services/DailyChallengesService";
+  resetAllPlayerData,
+  type LifetimeStats,
+  type WordCollectionProgress,
+} from "../services/StorageAdapter";
+import { unifiedDataStore } from "../services/UnifiedDataStore";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type { GameReport } from "../utils/gameReportUtils";
@@ -128,7 +130,7 @@ const GameHistoryCard = ({
                         style={styles.trophyIconTouchable}
                         onPress={() => onAchievementPress(achievement)}
                       >
-                        <Icon
+                        <CustomIcon
                           source="trophy"
                           size={16}
                           color={theme.customColors.achievementIcon}
@@ -167,19 +169,6 @@ const GameHistoryCard = ({
                 {report.moveAccuracy.toFixed(1)}%
               </Text>
             </View>
-            <View style={styles.statItem}>
-              <Text
-                style={[
-                  styles.historyCardInfoText,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
-              >
-                Efficiency{report.status === "given_up" ? " (Projected)" : ""}
-              </Text>
-              <Text style={{ color: theme.colors.onSurface }}>
-                {report.semanticPathEfficiency?.toFixed(1) || 0}%
-              </Text>
-            </View>
           </View>
         </Card.Content>
       </Card>
@@ -193,12 +182,19 @@ const AchievementCard = ({
   unlocked,
   theme,
   onPress,
+  progressiveCount,
 }: {
   achievement: Achievement;
   unlocked: boolean;
   theme: ExtendedTheme;
   onPress: (achievement: Achievement) => void;
+  progressiveCount?: number;
 }) => {
+  const displayName =
+    achievement.isProgressive && progressiveCount && progressiveCount > 0
+      ? `${achievement.name} ${progressiveCount}x`
+      : achievement.name;
+
   return (
     <TouchableOpacity
       onPress={() => (unlocked ? onPress(achievement) : null)}
@@ -222,7 +218,7 @@ const AchievementCard = ({
         <Card.Content>
           <View style={styles.achievementCardContent}>
             <View style={styles.achievementIconContainer}>
-              <Icon
+              <CustomIcon
                 source={unlocked ? "trophy" : "trophy-outline"}
                 size={24}
                 color={
@@ -243,7 +239,7 @@ const AchievementCard = ({
                   },
                 ]}
               >
-                {achievement.name}
+                {displayName}
               </Text>
             </View>
           </View>
@@ -259,7 +255,7 @@ const WordCollectionCard = ({
   progress,
   theme,
 }: {
-  collection: WordCollection;
+  collection: WordCollectionWithStatus;
   progress: string[];
   theme: ExtendedTheme;
 }) => {
@@ -292,6 +288,16 @@ const WordCollectionCard = ({
     ? collection.words
     : progress;
 
+  // Determine styling based on availability
+  const isAvailable = collection.isCurrentlyAvailable;
+  const cardOpacity = isAvailable ? 1 : 0.5;
+  const textColor = isAvailable
+    ? theme.colors.primary
+    : theme.colors.onSurfaceDisabled;
+  const progressTextColor = isAvailable
+    ? theme.colors.onSurfaceVariant
+    : theme.colors.onSurfaceDisabled;
+
   // Using Surface instead of Card, with standard Views instead of Card.Content
   return (
     <>
@@ -299,6 +305,7 @@ const WordCollectionCard = ({
         onPress={showWordDialog}
         disabled={!isWordlistViewable}
         activeOpacity={isWordlistViewable ? 0.7 : 1}
+        style={{ opacity: cardOpacity }}
       >
         <Surface
           style={[
@@ -319,29 +326,21 @@ const WordCollectionCard = ({
               <View style={styles.wordCollectionTitle}>
                 {collection.icon && (
                   <View style={styles.wordCollectionIconWrapper}>
-                    <Icon
+                    <CustomIcon
                       source={collection.icon}
                       size={24}
-                      color={theme.colors.primary}
+                      color={textColor}
                     />
                   </View>
                 )}
                 <Text
-                  style={[
-                    styles.wordCollectionNameText,
-                    { color: theme.colors.primary },
-                  ]}
+                  style={[styles.wordCollectionNameText, { color: textColor }]}
                 >
                   {collection.title}
                 </Text>
               </View>
 
-              <Text
-                style={[
-                  styles.progressText,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
-              >
+              <Text style={[styles.progressText, { color: progressTextColor }]}>
                 {collectedCount} / {totalWordsInCollection}
               </Text>
             </View>
@@ -355,7 +354,11 @@ const WordCollectionCard = ({
               >
                 <ProgressBar
                   progress={progressPercentage}
-                  color={theme.customColors.collectedWordChip}
+                  color={
+                    isAvailable
+                      ? theme.customColors.collectedWordChip
+                      : theme.colors.onSurfaceDisabled
+                  }
                   style={styles.progressBarInner}
                 />
               </View>
@@ -381,7 +384,7 @@ const WordCollectionCard = ({
             <View style={styles.wordDialogTitle}>
               {collection.icon && (
                 <View style={styles.wordDialogIconWrapper}>
-                  <Icon
+                  <CustomIcon
                     source={collection.icon}
                     size={24}
                     color={theme.colors.primary}
@@ -441,21 +444,41 @@ const WordCollectionCard = ({
 // Add new HighlightStatBox component
 const HighlightStatBox = ({ label, value, unit = "", icon, iconColor }) => {
   const { theme: appTheme } = useAppTheme();
-  
+
   return (
-    <View style={[styles.highlightStatBox, { backgroundColor: appTheme.colors.surface }]}>
+    <View
+      style={[
+        styles.highlightStatBox,
+        { backgroundColor: appTheme.colors.surface },
+      ]}
+    >
       <View style={styles.highlightStatHeader}>
-        <Icon source={icon} size={20} color={iconColor} />
-        <Text style={[styles.highlightStatLabel, { color: appTheme.colors.onSurfaceVariant }]}>
+        <CustomIcon source={icon} size={20} color={iconColor} />
+        <Text
+          style={[
+            styles.highlightStatLabel,
+            { color: appTheme.colors.onSurfaceVariant },
+          ]}
+        >
           {label}
         </Text>
       </View>
       <View style={styles.highlightStatValueContainer}>
-        <Text style={[styles.highlightStatValue, { color: appTheme.colors.onSurface }]}>
+        <Text
+          style={[
+            styles.highlightStatValue,
+            { color: appTheme.colors.onSurface },
+          ]}
+        >
           {value}
         </Text>
         {unit && (
-          <Text style={[styles.highlightStatUnit, { color: appTheme.colors.onSurfaceVariant }]}>
+          <Text
+            style={[
+              styles.highlightStatUnit,
+              { color: appTheme.colors.onSurfaceVariant },
+            ]}
+          >
             {unit}
           </Text>
         )}
@@ -465,19 +488,48 @@ const HighlightStatBox = ({ label, value, unit = "", icon, iconColor }) => {
 };
 
 // Component for W/L Ratio Display
-const WLRatioDisplay = ({ wins: winCountInput, totalGames: totalGamesInput, theme }) => {
+const WLRatioDisplay = ({
+  wins: winCountInput,
+  totalGames: totalGamesInput,
+  theme,
+}) => {
   const currentTotalGames = totalGamesInput || 0;
   const currentWins = winCountInput || 0;
   const currentLosses = currentTotalGames - currentWins;
 
-  const winPercentage = currentTotalGames > 0 ? (currentWins / currentTotalGames) * 100 : 0;
-  const lossPercentage = currentTotalGames > 0 ? (currentLosses / currentTotalGames) * 100 : (currentTotalGames === 0 ? 100 : 0);
+  const winPercentage =
+    currentTotalGames > 0 ? (currentWins / currentTotalGames) * 100 : 0;
+  const lossPercentage =
+    currentTotalGames > 0
+      ? (currentLosses / currentTotalGames) * 100
+      : currentTotalGames === 0
+        ? 100
+        : 0;
 
   return (
     <View style={styles.wlRatioBarWithLabels}>
-      <View style={[styles.wlRatioLine, { borderColor: theme.colors.outline }]}> 
-        <View style={[styles.wlRatioWinsSegment, { width: `${winPercentage}%`, backgroundColor: theme.customColors.startNode }]} />
-        <View style={[styles.wlRatioLossesSegment, { width: `${lossPercentage}%`, backgroundColor: currentTotalGames > 0 ? theme.customColors.warningColor : theme.colors.surfaceDisabled }]} />
+      <View style={[styles.wlRatioLine, { borderColor: theme.colors.outline }]}>
+        <View
+          style={[
+            styles.wlRatioWinsSegment,
+            {
+              width: `${winPercentage}%`,
+              backgroundColor: theme.customColors.startNode,
+            },
+          ]}
+        />
+        <View
+          style={[
+            styles.wlRatioLossesSegment,
+            {
+              width: `${lossPercentage}%`,
+              backgroundColor:
+                currentTotalGames > 0
+                  ? theme.customColors.warningColor
+                  : theme.colors.surfaceDisabled,
+            },
+          ]}
+        />
       </View>
     </View>
   );
@@ -485,33 +537,30 @@ const WLRatioDisplay = ({ wins: winCountInput, totalGames: totalGamesInput, them
 
 // --- Main StatsModal ---
 const StatsModal = () => {
-  const {
-    statsModalVisible,
-    setStatsModalVisible,
-    wordCollections,
-    setPathDisplayMode,
-  } = useGameStore((state) => ({
-    statsModalVisible: state.statsModalVisible,
-    setStatsModalVisible: state.setStatsModalVisible,
-    wordCollections: state.wordCollections,
-    setPathDisplayMode: state.setPathDisplayMode,
-  }));
   const { theme: appTheme } = useAppTheme();
+  const auth = useAuth();
+  const statsModalVisible = useGameStore((state) => state.statsModalVisible);
+  const setStatsModalVisible = useGameStore(
+    (state) => state.setStatsModalVisible,
+  );
+  const wordCollections = useGameStore((state) => state.wordCollections);
+  const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
   const historicalReportRef = useRef(null);
   const graphPreviewRef = useRef(null);
 
   // State
-  const [activeTab, setActiveTab] = useState("history");
-  const [gameHistory, setGameHistory] = useState<GameReport[]>([]);
+  const [activeTab, setActiveTab] = useState<"history" | "progress">("history");
+  const [loading, setLoading] = useState(true);
+  const [history, setHistory] = useState<GameReport[]>([]);
   const [lifetimeStats, setLifetimeStats] = useState<LifetimeStats | null>(
     null,
   );
   const [unlockedAchievementIds, setUnlockedAchievementIds] = useState<
     string[]
   >([]);
+  const [unviewedAchievementCount, setUnviewedAchievementCount] = useState(0);
   const [collectionsProgress, setCollectionsProgress] =
     useState<WordCollectionProgress>({});
-  const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<GameReport | null>(null);
   const [definitionDialogWord, setDefinitionDialogWord] = useState<
     string | null
@@ -526,6 +575,8 @@ const StatsModal = () => {
     useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [progressiveAchievementCounts, setProgressiveAchievementCounts] =
+    useState<Record<string, number>>({});
 
   // State for historical challenge sharing
   const [historicalChallengeLink, setHistoricalChallengeLink] = useState("");
@@ -534,35 +585,38 @@ const StatsModal = () => {
     setHistoricalChallengeDialogVisible,
   ] = useState(false);
 
-  // State for daily challenge selection
-  const [selectedDailyChallenge, setSelectedDailyChallenge] = useState<DailyChallenge | null>(null);
-  const [dailyChallengeProgress, setDailyChallengeProgress] = useState<Record<string, any>>({});
+  // Collapsible section state for Progress tab
+  const [lifetimeStatsExpanded, setLifetimeStatsExpanded] = useState(true);
+  const [difficultyAnalysisExpanded, setDifficultyAnalysisExpanded] =
+    useState(true);
+  const [achievementsExpanded, setAchievementsExpanded] = useState(false);
+  const [collectionsExpanded, setCollectionsExpanded] = useState(false);
 
   // Load data when modal opens
   useEffect(() => {
     if (statsModalVisible) {
       const loadData = async () => {
         try {
-          const [
-            historyData,
-            lifetimeData,
-            achievementIds,
-            collectionsData,
-          ] = await Promise.all([
-            loadGameHistory(),
-            getLifetimeStats(),
-            getUnlockedAchievementIds(),
-            getWordCollectionsProgress(),
-          ]);
+          const [historyData, lifetimeData, achievementIds, collectionsData] =
+            await Promise.all([
+              loadGameHistory(),
+              getLifetimeStats(),
+              getUnlockedAchievementIds(),
+              getWordCollectionsProgress(),
+            ]);
 
-          // Load daily challenge progress
-          const dailyProgress = await dailyChallengesService.getDailyChallengeProgress();
+          // Load progressive achievement counts
+          const progressiveCounts =
+            await unifiedDataStore.getProgressiveAchievementCounts();
 
-          setGameHistory(historyData);
+          setHistory(historyData);
           setLifetimeStats(lifetimeData);
           setUnlockedAchievementIds(achievementIds);
           setCollectionsProgress(collectionsData);
-          setDailyChallengeProgress(dailyProgress);
+          setProgressiveAchievementCounts(progressiveCounts);
+
+          // Load unviewed achievements
+          await refreshUnviewedAchievements();
         } catch (error) {
           console.error("Error loading stats data:", error);
         } finally {
@@ -606,6 +660,28 @@ const StatsModal = () => {
   const hideAchievementDetail = () => {
     setSelectedAchievement(null);
     setAchievementDialogVisible(false);
+  };
+
+  const markAchievementsAsViewed = async () => {
+    try {
+      await unifiedDataStore.markMultipleAchievementsAsViewed(
+        unlockedAchievementIds,
+      );
+      // Refresh the count after marking as viewed
+      await refreshUnviewedAchievements();
+    } catch (error) {
+      console.error("Error marking achievements as viewed:", error);
+    }
+  };
+
+  const markWordCollectionsAsViewed = async () => {
+    try {
+      const completedIds = await unifiedDataStore.getCompletedWordCollections();
+      await unifiedDataStore.markMultipleWordCollectionsAsViewed(completedIds);
+      // Note: The count will be refreshed when the modal closes via AppHeader
+    } catch (error) {
+      console.error("Error marking word collections as viewed:", error);
+    }
   };
 
   // Function to copy text to clipboard on web (can be reused)
@@ -664,14 +740,17 @@ const StatsModal = () => {
       if (Platform.OS === "web") {
         // Check if this is a daily challenge and generate appropriate link
         let link: string;
-        if (selectedReport.isDailyChallenge && selectedReport.dailyChallengeId) {
-          link = generateDailyChallengeDeepLink(
+        if (
+          selectedReport.isDailyChallenge &&
+          selectedReport.dailyChallengeId
+        ) {
+          link = generateSecureDailyChallengeDeepLink(
             selectedReport.dailyChallengeId,
             startWord,
-            targetWord
+            targetWord,
           );
         } else {
-          link = generateGameDeepLink(startWord, targetWord);
+          link = generateSecureGameDeepLink(startWord, targetWord);
         }
         setHistoricalChallengeLink(link);
         setHistoricalChallengeDialogVisible(true);
@@ -699,14 +778,15 @@ const StatsModal = () => {
   };
 
   // Aggregate lifetime stats from gameHistory
-  const aggregateStats = (history: GameReport[]): {
+  const aggregateStats = (
+    history: GameReport[],
+  ): {
     totalGamesPlayed: number;
     totalWins: number;
     totalGaveUps: number;
     totalMoves: number;
     averageMovesPerGame: string;
     averageMoveAccuracy: string;
-    averageSemanticPathEfficiency: string;
     averageSimilarityPerMove: string;
     totalBacktracks: number;
     totalDistanceTraveled: string;
@@ -720,20 +800,18 @@ const StatsModal = () => {
         totalWins: 0,
         totalGaveUps: 0,
         totalMoves: 0,
-        averageMovesPerGame: '0.00',
-        averageMoveAccuracy: '0.0',
-        averageSemanticPathEfficiency: '0.0',
-        averageSimilarityPerMove: '0.000',
+        averageMovesPerGame: "0.00",
+        averageMoveAccuracy: "0.0",
+        averageSimilarityPerMove: "0.000",
         totalBacktracks: 0,
-        totalDistanceTraveled: '0.00',
-        averageDistanceTraveled: '0.00',
+        totalDistanceTraveled: "0.00",
+        averageDistanceTraveled: "0.00",
         optimalGames: 0,
         bestGame: null,
       };
     }
     let totalMoves = 0;
     let totalMoveAccuracy = 0;
-    let totalSemanticPathEfficiency = 0;
     let totalSimilarity = 0;
     let similarityCount = 0;
     let totalBacktracks = 0;
@@ -742,13 +820,11 @@ const StatsModal = () => {
     let totalGaveUps = 0;
     let optimalGames = 0;
     let bestGame: GameReport | null = null;
-    let bestEfficiency = -1;
     let bestMoves = Infinity;
     history.forEach((game, idx) => {
       totalMoves += game.totalMoves || 0;
       totalMoveAccuracy += game.moveAccuracy || 0;
-      totalSemanticPathEfficiency += game.semanticPathEfficiency || 0;
-      if (typeof game.averageSimilarity === 'number') {
+      if (typeof game.averageSimilarity === "number") {
         totalSimilarity += game.averageSimilarity;
         similarityCount++;
       }
@@ -756,8 +832,8 @@ const StatsModal = () => {
         totalBacktracks += game.backtrackEvents.length;
       }
       totalDistanceTraveled += game.playerSemanticDistance || 0;
-      if (game.status === 'won') totalWins++;
-      if (game.status === 'given_up') totalGaveUps++;
+      if (game.status === "won") totalWins++;
+      if (game.status === "given_up") totalGaveUps++;
       // Optimal game: playerPath matches optimalPath
       if (
         Array.isArray(game.playerPath) &&
@@ -767,15 +843,16 @@ const StatsModal = () => {
       ) {
         optimalGames++;
       }
-      // Best game: highest semanticPathEfficiency, then fewest moves
-      const eff = game.semanticPathEfficiency ?? -1;
-      if (
-        eff > bestEfficiency ||
-        (eff === bestEfficiency && (game.totalMoves || Infinity) < bestMoves)
+      // Best game: fewest moves for won games, or highest accuracy for given up games
+      const currentMoves = game.totalMoves || Infinity;
+      if (game.status === "won" && currentMoves < bestMoves) {
+        bestMoves = currentMoves;
+        bestGame = history[idx];
+      } else if (
+        !bestGame ||
+        (bestGame.status !== "won" && game.status === "won")
       ) {
-        bestEfficiency = eff;
-        bestMoves = game.totalMoves || Infinity;
-        // Always use the reference from gameHistory
+        bestMoves = currentMoves;
         bestGame = history[idx];
       }
     });
@@ -785,19 +862,44 @@ const StatsModal = () => {
       totalWins,
       totalGaveUps,
       totalMoves,
-      averageMovesPerGame: totalGamesPlayed > 0 ? (totalMoves / totalGamesPlayed).toFixed(2) : '0.00',
-      averageMoveAccuracy: totalGamesPlayed > 0 ? (totalMoveAccuracy / totalGamesPlayed).toFixed(1) : '0.0',
-      averageSemanticPathEfficiency: totalGamesPlayed > 0 ? (totalSemanticPathEfficiency / totalGamesPlayed).toFixed(1) : '0.0',
-      averageSimilarityPerMove: similarityCount > 0 ? (totalSimilarity / similarityCount).toFixed(3) : '0.000',
+      averageMovesPerGame:
+        totalGamesPlayed > 0
+          ? (totalMoves / totalGamesPlayed).toFixed(2)
+          : "0.00",
+      averageMoveAccuracy:
+        totalGamesPlayed > 0
+          ? (totalMoveAccuracy / totalGamesPlayed).toFixed(1)
+          : "0.0",
+      averageSimilarityPerMove:
+        similarityCount > 0
+          ? (totalSimilarity / similarityCount).toFixed(3)
+          : "0.000",
       totalBacktracks,
       totalDistanceTraveled: totalDistanceTraveled.toFixed(2),
-      averageDistanceTraveled: totalGamesPlayed > 0 ? (totalDistanceTraveled / totalGamesPlayed).toFixed(2) : '0.00',
+      averageDistanceTraveled:
+        totalGamesPlayed > 0
+          ? (totalDistanceTraveled / totalGamesPlayed).toFixed(2)
+          : "0.00",
       optimalGames,
       bestGame,
     };
   };
 
-  const stats = aggregateStats(gameHistory);
+  const stats = aggregateStats(history);
+
+  // Function to refresh unviewed achievements
+  const refreshUnviewedAchievements = async () => {
+    try {
+      const unlockedIds = await unifiedDataStore.getUnlockedAchievements();
+      const viewedIds = await unifiedDataStore.getViewedAchievementIds();
+      const unviewedCount = unlockedIds.filter(
+        (id) => !viewedIds.includes(id),
+      ).length;
+      setUnviewedAchievementCount(unviewedCount);
+    } catch (error) {
+      console.error("Error refreshing unviewed achievements:", error);
+    }
+  };
 
   // Tab content components
   const renderHistoryTab = () => {
@@ -806,7 +908,7 @@ const StatsModal = () => {
         <View style={styles.reportContainer} ref={historicalReportRef}>
           <View style={styles.reportHeader}>
             <Button
-              icon="arrow-left"
+              icon={() => <CustomIcon source="arrow-left" size={20} color={appTheme.colors.primary} />}
               mode="text"
               onPress={handleBackToHistory}
               textColor={appTheme.colors.primary}
@@ -834,7 +936,7 @@ const StatsModal = () => {
 
     return (
       <FlatList
-        data={gameHistory}
+        data={history}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <GameHistoryCard
@@ -863,9 +965,14 @@ const StatsModal = () => {
   const renderProgressTab = () => {
     let completedCollectionsCount = 0;
     if (wordCollections && Object.keys(collectionsProgress).length > 0) {
-      wordCollections.forEach(collection => {
+      wordCollections.forEach((collection) => {
         const progress = collectionsProgress[collection.id];
-        if (collection.words && collection.words.length > 0 && progress && progress.collectedWords) {
+        if (
+          collection.words &&
+          collection.words.length > 0 &&
+          progress &&
+          progress.collectedWords
+        ) {
           if (progress.collectedWords.length === collection.words.length) {
             completedCollectionsCount++;
           }
@@ -879,42 +986,256 @@ const StatsModal = () => {
 
     const averageMoveAccuracy =
       lifetimeStats && gamesPlayed > 0
-        ? ((lifetimeStats.cumulativeMoveAccuracySum || 0) / gamesPlayed).toFixed(1)
+        ? (
+            (lifetimeStats.cumulativeMoveAccuracySum || 0) / gamesPlayed
+          ).toFixed(1)
         : "0.0";
 
     const actualAchievementsUnlocked = unlockedAchievementIds.length;
 
-    // Component for stat boxes in the highlight section with icon support
-    const HighlightStatBox = ({ label, value, unit = "", icon, iconColor }: { label: string, value: string | number, unit?: string, icon?: string, iconColor?: string }) => (
-      <View style={styles.highlightStatBox}>
-        <View style={styles.iconValueRow}>
-          {icon && (
-            <Icon
-              source={icon}
-              size={28}
-              color={iconColor || appTheme.colors.primary}
-            />
-          )}
-          <Text style={[styles.highlightStatValue, { color: appTheme.colors.primary, marginLeft: icon ? 8 : 0 }]}>{value}{unit}</Text>
+    // Analyze games by difficulty (path length)
+    const difficultyAnalysis = (() => {
+      if (!history || history.length === 0) {
+        return null;
+      }
+
+      const byDifficulty: Record<
+        number,
+        {
+          total: number;
+          wins: number;
+          totalMoves: number;
+          totalAccuracy: number;
+          optimalGames: number;
+          bestGame: GameReport | null;
+        }
+      > = {};
+
+      history.forEach((game) => {
+        const difficulty = (game.optimalPath?.length || 1) - 1; // Convert path length to moves
+        if (!byDifficulty[difficulty]) {
+          byDifficulty[difficulty] = {
+            total: 0,
+            wins: 0,
+            totalMoves: 0,
+            totalAccuracy: 0,
+            optimalGames: 0,
+            bestGame: null,
+          };
+        }
+
+        const stats = byDifficulty[difficulty];
+        stats.total += 1;
+        if (game.status === "won") stats.wins += 1;
+        stats.totalMoves += game.totalMoves || 0;
+        stats.totalAccuracy += game.moveAccuracy || 0;
+
+        // Check if this is an optimal game (player path matches optimal path exactly)
+        if (
+          Array.isArray(game.playerPath) &&
+          Array.isArray(game.optimalPath) &&
+          game.playerPath.length === game.optimalPath.length &&
+          game.playerPath.every((w, i) => w === game.optimalPath[i])
+        ) {
+          stats.optimalGames += 1;
+        }
+
+        // Track best game for this difficulty (fewest moves for won games, then any game)
+        const currentMoves = game.totalMoves || Infinity;
+        const bestMoves = stats.bestGame?.totalMoves || Infinity;
+
+        if (
+          !stats.bestGame ||
+          (game.status === "won" && stats.bestGame.status !== "won") ||
+          (game.status === "won" &&
+            stats.bestGame.status === "won" &&
+            currentMoves < bestMoves)
+        ) {
+          stats.bestGame = game;
+        }
+      });
+
+      return byDifficulty;
+    })();
+
+    // Component for collapsible section header
+    const CollapsibleSectionHeader = ({
+      title,
+      expanded,
+      onToggle,
+    }: {
+      title: string;
+      expanded: boolean;
+      onToggle: () => void;
+    }) => (
+      <TouchableOpacity
+        style={styles.collapsibleHeader}
+        onPress={onToggle}
+        activeOpacity={0.7}
+      >
+        <View style={styles.collapsibleHeaderContent}>
+          <View>
+            <Text
+              style={[
+                styles.lifetimeStatsTitle,
+                { color: appTheme.colors.primary, marginBottom: 0 },
+              ]}
+            >
+              {title}
+            </Text>
+          </View>
         </View>
-        <Text style={[styles.highlightStatLabel, { color: appTheme.colors.onSurfaceVariant }]}>{label}</Text>
-      </View>
+        <CustomIcon
+          source={expanded ? "chevron-up" : "chevron-down"}
+          size={24}
+          color={appTheme.colors.primary}
+        />
+      </TouchableOpacity>
     );
 
-    // Component for W/L Ratio Display
-    const WLRatioDisplay = ({ wins: winCountInput, totalGames: totalGamesInput, theme }) => {
-      const currentTotalGames = totalGamesInput || 0;
-      const currentWins = winCountInput || 0;
-      const currentLosses = currentTotalGames - currentWins;
-    
-      const winPercentage = currentTotalGames > 0 ? (currentWins / currentTotalGames) * 100 : 0;
-      const lossPercentage = currentTotalGames > 0 ? (currentLosses / currentTotalGames) * 100 : (currentTotalGames === 0 ? 100 : 0);
-    
+    // Component for difficulty analysis row
+    const DifficultyRow = ({
+      difficulty,
+      stats,
+    }: {
+      difficulty: number;
+      stats: {
+        total: number;
+        wins: number;
+        totalMoves: number;
+        totalAccuracy: number;
+        optimalGames: number;
+        bestGame: GameReport | null;
+      };
+    }) => {
+      const winRate = stats.total > 0 ? (stats.wins / stats.total) * 100 : 0;
+      const avgMoves = stats.total > 0 ? stats.totalMoves / stats.total : 0;
+      const avgAccuracy =
+        stats.total > 0 ? stats.totalAccuracy / stats.total : 0;
+      const optimalRate =
+        stats.total > 0 ? (stats.optimalGames / stats.total) * 100 : 0;
+
+      // Determine path length color (no difficulty labels)
+      const getPathLengthColor = (moves: number) => {
+        if (moves === 3) return appTheme.customColors.startNode; // 3 moves - green
+        if (moves === 4) return appTheme.colors.primary; // 4 moves - blue
+        if (moves === 5) return appTheme.customColors.warningColor; // 5 moves - orange
+        if (moves === 6) return appTheme.customColors.endNode; // 6 moves - red
+        return appTheme.colors.onSurface; // fallback for any outliers
+      };
+
+      const pathLengthColor = getPathLengthColor(difficulty);
+
       return (
-        <View style={styles.wlRatioBarWithLabels}>
-          <View style={[styles.wlRatioLine, { borderColor: theme.colors.outline }]}> 
-            <View style={[styles.wlRatioWinsSegment, { width: `${winPercentage}%`, backgroundColor: theme.customColors.startNode }]} />
-            <View style={[styles.wlRatioLossesSegment, { width: `${lossPercentage}%`, backgroundColor: currentTotalGames > 0 ? theme.customColors.warningColor : theme.colors.surfaceDisabled }]} />
+        <View
+          style={[
+            styles.difficultyRow,
+            { borderColor: appTheme.colors.outline },
+          ]}
+        >
+          <View style={styles.difficultyHeader}>
+            <View style={styles.difficultyLabelContainer}>
+              <View
+                style={[
+                  styles.difficultyDot,
+                  { backgroundColor: pathLengthColor },
+                ]}
+              />
+              <Text
+                style={[
+                  styles.difficultyLabel,
+                  { color: appTheme.colors.onSurface },
+                ]}
+              >
+                {difficulty} moves
+              </Text>
+            </View>
+            <Text
+              style={[
+                styles.difficultyGamesCount,
+                { color: appTheme.colors.onSurfaceVariant },
+              ]}
+            >
+              {stats.total} game{stats.total !== 1 ? "s" : ""}
+            </Text>
+          </View>
+
+          <View style={styles.difficultyStats}>
+            <View style={styles.difficultyStatItem}>
+              <Text
+                style={[
+                  styles.difficultyStatLabel,
+                  { color: appTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                Win Rate
+              </Text>
+              <Text
+                style={[
+                  styles.difficultyStatValue,
+                  { color: appTheme.colors.onSurface },
+                ]}
+              >
+                {winRate.toFixed(0)}%
+              </Text>
+            </View>
+
+            <View style={styles.difficultyStatItem}>
+              <Text
+                style={[
+                  styles.difficultyStatLabel,
+                  { color: appTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                Avg Moves
+              </Text>
+              <Text
+                style={[
+                  styles.difficultyStatValue,
+                  { color: appTheme.colors.onSurface },
+                ]}
+              >
+                {avgMoves.toFixed(1)}
+              </Text>
+            </View>
+
+            <View style={styles.difficultyStatItem}>
+              <Text
+                style={[
+                  styles.difficultyStatLabel,
+                  { color: appTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                Avg Accuracy
+              </Text>
+              <Text
+                style={[
+                  styles.difficultyStatValue,
+                  { color: appTheme.colors.onSurface },
+                ]}
+              >
+                {avgAccuracy.toFixed(0)}%
+              </Text>
+            </View>
+
+            <View style={styles.difficultyStatItem}>
+              <Text
+                style={[
+                  styles.difficultyStatLabel,
+                  { color: appTheme.colors.onSurfaceVariant },
+                ]}
+              >
+                Optimal Games
+              </Text>
+              <Text
+                style={[
+                  styles.difficultyStatValue,
+                  { color: appTheme.colors.onSurface },
+                ]}
+              >
+                {stats.optimalGames} ({optimalRate.toFixed(0)}%)
+              </Text>
+            </View>
           </View>
         </View>
       );
@@ -922,151 +1243,240 @@ const StatsModal = () => {
 
     return (
       <ScrollView contentContainerStyle={styles.tabContentContainerPadded}>
-        <Card style={[styles.statsSummaryCard, { backgroundColor: appTheme.colors.surfaceVariant, borderColor: appTheme.colors.outline }]}> 
+        {/* Lifetime Stats Section */}
+        <Card
+          style={[
+            styles.statsSummaryCard,
+            {
+              backgroundColor: appTheme.colors.surfaceVariant,
+              borderColor: appTheme.colors.outline,
+            },
+          ]}
+        >
           <Card.Content style={styles.statsCardContent}>
-            <Text style={[styles.lifetimeStatsTitle, { color: appTheme.colors.primary }]}>Lifetime Stats</Text>
-            <View style={styles.statLineItemList}>
-              {(() => {
-                const statItems = [
-                  { label: 'Games Played', value: stats.totalGamesPlayed },
-                  { label: 'Wins', value: stats.totalWins },
-                  { label: 'Win Rate', value: stats.totalGamesPlayed > 0 ? Math.round((stats.totalWins / stats.totalGamesPlayed) * 100) + '%' : '0%' },
-                  { label: 'Games Given Up', value: stats.totalGaveUps },
-                  { label: 'Avg. Moves/Game', value: stats.averageMovesPerGame },
-                  { label: 'Avg. Move Accuracy', value: stats.averageMoveAccuracy + '%' },
-                  { label: 'Total Backtracks', value: stats.totalBacktracks },
-                  { label: 'Achievements', value: unlockedAchievementIds.length },
-                  { label: 'Total Distance', value: stats.totalDistanceTraveled },
-                  { label: 'Optimal Games', value: stats.optimalGames },
-                ];
-                return statItems.map((item, idx) => (
-                  <View
-                    key={item.label}
-                    style={[
-                      styles.statsLineItemRow,
-                      idx !== statItems.length - 1 && styles.statsLineItemDivider,
-                    ]}
-                  >
-                    <Text style={styles.statsLineItemLabel}>{item.label}</Text>
-                    <Text style={styles.statsLineItemValue}>{item.value}</Text>
-                  </View>
-                ));
-              })()}
-            </View>
+            <CollapsibleSectionHeader
+              title="Lifetime Stats"
+              expanded={lifetimeStatsExpanded}
+              onToggle={() => setLifetimeStatsExpanded(!lifetimeStatsExpanded)}
+            />
+
+            {lifetimeStatsExpanded && (
+              <View style={styles.statLineItemList}>
+                {(() => {
+                  const statItems = [
+                    { label: "Games Played", value: stats.totalGamesPlayed },
+                    { label: "Wins", value: stats.totalWins },
+                    {
+                      label: "Win Rate",
+                      value:
+                        stats.totalGamesPlayed > 0
+                          ? Math.round(
+                              (stats.totalWins / stats.totalGamesPlayed) * 100,
+                            ) + "%"
+                          : "0%",
+                    },
+                    { label: "Games Given Up", value: stats.totalGaveUps },
+                    {
+                      label: "Avg. Moves/Game",
+                      value: stats.averageMovesPerGame,
+                    },
+                    {
+                      label: "Avg. Move Accuracy",
+                      value: stats.averageMoveAccuracy + "%",
+                    },
+                    { label: "Total Backtracks", value: stats.totalBacktracks },
+                    {
+                      label: "Achievements",
+                      value: `${unlockedAchievementIds.length} of ${allAchievements.length}`,
+                    },
+                    {
+                      label: "Total Semantic Distance",
+                      value: stats.totalDistanceTraveled,
+                    },
+                    {
+                      label: "Avg. Distance/Game",
+                      value: stats.averageDistanceTraveled,
+                    },
+                    { label: "Optimal Games", value: stats.optimalGames },
+                  ];
+
+                  return statItems.map((item, index) => (
+                    <View key={index}>
+                      <View style={styles.statsLineItemRow}>
+                        <Text
+                          style={[
+                            styles.statsLineItemLabel,
+                            { color: appTheme.colors.onSurface },
+                          ]}
+                        >
+                          {item.label}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.statsLineItemValue,
+                            { color: appTheme.colors.onSurface },
+                          ]}
+                        >
+                          {item.value}
+                        </Text>
+                      </View>
+                      {index < statItems.length - 1 && (
+                        <View
+                          style={[
+                            styles.statsLineItemDivider,
+                            { borderBottomColor: appTheme.colors.outline },
+                          ]}
+                        />
+                      )}
+                    </View>
+                  ));
+                })()}
+              </View>
+            )}
           </Card.Content>
         </Card>
 
-        <Text
+        {/* Performance by Difficulty Section */}
+        <Card
           style={[
-            styles.sectionTitle,
-            styles.achievementsSectionTitle,
-            { color: appTheme.colors.primary },
+            styles.statsSummaryCard,
+            {
+              backgroundColor: appTheme.colors.surfaceVariant,
+              borderColor: appTheme.colors.outline,
+              marginTop: 16,
+            },
           ]}
         >
-          Achievements
-        </Text>
+          <Card.Content style={styles.statsCardContent}>
+            <CollapsibleSectionHeader
+              title="Performance by Path Length"
+              expanded={difficultyAnalysisExpanded}
+              onToggle={() =>
+                setDifficultyAnalysisExpanded(!difficultyAnalysisExpanded)
+              }
+            />
 
-        {allAchievements.map((achievement) => (
-          <AchievementCard
-            key={achievement.id}
-            achievement={achievement}
-            unlocked={unlockedAchievementIds.includes(achievement.id)}
-            theme={appTheme}
-            onPress={showAchievementDetail}
-          />
-        ))}
+            {difficultyAnalysisExpanded && (
+              <View style={{ marginTop: 16 }}>
+                {difficultyAnalysis &&
+                Object.keys(difficultyAnalysis).length > 0 ? (
+                  Object.entries(difficultyAnalysis)
+                    .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                    .map(([difficulty, stats]) => (
+                      <DifficultyRow
+                        key={difficulty}
+                        difficulty={parseInt(difficulty)}
+                        stats={stats}
+                      />
+                    ))
+                ) : (
+                  <Text
+                    style={[
+                      styles.emptyStateText,
+                      { color: appTheme.colors.onSurfaceVariant },
+                    ]}
+                  >
+                    Play some games to see your performance by difficulty level.
+                  </Text>
+                )}
+              </View>
+            )}
+          </Card.Content>
+        </Card>
+
+        {/* Achievements Section */}
+        <Card
+          style={[
+            styles.statsSummaryCard,
+            {
+              backgroundColor: appTheme.colors.surfaceVariant,
+              borderColor: appTheme.colors.outline,
+              marginTop: 16,
+            },
+          ]}
+        >
+          <Card.Content style={styles.statsCardContent}>
+            <CollapsibleSectionHeader
+              title={
+                unviewedAchievementCount > 0
+                  ? `Achievements (${unviewedAchievementCount})`
+                  : "Achievements"
+              }
+              expanded={achievementsExpanded}
+              onToggle={() => {
+                setAchievementsExpanded(!achievementsExpanded);
+                // Mark achievements as viewed when section is expanded
+                if (!achievementsExpanded) {
+                  markAchievementsAsViewed();
+                }
+              }}
+            />
+
+            {achievementsExpanded && (
+              <View style={{ marginTop: 8 }}>
+                {allAchievements.map((achievement) => (
+                  <AchievementCard
+                    key={achievement.id}
+                    achievement={achievement}
+                    unlocked={unlockedAchievementIds.includes(achievement.id)}
+                    theme={appTheme}
+                    onPress={showAchievementDetail}
+                    progressiveCount={
+                      progressiveAchievementCounts[achievement.id]
+                    }
+                  />
+                ))}
+              </View>
+            )}
+          </Card.Content>
+        </Card>
 
         {/* Word Collections Section */}
-        <Text
+        <Card
           style={[
-            styles.sectionTitle,
-            styles.achievementsSectionTitle,
-            { color: appTheme.colors.primary },
+            styles.statsSummaryCard,
+            {
+              backgroundColor: appTheme.colors.surfaceVariant,
+              borderColor: appTheme.colors.outline,
+              marginTop: 16,
+            },
           ]}
         >
-          Word Collections
-        </Text>
-
-        {wordCollections.length === 0 ? (
-        <View style={styles.emptyStateContainer}>
-          <Icon
-            source="card-search-outline"
-            size={48}
-            color={appTheme.colors.onSurfaceVariant}
-          />
-          <Text
-            style={[
-              styles.emptyTabText,
-              { color: appTheme.colors.onSurface },
-              styles.eventsTabEmptyText,
-            ]}
-          >
-            No word collections available. Play more to discover them!
-          </Text>
-        </View>
-        ) : (
-          wordCollections.map((collection) => {
-          const collectionProgress =
-            collectionsProgress[collection.id]?.collectedWords || [];
-
-          return (
-            <WordCollectionCard
-              key={collection.id}
-              collection={collection}
-              progress={collectionProgress}
-              theme={appTheme}
+          <Card.Content style={styles.statsCardContent}>
+            <CollapsibleSectionHeader
+              title="Word Collections"
+              expanded={collectionsExpanded}
+              onToggle={() => {
+                setCollectionsExpanded(!collectionsExpanded);
+                // Mark word collections as viewed when section is expanded
+                if (!collectionsExpanded) {
+                  markWordCollectionsAsViewed();
+                }
+              }}
             />
-          );
-          })
-        )}
-      </ScrollView>
-    );
-  };
 
-  const renderDailyChallengesTab = () => {
-    const handleChallengeSelect = async (challenge: DailyChallenge) => {
-      setSelectedDailyChallenge(challenge);
-    };
+            {collectionsExpanded && (
+              <View style={[styles.wordCollectionsContainer, { marginTop: 8 }]}>
+                {wordCollections.map((collection) => {
+                  const progress = collectionsProgress[collection.id];
+                  const collectedCount = progress?.collectedWords?.length || 0;
+                  const totalWords = collection.words?.length || 0;
+                  const isCompleted =
+                    collectedCount === totalWords && totalWords > 0;
 
-    const handleBackToCalendar = () => {
-      setSelectedDailyChallenge(null);
-    };
-
-    // If a challenge is selected, show the report
-    if (selectedDailyChallenge) {
-      // Fix: Look up progress by challenge ID, not date
-      const progress = dailyChallengeProgress[selectedDailyChallenge.id];
-      
-      // Try to find a game report for this daily challenge
-      // Look for a game that was specifically marked as a daily challenge
-      const challengeGameReport = gameHistory.find(report => 
-        report.startWord === selectedDailyChallenge.startWord &&
-        report.targetWord === selectedDailyChallenge.targetWord && // Now both use targetWord
-        // Check if this was marked as a daily challenge
-        report.isDailyChallenge === true &&
-        // More flexible date matching - check multiple date formats
-        (new Date(report.timestamp).toDateString() === new Date(selectedDailyChallenge.date).toDateString() ||
-         new Date(report.timestamp).toISOString().split('T')[0] === selectedDailyChallenge.date)
-      );
-      
-      console.log('Daily Challenge:', selectedDailyChallenge.startWord, '→', selectedDailyChallenge.targetWord);
-      console.log('Found Report:', challengeGameReport ? `${challengeGameReport.startWord} → ${challengeGameReport.targetWord}` : 'NONE');
-
-      return (
-        <DailyChallengeReport
-          challenge={selectedDailyChallenge}
-          progress={progress}
-          gameReport={challengeGameReport}
-          onBack={handleBackToCalendar}
-          onWordDefinition={showWordDefinition}
-          onAchievementPress={showAchievementDetail}
-        />
-      );
-    }
-
-    return (
-      <ScrollView contentContainerStyle={styles.tabContentContainerPadded}>
-        <DailyChallengesCalendar onChallengeSelect={handleChallengeSelect} />
+                  return (
+                    <WordCollectionCard
+                      key={collection.id}
+                      collection={collection}
+                      progress={progress?.collectedWords || []}
+                      theme={appTheme}
+                    />
+                  );
+                })}
+              </View>
+            )}
+          </Card.Content>
+        </Card>
       </ScrollView>
     );
   };
@@ -1093,8 +1503,6 @@ const StatsModal = () => {
         return renderHistoryTab();
       case "progress":
         return renderProgressTab();
-      case "events":
-        return renderDailyChallengesTab();
       default:
         return null;
     }
@@ -1114,12 +1522,16 @@ const StatsModal = () => {
         ]}
       >
         <View style={styles.header}>
-          <Text style={{ ...styles.title, color: appTheme.colors.primary }}>
-            Player Statistics
+          <Text style={[styles.title, { color: appTheme.colors.onBackground }]}>
+            Stats
           </Text>
           <Button
+            mode="text"
             onPress={() => setStatsModalVisible(false)}
-            textColor={appTheme.colors.primary}
+            icon={() => <CustomIcon source="close" size={20} color={appTheme.colors.onSurfaceVariant} />}
+            compact
+            style={styles.closeButton}
+            labelStyle={{ color: appTheme.colors.onSurfaceVariant }}
           >
             Close
           </Button>
@@ -1130,8 +1542,13 @@ const StatsModal = () => {
           onValueChange={setActiveTab}
           buttons={[
             { value: "history", label: "History" },
-            { value: "progress", label: "Progress" },
-            { value: "events", label: "Daily Challenges" },
+            {
+              value: "progress",
+              label:
+                unviewedAchievementCount > 0
+                  ? `Progress (${unviewedAchievementCount})`
+                  : "Progress",
+            },
           ]}
           style={styles.segmentedButtons}
         />
@@ -1243,12 +1660,12 @@ const styles = StyleSheet.create({
     margin: 20,
     padding: 15,
     borderRadius: 12,
-    maxHeight: '90%',
+    maxHeight: "90%",
     flex: 1,
     borderWidth: 1,
-    maxWidth: 700,
-    width: '100%',
-    alignSelf: 'center',
+    maxWidth: 500,
+    width: "100%",
+    alignSelf: "center",
   },
   header: {
     flexDirection: "row",
@@ -1326,7 +1743,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderWidth: 1,
   },
-  statsCardContent: { 
+  statsCardContent: {
     paddingHorizontal: 12,
     paddingVertical: 12,
   },
@@ -1334,7 +1751,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 20,
     marginBottom: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   highlightSection: {
     flexDirection: "row",
@@ -1347,9 +1764,9 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   iconValueRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 2,
   },
   highlightStatValue: {
@@ -1364,41 +1781,41 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   wlRatioBar: {
-    flexDirection: 'row',
+    flexDirection: "row",
     height: 22,
-    width: '100%',
+    width: "100%",
     borderRadius: 11,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
     marginBottom: 6,
   },
   wlRatioBarRow: {
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
     marginTop: 8,
   },
   wlRatioBarWithLabels: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '80%',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "80%",
     maxWidth: 400,
     minWidth: 120,
     marginTop: 8,
   },
   wlRatioLine: {
-    flexDirection: 'row',
+    flexDirection: "row",
     height: 2,
-    width: '100%',
-    overflow: 'hidden',
+    width: "100%",
+    overflow: "hidden",
     borderWidth: 0,
     marginHorizontal: 12,
   },
   wlRatioWinsSegment: {
-    height: '100%',
+    height: "100%",
   },
   wlRatioLossesSegment: {
-    height: '100%',
+    height: "100%",
   },
   wlRatioPercentage: {
     fontSize: 14,
@@ -1528,7 +1945,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   wordDialogScrollView: {
-    maxHeight: '60%',
+    maxHeight: "60%",
   },
   wordDialogChip: {
     margin: 4,
@@ -1552,9 +1969,9 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 8,
     maxWidth: 700,
-    width: '90%',
-    maxHeight: '90%',
-    alignSelf: 'center',
+    width: "90%",
+    maxHeight: "90%",
+    alignSelf: "center",
     borderWidth: 1,
   },
   dialogStyle: {
@@ -1584,13 +2001,13 @@ const styles = StyleSheet.create({
     borderColor: "rgba(0,0,0,0.1)",
   },
   highlightStatHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
   highlightStatValueContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+    flexDirection: "row",
+    alignItems: "baseline",
   },
   highlightStatUnit: {
     fontSize: 16,
@@ -1609,28 +2026,93 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   statsLineItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     minHeight: 28,
     paddingVertical: 4,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   statsLineItemLabel: {
     fontSize: 16,
-    color: '#fff',
-    textAlign: 'left',
+    color: "#fff",
+    textAlign: "left",
     flex: 1,
   },
   statsLineItemValue: {
     fontSize: 16,
-    color: '#fff',
-    textAlign: 'right',
+    color: "#fff",
+    textAlign: "right",
     minWidth: 40,
-    fontVariant: ['tabular-nums'],
+    fontVariant: ["tabular-nums"],
   },
   statsLineItemDivider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#8886',
+    borderBottomColor: "#8886",
+  },
+  difficultyRow: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+  },
+  difficultyHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  difficultyLabelContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  difficultyDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  difficultyLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  difficultyGamesCount: {
+    fontSize: 14,
+  },
+  difficultyStats: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  difficultyStatItem: {
+    alignItems: "center",
+    flex: 1,
+  },
+  difficultyStatLabel: {
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  difficultyStatValue: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  wordCollectionsContainer: {
+    gap: 8,
+  },
+  collapsibleHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 8,
+    marginBottom: 8,
+  },
+  collapsibleHeaderContent: {
+    flex: 1,
+  },
+  emptyStateText: {
+    textAlign: "center",
+  },
+  closeButton: {},
+  closeText: {
+    fontSize: 14,
   },
 });
 

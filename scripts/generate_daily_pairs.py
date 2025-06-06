@@ -12,21 +12,20 @@ GRAPH_PATH = "../client/public/data/graph.json"
 OUTPUT_PATH = "../src/data/playtest_pairs.json"  # Changed output path
 
 # Constraints (matching useGameStore.ts)
-MIN_PATH_LENGTH = 4  # Changed to start from 4 for daily challenges
-MAX_PATH_LENGTH = 6  # Changed to maximum 6 steps for daily challenges
+MIN_PATH_LENGTH = 4  # 4 steps (5 nodes)
+MAX_PATH_LENGTH = 5  # 5 steps (6 nodes)
 MAX_ATTEMPTS_PER_PAIR = 200  # Increased attempts
-MIN_NODE_DEGREE = 2  # Reduced from 2 to allow more potential pairs
+MIN_NODE_DEGREE = 3  # Increased back to 3 for better quality pairs
 MIN_TSNE_DISTANCE_SQUARED = 20 * 20  # Reduced from 20*20 to allow more potential pairs
 
 # Daily challenges configuration - Generate MORE than 365 to allow filtering
-# Target: 65 4-step, 120 5-step, 180 6-step = 365 total
-# Generate: 90 4-step, 160 5-step, 200 6-step = 450 total (extra buffer for filtering)
+# Target: 165 4-step, 200 5-step = 365 total
+# Generate: 185 4-step, 220 5-step = 405 total (extra buffer for filtering)
 PAIRS_PER_PATH_LENGTH = {
-    4: 90,   # 90 challenges with 4 steps (25 extra)
-    5: 160,  # 160 challenges with 5 steps (40 extra)  
-    6: 200   # 200 challenges with 6 steps (20 extra)
+    4: 185,  # 165 challenges with 4 steps (20 extra)
+    5: 220   # 200 challenges with 5 steps (20 extra)
 }
-TARGET_PATH_LENGTHS = [4, 5, 6]  # Only the lengths we need
+TARGET_PATH_LENGTHS = [4, 5]  # Only 4-5 step paths
 CHUNK_SIZE = 10  # Increased chunk size for efficiency
 
 # Global lock for thread-safe printing
@@ -228,7 +227,7 @@ def main():
         safe_print(f"\nGenerating pairs with distribution: {PAIRS_PER_PATH_LENGTH}")
         
         # Calculate number of chunks needed
-        total_pairs_needed = sum(PAIRS_PER_PATH_LENGTH.values())  # 90 + 160 + 200 = 450
+        total_pairs_needed = sum(PAIRS_PER_PATH_LENGTH.values())  # 185 + 220 = 405
         num_chunks = (total_pairs_needed + CHUNK_SIZE - 1) // CHUNK_SIZE
         
         # Prepare arguments for parallel processing

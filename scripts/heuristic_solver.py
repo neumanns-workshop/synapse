@@ -195,21 +195,23 @@ class HeuristicSolver:
                 steps_taken = result["steps"]
                 efficiency = steps_taken / optimal_length if optimal_length > 0 else float('inf')
                 
-                # STRICTLY reject optimal solutions - only accept if non-optimal OR it's our very last attempt
-                if steps_taken > optimal_length:
+                # Reject optimal solutions AND solutions that are just one step longer
+                # Only accept if at least 2 steps longer than optimal OR it's our very last attempt
+                if steps_taken > optimal_length + 1:
                     result["attempts"] = attempts
-                    result["final_attempt"] = attempt + 1
+                    result["efficiency"] = efficiency
+                    result["optimal_length"] = optimal_length
                     return result
                 elif attempt == max_retries - 1:
-                    # Only accept optimal on the very last attempt as absolute fallback
+                    # On last attempt, accept whatever we have
                     result["attempts"] = attempts
-                    result["final_attempt"] = attempt + 1
-                    result["reason"] += " (optimal solution accepted as last resort)"
+                    result["efficiency"] = efficiency
+                    result["optimal_length"] = optimal_length
                     return result
-                
-                # Store as best result but continue trying for non-optimal solution
-                if best_result is None or steps_taken < best_result["steps"]:
-                    best_result = result.copy()
+                else:
+                    # Try again with more randomness
+                    print(f"  Rejecting solution (steps: {steps_taken}, optimal: {optimal_length}) - retrying with more randomness")
+                    continue
         
         # If we couldn't find a non-optimal solution, return the best one we found
         if best_result is not None:
@@ -537,6 +539,7 @@ def solve_playtest_pairs_heuristic(pairs_file_path: str, max_retries: int = 50) 
         final_attempt = result.get("final_attempt", 1)
         if final_attempt > 1:
             retry_count += 1
+            print(f"  Required {final_attempt} attempts to find non-optimal solution")
         
         # Format result for consistency with LLM solver
         formatted_result = {
@@ -552,7 +555,8 @@ def solve_playtest_pairs_heuristic(pairs_file_path: str, max_retries: int = 50) 
             "strategy_log": result.get("strategy_log", []),
             "heuristic_score": result["steps"] / optimal_length if result["status"] == "solved" else float('inf'),
             "final_attempt": final_attempt,
-            "total_attempts": len(result.get("attempts", []))
+            "total_attempts": len(result.get("attempts", [])),
+            "was_retried": final_attempt > 1
         }
         
         results.append(formatted_result)
@@ -690,9 +694,8 @@ if __name__ == "__main__":
     
     # Target distribution for daily challenges
     TARGET_DISTRIBUTION = {
-        4: 65,   # 65 challenges with 4 steps
-        5: 120,  # 120 challenges with 5 steps  
-        6: 180   # 180 challenges with 6 steps
+        4: 165,  # 165 challenges with 4 steps (45% - Easy)
+        5: 200   # 200 challenges with 5 steps (55% - Medium)
     }
     
     # Solve the playtest pairs

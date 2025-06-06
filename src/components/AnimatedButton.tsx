@@ -25,7 +25,7 @@ const AnimatedPaperButton: React.FC<AnimatedButtonProps> = ({
 }) => {
   // Animation shared values
   const scale = useSharedValue(1);
-  
+
   // Create animation style
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -37,20 +37,20 @@ const AnimatedPaperButton: React.FC<AnimatedButtonProps> = ({
   const handlePress = (e: GestureResponderEvent) => {
     if (scaleOnPress) {
       // Scale down
-      scale.value = withTiming(0.95, { 
-        duration: 100, 
-        easing: Easing.inOut(Easing.ease) 
+      scale.value = withTiming(0.95, {
+        duration: 100,
+        easing: Easing.inOut(Easing.ease),
       });
-      
+
       // Scale back up
       setTimeout(() => {
-        scale.value = withTiming(1, { 
-          duration: 200, 
-          easing: Easing.inOut(Easing.ease) 
+        scale.value = withTiming(1, {
+          duration: 200,
+          easing: Easing.inOut(Easing.ease),
         });
       }, 100);
     }
-    
+
     // Call the original onPress handler
     if (onPress) {
       onPress(e);
@@ -74,4 +74,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AnimatedPaperButton; 
+export default AnimatedPaperButton;

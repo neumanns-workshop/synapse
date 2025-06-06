@@ -41,7 +41,6 @@ export interface GameReport {
   optimalSemanticDistance: number;
   averageSimilarity: number | null;
   backtrackEvents?: BacktrackReportEntry[]; // Renamed and using new type
-  semanticPathEfficiency?: number; // Added for the new efficiency metric
   earnedAchievements?: Achievement[]; // Added to store earned achievements
   potentialRarestMoves?: PotentialRarestMove[]; // Added for "Putting on the Dog"
   id: string;
@@ -65,7 +64,11 @@ export const getSemanticDistance = (
   word2: string,
 ): number => {
   // Check if word1 exists and has an edges property, and if word2 is a key in those edges
-  if (graphData[word1] && graphData[word1].edges && graphData[word1].edges[word2] !== undefined) {
+  if (
+    graphData[word1] &&
+    graphData[word1].edges &&
+    graphData[word1].edges[word2] !== undefined
+  ) {
     return 1 - graphData[word1].edges[word2]; // Convert similarity to distance
   }
   return 1; // Max distance if no direct connection or word/edge doesn't exist
@@ -276,36 +279,6 @@ export const generateGameReport = (
     }
   }
 
-  // Determine the denominator for efficiency calculation
-  let efficiencyDenominator = playerSemanticDistanceTotal;
-  const playerReachedEnd = playerPath[playerPath.length - 1] === targetWord;
-
-  if (!playerReachedEnd && suggestedPathFromFinalPosition.length > 0) {
-    // Construct hypothetical full path: player's actual path up to the last word, then the suggested path from there.
-    // Ensure no duplication of the last common word.
-    // finalSuggestedPath starts with the player's last position.
-    const hypotheticalFullPath = playerPath
-      .slice(0, playerPath.length - 1)
-      .concat(suggestedPathFromFinalPosition);
-    efficiencyDenominator = calculatePathDistance(
-      graphData,
-      hypotheticalFullPath,
-    );
-  }
-
-  // Calculate Semantic Path Efficiency
-  let calculatedSemanticPathEfficiency: number;
-  if (efficiencyDenominator === 0) {
-    if (optimalSemanticDistance === 0) {
-      calculatedSemanticPathEfficiency = 100.0;
-    } else {
-      calculatedSemanticPathEfficiency = 0.0;
-    }
-  } else {
-    calculatedSemanticPathEfficiency =
-      (optimalSemanticDistance / efficiencyDenominator) * 100.0;
-  }
-
   // If game is won, there's no suggested path needed from the end word.
   const finalSuggestedPath =
     gameStatus === "won" ? [] : suggestedPathFromFinalPosition;
@@ -329,7 +302,6 @@ export const generateGameReport = (
     optimalSemanticDistance,
     averageSimilarity,
     backtrackEvents: backtrackEvents.length > 0 ? backtrackEvents : undefined,
-    semanticPathEfficiency: calculatedSemanticPathEfficiency,
     earnedAchievements: [],
     pathEfficiency: pathEfficiency,
     potentialRarestMoves: potentialRarestMovesInput, // Assign to report

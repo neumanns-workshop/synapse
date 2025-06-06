@@ -18,6 +18,7 @@ import { straightAndNarrowAchievement } from "./straightAndNarrow.definition";
 import { thoseWhoKnowAchievement } from "./thoseWhoKnow.definition";
 import type { Achievement } from "../achievement.types";
 import { seasonalExplorerAchievement } from "./seasonalExplorer.achievement";
+import { uRobotAchievement } from "./uRobot.achievement";
 import { wordCollectorAchievement } from "./wordCollector.achievement";
 
 export const allAchievements: Achievement[] = [
@@ -41,7 +42,51 @@ export const allAchievements: Achievement[] = [
   sellingSeashellsAchievement,
   seasonalExplorerAchievement,
   wordCollectorAchievement,
+  uRobotAchievement,
 ];
+
+// ============================================================================
+// ACHIEVEMENT ID STABILITY CHECK
+// ============================================================================
+// This ensures achievement IDs never accidentally change, which would break
+// user progress when syncing with Supabase. DO NOT MODIFY THESE IDs!
+
+const STABLE_ACHIEVEMENT_IDS = [
+  "straightAndNarrow",
+  "juggernaut",
+  "hereBeDragons",
+  "dancingToADifferentBeat",
+  "notAllWhoWanderAreLost",
+  "sixFeetFromTheEdge",
+  "forgotMyKeys",
+  "comebackKid",
+  "dejaVu",
+  "epicyclesUponEpicycles",
+  "slow-and-steady",
+  "looseCannon",
+  "looseCannonWins",
+  "stealing-second",
+  "sorry-wrong-room",
+  "thoseWhoKnow",
+  "puttingOnTheDog",
+  "sellingSeashells",
+  "seasonal-explorer",
+  "word-collector",
+  "uRobot",
+] as const;
+
+// Validate that achievement IDs match the stable list
+if (process.env.NODE_ENV === "development") {
+  const currentIds = allAchievements.map((a) => a.id).sort();
+  const expectedIds = [...STABLE_ACHIEVEMENT_IDS].sort();
+
+  if (JSON.stringify(currentIds) !== JSON.stringify(expectedIds)) {
+    console.error("🚨 ACHIEVEMENT ID MISMATCH DETECTED!");
+    console.error("Expected IDs:", expectedIds);
+    console.error("Current IDs:", currentIds);
+    console.error("This will break user progress! Fix immediately!");
+  }
+}
 
 // Optionally, re-export all individual achievements if direct access is ever needed
 export {
@@ -65,4 +110,5 @@ export {
   sellingSeashellsAchievement,
   seasonalExplorerAchievement,
   wordCollectorAchievement,
+  uRobotAchievement,
 };

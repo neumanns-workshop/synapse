@@ -27,7 +27,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "title": "Synapse"
+      "title": "Synapse",
+      "bundler": "webpack",
+      "webpackConfigPath": "webpack.config.js"
     },
     "extra": {
       "eas": {

@@ -18,6 +18,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import AnimatedPaperButton from "./AnimatedButton";
+import CustomIcon from "./CustomIcon";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 
@@ -49,13 +50,16 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
 
   React.useEffect(() => {
     if (visible) {
-      scale.value = withTiming(1, { 
-        duration: 250, 
-        easing: Easing.out(Easing.back(1.5)) 
+      scale.value = withTiming(1, {
+        duration: 250,
+        easing: Easing.out(Easing.back(1.5)),
       });
       opacity.value = withTiming(1, { duration: 250 });
     } else {
-      scale.value = withTiming(0.9, { duration: 150, easing: Easing.in(Easing.ease) });
+      scale.value = withTiming(0.9, {
+        duration: 150,
+        easing: Easing.in(Easing.ease),
+      });
       opacity.value = withTiming(0, { duration: 150 });
     }
   }, [visible, scale, opacity]);
@@ -69,7 +73,7 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
 
   const renderListItemIcon = React.useCallback(
     (props: { color: string; style: ViewStyle }) => (
-      <List.Icon {...props} icon="book-open-variant" color={colors.onSurface} />
+      <CustomIcon source="book-open-variant" size={24} color={colors.onSurface} />
     ),
     [colors.onSurface],
   );
@@ -79,7 +83,8 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
       typeof pathIndexInPlayerPath === "number"
         ? pathIndexInPlayerPath
         : playerPath.indexOf(word);
-    if (gameStatus !== "playing" || !playerPath || playerPath.length <= 1) return false;
+    if (gameStatus !== "playing" || !playerPath || playerPath.length <= 1)
+      return false;
     if (wordIndex <= 0 || wordIndex >= playerPath.length - 1) return false;
     const choiceIndex = wordIndex - 1;
     if (choiceIndex < 0 || choiceIndex >= optimalChoices.length) return false;
@@ -109,7 +114,7 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
       return;
     }
     backtrackToWord(word, wordIndex);
-    onDismiss(); 
+    onDismiss();
   };
 
   if (!definitionsData || !word) {
@@ -130,7 +135,9 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
         onDismiss={onDismiss}
         contentContainerStyle={styles.modalContentContainer}
       >
-        <Animated.View style={[styles.animatedDialogContainer, animatedContentStyle]}>
+        <Animated.View
+          style={[styles.animatedDialogContainer, animatedContentStyle]}
+        >
           <View
             style={[
               styles.dialogBase,
@@ -140,11 +147,13 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
               },
             ]}
           >
-            <PaperDialog.Title style={[styles.dialogTitle, { color: colors.primary }]}>
+            <PaperDialog.Title
+              style={[styles.dialogTitle, { color: colors.primary }]}
+            >
               {word}
             </PaperDialog.Title>
             <PaperDialog.Content>
-              <ScrollView 
+              <ScrollView
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={true}
                 contentContainerStyle={{ paddingBottom: 16 }}
@@ -174,7 +183,9 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                     </React.Fragment>
                   ))
                 ) : (
-                  <Text style={[styles.noDefinition, { color: colors.onSurface }]}>
+                  <Text
+                    style={[styles.noDefinition, { color: colors.onSurface }]}
+                  >
                     No definition available for this word.
                   </Text>
                 )}
@@ -185,13 +196,16 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                 <AnimatedPaperButton
                   mode="text"
                   onPress={handleBacktrack}
-                  icon="step-backward"
+                  icon={() => <CustomIcon source="step-backward" size={20} color={buttonTextColor} />}
                   textColor={buttonTextColor}
                 >
                   Backtrack
                 </AnimatedPaperButton>
               )}
-              <AnimatedPaperButton onPress={onDismiss} textColor={buttonTextColor}>
+              <AnimatedPaperButton
+                onPress={onDismiss}
+                textColor={buttonTextColor}
+              >
                 Close
               </AnimatedPaperButton>
             </PaperDialog.Actions>
@@ -203,18 +217,18 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
 };
 
 const styles = StyleSheet.create({
-  modalContentContainer: { 
-    justifyContent: 'center',
-    alignItems: 'center',
+  modalContentContainer: {
+    justifyContent: "center",
+    alignItems: "center",
     padding: 16,
   },
-  animatedDialogContainer: { 
-    width: '90%',
+  animatedDialogContainer: {
+    width: "90%",
     maxWidth: 700,
-    maxHeight: '90%',
+    maxHeight: "90%",
   },
-  dialogBase: { 
-    width: "100%", 
+  dialogBase: {
+    width: "100%",
     borderWidth: 1,
     borderRadius: 8,
   },

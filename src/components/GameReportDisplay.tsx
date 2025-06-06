@@ -1,7 +1,8 @@
 import React from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 
-import { Text, Card, useTheme, Icon, Button } from "react-native-paper";
+import { Text, Card, useTheme, Button } from "react-native-paper";
+import CustomIcon from "./CustomIcon";
 
 import type { Achievement } from "../features/achievements";
 import { useGameStore } from "../stores/useGameStore";
@@ -43,7 +44,7 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
   const { customColors, colors } = useTheme() as ExtendedTheme;
   const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
   const currentPathDisplayMode = useGameStore((state) => state.pathDisplayMode);
-  
+
   // Use AI path data from the report instead of the store
   const isDailyChallenge = report.isDailyChallenge || false;
   const aiPath = report.aiPath || [];
@@ -179,24 +180,6 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
             </Text>
           </View>
 
-          <View style={styles.section}>
-            <Text
-              variant="titleMedium"
-              style={[styles.sectionTitle, { color: colors.primary }]}
-            >
-              Semantic Efficiency{" "}
-              {report.playerPath[report.playerPath.length - 1] !==
-              report.optimalPath[report.optimalPath.length - 1]
-                ? "(Projected)"
-                : ""}
-            </Text>
-            <Text variant="bodyLarge" style={{ color: colors.primary }}>
-              {report.semanticPathEfficiency !== undefined
-                ? report.semanticPathEfficiency.toFixed(1) + "%"
-                : "N/A"}
-            </Text>
-          </View>
-
           {(() => {
             const globalMoves = report.optimalChoices.filter(
               (choice) => choice.isGlobalOptimal,
@@ -299,7 +282,7 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                   >
                     <View style={styles.achievementHeader}>
                       <View style={styles.achievementIconContainer}>
-                        <Icon
+                        <CustomIcon
                           source="trophy"
                           size={20}
                           color={customColors.achievementIcon}
@@ -323,7 +306,7 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
           <View style={[styles.section, styles.buttonSection]}>
             <Button
               mode="outlined"
-              icon="share-variant"
+              icon={() => <CustomIcon source="share-variant" size={20} color={colors.primary} />}
               onPress={() => {
                 if (onChallengePress) {
                   onChallengePress();

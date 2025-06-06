@@ -1,24 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Text, Card, Icon, useTheme, ActivityIndicator } from 'react-native-paper';
-import type { ExtendedTheme } from '../theme/SynapseTheme';
-import { dailyChallengesService } from '../services/DailyChallengesService';
-import type { DailyChallenge, DailyChallengeProgress } from '../types/dailyChallenges';
-import { allWordCollections } from '../features/wordCollections';
-import type { WordCollection } from '../features/wordCollections/collection.types';
-import { useGameStore } from '../stores/useGameStore';
+import React, { useState, useEffect } from "react";
+import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+
+import {
+  Text,
+  Card,
+  useTheme,
+  ActivityIndicator,
+} from "react-native-paper";
+import CustomIcon from "./CustomIcon";
+
+import { allWordCollections } from "../features/wordCollections";
+import type { WordCollection } from "../features/wordCollections/collection.types";
+import { dailyChallengesService } from "../services/DailyChallengesService";
+import { useGameStore } from "../stores/useGameStore";
+import type { ExtendedTheme } from "../theme/SynapseTheme";
+import type {
+  DailyChallenge,
+  DailyChallengeProgress,
+} from "../types/dailyChallenges";
 
 interface DailyChallengesCalendarProps {
   onChallengeSelect?: (challenge: DailyChallenge) => void;
 }
 
-const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({ 
-  onChallengeSelect 
+const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
+  onChallengeSelect,
 }) => {
   const { colors, customColors } = useTheme() as ExtendedTheme;
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [challenges, setChallenges] = useState<DailyChallenge[]>([]);
-  const [progress, setProgress] = useState<Record<string, DailyChallengeProgress>>({});
+  const [progress, setProgress] = useState<
+    Record<string, DailyChallengeProgress>
+  >({});
   const [loading, setLoading] = useState(true);
 
   // Access upgrade prompt function from game store
@@ -32,27 +45,39 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
     setLoading(true);
     try {
       // Get first and last day of the month
-      const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
-      const lastDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-      
-      const startDate = firstDay.toISOString().split('T')[0];
-      const endDate = lastDay.toISOString().split('T')[0];
-      
-      const monthChallenges = dailyChallengesService.getChallengesInRange(startDate, endDate);
-      const challengeProgress = await dailyChallengesService.getDailyChallengeProgress();
-      
+      const firstDay = new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth(),
+        1,
+      );
+      const lastDay = new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth() + 1,
+        0,
+      );
+
+      const startDate = firstDay.toISOString().split("T")[0];
+      const endDate = lastDay.toISOString().split("T")[0];
+
+      const monthChallenges = dailyChallengesService.getChallengesInRange(
+        startDate,
+        endDate,
+      );
+      const challengeProgress =
+        await dailyChallengesService.getDailyChallengeProgress();
+
       setChallenges(monthChallenges);
       setProgress(challengeProgress);
     } catch (error) {
-      console.error('Error loading challenges for month:', error);
+      console.error("Error loading challenges for month:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const navigateMonth = (direction: 'prev' | 'next') => {
+  const navigateMonth = (direction: "prev" | "next") => {
     const newMonth = new Date(currentMonth);
-    if (direction === 'prev') {
+    if (direction === "prev") {
       newMonth.setMonth(currentMonth.getMonth() - 1);
     } else {
       newMonth.setMonth(currentMonth.getMonth() + 1);
@@ -61,7 +86,7 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
   };
 
   const formatMonthYear = (date: Date) => {
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   };
 
   const getDaysInMonth = (): (number | null)[] => {
@@ -73,89 +98,114 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
     const startingDayOfWeek = firstDay.getDay();
 
     const days: (number | null)[] = [];
-    
+
     // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     // Add all days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-    
+
     return days;
   };
 
   const getChallengeForDay = (day: number): DailyChallenge | null => {
-    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-    const dateString = date.toISOString().split('T')[0];
-    
-    // DEBUG: Add dummy challenge for June 2nd to test upgrade prompt
-    if (currentMonth.getMonth() === 5 && day === 2) { // June is month 5 (0-indexed)
-      return {
-        id: "2024-06-02",
-        date: "2024-06-02", 
-        startWord: "test",
-        targetWord: "upgrade",
-        optimalPathLength: 4
-      };
-    }
-    
-    return challenges.find(challenge => challenge.date === dateString) || null;
+    // Create date string directly without timezone conversion to avoid date shifts
+    const year = currentMonth.getFullYear();
+    const month = String(currentMonth.getMonth() + 1).padStart(2, "0");
+    const dayStr = String(day).padStart(2, "0");
+    const dateString = `${year}-${month}-${dayStr}`;
+
+    return (
+      challenges.find((challenge) => challenge.date === dateString) || null
+    );
   };
 
   const getChallengeStatus = (challenge: DailyChallenge | null) => {
-    if (!challenge) return 'unavailable';
-    
-    const today = new Date().toISOString().split('T')[0];
+    if (!challenge) return "unavailable";
+
+    // Use EST timezone for consistent daily reset timing
+    const now = new Date();
+    const estDate = new Date(
+      now.toLocaleString("en-US", { timeZone: "America/New_York" }),
+    );
+    const year = estDate.getFullYear();
+    const month = String(estDate.getMonth() + 1).padStart(2, "0");
+    const day = String(estDate.getDate()).padStart(2, "0");
+    const today = `${year}-${month}-${day}`;
+
     const isToday = challenge.date === today;
-    const isAvailable = dailyChallengesService.isChallengeAvailable(challenge.date);
-    const isCompleted = progress[challenge.date]?.completed;
-    
-    // If it's completed, always show as completed
-    if (isCompleted) return 'completed';
-    
+    const isAvailable = dailyChallengesService.isChallengeAvailable(
+      challenge.date,
+    );
+    const isCompleted = progress[challenge.id]?.completed;
+
+    // If it's completed, determine status based on move accuracy
+    if (isCompleted) {
+      const playerMoves = progress[challenge.id]?.playerMoves || 0;
+      const optimalMoves =
+        challenge.optimalPathLength || challenge.aiSolution?.stepsTaken || 1;
+      const aiMoves =
+        challenge.aiSolution?.stepsTaken ||
+        (challenge.aiSolution?.path
+          ? challenge.aiSolution.path.length - 1
+          : null) ||
+        optimalMoves;
+
+      // Calculate move accuracy: how close player came to optimal
+      // Handle the case where playerMoves is 0 (gave up immediately)
+      const moveAccuracy =
+        playerMoves > 0 ? Math.min(100, (optimalMoves / playerMoves) * 100) : 0;
+
+      // Status based on move accuracy and AI comparison
+      if (moveAccuracy >= 100) return "optimal"; // Gold star for optimal
+      if (moveAccuracy >= 60) return "good"; // Purple star for good performance
+      if (playerMoves <= aiMoves && playerMoves > 0) return "beat-ai"; // Silver star for beating AI
+      return "completed"; // Filled circle for basic completion
+    }
+
     // If it's today's challenge, show as today (free)
-    if (isToday) return 'today';
-    
+    if (isToday) return "today";
+
     // If it's in the future, show as future
-    if (!isAvailable) return 'future';
-    
+    if (!isAvailable) return "future";
+
     // For past challenges (incomplete), they're locked - need upgrade
     const isPastChallenge = challenge.date < today;
     if (isPastChallenge) {
-      return 'locked';
+      return "locked";
     }
-    
+
     // This shouldn't happen, but fallback
-    return 'unavailable';
+    return "unavailable";
   };
 
   // Helper function to check if a date is an equinox or solstice
   const getCelestialEvent = (day: number): string | null => {
-    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-    const month = date.getMonth() + 1; // 1-12
-    const dayOfMonth = date.getDate();
-    
-    // Equinoxes and Solstices (approximate dates)
-    if (month === 3 && dayOfMonth === 20) return "Spring Equinox";
-    if (month === 6 && (dayOfMonth === 20 || dayOfMonth === 21)) return "Summer Solstice";
-    if (month === 9 && dayOfMonth === 22) return "Autumn Equinox";
-    if (month === 12 && dayOfMonth === 21) return "Winter Solstice";
-    
+    // Removed celestial event detection - no longer needed
     return null;
   };
 
   // Helper function to get active collections for a given date
   const getActiveCollectionsForDate = (date: Date): WordCollection[] => {
-    return allWordCollections.filter(collection => {
+    return allWordCollections.filter((collection) => {
       if (!collection.startDate || !collection.endDate) return false;
-      
+
       // Create dates for the same year as the given date to handle year transitions
-      const startDate = new Date(date.getFullYear(), collection.startDate.getMonth(), collection.startDate.getDate());
-      const endDate = new Date(date.getFullYear(), collection.endDate.getMonth(), collection.endDate.getDate());
-      
+      const startDate = new Date(
+        date.getFullYear(),
+        collection.startDate.getMonth(),
+        collection.startDate.getDate(),
+      );
+      const endDate = new Date(
+        date.getFullYear(),
+        collection.endDate.getMonth(),
+        collection.endDate.getDate(),
+      );
+
       // Handle events that cross year boundaries (like New Year events)
       if (startDate > endDate) {
         // Event crosses year boundary
@@ -169,46 +219,50 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
 
   // Helper function to get event indicators for a day
   const getEventIndicators = (day: number) => {
-    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+    const date = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      day,
+    );
     const activeCollections = getActiveCollectionsForDate(date);
-    
-    return activeCollections.map(collection => ({
+
+    return activeCollections.map((collection) => ({
       id: collection.id,
       title: collection.title,
       icon: collection.icon,
-      color: getEventColor(collection.id)
+      color: getEventColor(collection.id),
     }));
   };
 
   // Helper function to get event colors
   const getEventColor = (collectionId: string): string => {
     switch (collectionId) {
-      case 'renewal':
-        return '#4FC3F7'; // Light blue for Renewal & Reflection
-      case 'affection':
-        return '#FF69B4'; // Pink for Affection & Kinship (includes Valentine's)
-      case 'greening':
-        return '#66BB6A'; // Green for Greening Earth
-      case 'bloom':
-        return '#FFB74D'; // Orange/gold for Bloom & Buzz
-      case 'high-sun':
-        return '#FF5722'; // Red-orange for High Sun & Wildfire
-      case 'ripening':
-        return '#FFC107'; // Amber for Ripening & Radiance
-      case 'amber-harvest':
-        return '#FF8F00'; // Deep amber for Amber Harvest
-      case 'cider-ember':
-        return '#FF6B35'; // Orange for Cider & Ember (includes Halloween)
-      case 'fog-frost':
-        return '#9E9E9E'; // Gray for Fog & First Frost
-      case 'long-night':
-        return '#3F51B5'; // Deep blue for Long Night & Spark
-      case 'gratitude-gathering':
-        return '#8BC34A'; // Light green for Gratitude & Gathering
-      case 'equinox-solstice':
-        return '#673AB7'; // Purple for Equinox & Solstice
-      case 'seasons':
-        return '#4CAF50'; // Green for general seasons
+      case "renewal":
+        return "#4FC3F7"; // Light blue for Renewal & Reflection
+      case "affection":
+        return "#FF69B4"; // Pink for Affection & Kinship (includes Valentine's)
+      case "greening":
+        return "#66BB6A"; // Green for Greening Earth
+      case "bloom":
+        return "#FFB74D"; // Orange/gold for Bloom & Buzz
+      case "high-sun":
+        return "#FF5722"; // Red-orange for High Sun & Wildfire
+      case "ripening":
+        return "#FFC107"; // Amber for Ripening & Radiance
+      case "amber-harvest":
+        return "#FF8F00"; // Deep amber for Amber Harvest
+      case "cider-ember":
+        return "#FF6B35"; // Orange for Cider & Ember (includes Halloween)
+      case "fog-frost":
+        return "#9E9E9E"; // Gray for Fog & First Frost
+      case "long-night":
+        return "#3F51B5"; // Deep blue for Long Night & Spark
+      case "gratitude-gathering":
+        return "#8BC34A"; // Light green for Gratitude & Gathering
+      case "equinox-solstice":
+        return "#673AB7"; // Purple for Equinox & Solstice
+      case "seasons":
+        return "#4CAF50"; // Green for general seasons
       default:
         return colors.secondary; // Default color for other events
     }
@@ -216,52 +270,78 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed':
-        return customColors.startNode;
-      case 'today':
+      case "optimal":
+        return "#FFD700"; // Gold for optimal (like game reports)
+      case "good":
+        return "#9C27B0"; // Purple for good performance (like suggested moves)
+      case "beat-ai":
+        return "#607D8B"; // Silver/blue for beating AI
+      case "completed":
+        return customColors.startNode; // Green for basic completion
+      case "today":
         return colors.primary;
-      case 'available':
+      case "available":
         return colors.onSurfaceVariant;
-      case 'locked':
-        return colors.onSurfaceDisabled;
-      case 'future':
-        return colors.onSurfaceDisabled;
+      case "locked":
+        return "#FF8F00"; // Amber for missed challenges (recoverable with upgrade)
+      case "future":
+        return "#607D8B"; // Blue-gray for future challenges (locked until time)
       default:
-        return 'transparent';
+        return "transparent";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed':
-        return 'check-circle';
-      case 'today':
-        return 'star';
-      case 'available':
-        return 'circle-outline';
-      case 'locked':
-        return 'lock';
-      case 'future':
-        return 'lock';
+      case "optimal":
+        return "star";
+      case "good":
+        return "star";
+      case "beat-ai":
+        return "star";
+      case "completed":
+        return "circle";
+      case "today":
+        return "circle-outline";
+      case "available":
+        return "circle-outline";
+      case "locked":
+        return "clock-outline";
+      case "future":
+        return "lock";
       default:
         return null;
     }
   };
 
-  const handleDayPress = (day: number) => {
+  const getGradeLetter = (status: string): string | null => {
+    return null; // No longer using grade letters
+  };
+
+  const handleDayPress = async (day: number) => {
     const challenge = getChallengeForDay(day);
     if (challenge && onChallengeSelect) {
       const status = getChallengeStatus(challenge);
-      if (status === 'locked') {
-        // Show upgrade prompt for locked past challenges
-        showUpgradePrompt("Access past daily challenges with Premium! Upgrade to unlock your challenge history and play any missed challenges.");
-      } else if (status !== 'future' && status !== 'unavailable') {
+      if (status === "locked") {
+        // Check if user is premium first
+        const isPremium = await dailyChallengesService.isPremiumUser();
+        if (isPremium) {
+          // Premium users can access past challenges
+          onChallengeSelect(challenge);
+        } else {
+          // Show upgrade prompt for non-premium users
+          showUpgradePrompt(
+            "", // Use context content instead of hardcoded message
+            "pastChallenges",
+          );
+        }
+      } else if (status !== "future" && status !== "unavailable") {
         onChallengeSelect(challenge);
       }
     }
   };
 
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   if (loading) {
     return (
@@ -279,23 +359,26 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
       <Card.Content>
         {/* Header with month navigation */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigateMonth('prev')}>
-            <Icon source="chevron-left" size={24} color={colors.primary} />
+          <TouchableOpacity onPress={() => navigateMonth("prev")}>
+            <CustomIcon source="chevron-left" size={24} color={colors.primary} />
           </TouchableOpacity>
-          
+
           <Text style={[styles.monthTitle, { color: colors.primary }]}>
             {formatMonthYear(currentMonth)}
           </Text>
-          
-          <TouchableOpacity onPress={() => navigateMonth('next')}>
-            <Icon source="chevron-right" size={24} color={colors.primary} />
+
+          <TouchableOpacity onPress={() => navigateMonth("next")}>
+            <CustomIcon source="chevron-right" size={24} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
         {/* Week day headers */}
         <View style={styles.weekDaysRow}>
-          {weekDays.map(day => (
-            <Text key={day} style={[styles.weekDayText, { color: colors.onSurfaceVariant }]}>
+          {weekDays.map((day) => (
+            <Text
+              key={day}
+              style={[styles.weekDayText, { color: colors.onSurfaceVariant }]}
+            >
               {day}
             </Text>
           ))}
@@ -313,43 +396,24 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
             const statusColor = getStatusColor(status);
             const statusIcon = getStatusIcon(status);
             const eventIndicators = getEventIndicators(day);
-            const celestialEvent = getCelestialEvent(day);
 
             return (
               <TouchableOpacity
                 key={day}
                 style={[
                   styles.dayCell,
-                  status !== 'unavailable' && styles.availableDayCell,
-                  { borderColor: colors.outline }
+                  status !== "unavailable" && styles.availableDayCell,
+                  { borderColor: colors.outline },
                 ]}
                 onPress={() => handleDayPress(day)}
-                disabled={status === 'future' || status === 'unavailable'}
+                disabled={status === "future" || status === "unavailable"}
               >
-                <Text style={[
-                  styles.dayNumber, 
-                  { color: statusColor },
-                  !!celestialEvent && styles.celestialDayNumber
-                ]}>
+                <Text style={[styles.dayNumber, { color: statusColor }]}>
                   {day}
                 </Text>
                 {statusIcon && (
                   <View style={styles.statusIcon}>
-                    <Icon 
-                      source={statusIcon} 
-                      size={12} 
-                      color={statusColor}
-                    />
-                  </View>
-                )}
-                {/* Celestial event indicator */}
-                {celestialEvent && (
-                  <View style={styles.celestialIndicator}>
-                    <Icon 
-                      source="star-four-points" 
-                      size={8} 
-                      color="#FFD700"
-                    />
+                    <CustomIcon source={statusIcon} size={12} color={statusColor} />
                   </View>
                 )}
                 {/* Event indicators - bottom border bars */}
@@ -360,10 +424,10 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
                         key={event.id}
                         style={[
                           styles.eventBar,
-                          { 
+                          {
                             backgroundColor: event.color,
                             height: eventIndicators.length > 1 ? 2 : 3, // Thinner bars when multiple
-                          }
+                          },
                         ]}
                       />
                     ))}
@@ -377,117 +441,122 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
         {/* Legend */}
         <View style={styles.legend}>
           <View style={styles.legendItem}>
-            <Icon source="check-circle" size={16} color={customColors.startNode} />
-            <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
+            <CustomIcon source="star" size={16} color="#FFD700" />
+            <Text
+              style={[styles.legendText, { color: colors.onSurfaceVariant }]}
+            >
+              Optimal
+            </Text>
+          </View>
+          <View style={styles.legendItem}>
+            <CustomIcon source="star" size={16} color="#9C27B0" />
+            <Text
+              style={[styles.legendText, { color: colors.onSurfaceVariant }]}
+            >
+              Good
+            </Text>
+          </View>
+          <View style={styles.legendItem}>
+            <CustomIcon source="star" size={16} color="#607D8B" />
+            <Text
+              style={[styles.legendText, { color: colors.onSurfaceVariant }]}
+            >
+              Beat AI
+            </Text>
+          </View>
+          <View style={styles.legendItem}>
+            <CustomIcon source="circle" size={16} color={customColors.startNode} />
+            <Text
+              style={[styles.legendText, { color: colors.onSurfaceVariant }]}
+            >
               Completed
             </Text>
           </View>
           <View style={styles.legendItem}>
-            <Icon source="star" size={16} color={colors.primary} />
-            <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-              Today (Free)
+            <CustomIcon source="circle-outline" size={16} color={colors.primary} />
+            <Text
+              style={[styles.legendText, { color: colors.onSurfaceVariant }]}
+            >
+              Today
             </Text>
           </View>
           <View style={styles.legendItem}>
-            <Icon source="lock" size={16} color={colors.onSurfaceDisabled} />
-            <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-              Missed (Upgrade)
+            <CustomIcon source="clock-outline" size={16} color="#FF8F00" />
+            <Text
+              style={[styles.legendText, { color: colors.onSurfaceVariant }]}
+            >
+              Missed
             </Text>
           </View>
           <View style={styles.legendItem}>
-            <Icon source="lock" size={16} color={colors.onSurfaceDisabled} />
-            <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
+            <CustomIcon source="lock" size={16} color="#607D8B" />
+            <Text
+              style={[styles.legendText, { color: colors.onSurfaceVariant }]}
+            >
               Future
-            </Text>
-          </View>
-          <View style={styles.legendItem}>
-            <Icon source="star-four-points" size={16} color="#FFD700" />
-            <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-              Equinox/Solstice
             </Text>
           </View>
         </View>
 
-        {/* Event Legend */}
-        <View style={styles.eventLegend}>
-          <Text style={[styles.eventLegendTitle, { color: colors.onSurfaceVariant }]}>
-            Seasonal Collections:
+        {/* Grading note */}
+        <View style={styles.gradingNote}>
+          <Text
+            style={[styles.gradingNoteText, { color: colors.onSurfaceVariant }]}
+          >
+            Performance based on move accuracy
           </Text>
-          <View style={styles.eventLegendGrid}>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#4FC3F7' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                Renewal (Jan)
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#FF69B4' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                Affection (Feb)
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#66BB6A' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                Greening (Mar-Apr)
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#FFB74D' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                Bloom (Apr-May)
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#FF5722' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                High Sun (Jun-Jul)
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#FFC107' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                Ripening (Jul-Aug)
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#FF8F00' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                Amber Harvest (Sep)
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#FF6B35' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                Cider & Ember (Oct)
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#9E9E9E' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                Fog & Frost (Nov)
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#3F51B5' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                Long Night (Dec)
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#8BC34A' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                Gratitude (Nov-Dec)
-              </Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.eventDot, { backgroundColor: '#673AB7' }]} />
-              <Text style={[styles.legendText, { color: colors.onSurfaceVariant }]}>
-                Equinox (Year-round)
-              </Text>
-            </View>
-          </View>
         </View>
+
+        {/* Show active collections for current month */}
+        {(() => {
+          const currentDate = new Date();
+          const activeCollections = getActiveCollectionsForDate(currentDate);
+
+          if (activeCollections.length > 0) {
+            return (
+              <View style={styles.activeThemesContainer}>
+                <Text
+                  style={[
+                    styles.activeThemesTitle,
+                    { color: colors.onSurfaceVariant },
+                  ]}
+                >
+                  Active Collections
+                </Text>
+                <View style={styles.activeThemesList}>
+                  {activeCollections.map((collection, index) => (
+                    <View
+                      key={collection.id}
+                      style={[
+                        styles.activeThemeChip,
+                        {
+                          backgroundColor: colors.surfaceVariant,
+                          borderColor: getEventColor(collection.id),
+                        },
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.activeThemeIndicator,
+                          { backgroundColor: getEventColor(collection.id) },
+                        ]}
+                      />
+                      <Text
+                        style={[
+                          styles.activeThemeText,
+                          { color: colors.onSurfaceVariant },
+                        ]}
+                      >
+                        {collection.title}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            );
+          }
+          return null;
+        })()}
       </Card.Content>
     </Card>
   );
@@ -496,12 +565,13 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
 const styles = StyleSheet.create({
   calendarCard: {
     margin: 16,
+    marginBottom: 8,
     elevation: 2,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   loadingText: {
@@ -509,73 +579,78 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   monthTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   weekDaysRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginBottom: 8,
   },
   weekDayText: {
     flex: 1,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   calendarGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   dayCell: {
-    width: '14.28%', // 100% / 7 days
+    width: "14.28%", // 100% / 7 days
     aspectRatio: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 0.5,
-    borderColor: 'transparent',
+    borderColor: "transparent",
   },
   availableDayCell: {
     borderRadius: 4,
   },
   dayNumber: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   statusIcon: {
-    position: 'absolute',
+    position: "absolute",
     top: 2,
     right: 2,
   },
   legend: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
+    borderTopColor: "rgba(0,0,0,0.1)",
   },
   legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
+    marginHorizontal: 4,
+    marginVertical: 2,
   },
   legendText: {
     fontSize: 12,
   },
   eventBorderBars: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     height: 2,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
   eventBar: {
     flex: 1,
@@ -589,31 +664,71 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(0,0,0,0.1)',
+    borderTopColor: "rgba(0,0,0,0.1)",
   },
   eventLegendTitle: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 8,
   },
   eventLegendGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
     gap: 8,
   },
-  celestialDayCell: {
+  activeThemesContainer: {
+    marginTop: 16,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.1)",
+    alignItems: "center",
+  },
+  activeThemesTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  activeThemesList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 8,
+  },
+  activeThemeChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderWidth: 2,
-    borderColor: '#FFD700',
+    borderRadius: 20,
+    margin: 4,
+    elevation: 1,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
-  celestialDayNumber: {
-    fontWeight: 'bold',
+  activeThemeIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
   },
-  celestialIndicator: {
-    position: 'absolute',
-    top: 2,
-    left: 2,
+  activeThemeText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  gradingNote: {
+    marginTop: 16,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.1)",
+    alignItems: "center",
+  },
+  gradingNoteText: {
+    fontSize: 12,
   },
 });
 
-export default DailyChallengesCalendar; 
+export default DailyChallengesCalendar;

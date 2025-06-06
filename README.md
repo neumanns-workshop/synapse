@@ -14,7 +14,7 @@ A cross-platform word navigation game built with React Native and Expo, where pl
 - **Optimal Path**: View the optimal path after completing a game
 
 ### Advanced Features
-- **Unlimited Play Mode**: Unlock random pair generation for endless gameplay (premium feature).
+- **Unlimited Play Mode**: Unlock random pair generation for endless gameplay (Galaxy Brain feature).
 - **Performance Optimized**: Frame rate limiting and efficient rendering
 - **Cross-Platform**: Works seamlessly on iOS, Android, and Web
 - **Deep Linking**: Share and play specific word challenges

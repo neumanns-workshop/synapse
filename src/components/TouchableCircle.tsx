@@ -14,7 +14,8 @@ import { Circle, CircleProps } from "react-native-svg";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-interface TouchableCircleProps extends Omit<CircleProps, "r" | "onPress" | "fill"> {
+interface TouchableCircleProps
+  extends Omit<CircleProps, "r" | "onPress" | "fill"> {
   cx: number;
   cy: number;
   initialRadius: number; // This is the key prop that was missing

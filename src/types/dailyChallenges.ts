@@ -34,4 +34,4 @@ export interface DailyChallengeState {
   remainingFreeGames: number;
   isPremium: boolean;
   progress: Record<string, DailyChallengeProgress>;
-} 
+}

@@ -6,7 +6,8 @@ module.exports = function(api) {
       ['@babel/plugin-transform-runtime', {
         helpers: true,
         regenerator: true,
-        absoluteRuntime: false
+        absoluteRuntime: false,
+        version: '^7.0.0'
       }],
       ['module-resolver', {
         root: ['./src'],
@@ -34,8 +35,16 @@ module.exports = function(api) {
           '@types': './src/types',
           '@data': './src/data'
         },
+        resolvePath: (sourcePath, currentFile, opts) => {
+          // Add logging for debugging module resolution
+          console.log(`Resolving: ${sourcePath} from ${currentFile}`);
+          return require('babel-plugin-module-resolver').resolvePath(sourcePath, currentFile, opts);
+        }
       }],
       'react-native-reanimated/plugin',
+      '@babel/plugin-proposal-export-namespace-from',
+      '@babel/plugin-proposal-nullish-coalescing-operator',
+      '@babel/plugin-proposal-optional-chaining'
     ],
   };
 }; 

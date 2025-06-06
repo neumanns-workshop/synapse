@@ -13,11 +13,15 @@ export interface Achievement {
   name: string;
   description: string;
   icon?: string;
-  
+
+  // Versioning for safe updates
+  version?: number; // Default to 1 if not specified
+  deprecated?: boolean; // Mark achievements as deprecated instead of removing
+
   // For progressive achievements
   isProgressive?: boolean;
   tiers?: AchievementTier[];
-  
+
   // Takes the game report and current game status, returns true if achieved
   check: (
     gameReport: GameReport,

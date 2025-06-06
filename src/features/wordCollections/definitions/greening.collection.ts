@@ -68,7 +68,7 @@ const greeningWordList = [
   "ground",
   "steady",
   "stable",
-  "firm"
+  "firm",
 ];
 
 export const greeningCollection: WordCollection = createCollection(
@@ -81,4 +81,4 @@ export const greeningCollection: WordCollection = createCollection(
     startDate: new Date(new Date().getFullYear(), 2, 1), // March 1st
     endDate: new Date(new Date().getFullYear(), 3, 30), // April 30th
   },
-); 
+);

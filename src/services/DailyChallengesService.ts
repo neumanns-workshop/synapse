@@ -1,19 +1,13 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { 
-  DailyChallenge, 
-  DailyChallengesData, 
-  DailyChallengeProgress, 
-  DailyChallengeState 
-} from '../types/dailyChallenges';
-
-// Storage keys
-const DAILY_CHALLENGE_PROGRESS_KEY = 'dailyChallengeProgress';
-const DAILY_CHALLENGE_STATE_KEY = 'dailyChallengeState';
-const FREE_GAMES_COUNT_KEY = 'freeGamesCount';
-const LAST_RESET_DATE_KEY = 'lastResetDate';
+import { unifiedDataStore } from "./UnifiedDataStore";
+import dailyChallengesData from "../data/daily_challenges_v2.json";
+import type {
+  DailyChallenge,
+  DailyChallengesData,
+  DailyChallengeProgress,
+  DailyChallengeState,
+} from "../types/dailyChallenges";
 
 // Import the daily challenges data
-import dailyChallengesData from '../data/daily_challenges_v2.json';
 
 export class DailyChallengesService {
   private static instance: DailyChallengesService;
@@ -31,17 +25,31 @@ export class DailyChallengesService {
   }
 
   /**
-   * Get today's date in YYYY-MM-DD format
+   * Get today's date in YYYY-MM-DD format using EST timezone
+   * Daily challenges reset at 12:00 AM EST
    */
   private getTodayString(): string {
-    return new Date().toISOString().split('T')[0];
+    const now = new Date();
+
+    // Convert to EST (UTC-5) or EDT (UTC-4) depending on DST
+    // Using toLocaleDateString with EST timezone
+    const estDate = new Date(
+      now.toLocaleString("en-US", { timeZone: "America/New_York" }),
+    );
+
+    // Format as YYYY-MM-DD
+    const year = estDate.getFullYear();
+    const month = String(estDate.getMonth() + 1).padStart(2, "0");
+    const day = String(estDate.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
   }
 
   /**
    * Get the daily challenge for a specific date
    */
   public getChallengeForDate(date: string): DailyChallenge | null {
-    return this.challenges.find(challenge => challenge.date === date) || null;
+    return this.challenges.find((challenge) => challenge.date === date) || null;
   }
 
   /**
@@ -55,84 +63,100 @@ export class DailyChallengesService {
    * Check if user has completed today's challenge
    */
   public async hasCompletedTodaysChallenge(): Promise<boolean> {
-    const today = this.getTodayString();
-    const progress = await this.getDailyChallengeProgress();
-    return progress[today]?.completed || false;
+    const todaysChallenge = this.getTodaysChallenge();
+    console.log(
+      "🔍 DailyChallengesService: hasCompletedTodaysChallenge called:",
+      {
+        todaysChallengeExists: !!todaysChallenge,
+        challengeId: todaysChallenge?.id,
+      },
+    );
+
+    if (!todaysChallenge) {
+      console.log(
+        "🔍 DailyChallengesService: No challenge for today, returning false",
+      );
+      return false; // No challenge available for today
+    }
+
+    const progress = await unifiedDataStore.getDailyChallengeProgress();
+    console.log("🔍 DailyChallengesService: Progress data:", {
+      allProgressKeys: Object.keys(progress),
+      targetChallengeId: todaysChallenge.id,
+      targetProgress: progress[todaysChallenge.id],
+      isCompleted: progress[todaysChallenge.id]?.completed,
+    });
+
+    // Use the challenge ID as the key, not the date
+    const isCompleted = progress[todaysChallenge.id]?.completed || false;
+    console.log("🔍 DailyChallengesService: Final result:", isCompleted);
+    return isCompleted;
   }
 
   /**
    * Get all daily challenge progress
    */
-  public async getDailyChallengeProgress(): Promise<Record<string, DailyChallengeProgress>> {
-    try {
-      const progressJson = await AsyncStorage.getItem(DAILY_CHALLENGE_PROGRESS_KEY);
-      return progressJson ? JSON.parse(progressJson) : {};
-    } catch (error) {
-      console.error('Error loading daily challenge progress:', error);
-      return {};
-    }
+  public async getDailyChallengeProgress(): Promise<
+    Record<string, DailyChallengeProgress>
+  > {
+    return await unifiedDataStore.getDailyChallengeProgress();
   }
 
   /**
    * Save daily challenge progress
    */
   public async saveDailyChallengeProgress(
-    challengeId: string, 
-    progress: Omit<DailyChallengeProgress, 'challengeId'>
+    challengeId: string,
+    progress: Omit<DailyChallengeProgress, "challengeId">,
   ): Promise<void> {
-    try {
-      const allProgress = await this.getDailyChallengeProgress();
-      allProgress[challengeId] = { challengeId, ...progress };
-      await AsyncStorage.setItem(DAILY_CHALLENGE_PROGRESS_KEY, JSON.stringify(allProgress));
-    } catch (error) {
-      console.error('Error saving daily challenge progress:', error);
-    }
+    const fullProgress: DailyChallengeProgress = { challengeId, ...progress };
+    await unifiedDataStore.updateDailyChallengeProgress(
+      challengeId,
+      fullProgress,
+    );
   }
 
   /**
    * Get remaining free games for today
    */
   public async getRemainingFreeGames(): Promise<number> {
-    try {
-      const today = this.getTodayString();
-      const lastResetDate = await AsyncStorage.getItem(LAST_RESET_DATE_KEY);
-      
-      // Reset count if it's a new day
-      if (lastResetDate !== today) {
-        await AsyncStorage.setItem(FREE_GAMES_COUNT_KEY, '2'); // 2 free games per day
-        await AsyncStorage.setItem(LAST_RESET_DATE_KEY, today);
-        return 2;
-      }
-
-      const freeGamesJson = await AsyncStorage.getItem(FREE_GAMES_COUNT_KEY);
-      return freeGamesJson ? parseInt(freeGamesJson, 10) : 2;
-    } catch (error) {
-      console.error('Error getting remaining free games:', error);
-      return 2;
-    }
+    return await unifiedDataStore.getRemainingFreeGames();
   }
 
   /**
    * Consume a free game
    */
   public async consumeFreeGame(): Promise<number> {
-    try {
-      const remaining = await this.getRemainingFreeGames();
-      const newCount = Math.max(0, remaining - 1);
-      await AsyncStorage.setItem(FREE_GAMES_COUNT_KEY, newCount.toString());
-      return newCount;
-    } catch (error) {
-      console.error('Error consuming free game:', error);
-      return 0;
-    }
+    return await unifiedDataStore.consumeFreeGame();
   }
 
   /**
-   * Check if user is premium (placeholder for future implementation)
+   * Check if user is premium
+   * Now requires BOTH local premium status AND being authenticated
    */
   public async isPremiumUser(): Promise<boolean> {
-    // TODO: Implement premium user check
-    return false;
+    // First check if user has local premium status
+    const hasLocalPremium = await unifiedDataStore.isPremiumUser();
+
+    // If no local premium, definitely not premium
+    if (!hasLocalPremium) {
+      return false;
+    }
+
+    // If has local premium, also check if user is authenticated
+    // This prevents signed-out users from retaining premium benefits
+    try {
+      const { SupabaseService } = await import("./SupabaseService");
+      const supabaseService = SupabaseService.getInstance();
+      const isAuthenticated = supabaseService.isAuthenticated();
+
+      // Must be both locally premium AND authenticated
+      return hasLocalPremium && isAuthenticated;
+    } catch (error) {
+      console.error("Error checking authentication for premium status:", error);
+      // If we can't check auth, default to local premium status only
+      return hasLocalPremium;
+    }
   }
 
   /**
@@ -150,16 +174,19 @@ export class DailyChallengesService {
       hasPlayedToday,
       remainingFreeGames,
       isPremium,
-      progress
+      progress,
     };
   }
 
   /**
    * Get challenges for a date range (for calendar view)
    */
-  public getChallengesInRange(startDate: string, endDate: string): DailyChallenge[] {
-    return this.challenges.filter(challenge => 
-      challenge.date >= startDate && challenge.date <= endDate
+  public getChallengesInRange(
+    startDate: string,
+    endDate: string,
+  ): DailyChallenge[] {
+    return this.challenges.filter(
+      (challenge) => challenge.date >= startDate && challenge.date <= endDate,
     );
   }
 
@@ -182,19 +209,17 @@ export class DailyChallengesService {
    * Reset all daily challenge data (for testing purposes)
    */
   public async resetDailyChallengeData(): Promise<void> {
-    try {
-      await AsyncStorage.multiRemove([
-        DAILY_CHALLENGE_PROGRESS_KEY,
-        DAILY_CHALLENGE_STATE_KEY,
-        FREE_GAMES_COUNT_KEY,
-        LAST_RESET_DATE_KEY,
-      ]);
-      console.log('Daily challenge data cleared');
-    } catch (error) {
-      console.error('Error clearing daily challenge data:', error);
-    }
+    // Reset the daily challenges section in unified data
+    const data = await unifiedDataStore.getData();
+    data.dailyChallenges = {
+      progress: {},
+      freeGamesRemaining: 2,
+      lastResetDate: this.getTodayString(),
+    };
+    await unifiedDataStore.saveData();
+    console.log("Daily challenge data cleared");
   }
 }
 
 // Export singleton instance
-export const dailyChallengesService = DailyChallengesService.getInstance(); 
+export const dailyChallengesService = DailyChallengesService.getInstance();

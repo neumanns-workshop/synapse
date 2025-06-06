@@ -8,7 +8,13 @@ import Svg, { Line, Text } from "react-native-svg";
 import TouchableCircle from "./TouchableCircle";
 import { useGameStore } from "../stores/useGameStore";
 import type { GameReport } from "../utils/gameReportUtils";
-import { startMeasure, endMeasure, PerformanceMarks, PerformanceMeasures, startFrameRateMonitoring } from '../utils/performanceMonitor';
+import {
+  startMeasure,
+  endMeasure,
+  PerformanceMarks,
+  PerformanceMeasures,
+  startFrameRateMonitoring,
+} from "../utils/performanceMonitor";
 
 interface CustomTheme extends MD3Theme {
   customColors: {
@@ -69,7 +75,7 @@ const calculateDynamicFontSize = (
   nodeX: number,
   viewBoxX: number,
   viewBoxWidth: number,
-  label: string
+  label: string,
 ): number => {
   const MARGIN = 12; // px, margin from each edge
   const MAX_FONT_SIZE = 24;
@@ -221,7 +227,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   // Handle word selection with performance monitoring
   const onSelectWord = (word: string) => {
     startMeasure(PerformanceMarks.WORD_SELECTION);
-    
+
     // Only allow selection if not using a gameReport (i.e., it's a live game)
     if (!gameReport && gameStatus === "playing") {
       selectWord(word);
@@ -230,14 +236,22 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
     endMeasure(
       PerformanceMarks.WORD_SELECTION,
       PerformanceMarks.WORD_SELECTION,
-      PerformanceMeasures.WORD_SELECTION_TIME
+      PerformanceMeasures.WORD_SELECTION_TIME,
     );
   };
 
   // --- Memoized Data Preparation ---
-  const { nodesToRender, linksToRender, viewBox, viewBoxX, viewBoxY, viewBoxWidth, viewBoxHeight } = useMemo(() => {
+  const {
+    nodesToRender,
+    linksToRender,
+    viewBox,
+    viewBoxX,
+    viewBoxY,
+    viewBoxWidth,
+    viewBoxHeight,
+  } = useMemo(() => {
     startMeasure(PerformanceMarks.GRAPH_RENDER);
-    
+
     // graphData comes from store, startWord/targetWord can be from report or store
     if (
       !graphData ||
@@ -247,14 +261,14 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
         gameStatus !== "given_up" &&
         (gameStatus === "idle" || gameStatus === "loading"))
     ) {
-      return { 
-        nodesToRender: [], 
-        linksToRender: [], 
-        viewBox: "0 0 100 100", 
+      return {
+        nodesToRender: [],
+        linksToRender: [],
+        viewBox: "0 0 100 100",
         viewBoxX: 0,
         viewBoxY: 0,
-        viewBoxWidth: 100, 
-        viewBoxHeight: 100 
+        viewBoxWidth: 100,
+        viewBoxHeight: 100,
       };
     }
 
@@ -427,7 +441,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
     endMeasure(
       PerformanceMarks.GRAPH_RENDER,
       PerformanceMarks.GRAPH_RENDER,
-      PerformanceMeasures.GRAPH_RENDER_TIME
+      PerformanceMeasures.GRAPH_RENDER_TIME,
     );
 
     return result;
@@ -446,12 +460,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   ]);
 
   // --- Render Checks ---
-  if (
-    !graphData ||
-    (gameStatus !== "won" &&
-      gameStatus !== "given_up" &&
-      (gameStatus === "idle" || gameStatus === "loading"))
-  ) {
+  if (!graphData || gameStatus === "loading") {
     return (
       <View style={styles.container}>
         <RNText>Loading Graph...</RNText>
@@ -459,12 +468,23 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
     );
   }
 
-  if (!startWord || !targetWord || nodesToRender.length === 0) {
+  if (
+    (!startWord || !targetWord || nodesToRender.length === 0) &&
+    gameStatus !== "idle"
+  ) {
     return (
       <View style={styles.container}>
         <RNText>Waiting for game data...</RNText>
       </View>
     );
+  }
+
+  // If we're in idle state with no data, just render empty container
+  if (
+    gameStatus === "idle" &&
+    (!startWord || !targetWord || nodesToRender.length === 0)
+  ) {
+    return <View style={styles.container} />;
   }
 
   // --- Rendering ---
@@ -596,7 +616,13 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
                 (n) => n.id === activeCurrentWord,
               );
               if (currentNodeData) {
-                const dynamicFontSize = calculateDynamicFontSize(node.id, node.x, viewBoxX, viewBoxWidth, node.id);
+                const dynamicFontSize = calculateDynamicFontSize(
+                  node.id,
+                  node.x,
+                  viewBoxX,
+                  viewBoxWidth,
+                  node.id,
+                );
                 const AVG_CHAR_WIDTH = dynamicFontSize * 0.6; // Approx. avg char width
 
                 // Vertical collision check
@@ -635,7 +661,13 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
             return 0;
           })
           .map((node) => {
-            const fontSize = calculateDynamicFontSize(node.id, node.x, viewBoxX, viewBoxWidth, node.id);
+            const fontSize = calculateDynamicFontSize(
+              node.id,
+              node.x,
+              viewBoxX,
+              viewBoxWidth,
+              node.id,
+            );
             return (
               <Text
                 key={`label-${node.id}`}

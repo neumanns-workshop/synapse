@@ -1,21 +1,21 @@
-import { PerformanceObserver } from 'react-native-performance';
+import { PerformanceObserver } from "react-native-performance";
 
 // Performance marks for different operations
 export const PerformanceMarks = {
-  GRAPH_RENDER: 'GRAPH_RENDER',
-  PATH_CALCULATION: 'PATH_CALCULATION',
-  WORD_SELECTION: 'WORD_SELECTION',
-  DEFINITION_LOAD: 'DEFINITION_LOAD',
-  STATE_UPDATE: 'STATE_UPDATE',
+  GRAPH_RENDER: "GRAPH_RENDER",
+  PATH_CALCULATION: "PATH_CALCULATION",
+  WORD_SELECTION: "WORD_SELECTION",
+  DEFINITION_LOAD: "DEFINITION_LOAD",
+  STATE_UPDATE: "STATE_UPDATE",
 } as const;
 
 // Performance measures for different operations
 export const PerformanceMeasures = {
-  GRAPH_RENDER_TIME: 'GRAPH_RENDER_TIME',
-  PATH_CALCULATION_TIME: 'PATH_CALCULATION_TIME',
-  WORD_SELECTION_TIME: 'WORD_SELECTION_TIME',
-  DEFINITION_LOAD_TIME: 'DEFINITION_LOAD_TIME',
-  STATE_UPDATE_TIME: 'STATE_UPDATE_TIME',
+  GRAPH_RENDER_TIME: "GRAPH_RENDER_TIME",
+  PATH_CALCULATION_TIME: "PATH_CALCULATION_TIME",
+  WORD_SELECTION_TIME: "WORD_SELECTION_TIME",
+  DEFINITION_LOAD_TIME: "DEFINITION_LOAD_TIME",
+  STATE_UPDATE_TIME: "STATE_UPDATE_TIME",
 } as const;
 
 // Frame rate limiting configuration
@@ -37,7 +37,7 @@ const observer = new PerformanceObserver((list) => {
 });
 
 // Start observing performance entries
-observer.observe({ entryTypes: ['measure'] });
+observer.observe({ entryTypes: ["measure"] });
 
 // Utility functions for performance monitoring
 export const startMeasure = (markName: keyof typeof PerformanceMarks) => {
@@ -49,7 +49,7 @@ export const startMeasure = (markName: keyof typeof PerformanceMarks) => {
 export const endMeasure = (
   startMark: keyof typeof PerformanceMarks,
   endMark: keyof typeof PerformanceMarks,
-  measureName: keyof typeof PerformanceMeasures
+  measureName: keyof typeof PerformanceMeasures,
 ) => {
   if (global.performance) {
     global.performance.mark(endMark);
@@ -63,7 +63,7 @@ export const logMemoryUsage = () => {
     // @ts-ignore - memory property exists in some environments
     const memory = global.performance.memory;
     if (memory) {
-      console.log('Memory Usage:', {
+      console.log("Memory Usage:", {
         totalJSHeapSize: `${Math.round(memory.totalJSHeapSize / 1024 / 1024)}MB`,
         usedJSHeapSize: `${Math.round(memory.usedJSHeapSize / 1024 / 1024)}MB`,
         jsHeapSizeLimit: `${Math.round(memory.jsHeapSizeLimit / 1024 / 1024)}MB`,
@@ -89,7 +89,7 @@ export const startFrameRateMonitoring = () => {
     if (isFrameRateLimited) {
       const now = performance.now();
       const elapsed = now - lastFrameTime;
-      
+
       if (elapsed < FRAME_TIME) {
         // If we're ahead of schedule, wait for the next frame
         const waitTime = Math.max(0, FRAME_TIME - elapsed);
@@ -101,7 +101,7 @@ export const startFrameRateMonitoring = () => {
         });
         return;
       }
-      
+
       lastFrameTime = now;
     }
 
@@ -119,13 +119,13 @@ export const toggleFrameRateLimit = (enabled: boolean) => {
     cancelAnimationFrame(rafId);
     rafId = null;
   }
-  console.log(`Frame rate limiting ${enabled ? 'enabled' : 'disabled'}`);
+  console.log(`Frame rate limiting ${enabled ? "enabled" : "disabled"}`);
 };
 
 // Set custom target FPS
 export const setTargetFPS = (fps: number) => {
   if (fps < 1 || fps > 120) {
-    console.warn('Target FPS must be between 1 and 120');
+    console.warn("Target FPS must be between 1 and 120");
     return;
   }
   TARGET_FPS = fps;
@@ -140,4 +140,4 @@ export const cleanupPerformanceMonitoring = () => {
     cancelAnimationFrame(rafId);
     rafId = null;
   }
-}; 
+};

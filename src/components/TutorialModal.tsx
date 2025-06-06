@@ -1,10 +1,20 @@
-import React from 'react';
-import { StyleSheet, View, Dimensions, Image, ScrollView } from 'react-native';
-import { Modal, Portal, Text, Button, IconButton, useTheme } from 'react-native-paper';
-import type { ExtendedTheme } from '../theme/SynapseTheme';
-import { useTutorial } from '../context/TutorialContext';
+import React from "react";
+import { StyleSheet, View, Dimensions, Image, ScrollView } from "react-native";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+import {
+  Modal,
+  Portal,
+  Text,
+  Button,
+  IconButton,
+  useTheme,
+} from "react-native-paper";
+
+import CustomIcon from "./CustomIcon";
+import { useTutorial } from "../context/TutorialContext";
+import type { ExtendedTheme } from "../theme/SynapseTheme";
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const MODAL_WIDTH = Math.min(SCREEN_WIDTH - 40, 500); // Max width of 500, or screen width - 40px padding
 const MODAL_HEIGHT = Math.min(SCREEN_HEIGHT - 80, 540); // Dynamic height based on screen size
 
@@ -31,16 +41,16 @@ const TutorialModal: React.FC = () => {
           styles.modalContainer,
           { backgroundColor: colors.surface },
         ]}
-        style={{ backgroundColor: 'rgba(20,20,20,0.95)' }}
+        style={{ backgroundColor: "rgba(20,20,20,0.95)" }}
       >
         <View style={styles.contentContainer}>
           <IconButton
-            icon="close"
+            icon={() => <CustomIcon source="close" size={24} color={colors.onSurface} />}
             size={24}
             onPress={skipTutorial}
             style={styles.closeButton}
           />
-          
+
           <Text
             variant="headlineSmall"
             style={[styles.title, { color: colors.primary }]}
@@ -48,20 +58,29 @@ const TutorialModal: React.FC = () => {
             {currentTutorialStep.title}
           </Text>
 
-          <ScrollView style={styles.scrollArea} contentContainerStyle={{ alignItems: 'center', paddingBottom: 8 }}>
+          <ScrollView
+            style={styles.scrollArea}
+            contentContainerStyle={{ alignItems: "center", paddingBottom: 8 }}
+          >
             {currentTutorialStep.iconComponent ? (
-              <currentTutorialStep.iconComponent width={120} height={120} style={{ alignSelf: 'center', marginBottom: 16 }} />
-            ) : currentTutorialStep.image && (
-              <View style={styles.imageWrapper}>
-                <Image
-                  source={currentTutorialStep.image}
-                  style={[
-                    styles.tutorialImage,
-                    { borderColor: colors.outline },
-                  ]}
-                  resizeMode="contain"
-                />
-              </View>
+              <currentTutorialStep.iconComponent
+                width={120}
+                height={120}
+                style={{ alignSelf: "center", marginBottom: 16 }}
+              />
+            ) : (
+              currentTutorialStep.image && (
+                <View style={styles.imageWrapper}>
+                  <Image
+                    source={currentTutorialStep.image}
+                    style={[
+                      styles.tutorialImage,
+                      { borderColor: colors.outline },
+                    ]}
+                    resizeMode="contain"
+                  />
+                </View>
+              )
             )}
             <Text
               variant="bodyLarge"
@@ -78,9 +97,10 @@ const TutorialModal: React.FC = () => {
                 style={[
                   styles.progressDot,
                   {
-                    backgroundColor: index === currentStep
-                      ? colors.primary
-                      : colors.onSurfaceDisabled,
+                    backgroundColor:
+                      index === currentStep
+                        ? colors.primary
+                        : colors.onSurfaceDisabled,
                   },
                 ]}
               />
@@ -97,13 +117,13 @@ const TutorialModal: React.FC = () => {
                 Previous
               </Button>
             )}
-            
+
             <Button
               mode="contained"
               onPress={nextStep}
               style={styles.navButton}
             >
-              {isLastStep ? 'Finish' : 'Next'}
+              {isLastStep ? "Finish" : "Next"}
             </Button>
           </View>
         </View>
@@ -120,21 +140,21 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 8,
     elevation: 5,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   contentContainer: {
     flex: 1,
-    height: '100%',
+    height: "100%",
     padding: 10,
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
+    flexDirection: "column",
+    justifyContent: "flex-start",
   },
   scrollArea: {
     flex: 1,
-    width: '100%',
+    width: "100%",
   },
   closeButton: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     top: 0,
     zIndex: 1,
@@ -142,8 +162,8 @@ const styles = StyleSheet.create({
   },
   title: {
     marginBottom: 16,
-    textAlign: 'center',
-    fontWeight: 'bold',
+    textAlign: "center",
+    fontWeight: "bold",
     marginTop: 10,
   },
   contentText: {
@@ -152,9 +172,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   progressContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginVertical: 20,
     gap: 8,
   },
@@ -164,8 +184,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   navigationButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     gap: 12,
   },
   navButton: {
@@ -176,19 +196,19 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 16,
     borderWidth: 2,
-    backgroundColor: '#232323', // fallback background
-    shadowColor: '#000',
+    backgroundColor: "#232323", // fallback background
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.18,
     shadowRadius: 6,
     elevation: 4,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   imageWrapper: {
-    backgroundColor: '#232323',
+    backgroundColor: "#232323",
     borderRadius: 20,
     padding: 4,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: 16,
   },
   textScroll: {
@@ -197,4 +217,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TutorialModal; 
+export default TutorialModal;
