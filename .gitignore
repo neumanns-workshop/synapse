@@ -48,6 +48,9 @@ test-*.js
 # Supabase temporary files
 supabase/.temp/
 
+# Test coverage reports
+coverage/
+
 # Ignore large similarity matrix that shouldn't be committed
 client/public/data/dense_similarity_matrix.json 
 

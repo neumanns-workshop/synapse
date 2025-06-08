@@ -15,7 +15,12 @@ const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 if (!supabaseUrl || !supabaseAnonKey) {
   // Temporarily comment out the throw to see the log even if vars are missing
   // throw new Error("Missing Supabase environment variables");
-  console.error("ERROR: Missing Supabase environment variables. Supabase URL:", supabaseUrl, "Anon Key:", supabaseAnonKey);
+  console.error(
+    "ERROR: Missing Supabase environment variables. Supabase URL:",
+    supabaseUrl,
+    "Anon Key:",
+    supabaseAnonKey,
+  );
 }
 
 export interface UserProfile {
@@ -48,6 +53,8 @@ export interface AuthState {
   isLoading: boolean;
 }
 
+
+
 export class SupabaseService {
   private static instance: SupabaseService;
   private supabase: SupabaseClient;
@@ -67,7 +74,9 @@ export class SupabaseService {
 
     if (!supabaseUrl || !supabaseAnonKey) {
       // UNCOMMENT THE ERROR THROW:
-      throw new Error("Missing Supabase environment variables. Check .env file and restart server.");
+      throw new Error(
+        "Missing Supabase environment variables. Check .env file and restart server.",
+      );
     }
 
     this.supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -85,6 +94,8 @@ export class SupabaseService {
   // ============================================================================
   // AUTH STATE MANAGEMENT
   // ============================================================================
+  
+
 
   private async initializeAuth() {
     // Get initial session
@@ -125,9 +136,11 @@ export class SupabaseService {
 
       // If no profile exists, this might be a database reset scenario
       if (!profile) {
-        console.warn("🚨 No user profile found for authenticated user - possible database reset");
+        console.warn(
+          "🚨 No user profile found for authenticated user - possible database reset",
+        );
         console.warn("🔄 Signing out user to clear inconsistent state");
-        
+
         // Sign out to clear the inconsistent state
         await this.signOut();
         return; // Exit early, don't continue with sync
@@ -142,22 +155,31 @@ export class SupabaseService {
       });
       console.log("🔄 Auth state updated");
 
-      // PROPER SYNC FLOW: Fetch cloud data first (like git fetch)
-      console.log("🔄 Starting cloud data sync (fetch)...");
-      const syncResult = await this.syncCloudDataToLocal();
+      // PROGRESSIVE SYNC FLOW: Use new progressive sync system
+      console.log("🔄 Starting progressive data sync...");
       
+      // Import ProgressiveSyncService dynamically to avoid circular dependency
+      const { ProgressiveSyncService } = await import('./ProgressiveSyncService');
+      const progressiveSync = ProgressiveSyncService.getInstance();
+
+      // Fetch cloud data first (like git fetch)
+      console.log("🔄 Starting progressive cloud data sync (fetch)...");
+      const fetchResult = await progressiveSync.syncFromCloud();
+
       // If sync failed due to missing data, user was already signed out
-      if (syncResult?.error?.message?.includes("signed out for consistency")) {
+      if (!fetchResult.success && fetchResult.error && typeof fetchResult.error === 'object' && 'message' in fetchResult.error && 
+          typeof fetchResult.error.message === 'string' && 
+          fetchResult.error.message.includes("signed out for consistency")) {
         console.log("🔄 User was signed out during sync due to missing data");
         return; // Exit early
       }
-      
-      console.log("🔄 Cloud data sync completed");
+
+      console.log("🔄 Progressive cloud data sync completed in", fetchResult.totalTime, "ms");
 
       // Then sync local data to cloud (like git push)
-      console.log("🔄 Starting local data sync (push)...");
-      await this.syncLocalDataToCloud();
-      console.log("🔄 Local data sync completed");
+      console.log("🔄 Starting progressive local data sync (push)...");
+      const pushResult = await progressiveSync.syncToCloud();
+      console.log("🔄 Progressive local data sync completed in", pushResult.totalTime, "ms");
 
       // Refresh profile after sync in case premium status changed
       console.log("🔄 Refreshing profile after sync...");
@@ -201,6 +223,8 @@ export class SupabaseService {
       }
     };
   }
+
+
 
   public getCurrentAuthState(): AuthState {
     return this.currentAuthState;
@@ -252,15 +276,17 @@ export class SupabaseService {
       // Even if session is null for some reason but user exists, handle it.
       // However, signInAnonymously should always return a session on success.
       else if (data.user && !data.session) {
-         // This case is less likely for signInAnonymously but good for robustness
-         // We might need to get a session explicitly or handle partial state.
-         // For now, let's assume session is present on success as per Supabase docs.
-         console.warn("Anonymous sign-in returned user but no session, state might be incomplete.");
-         // Potentially call getSession then handleAuthStateChange
-         const { data: newSessionData } = await this.supabase.auth.getSession();
-         if (newSessionData.session) {
-            await this.handleAuthStateChange(newSessionData.session);
-         }
+        // This case is less likely for signInAnonymously but good for robustness
+        // We might need to get a session explicitly or handle partial state.
+        // For now, let's assume session is present on success as per Supabase docs.
+        console.warn(
+          "Anonymous sign-in returned user but no session, state might be incomplete.",
+        );
+        // Potentially call getSession then handleAuthStateChange
+        const { data: newSessionData } = await this.supabase.auth.getSession();
+        if (newSessionData.session) {
+          await this.handleAuthStateChange(newSessionData.session);
+        }
       }
 
       return { data, error: null }; // Return structure similar to Supabase client
@@ -286,8 +312,16 @@ export class SupabaseService {
       }
 
       console.log("🔐 Calling supabase.auth.signInWithPassword...");
-      const { data, error } = await this.supabase.auth.signInWithPassword(signInOptions);
-      console.log("🔐 signInWithPassword response - user:", !!data.user, "session:", !!data.session, "error:", error);
+      const { data, error } =
+        await this.supabase.auth.signInWithPassword(signInOptions);
+      console.log(
+        "🔐 signInWithPassword response - user:",
+        !!data.user,
+        "session:",
+        !!data.session,
+        "error:",
+        error,
+      );
 
       if (error) {
         console.error("🔐 Sign-in failed with Supabase error:", error);
@@ -313,7 +347,9 @@ export class SupabaseService {
       } else {
         // For a standard sign-out, we reset the session (e.g., free games)
         // but keep all their progress.
-        console.log("➡️ Performing standard sign-out, resetting session state...");
+        console.log(
+          "➡️ Performing standard sign-out, resetting session state...",
+        );
         await this.unifiedStore.resetForNewAnonymousSession();
         console.log("✅ Session state reset for new anonymous user.");
       }
@@ -321,7 +357,10 @@ export class SupabaseService {
       // Sign out from all sessions
       const { error } = await this.supabase.auth.signOut({ scope: "global" });
       if (error) {
-        console.warn("Standard signOut failed, attempting manual cleanup:", error);
+        console.warn(
+          "Standard signOut failed, attempting manual cleanup:",
+          error,
+        );
         // Fallback for manual session clearing if normal sign out fails
         if (typeof window !== "undefined") {
           const keys = Object.keys(localStorage);
@@ -371,13 +410,16 @@ export class SupabaseService {
     }
   }
 
-  public async updateUserCredentials(email: string, password?: string): Promise<{ user: User | null; error: any }> {
+  public async updateUserCredentials(
+    email: string,
+    password?: string,
+  ): Promise<{ user: User | null; error: any }> {
     try {
       const updateData: { email: string; password?: string } = { email };
       if (password) {
         updateData.password = password;
       }
-      
+
       const { data, error } = await this.supabase.auth.updateUser(updateData);
 
       if (error) throw error;
@@ -387,24 +429,33 @@ export class SupabaseService {
       // The onAuthStateChange listener should also pick this up, but an explicit refresh here is good.
       if (data.user) {
         // Fetch a fresh session which should contain the updated user
-        const { data: sessionData, error: sessionError } = await this.supabase.auth.refreshSession();
+        const { data: sessionData, error: sessionError } =
+          await this.supabase.auth.refreshSession();
         if (sessionError) {
-          console.warn("Error refreshing session after user update:", sessionError);
+          console.warn(
+            "Error refreshing session after user update:",
+            sessionError,
+          );
           // Proceed with potentially stale session data in currentAuthState, onAuthStateChange might fix it
-          await this.handleAuthStateChange(this.currentAuthState.session); 
+          await this.handleAuthStateChange(this.currentAuthState.session);
         } else if (sessionData.session) {
           await this.handleAuthStateChange(sessionData.session);
         }
-        
+
         // Also, update the email in the user_profiles table if it's different
         // This assumes the currently authenticated user (whose credentials were updated)
         // is the one whose profile needs this email update.
-        if (this.currentAuthState.profile && this.currentAuthState.profile.email !== email) {
-            await this.updateUserProfile({ email: email });
-            console.log(`Updated user_profiles email for user ${data.user.id} to ${email}`);
+        if (
+          this.currentAuthState.profile &&
+          this.currentAuthState.profile.email !== email
+        ) {
+          await this.updateUserProfile({ email: email });
+          console.log(
+            `Updated user_profiles email for user ${data.user.id} to ${email}`,
+          );
         }
       }
-      
+
       return { user: data.user, error: null };
     } catch (error) {
       console.error("Error updating user credentials:", error);
@@ -423,7 +474,7 @@ export class SupabaseService {
       if (error) {
         // PGRST116 means no rows found, which is a valid state (profile might not exist yet or was deleted)
         // In this specific context, it means premium is effectively false.
-        if (error.code === 'PGRST116') return false;
+        if (error.code === "PGRST116") return false;
         console.error(`Error fetching is_premium for user ${userId}:`, error);
         return null; // Indicate an actual error occurred
       }
@@ -473,7 +524,12 @@ export class SupabaseService {
         .eq("id", userId)
         .single();
 
-      console.log("🔍 Supabase query completed. Data:", !!data, "Error:", error);
+      console.log(
+        "🔍 Supabase query completed. Data:",
+        !!data,
+        "Error:",
+        error,
+      );
 
       if (error) {
         console.error("🔍 Error fetching user profile:", error);
@@ -493,18 +549,26 @@ export class SupabaseService {
       const userId = this.currentAuthState.user?.id;
       if (!userId) throw new Error("No authenticated user");
 
+      console.log("🔧 Attempting to update user profile:", { userId, updates });
+
       const { error } = await this.supabase
         .from("user_profiles")
         .update(updates)
         .eq("id", userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("🚨 Database update error:", error);
+        throw error;
+      }
+
+      console.log("✅ Database update successful");
 
       // Update local auth state
       if (this.currentAuthState.profile) {
         this.updateAuthState({
           profile: { ...this.currentAuthState.profile, ...updates },
         });
+        console.log("✅ Local auth state updated");
       }
 
       return { error: null };
@@ -518,24 +582,77 @@ export class SupabaseService {
     const currentProfile = this.currentAuthState.profile;
     if (!currentProfile) throw new Error("No user profile found");
 
-    return this.updateUserProfile({
+    const result = await this.updateUserProfile({
       privacy_settings: {
         ...currentProfile.privacy_settings,
         email_updates: emailUpdatesOptIn,
       },
     });
+
+    // If the update was successful, also update the local unified data store
+    // This prevents sync operations from overwriting the preference change
+    if (!result.error) {
+      try {
+        console.log("📧 Updating local UnifiedDataStore with email preference:", emailUpdatesOptIn);
+        // Note: email_updates is managed in the profile table, not in the local privacy settings
+        // But we should sync any other privacy changes to keep things consistent
+        
+        // Refresh the profile to ensure local auth state is up to date
+        await this.refreshUserProfile();
+      } catch (error) {
+        console.warn("Could not update local privacy settings:", error);
+        // Don't fail the whole operation if local update fails
+      }
+    }
+
+    return result;
   }
 
-  public async updatePrivacySettings(privacyUpdates: Partial<UserProfile["privacy_settings"]>) {
+  public async updatePrivacySettings(
+    privacyUpdates: Partial<UserProfile["privacy_settings"]>,
+  ) {
     const currentProfile = this.currentAuthState.profile;
     if (!currentProfile) throw new Error("No user profile found");
 
-    return this.updateUserProfile({
+    const result = await this.updateUserProfile({
       privacy_settings: {
         ...currentProfile.privacy_settings,
         ...privacyUpdates,
       },
     });
+
+    // If the update was successful, also update the local unified data store
+    // This prevents sync operations from overwriting the preference changes
+    if (!result.error) {
+      try {
+        console.log("🔒 Updating local UnifiedDataStore with privacy settings:", privacyUpdates);
+        
+        // Map the privacy settings to the local format
+        const localPrivacyUpdates: any = {};
+        if (privacyUpdates.allow_challenge_sharing !== undefined) {
+          localPrivacyUpdates.allowChallengeSharing = privacyUpdates.allow_challenge_sharing;
+        }
+        if (privacyUpdates.allow_stats_sharing !== undefined) {
+          localPrivacyUpdates.allowStatsSharing = privacyUpdates.allow_stats_sharing;
+        }
+        if (privacyUpdates.allow_leaderboards !== undefined) {
+          localPrivacyUpdates.allowLeaderboards = privacyUpdates.allow_leaderboards;
+        }
+        if (privacyUpdates.data_collection !== undefined) {
+          localPrivacyUpdates.dataCollection = privacyUpdates.data_collection;
+        }
+        
+        await this.unifiedStore.updatePrivacySettings(localPrivacyUpdates);
+        
+        // Refresh the profile to ensure local auth state is up to date
+        await this.refreshUserProfile();
+      } catch (error) {
+        console.warn("Could not update local privacy settings:", error);
+        // Don't fail the whole operation if local update fails
+      }
+    }
+
+    return result;
   }
 
   public async refreshUserProfile() {
@@ -565,29 +682,35 @@ export class SupabaseService {
    * Create a premium user profile immediately after payment
    * This is used for optimistic UI updates
    */
-  public async createPremiumProfile(userId: string, email: string): Promise<{ error: any }> {
+  public async createPremiumProfile(
+    userId: string,
+    email: string,
+  ): Promise<{ error: any }> {
     try {
       // Use UPSERT instead of INSERT to handle existing profiles
-      const { error } = await this.supabase.from("user_profiles").upsert({
-        id: userId,
-        email,
-        is_premium: true,
-        updated_at: new Date().toISOString(),
-        privacy_settings: {
-          allow_challenge_sharing: true,
-          allow_stats_sharing: true,
-          allow_leaderboards: true,
-          data_collection: false,
-          email_updates: false,
+      const { error } = await this.supabase.from("user_profiles").upsert(
+        {
+          id: userId,
+          email,
+          is_premium: true,
+          updated_at: new Date().toISOString(),
+          privacy_settings: {
+            allow_challenge_sharing: true,
+            allow_stats_sharing: true,
+            allow_leaderboards: true,
+            data_collection: false,
+            email_updates: false,
+          },
+          platform_purchase_data: {
+            platform: "stripe" as const,
+            purchaseDate: Date.now(),
+            validated: false, // Will be set to true by webhook
+          },
         },
-        platform_purchase_data: {
-          platform: "stripe" as const,
-          purchaseDate: Date.now(),
-          validated: false, // Will be set to true by webhook
+        {
+          onConflict: "id", // Handle conflicts on the primary key (user ID)
         },
-      }, {
-        onConflict: "id", // Handle conflicts on the primary key (user ID)
-      });
+      );
 
       if (error) throw error;
 
@@ -660,8 +783,10 @@ export class SupabaseService {
       // Also sync to local storage
       await this.unifiedStore.setPurchaseInfo(purchaseData);
 
-      // Trigger full data sync to ensure everything is up to date
-      await this.syncLocalDataToCloud();
+      // Trigger progressive data sync to ensure everything is up to date
+      const { ProgressiveSyncService } = await import('./ProgressiveSyncService');
+      const progressiveSync = ProgressiveSyncService.getInstance();
+      await progressiveSync.syncToCloud();
 
       console.log("Purchase data synced successfully");
       return { error: null };
@@ -697,7 +822,8 @@ export class SupabaseService {
       };
 
       // Compress data for efficient cloud storage
-      const compressedCloudData = await this.unifiedStore.exportCompressedData();
+      const compressedCloudData =
+        await this.unifiedStore.exportCompressedData();
 
       // Sync to user_data table (full data backup) - using compressed data
       const { error: dataError } = await this.supabase.from("user_data").upsert(
@@ -724,8 +850,7 @@ export class SupabaseService {
             localData.user.privacy?.allowChallengeSharing ?? true,
           allow_stats_sharing:
             localData.user.privacy?.allowStatsSharing ?? true,
-          allow_leaderboards:
-            localData.user.privacy?.allowLeaderboards ?? true,
+          allow_leaderboards: localData.user.privacy?.allowLeaderboards ?? true,
           data_collection: localData.user.privacy?.dataCollection ?? false,
           email_updates:
             this.currentAuthState.profile?.privacy_settings?.email_updates ??
@@ -785,22 +910,28 @@ export class SupabaseService {
       // Check if both user data and profile are missing (database was reset)
       const noUserData = dataError && dataError.code === "PGRST116";
       const noProfile = profileError && profileError.code === "PGRST116";
-      
+
       if (noUserData && noProfile) {
-        console.warn("🚨 User data and profile not found in cloud - database may have been reset");
+        console.warn(
+          "🚨 User data and profile not found in cloud - database may have been reset",
+        );
         console.warn("🔄 Signing out user to clear inconsistent state");
-        
+
         // Sign out the user to clear the inconsistent state
         await this.signOut();
-        
+
         // Reset local data to defaults but preserve any local progress
         const localData = await this.unifiedStore.getData();
         localData.user.isPremium = false;
         localData.user.email = undefined;
         localData.user.purchase = undefined;
         await this.unifiedStore.importData(localData);
-        
-        return { error: new Error("User profile not found - signed out for consistency") };
+
+        return {
+          error: new Error(
+            "User profile not found - signed out for consistency",
+          ),
+        };
       }
 
       if (userData?.data) {
@@ -848,46 +979,75 @@ export class SupabaseService {
 
         // Get current local data to preserve local-only progress
         const localData = await this.unifiedStore.getData();
-        
-        // Merge daily challenge progress (preserve local completions)
-        const mergedDailyChallengeProgress = {
-          ...cloudData.dailyChallenges.progress,
-          ...localData.dailyChallenges.progress, // Local takes precedence
-        };
+
+        // For daily challenges, prioritize cloud data (user-specific, account-bound)
+        // Only merge in local progress if cloud has no data for that specific challenge
+        const mergedDailyChallengeProgress = { ...localData.dailyChallenges.progress };
+        for (const [challengeId, cloudProgress] of Object.entries(cloudData.dailyChallenges.progress)) {
+          mergedDailyChallengeProgress[challengeId] = cloudProgress; // Cloud takes precedence
+        }
         cloudData.dailyChallenges.progress = mergedDailyChallengeProgress;
-        
+
         // Merge game history (combine and deduplicate by ID, keep most recent 100)
-        const mergedGameHistory = this.mergeGameHistory(cloudData.gameHistory || [], localData.gameHistory || []);
+        const mergedGameHistory = this.mergeGameHistory(
+          cloudData.gameHistory || [],
+          localData.gameHistory || [],
+        );
         cloudData.gameHistory = mergedGameHistory;
-        
+
         // Merge achievements (combine unlocked IDs, viewed IDs, timestamps, and progressive counters)
-        cloudData.achievements = this.mergeAchievements(cloudData.achievements || {}, localData.achievements || {});
-        
+        cloudData.achievements = this.mergeAchievements(
+          cloudData.achievements || {},
+          localData.achievements || {},
+        );
+
         // Merge word collections progress (combine collected words)
-        cloudData.collections = this.mergeWordCollections(cloudData.collections || {}, localData.collections || {});
-        
+        cloudData.collections = this.mergeWordCollections(
+          cloudData.collections || {},
+          localData.collections || {},
+        );
+
         // Merge word collection viewing status (combine completed and viewed IDs)
-        cloudData.wordCollections = this.mergeWordCollectionStatus(cloudData.wordCollections || {}, localData.wordCollections || {});
-        
+        cloudData.wordCollections = this.mergeWordCollectionStatus(
+          cloudData.wordCollections || {},
+          localData.wordCollections || {},
+        );
+
         // Merge statistics (take the higher values for most stats)
-        cloudData.stats = this.mergeStatistics(cloudData.stats || {}, localData.stats || {});
-        
+        cloudData.stats = this.mergeStatistics(
+          cloudData.stats || {},
+          localData.stats || {},
+        );
+
         // Merge news read status (combine read article IDs)
-        cloudData.news = this.mergeNewsStatus(cloudData.news || {}, localData.news || {});
-        
+        cloudData.news = this.mergeNewsStatus(
+          cloudData.news || {},
+          localData.news || {},
+        );
+
         // Preserve current games (local takes precedence for in-progress games)
         cloudData.currentGames = {
-          regular: localData.currentGames.regular || cloudData.currentGames?.regular || null,
-          challenge: localData.currentGames.challenge || cloudData.currentGames?.challenge || null,
-          temp: localData.currentGames.temp || cloudData.currentGames?.temp || null,
+          regular:
+            localData.currentGames.regular ||
+            cloudData.currentGames?.regular ||
+            null,
+          challenge:
+            localData.currentGames.challenge ||
+            cloudData.currentGames?.challenge ||
+            null,
+          temp:
+            localData.currentGames.temp || cloudData.currentGames?.temp || null,
         };
-        
+
         console.log("🔄 Comprehensive data merge completed:", {
-          dailyChallengeProgress: Object.keys(mergedDailyChallengeProgress).length,
+          dailyChallengeProgress: Object.keys(mergedDailyChallengeProgress)
+            .length,
           gameHistory: mergedGameHistory.length,
-          achievements: Object.keys(cloudData.achievements.unlockedIds || []).length,
+          achievements: Object.keys(cloudData.achievements.unlockedIds || [])
+            .length,
           wordCollections: Object.keys(cloudData.collections).length,
-          currentGames: Object.values(cloudData.currentGames).filter(Boolean).length,
+          currentGames: Object.values(cloudData.currentGames).filter(Boolean)
+            .length,
         });
 
         // Import merged cloud data to local storage
@@ -919,7 +1079,9 @@ export class SupabaseService {
 
           // Note: We don't merge daily challenge progress here because there's no cloud data
           // Local daily challenge progress is preserved as-is
-          console.log("🔄 Preserving local daily challenge progress (no cloud backup found)");
+          console.log(
+            "🔄 Preserving local daily challenge progress (no cloud backup found)",
+          );
 
           await this.unifiedStore.importData(localData);
           console.log("Profile data synced to local successfully");
@@ -949,14 +1111,17 @@ export class SupabaseService {
       }
       return acc;
     }, new Map());
-    
+
     // Sort by timestamp (most recent first) and keep only the last 100
     return Array.from(deduped.values())
-      .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+      .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0))
       .slice(0, 100);
   }
 
-  private mergeAchievements(cloudAchievements: any, localAchievements: any): any {
+  private mergeAchievements(
+    cloudAchievements: any,
+    localAchievements: any,
+  ): any {
     const defaultAchievements = {
       unlockedIds: [],
       viewedIds: [],
@@ -971,42 +1136,66 @@ export class SupabaseService {
     return {
       unlockedIds: [...new Set([...cloud.unlockedIds, ...local.unlockedIds])],
       viewedIds: [...new Set([...cloud.viewedIds, ...local.viewedIds])],
-      unlockTimestamps: { ...cloud.unlockTimestamps, ...local.unlockTimestamps },
-      progressiveCounters: this.mergeProgressiveCounters(cloud.progressiveCounters, local.progressiveCounters),
+      unlockTimestamps: {
+        ...cloud.unlockTimestamps,
+        ...local.unlockTimestamps,
+      },
+      progressiveCounters: this.mergeProgressiveCounters(
+        cloud.progressiveCounters,
+        local.progressiveCounters,
+      ),
       schemaVersion: Math.max(cloud.schemaVersion, local.schemaVersion),
     };
   }
 
-  private mergeProgressiveCounters(cloudCounters: Record<string, number>, localCounters: Record<string, number>): Record<string, number> {
+  private mergeProgressiveCounters(
+    cloudCounters: Record<string, number>,
+    localCounters: Record<string, number>,
+  ): Record<string, number> {
     const merged: Record<string, number> = { ...cloudCounters };
-    
+
     // Take the higher count for each achievement
     for (const [achievementId, localCount] of Object.entries(localCounters)) {
       merged[achievementId] = Math.max(merged[achievementId] || 0, localCount);
     }
-    
+
     return merged;
   }
 
-  private mergeWordCollections(cloudCollections: any, localCollections: any): any {
+  private mergeWordCollections(
+    cloudCollections: any,
+    localCollections: any,
+  ): any {
     const merged: any = { ...cloudCollections };
-    
+
     // Merge collected words for each collection
-    for (const [collectionId, localProgress] of Object.entries(localCollections)) {
-      const localData = localProgress as { collectedWords: string[]; lastUpdated: number };
-      const cloudData = merged[collectionId] as { collectedWords: string[]; lastUpdated: number } | undefined;
-      
+    for (const [collectionId, localProgress] of Object.entries(
+      localCollections,
+    )) {
+      const localData = localProgress as {
+        collectedWords: string[];
+        lastUpdated: number;
+      };
+      const cloudData = merged[collectionId] as
+        | { collectedWords: string[]; lastUpdated: number }
+        | undefined;
+
       if (!cloudData) {
         merged[collectionId] = localData;
       } else {
         // Combine collected words and use the latest timestamp
         merged[collectionId] = {
-          collectedWords: [...new Set([...cloudData.collectedWords, ...localData.collectedWords])],
+          collectedWords: [
+            ...new Set([
+              ...cloudData.collectedWords,
+              ...localData.collectedWords,
+            ]),
+          ],
           lastUpdated: Math.max(cloudData.lastUpdated, localData.lastUpdated),
         };
       }
     }
-    
+
     return merged;
   }
 
@@ -1022,9 +1211,14 @@ export class SupabaseService {
     const local = { ...defaultStatus, ...localStatus };
 
     return {
-      completedIds: [...new Set([...cloud.completedIds, ...local.completedIds])],
+      completedIds: [
+        ...new Set([...cloud.completedIds, ...local.completedIds]),
+      ],
       viewedIds: [...new Set([...cloud.viewedIds, ...local.viewedIds])],
-      completionTimestamps: { ...cloud.completionTimestamps, ...local.completionTimestamps },
+      completionTimestamps: {
+        ...cloud.completionTimestamps,
+        ...local.completionTimestamps,
+      },
       schemaVersion: Math.max(cloud.schemaVersion, local.schemaVersion),
     };
   }
@@ -1042,11 +1236,20 @@ export class SupabaseService {
     const local = { ...defaultStats, ...localStats };
 
     return {
-      totalGamesPlayed: Math.max(cloud.totalGamesPlayed, local.totalGamesPlayed),
+      totalGamesPlayed: Math.max(
+        cloud.totalGamesPlayed,
+        local.totalGamesPlayed,
+      ),
       totalWins: Math.max(cloud.totalWins, local.totalWins),
       totalGaveUps: Math.max(cloud.totalGaveUps, local.totalGaveUps),
-      achievementsUnlocked: Math.max(cloud.achievementsUnlocked, local.achievementsUnlocked),
-      cumulativeMoveAccuracySum: Math.max(cloud.cumulativeMoveAccuracySum, local.cumulativeMoveAccuracySum),
+      achievementsUnlocked: Math.max(
+        cloud.achievementsUnlocked,
+        local.achievementsUnlocked,
+      ),
+      cumulativeMoveAccuracySum: Math.max(
+        cloud.cumulativeMoveAccuracySum,
+        local.cumulativeMoveAccuracySum,
+      ),
     };
   }
 
@@ -1060,10 +1263,14 @@ export class SupabaseService {
     const local = { ...defaultNews, ...localNews };
 
     return {
-      readArticleIds: [...new Set([...cloud.readArticleIds, ...local.readArticleIds])],
+      readArticleIds: [
+        ...new Set([...cloud.readArticleIds, ...local.readArticleIds]),
+      ],
       lastChecked: Math.max(cloud.lastChecked, local.lastChecked),
     };
   }
+
+
 
   // ============================================================================
   // UTILITY METHODS
@@ -1086,9 +1293,9 @@ export class SupabaseService {
   }
 
   public async invokeFunction<T = any>(
-    functionName: string, 
-    body: any, 
-    jwtToken?: string // Optional JWT token parameter
+    functionName: string,
+    body: any,
+    jwtToken?: string, // Optional JWT token parameter
   ): Promise<{ data: T | null; error: any }> {
     try {
       const headers: HeadersInit = {
@@ -1097,7 +1304,8 @@ export class SupabaseService {
       };
 
       // Use provided JWT, or fallback to current session's JWT
-      const tokenToUse = jwtToken || this.currentAuthState.session?.access_token;
+      const tokenToUse =
+        jwtToken || this.currentAuthState.session?.access_token;
 
       if (tokenToUse) {
         headers["Authorization"] = `Bearer ${tokenToUse}`;
@@ -1105,18 +1313,30 @@ export class SupabaseService {
         // This case means no explicit JWT was passed AND no user is signed in.
         // Some functions might be designed to be called like this (fully public),
         // others (like create-checkout-session) will fail if no Auth header is present.
-        console.warn(`Invoking function ${functionName} without a user session or explicit JWT.`);
+        console.warn(
+          `Invoking function ${functionName} without a user session or explicit JWT.`,
+        );
       }
 
-      const response = await fetch(`${supabaseUrl}/functions/v1/${functionName}`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body),
-      });
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/${functionName}`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(body),
+        },
+      );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: response.statusText }));
-        throw errorData.error || new Error(`Function ${functionName} failed with status ${response.status}`);
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: response.statusText }));
+        throw (
+          errorData.error ||
+          new Error(
+            `Function ${functionName} failed with status ${response.status}`,
+          )
+        );
       }
       const responseData = await response.json();
       return { data: responseData, error: null };
@@ -1128,60 +1348,68 @@ export class SupabaseService {
 
   public async deleteAccount() {
     try {
-      console.log("🗑️ SupabaseService.deleteAccount: Starting deletion process...");
-      
+      console.log(
+        "🗑️ SupabaseService.deleteAccount: Starting deletion process...",
+      );
+
       // Get current user info for debugging
       const user = this.currentAuthState.user;
       const session = this.currentAuthState.session;
       console.log("🗑️ Current user:", user?.id, user?.email);
       console.log("🗑️ Session exists:", !!session);
       console.log("🗑️ Access token exists:", !!session?.access_token);
-      
+
       if (!session?.access_token) {
         throw new Error("No valid session found. Please sign in again.");
       }
-      
 
-      
       // Call edge function - try with current token first, then refresh if needed
       console.log("🗑️ Calling delete-user-account edge function...");
-      
+
       // Try with the current session first
       let { data, error } = await this.supabase.functions.invoke(
         "delete-user-account",
         {
           body: {},
-        }
+        },
       );
-      
+
       // If we get a 401 error, try refreshing the session and retry once
-      if (error && (error.context?.status === 401 || String(error.message).includes("401"))) {
+      if (
+        error &&
+        (error.context?.status === 401 || String(error.message).includes("401"))
+      ) {
         console.log("🗑️ Got 401 error, attempting session refresh...");
-        
+
         // Explicitly pass the refresh token to be sure
         if (!session?.refresh_token) {
-          throw new Error("No refresh token available. Please sign out and sign back in.");
+          throw new Error(
+            "No refresh token available. Please sign out and sign back in.",
+          );
         }
 
-        const { data: refreshData, error: refreshError } = await this.supabase.auth.refreshSession({
-          refresh_token: session.refresh_token,
-        });
+        const { data: refreshData, error: refreshError } =
+          await this.supabase.auth.refreshSession({
+            refresh_token: session.refresh_token,
+          });
 
         if (refreshError) {
           console.warn("🗑️ Session refresh failed:", refreshError);
-          throw new Error("Your session has expired. Please sign in again and try deleting your account.");
+          throw new Error(
+            "Your session has expired. Please sign in again and try deleting your account.",
+          );
         }
-        
+
         console.log("🗑️ Session refreshed, retrying delete...");
-        
+
         // Retry the function call with refreshed session
         const result = await this.supabase.functions.invoke(
           "delete-user-account",
           {
             body: {},
-          }
+          },
         );
-        
+
         data = result.data;
         error = result.error;
       }
@@ -1190,9 +1418,11 @@ export class SupabaseService {
 
       if (error) throw error;
 
-      console.log("🗑️ Account deletion successful, now performing hard sign-out...");
+      console.log(
+        "🗑️ Account deletion successful, now performing hard sign-out...",
+      );
       await this.signOut({ accountDeleted: true });
-      
+
       return { error: null };
     } catch (error) {
       console.error("🗑️ Error deleting account:", error);
