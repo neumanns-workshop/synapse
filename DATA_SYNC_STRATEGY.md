@@ -101,12 +101,12 @@ npx expo install expo-in-app-purchases
 **iOS (App Store Connect):**
 - Create in-app purchase: `synapse_premium_unlock`
 - Type: Non-Consumable
-- Price: $4.99
+- Price: $5
 
 **Android (Google Play Console):**
 - Create managed product: `synapse_premium_unlock`
 - Type: Managed product
-- Price: $4.99
+- Price: $5
 
 ### 3. Implementation Code
 ```typescript

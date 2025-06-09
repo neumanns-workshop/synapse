@@ -7,13 +7,13 @@ You now have a **complete web-first IAP system** with Stripe integration! Here's
 ### 📦 **Components Created**
 1. **`StripeService.ts`** - Handles payment processing with Stripe Checkout
 2. **`PaymentHandler.ts`** - Manages payment redirects and success/failure handling
-3. **Enhanced `UpgradePrompt.tsx`** - Shows $4.99 pricing and handles purchases
+3. **Enhanced `UpgradePrompt.tsx`** - Shows $5 pricing and handles purchases
 4. **Enhanced `SupabaseService.ts`** - Syncs premium status and purchase data
 5. **Updated `App.tsx`** - Automatically handles payment redirects
 
 ### 💰 **Pricing & Features**
-- **Price**: $4.99 one-time payment
-- **Product**: "Synapse Premium"
+- **Price**: $5 one-time payment
+- **Product**: "Galaxy Brain Synapse Premium Account"
 - **Features**: Unlimited games, cloud sync, past challenges, Lab access
 - **Payment Method**: Stripe Checkout (hosted payment page)
 
@@ -175,7 +175,7 @@ supabase functions deploy verify-payment
 ## 🧪 **Testing Checklist**
 
 ### ✅ **Basic Flow**
-- [ ] Upgrade prompt shows "$4.99" pricing
+- [ ] Upgrade prompt shows "$5" pricing
 - [ ] "Get Premium" button redirects to Stripe Checkout
 - [ ] Payment success returns to app with success message
 - [ ] Premium features are immediately unlocked
@@ -196,7 +196,7 @@ supabase functions deploy verify-payment
 
 ## 💡 **What Happens When User Pays**
 
-1. **User clicks "Get Premium - $4.99"**
+1. **User clicks "Get Premium - $5"**
 2. **StripeService creates checkout session** via Supabase Edge Function
 3. **User redirected to Stripe Checkout** (secure hosted page)
 4. **User enters payment details** and completes purchase
@@ -214,7 +214,7 @@ Your web IAP system is production-ready! The implementation includes:
 - ✅ **Secure payment processing** (Stripe handles all PCI compliance)
 - ✅ **Instant premium activation** (no delays or manual verification)
 - ✅ **Cloud data sync** (purchase history tracked in Supabase)
-- ✅ **Beautiful pricing display** ($4.99 prominently shown)
+- ✅ **Beautiful pricing display** ($5 prominently shown)
 - ✅ **Error handling** (graceful failures and user feedback)
 - ✅ **Debug tools** (for testing in development)
 

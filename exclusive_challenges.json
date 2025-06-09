@@ -1,0 +1,485 @@
+{
+  "version": "1.0",
+  "generatedAt": "2025-06-09T10:16:59.766Z",
+  "description": "Exclusive challenges for guerrilla marketing",
+  "unconstrainedChallenges": [
+    {
+      "id": "exclusive_1749464219862_engdwf1xw",
+      "startWord": "release",
+      "targetWord": "footnote",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: release → footnote"
+    },
+    {
+      "id": "exclusive_1749464219907_atlvjtdrp",
+      "startWord": "hunt",
+      "targetWord": "camel",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: hunt → camel"
+    },
+    {
+      "id": "exclusive_1749464219983_8qqipxml9",
+      "startWord": "council",
+      "targetWord": "disperse",
+      "optimalPathLength": 2,
+      "description": "2-step challenge: council → disperse"
+    },
+    {
+      "id": "exclusive_1749464220033_5oy7q8b2s",
+      "startWord": "jaunty",
+      "targetWord": "trap",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: jaunty → trap"
+    },
+    {
+      "id": "exclusive_1749464220114_x9wn26atu",
+      "startWord": "truck",
+      "targetWord": "device",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: truck → device"
+    },
+    {
+      "id": "exclusive_1749464220117_ib8ny78pw",
+      "startWord": "whatsoever",
+      "targetWord": "tart",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: whatsoever → tart"
+    },
+    {
+      "id": "exclusive_1749464220120_w01m54ytu",
+      "startWord": "lake",
+      "targetWord": "edit",
+      "optimalPathLength": 7,
+      "description": "7-step challenge: lake → edit"
+    },
+    {
+      "id": "exclusive_1749464220123_uvgniwm6x",
+      "startWord": "drug",
+      "targetWord": "shroud",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: drug → shroud"
+    },
+    {
+      "id": "exclusive_1749464220126_un0awcg08",
+      "startWord": "thrill",
+      "targetWord": "sappy",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: thrill → sappy"
+    },
+    {
+      "id": "exclusive_1749464220128_5f76nr2n5",
+      "startWord": "kill",
+      "targetWord": "wire",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: kill → wire"
+    },
+    {
+      "id": "exclusive_1749464220130_11q5zjo4g",
+      "startWord": "basin",
+      "targetWord": "cell",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: basin → cell"
+    },
+    {
+      "id": "exclusive_1749464220131_jb8skvjrg",
+      "startWord": "firm",
+      "targetWord": "drawback",
+      "optimalPathLength": 5,
+      "description": "5-step challenge: firm → drawback"
+    },
+    {
+      "id": "exclusive_1749464220132_ugi06hdjf",
+      "startWord": "prospect",
+      "targetWord": "mood",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: prospect → mood"
+    },
+    {
+      "id": "exclusive_1749464220143_slbtjmm0p",
+      "startWord": "fop",
+      "targetWord": "complain",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: fop → complain"
+    },
+    {
+      "id": "exclusive_1749464220145_eafksvlh8",
+      "startWord": "know",
+      "targetWord": "contemptuous",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: know → contemptuous"
+    }
+  ],
+  "themedSets": [
+    {
+      "id": "set_ocean-depths_1749464220145",
+      "name": "Ocean Depths",
+      "description": "Dive deep into the mysteries of the sea",
+      "theme": "ocean-depths",
+      "challenges": [
+        {
+          "id": "themed_ocean-depths_1749464220145_1o4zyh4e0",
+          "startWord": "tide",
+          "targetWord": "storm",
+          "optimalPathLength": 2,
+          "theme": "ocean-depths",
+          "description": "When calm waters turn wild"
+        },
+        {
+          "id": "themed_ocean-depths_1749464220145_8gavvduc2",
+          "startWord": "pearl",
+          "targetWord": "treasure",
+          "optimalPathLength": 2,
+          "theme": "ocean-depths",
+          "description": "Hidden gems of the deep"
+        }
+      ]
+    },
+    {
+      "id": "set_space-odyssey_1749464220145",
+      "name": "Space Odyssey",
+      "description": "Journey through the cosmos and beyond",
+      "theme": "space-odyssey",
+      "challenges": []
+    },
+    {
+      "id": "set_urban-pulse_1749464220149",
+      "name": "Urban Pulse",
+      "description": "Feel the rhythm of city life",
+      "theme": "urban-pulse",
+      "challenges": [
+        {
+          "id": "themed_urban-pulse_1749464220146_za3oayni0",
+          "startWord": "street",
+          "targetWord": "rhythm",
+          "optimalPathLength": 6,
+          "theme": "urban-pulse",
+          "description": "City beats and flows"
+        },
+        {
+          "id": "themed_urban-pulse_1749464220149_ig6has92x",
+          "startWord": "crowd",
+          "targetWord": "energy",
+          "optimalPathLength": 8,
+          "theme": "urban-pulse",
+          "description": "Collective power"
+        }
+      ]
+    }
+  ],
+  "allChallenges": [
+    {
+      "id": "exclusive_1749464219862_engdwf1xw",
+      "startWord": "release",
+      "targetWord": "footnote",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: release → footnote"
+    },
+    {
+      "id": "exclusive_1749464219907_atlvjtdrp",
+      "startWord": "hunt",
+      "targetWord": "camel",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: hunt → camel"
+    },
+    {
+      "id": "exclusive_1749464219983_8qqipxml9",
+      "startWord": "council",
+      "targetWord": "disperse",
+      "optimalPathLength": 2,
+      "description": "2-step challenge: council → disperse"
+    },
+    {
+      "id": "exclusive_1749464220033_5oy7q8b2s",
+      "startWord": "jaunty",
+      "targetWord": "trap",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: jaunty → trap"
+    },
+    {
+      "id": "exclusive_1749464220114_x9wn26atu",
+      "startWord": "truck",
+      "targetWord": "device",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: truck → device"
+    },
+    {
+      "id": "exclusive_1749464220117_ib8ny78pw",
+      "startWord": "whatsoever",
+      "targetWord": "tart",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: whatsoever → tart"
+    },
+    {
+      "id": "exclusive_1749464220120_w01m54ytu",
+      "startWord": "lake",
+      "targetWord": "edit",
+      "optimalPathLength": 7,
+      "description": "7-step challenge: lake → edit"
+    },
+    {
+      "id": "exclusive_1749464220123_uvgniwm6x",
+      "startWord": "drug",
+      "targetWord": "shroud",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: drug → shroud"
+    },
+    {
+      "id": "exclusive_1749464220126_un0awcg08",
+      "startWord": "thrill",
+      "targetWord": "sappy",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: thrill → sappy"
+    },
+    {
+      "id": "exclusive_1749464220128_5f76nr2n5",
+      "startWord": "kill",
+      "targetWord": "wire",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: kill → wire"
+    },
+    {
+      "id": "exclusive_1749464220130_11q5zjo4g",
+      "startWord": "basin",
+      "targetWord": "cell",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: basin → cell"
+    },
+    {
+      "id": "exclusive_1749464220131_jb8skvjrg",
+      "startWord": "firm",
+      "targetWord": "drawback",
+      "optimalPathLength": 5,
+      "description": "5-step challenge: firm → drawback"
+    },
+    {
+      "id": "exclusive_1749464220132_ugi06hdjf",
+      "startWord": "prospect",
+      "targetWord": "mood",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: prospect → mood"
+    },
+    {
+      "id": "exclusive_1749464220143_slbtjmm0p",
+      "startWord": "fop",
+      "targetWord": "complain",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: fop → complain"
+    },
+    {
+      "id": "exclusive_1749464220145_eafksvlh8",
+      "startWord": "know",
+      "targetWord": "contemptuous",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: know → contemptuous"
+    },
+    {
+      "id": "themed_ocean-depths_1749464220145_1o4zyh4e0",
+      "startWord": "tide",
+      "targetWord": "storm",
+      "optimalPathLength": 2,
+      "theme": "ocean-depths",
+      "description": "When calm waters turn wild"
+    },
+    {
+      "id": "themed_ocean-depths_1749464220145_8gavvduc2",
+      "startWord": "pearl",
+      "targetWord": "treasure",
+      "optimalPathLength": 2,
+      "theme": "ocean-depths",
+      "description": "Hidden gems of the deep"
+    },
+    {
+      "id": "themed_urban-pulse_1749464220146_za3oayni0",
+      "startWord": "street",
+      "targetWord": "rhythm",
+      "optimalPathLength": 6,
+      "theme": "urban-pulse",
+      "description": "City beats and flows"
+    },
+    {
+      "id": "themed_urban-pulse_1749464220149_ig6has92x",
+      "startWord": "crowd",
+      "targetWord": "energy",
+      "optimalPathLength": 8,
+      "theme": "urban-pulse",
+      "description": "Collective power"
+    }
+  ],
+  "qrCodes": [
+    {
+      "challengeId": "exclusive_1749464219862_engdwf1xw",
+      "startWord": "release",
+      "targetWord": "footnote",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: release → footnote",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464219862_engdwf1xw&start=release&target=footnote&hash=25rgnv",
+      "qrText": "release → footnote"
+    },
+    {
+      "challengeId": "exclusive_1749464219907_atlvjtdrp",
+      "startWord": "hunt",
+      "targetWord": "camel",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: hunt → camel",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464219907_atlvjtdrp&start=hunt&target=camel&hash=ea7bsl",
+      "qrText": "hunt → camel"
+    },
+    {
+      "challengeId": "exclusive_1749464219983_8qqipxml9",
+      "startWord": "council",
+      "targetWord": "disperse",
+      "optimalPathLength": 2,
+      "description": "2-step challenge: council → disperse",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464219983_8qqipxml9&start=council&target=disperse&hash=r65qrq",
+      "qrText": "council → disperse"
+    },
+    {
+      "challengeId": "exclusive_1749464220033_5oy7q8b2s",
+      "startWord": "jaunty",
+      "targetWord": "trap",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: jaunty → trap",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220033_5oy7q8b2s&start=jaunty&target=trap&hash=r1qe75",
+      "qrText": "jaunty → trap"
+    },
+    {
+      "challengeId": "exclusive_1749464220114_x9wn26atu",
+      "startWord": "truck",
+      "targetWord": "device",
+      "optimalPathLength": 3,
+      "description": "3-step challenge: truck → device",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220114_x9wn26atu&start=truck&target=device&hash=t40fwu",
+      "qrText": "truck → device"
+    },
+    {
+      "challengeId": "exclusive_1749464220117_ib8ny78pw",
+      "startWord": "whatsoever",
+      "targetWord": "tart",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: whatsoever → tart",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220117_ib8ny78pw&start=whatsoever&target=tart&hash=c1z2ab",
+      "qrText": "whatsoever → tart"
+    },
+    {
+      "challengeId": "exclusive_1749464220120_w01m54ytu",
+      "startWord": "lake",
+      "targetWord": "edit",
+      "optimalPathLength": 7,
+      "description": "7-step challenge: lake → edit",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220120_w01m54ytu&start=lake&target=edit&hash=jaobh9",
+      "qrText": "lake → edit"
+    },
+    {
+      "challengeId": "exclusive_1749464220123_uvgniwm6x",
+      "startWord": "drug",
+      "targetWord": "shroud",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: drug → shroud",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220123_uvgniwm6x&start=drug&target=shroud&hash=3wnowv",
+      "qrText": "drug → shroud"
+    },
+    {
+      "challengeId": "exclusive_1749464220126_un0awcg08",
+      "startWord": "thrill",
+      "targetWord": "sappy",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: thrill → sappy",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220126_un0awcg08&start=thrill&target=sappy&hash=ex1t0l",
+      "qrText": "thrill → sappy"
+    },
+    {
+      "challengeId": "exclusive_1749464220128_5f76nr2n5",
+      "startWord": "kill",
+      "targetWord": "wire",
+      "optimalPathLength": 8,
+      "description": "8-step challenge: kill → wire",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220128_5f76nr2n5&start=kill&target=wire&hash=bhug16",
+      "qrText": "kill → wire"
+    },
+    {
+      "challengeId": "exclusive_1749464220130_11q5zjo4g",
+      "startWord": "basin",
+      "targetWord": "cell",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: basin → cell",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220130_11q5zjo4g&start=basin&target=cell&hash=q1ha1u",
+      "qrText": "basin → cell"
+    },
+    {
+      "challengeId": "exclusive_1749464220131_jb8skvjrg",
+      "startWord": "firm",
+      "targetWord": "drawback",
+      "optimalPathLength": 5,
+      "description": "5-step challenge: firm → drawback",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220131_jb8skvjrg&start=firm&target=drawback&hash=epavio",
+      "qrText": "firm → drawback"
+    },
+    {
+      "challengeId": "exclusive_1749464220132_ugi06hdjf",
+      "startWord": "prospect",
+      "targetWord": "mood",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: prospect → mood",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220132_ugi06hdjf&start=prospect&target=mood&hash=8xb8oz",
+      "qrText": "prospect → mood"
+    },
+    {
+      "challengeId": "exclusive_1749464220143_slbtjmm0p",
+      "startWord": "fop",
+      "targetWord": "complain",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: fop → complain",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220143_slbtjmm0p&start=fop&target=complain&hash=8x969o",
+      "qrText": "fop → complain"
+    },
+    {
+      "challengeId": "exclusive_1749464220145_eafksvlh8",
+      "startWord": "know",
+      "targetWord": "contemptuous",
+      "optimalPathLength": 6,
+      "description": "6-step challenge: know → contemptuous",
+      "url": "https://synapse.game/exclusive?id=exclusive_1749464220145_eafksvlh8&start=know&target=contemptuous&hash=grmlx4",
+      "qrText": "know → contemptuous"
+    },
+    {
+      "challengeId": "themed_ocean-depths_1749464220145_1o4zyh4e0",
+      "startWord": "tide",
+      "targetWord": "storm",
+      "optimalPathLength": 2,
+      "theme": "ocean-depths",
+      "description": "When calm waters turn wild",
+      "url": "https://synapse.game/exclusive?id=themed_ocean-depths_1749464220145_1o4zyh4e0&start=tide&target=storm&hash=39p1h5",
+      "qrText": "tide → storm"
+    },
+    {
+      "challengeId": "themed_ocean-depths_1749464220145_8gavvduc2",
+      "startWord": "pearl",
+      "targetWord": "treasure",
+      "optimalPathLength": 2,
+      "theme": "ocean-depths",
+      "description": "Hidden gems of the deep",
+      "url": "https://synapse.game/exclusive?id=themed_ocean-depths_1749464220145_8gavvduc2&start=pearl&target=treasure&hash=q6luof",
+      "qrText": "pearl → treasure"
+    },
+    {
+      "challengeId": "themed_urban-pulse_1749464220146_za3oayni0",
+      "startWord": "street",
+      "targetWord": "rhythm",
+      "optimalPathLength": 6,
+      "theme": "urban-pulse",
+      "description": "City beats and flows",
+      "url": "https://synapse.game/exclusive?id=themed_urban-pulse_1749464220146_za3oayni0&start=street&target=rhythm&hash=3r3wah",
+      "qrText": "street → rhythm"
+    },
+    {
+      "challengeId": "themed_urban-pulse_1749464220149_ig6has92x",
+      "startWord": "crowd",
+      "targetWord": "energy",
+      "optimalPathLength": 8,
+      "theme": "urban-pulse",
+      "description": "Collective power",
+      "url": "https://synapse.game/exclusive?id=themed_urban-pulse_1749464220149_ig6has92x&start=crowd&target=energy&hash=f2bfph",
+      "qrText": "crowd → energy"
+    }
+  ]
+}
