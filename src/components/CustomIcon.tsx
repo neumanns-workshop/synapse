@@ -1,5 +1,5 @@
-import React from 'react';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React from "react";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface CustomIconProps {
   source: string;
@@ -8,7 +8,12 @@ interface CustomIconProps {
   style?: any;
 }
 
-const CustomIcon: React.FC<CustomIconProps> = ({ source, size = 24, color, style }) => {
+const CustomIcon: React.FC<CustomIconProps> = ({
+  source,
+  size = 24,
+  color,
+  style,
+}) => {
   return (
     <MaterialCommunityIcons
       name={source as any}
@@ -19,4 +24,4 @@ const CustomIcon: React.FC<CustomIconProps> = ({ source, size = 24, color, style
   );
 };
 
-export default CustomIcon; 
+export default CustomIcon;

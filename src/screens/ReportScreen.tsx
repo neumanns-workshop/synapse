@@ -23,10 +23,12 @@ import GameReportDisplay from "../components/GameReportDisplay";
 import GraphVisualization from "../components/GraphVisualization";
 import PlayerPathDisplay from "../components/PlayerPathDisplay";
 import WordDefinitionDialog from "../components/WordDefinitionDialog";
+import { QRCodeDisplay } from "../components/QRCodeDisplay";
 import {
   shareChallenge,
   generateSecureGameDeepLink,
   generateSecureDailyChallengeDeepLink,
+  generateChallengeMessage,
 } from "../services/SharingService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -39,6 +41,7 @@ const ReportScreen = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [challengeLink, setChallengeLink] = useState("");
   const [challengeDialogVisible, setChallengeDialogVisible] = useState(false);
+  const [challengeMessage, setChallengeMessage] = useState("");
 
   const gameStatus = useGameStore((state) => state.gameStatus);
   const gameReport = useGameStore((state) => state.gameReport);
@@ -89,12 +92,12 @@ const ReportScreen = () => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       try {
         await navigator.clipboard.writeText(text);
-        setSnackbarMessage("Challenge link copied to clipboard!");
+        setSnackbarMessage("Challenge copied to clipboard!");
         setSnackbarVisible(true);
         // Close dialog after copy (optional)
         setChallengeDialogVisible(false);
       } catch (error) {
-        setSnackbarMessage("Failed to copy challenge link");
+        setSnackbarMessage("Failed to copy challenge");
         setSnackbarVisible(true);
       }
     }
@@ -111,11 +114,6 @@ const ReportScreen = () => {
 
       const pathLength = playerPath.length - 1;
 
-      // Calculate time in seconds from timestamp
-      // const timeInSeconds = Math.floor(
-      //   (gameReport.timestamp - ((gameReport as any).startTime || 0)) / 1000,
-      // );
-
       // Prepare graph view for preview (player path only)
       prepareGraphPreview();
 
@@ -123,16 +121,31 @@ const ReportScreen = () => {
       if (Platform.OS === "web") {
         // Check if this is a daily challenge and generate appropriate link
         let link: string;
+        let message: string;
+
         if (gameReport.isDailyChallenge && gameReport.dailyChallengeId) {
           link = generateSecureDailyChallengeDeepLink(
             gameReport.dailyChallengeId,
             startWord,
             targetWord,
           );
+          // For daily challenges, we'd need the taunt message here
+          // But this should be handled by DailyChallengeReport component
+          message = `Daily challenge: "${startWord}" → "${targetWord}"`;
         } else {
           link = generateSecureGameDeepLink(startWord, targetWord);
+          message = generateChallengeMessage({
+            startWord,
+            targetWord,
+            playerPath,
+            steps: pathLength,
+            deepLink: link,
+            gameStatus: gameReport.status,
+          });
         }
+
         setChallengeLink(link);
+        setChallengeMessage(message);
         setChallengeDialogVisible(true);
         return;
       }
@@ -144,7 +157,6 @@ const ReportScreen = () => {
         playerPath,
         screenshotRef: graphPreviewRef, // Use the graph preview ref for sharing
         steps: pathLength,
-        // timeInSeconds, // Removed
       });
 
       if (success) {
@@ -216,28 +228,51 @@ const ReportScreen = () => {
             <Text
               style={[styles.dialogText, { color: colors.onSurfaceVariant }]}
             >
-              Share this link for a friend to play this exact game!
+              This message will be shared with the challenge:
             </Text>
 
-            {/* Graph preview for challenge */}
+            {/* Challenge message preview */}
             <View
               style={[
-                styles.graphPreviewContainer,
-                { borderColor: colors.outline },
+                styles.messagePreviewContainer,
+                {
+                  backgroundColor: colors.surfaceVariant,
+                  borderColor: colors.outline,
+                },
               ]}
-              ref={graphPreviewRef}
             >
-              {gameReport && (
-                <GraphVisualization
-                  height={180}
-                  gameReport={gameReport}
-                  pathDisplayModeOverride={{
-                    player: true,
-                    optimal: false,
-                    suggested: false,
-                  }}
-                />
-              )}
+              <Text
+                style={[
+                  styles.messagePreviewText,
+                  { color: colors.onSurfaceVariant },
+                ]}
+              >
+                {challengeMessage}
+              </Text>
+            </View>
+
+            {/* Graph preview for challenge */}
+            <View style={{ position: 'relative' }}>
+              <View
+                style={[
+                  styles.graphPreviewContainer,
+                  { borderColor: colors.outline },
+                ]}
+                ref={graphPreviewRef}
+              >
+                {gameReport && (
+                  <GraphVisualization
+                    height={180}
+                    gameReport={gameReport}
+                    pathDisplayModeOverride={{
+                      player: true,
+                      optimal: false,
+                      suggested: false,
+                    }}
+                  />
+                )}
+              </View>
+              <QRCodeDisplay value={challengeLink} size={60} overlay />
             </View>
 
             <TextInput
@@ -256,11 +291,13 @@ const ReportScreen = () => {
           </Dialog.Content>
           <Dialog.Actions>
             <Button
-              onPress={() => copyToClipboard(challengeLink)}
+              onPress={() =>
+                copyToClipboard(`${challengeMessage}\n\n${challengeLink}`)
+              }
               mode="contained"
               textColor={colors.onPrimary}
             >
-              Copy Link
+              Copy Challenge
             </Button>
             <Button
               onPress={() => setChallengeDialogVisible(false)}
@@ -328,6 +365,17 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginBottom: 16,
     borderWidth: 1,
+  },
+  messagePreviewContainer: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+  },
+  messagePreviewText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontStyle: "italic",
   },
   sectionContainer: {
     marginHorizontal: 8,

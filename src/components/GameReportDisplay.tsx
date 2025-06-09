@@ -306,7 +306,13 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
           <View style={[styles.section, styles.buttonSection]}>
             <Button
               mode="outlined"
-              icon={() => <CustomIcon source="share-variant" size={20} color={colors.primary} />}
+              icon={() => (
+                <CustomIcon
+                  source="share-variant"
+                  size={20}
+                  color={colors.primary}
+                />
+              )}
               onPress={() => {
                 if (onChallengePress) {
                   onChallengePress();

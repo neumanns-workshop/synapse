@@ -109,6 +109,14 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
       enabled: false,
       comingSoon: true,
     },
+    {
+      id: "semantic_sprints",
+      name: "Semantic Sprints",
+      description:
+        "Given a semantic distance target, complete multiple games to achieve the highest combined accuracy!",
+      enabled: false,
+      comingSoon: true,
+    },
   ]);
 
   const toggleFeature = (id: string) => {
@@ -137,9 +145,7 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
           <View style={styles.header}>
             <View style={styles.headerContent}>
               <View style={styles.headerText}>
-                <Dialog.Title
-                  style={{ color: colors.primary }}
-                >
+                <Dialog.Title style={{ color: colors.primary }}>
                   Lab
                 </Dialog.Title>
                 <Text
@@ -240,7 +246,13 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
                   marginBottom: 8,
                 }}
                 labelStyle={{ color: colors.onPrimary, fontWeight: "bold" }}
-                icon={() => <CustomIcon source="brain" size={20} color={colors.onPrimary} />}
+                icon={() => (
+                  <CustomIcon
+                    source="brain"
+                    size={20}
+                    color={colors.onPrimary}
+                  />
+                )}
               >
                 Sign In/Up
               </Button>

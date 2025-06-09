@@ -45,7 +45,9 @@ const TutorialModal: React.FC = () => {
       >
         <View style={styles.contentContainer}>
           <IconButton
-            icon={() => <CustomIcon source="close" size={24} color={colors.onSurface} />}
+            icon={() => (
+              <CustomIcon source="close" size={24} color={colors.onSurface} />
+            )}
             size={24}
             onPress={skipTutorial}
             style={styles.closeButton}

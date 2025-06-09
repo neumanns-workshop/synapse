@@ -220,7 +220,13 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
                         { backgroundColor: colors.surface },
                       ]}
                       contentStyle={styles.dropdownButtonContent}
-                      icon={() => <CustomIcon source="chevron-down" size={20} color={colors.onSurface} />}
+                      icon={() => (
+                        <CustomIcon
+                          source="chevron-down"
+                          size={20}
+                          color={colors.onSurface}
+                        />
+                      )}
                     >
                       {contactTypeOptions.find(
                         (option) => option.value === contactType,
@@ -233,7 +239,13 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
                     <Menu.Item
                       key={option.value}
                       title={option.label}
-                      leadingIcon={() => <CustomIcon source={option.icon} size={24} color={colors.onSurface} />}
+                      leadingIcon={() => (
+                        <CustomIcon
+                          source={option.icon}
+                          size={24}
+                          color={colors.onSurface}
+                        />
+                      )}
                       onPress={() => {
                         setContactType(option.value as ContactType);
                         setDropdownVisible(false);

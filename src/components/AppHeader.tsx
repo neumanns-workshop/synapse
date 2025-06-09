@@ -1,13 +1,7 @@
 import React from "react";
 import { Image, StyleSheet, Pressable, View, Text } from "react-native";
 
-import {
-  Appbar,
-  useTheme,
-  Badge,
-  Button,
-  Menu,
-} from "react-native-paper";
+import { Appbar, useTheme, Badge, Button, Menu } from "react-native-paper";
 import CustomIcon from "./CustomIcon";
 // Removed react-native-reanimated imports - using simple buttons instead
 
@@ -377,9 +371,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   const handleDailies = () => {
     setMenuVisible(false);
     setDailiesModalVisible(true);
+    // Clear daily challenge notification immediately when opening modal
+    checkIncompleteDailyChallenge();
   };
-
-
 
   const handleUpgrade = () => {
     setMenuVisible(false);
@@ -413,16 +407,22 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         {/* Auth/Account Button */}
         <Button
           mode="contained"
-          onPress={auth.user ? () => {
-            setMenuVisible(false);
-            onShowAccount?.();
-          } : () => {
-            setMenuVisible(false);
-            onShowAuth?.();
-          }}
+          onPress={
+            auth.user
+              ? () => {
+                  setMenuVisible(false);
+                  onShowAccount?.();
+                }
+              : () => {
+                  setMenuVisible(false);
+                  onShowAuth?.();
+                }
+          }
           compact
           buttonColor={auth.user ? customColors.currentNode : colors.primary}
-          icon={() => <CustomIcon source="brain" size={18} color={colors.onPrimary} />}
+          icon={() => (
+            <CustomIcon source="brain" size={18} color={colors.onPrimary} />
+          )}
           style={{ marginRight: 8 }}
           labelStyle={{
             color: colors.onPrimary,
@@ -463,7 +463,13 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 "Daily Challenges"
               )
             }
-            leadingIcon={() => <CustomIcon source="calendar-today" size={24} color={colors.onSurface} />}
+            leadingIcon={() => (
+              <CustomIcon
+                source="calendar-today"
+                size={24}
+                color={colors.onSurface}
+              />
+            )}
             titleStyle={{ color: colors.onSurface }}
           />
           <Menu.Item
@@ -488,19 +494,29 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 "Stats"
               )
             }
-            leadingIcon={() => <CustomIcon source="trophy" size={24} color={colors.onSurface} />}
+            leadingIcon={() => (
+              <CustomIcon source="trophy" size={24} color={colors.onSurface} />
+            )}
             titleStyle={{ color: colors.onSurface }}
           />
           <Menu.Item
             onPress={handleQuickstart}
             title="How to Play"
-            leadingIcon={() => <CustomIcon source="rocket-launch" size={24} color={colors.onSurface} />}
+            leadingIcon={() => (
+              <CustomIcon
+                source="rocket-launch"
+                size={24}
+                color={colors.onSurface}
+              />
+            )}
             titleStyle={{ color: colors.onSurface }}
           />
           <Menu.Item
             onPress={handleLab}
             title="Lab"
-            leadingIcon={() => <CustomIcon source="flask" size={24} color={colors.onSurface} />}
+            leadingIcon={() => (
+              <CustomIcon source="flask" size={24} color={colors.onSurface} />
+            )}
             titleStyle={{ color: colors.onSurface }}
           />
           <Menu.Item
@@ -522,13 +538,21 @@ const AppHeader: React.FC<AppHeaderProps> = ({
                 "News"
               )
             }
-            leadingIcon={() => <CustomIcon source="newspaper" size={24} color={colors.onSurface} />}
+            leadingIcon={() => (
+              <CustomIcon
+                source="newspaper"
+                size={24}
+                color={colors.onSurface}
+              />
+            )}
             titleStyle={{ color: colors.onSurface }}
           />
-                    <Menu.Item
+          <Menu.Item
             onPress={handleContact}
             title="Contact"
-            leadingIcon={() => <CustomIcon source="email" size={24} color={colors.onSurface} />}
+            leadingIcon={() => (
+              <CustomIcon source="email" size={24} color={colors.onSurface} />
+            )}
             titleStyle={{ color: colors.onSurface }}
           />
         </Menu>
@@ -539,7 +563,17 @@ const AppHeader: React.FC<AppHeaderProps> = ({
           <View
             style={[
               styles.notificationBadge,
-              { backgroundColor: getHighestPriorityColor() },
+              // If it's ONLY a daily challenge notification, make it hollow
+              unreadCount === 0 && 
+              unviewedAchievementCount === 0 && 
+              unviewedWordCollectionCount === 0 && 
+              hasIncompleteDailyChallenge
+                ? {
+                    backgroundColor: "transparent",
+                    borderColor: colors.primary,
+                    borderWidth: 2,
+                  }
+                : { backgroundColor: getHighestPriorityColor() },
             ]}
           />
         )}

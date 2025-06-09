@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 
-import {
-  Text,
-  Card,
-  useTheme,
-  ActivityIndicator,
-} from "react-native-paper";
+import { Text, Card, useTheme, ActivityIndicator } from "react-native-paper";
 import CustomIcon from "./CustomIcon";
 
 import { allWordCollections } from "../features/wordCollections";
@@ -141,11 +136,17 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
     const isAvailable = dailyChallengesService.isChallengeAvailable(
       challenge.date,
     );
-    const isCompleted = progress[challenge.id]?.completed;
+    const challengeProgress = progress[challenge.id];
+    const isCompleted = challengeProgress?.completed;
 
     // If it's completed, determine status based on move accuracy
     if (isCompleted) {
-      const playerMoves = progress[challenge.id]?.playerMoves || 0;
+      // Check the new status field first
+      if (challengeProgress.status === "given_up") {
+        return "completed"; // Always show as "completed" if given up
+      }
+
+      const playerMoves = challengeProgress.playerMoves || 0;
       const optimalMoves =
         challenge.optimalPathLength || challenge.aiSolution?.stepsTaken || 1;
       const aiMoves =
@@ -360,7 +361,11 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
         {/* Header with month navigation */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigateMonth("prev")}>
-            <CustomIcon source="chevron-left" size={24} color={colors.primary} />
+            <CustomIcon
+              source="chevron-left"
+              size={24}
+              color={colors.primary}
+            />
           </TouchableOpacity>
 
           <Text style={[styles.monthTitle, { color: colors.primary }]}>
@@ -368,7 +373,11 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
           </Text>
 
           <TouchableOpacity onPress={() => navigateMonth("next")}>
-            <CustomIcon source="chevron-right" size={24} color={colors.primary} />
+            <CustomIcon
+              source="chevron-right"
+              size={24}
+              color={colors.primary}
+            />
           </TouchableOpacity>
         </View>
 
@@ -413,7 +422,11 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
                 </Text>
                 {statusIcon && (
                   <View style={styles.statusIcon}>
-                    <CustomIcon source={statusIcon} size={12} color={statusColor} />
+                    <CustomIcon
+                      source={statusIcon}
+                      size={12}
+                      color={statusColor}
+                    />
                   </View>
                 )}
                 {/* Event indicators - bottom border bars */}
@@ -465,7 +478,11 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
             </Text>
           </View>
           <View style={styles.legendItem}>
-            <CustomIcon source="circle" size={16} color={customColors.startNode} />
+            <CustomIcon
+              source="circle"
+              size={16}
+              color={customColors.startNode}
+            />
             <Text
               style={[styles.legendText, { color: colors.onSurfaceVariant }]}
             >
@@ -473,7 +490,11 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
             </Text>
           </View>
           <View style={styles.legendItem}>
-            <CustomIcon source="circle-outline" size={16} color={colors.primary} />
+            <CustomIcon
+              source="circle-outline"
+              size={16}
+              color={colors.primary}
+            />
             <Text
               style={[styles.legendText, { color: colors.onSurfaceVariant }]}
             >

@@ -73,7 +73,11 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
 
   const renderListItemIcon = React.useCallback(
     (props: { color: string; style: ViewStyle }) => (
-      <CustomIcon source="book-open-variant" size={24} color={colors.onSurface} />
+      <CustomIcon
+        source="book-open-variant"
+        size={24}
+        color={colors.onSurface}
+      />
     ),
     [colors.onSurface],
   );
@@ -196,7 +200,13 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                 <AnimatedPaperButton
                   mode="text"
                   onPress={handleBacktrack}
-                  icon={() => <CustomIcon source="step-backward" size={20} color={buttonTextColor} />}
+                  icon={() => (
+                    <CustomIcon
+                      source="step-backward"
+                      size={20}
+                      color={buttonTextColor}
+                    />
+                  )}
                   textColor={buttonTextColor}
                 >
                   Backtrack

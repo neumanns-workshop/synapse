@@ -22,9 +22,11 @@ import CustomIcon from "./CustomIcon";
 import GameReportDisplay from "./GameReportDisplay";
 import GraphVisualization from "./GraphVisualization";
 import PlayerPathDisplay from "./PlayerPathDisplay";
+import { QRCodeDisplay } from "./QRCodeDisplay";
 import {
   shareDailyChallenge,
   generateSecureDailyChallengeDeepLink,
+  generateDailyChallengeTaunt,
 } from "../services/SharingService";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type {
@@ -59,17 +61,19 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [challengeLink, setChallengeLink] = useState("");
   const [challengeDialogVisible, setChallengeDialogVisible] = useState(false);
+  const [tauntMessage, setTauntMessage] = useState("");
 
   // Function to copy text to clipboard on web
   const copyToClipboard = async (text: string) => {
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       try {
         await navigator.clipboard.writeText(text);
-        setSnackbarMessage("Daily challenge link copied to clipboard!");
+        setSnackbarMessage("Challenge copied to clipboard!");
         setSnackbarVisible(true);
+        // Close dialog after copy (optional)
         setChallengeDialogVisible(false);
       } catch (error) {
-        setSnackbarMessage("Failed to copy daily challenge link");
+        setSnackbarMessage("Failed to copy challenge");
         setSnackbarVisible(true);
       }
     }
@@ -99,7 +103,20 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
           challenge.startWord,
           challenge.targetWord,
         );
+
+        // Generate the taunt message (same as native)
+        const taunt = generateDailyChallengeTaunt({
+          startWord: challenge.startWord,
+          targetWord: challenge.targetWord,
+          aiSteps,
+          userSteps,
+          userCompleted,
+          userGaveUp,
+          challengeDate: challenge.date,
+        });
+
         setChallengeLink(link);
+        setTauntMessage(taunt);
         setChallengeDialogVisible(true);
         return;
       }
@@ -135,7 +152,13 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
       <View style={styles.container}>
         <View style={styles.reportHeader}>
           <Button
-            icon={() => <CustomIcon source="arrow-left" size={20} color={colors.primary} />}
+            icon={() => (
+              <CustomIcon
+                source="arrow-left"
+                size={20}
+                color={colors.primary}
+              />
+            )}
             mode="text"
             onPress={onBack}
             textColor={colors.primary}
@@ -172,27 +195,50 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
               <Text
                 style={[styles.dialogText, { color: colors.onSurfaceVariant }]}
               >
-                Share this link to challenge friends with this daily puzzle!
+                This message will be shared with the challenge:
               </Text>
 
-              {/* Graph preview for challenge */}
+              {/* Taunt message preview */}
               <View
                 style={[
-                  styles.graphPreviewContainer,
-                  { borderColor: colors.outline },
+                  styles.messagePreviewContainer,
+                  {
+                    backgroundColor: colors.surfaceVariant,
+                    borderColor: colors.outline,
+                  },
                 ]}
-                ref={graphPreviewRef}
               >
-                <GraphVisualization
-                  height={180}
-                  gameReport={gameReport}
-                  pathDisplayModeOverride={{
-                    player: true,
-                    optimal: false,
-                    suggested: false,
-                    ai: false,
-                  }}
-                />
+                <Text
+                  style={[
+                    styles.messagePreviewText,
+                    { color: colors.onSurfaceVariant },
+                  ]}
+                >
+                  {tauntMessage}
+                </Text>
+              </View>
+
+              {/* Graph preview for challenge */}
+              <View style={{ position: 'relative' }}>
+                <View
+                  style={[
+                    styles.graphPreviewContainer,
+                    { borderColor: colors.outline },
+                  ]}
+                  ref={graphPreviewRef}
+                >
+                  <GraphVisualization
+                    height={180}
+                    gameReport={gameReport}
+                    pathDisplayModeOverride={{
+                      player: true,
+                      optimal: false,
+                      suggested: false,
+                      ai: false,
+                    }}
+                  />
+                </View>
+                <QRCodeDisplay value={challengeLink} size={60} overlay />
               </View>
 
               <TextInput
@@ -211,11 +257,13 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
             </Dialog.Content>
             <Dialog.Actions>
               <Button
-                onPress={() => copyToClipboard(challengeLink)}
+                onPress={() =>
+                  copyToClipboard(`${tauntMessage}\n\n${challengeLink}`)
+                }
                 mode="contained"
                 textColor={colors.onPrimary}
               >
-                Copy Link
+                Copy Challenge
               </Button>
               <Button
                 onPress={() => setChallengeDialogVisible(false)}
@@ -249,7 +297,9 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
     >
       <View style={styles.reportHeader}>
         <Button
-          icon={() => <CustomIcon source="arrow-left" size={20} color={colors.primary} />}
+          icon={() => (
+            <CustomIcon source="arrow-left" size={20} color={colors.primary} />
+          )}
           mode="text"
           onPress={onBack}
           textColor={colors.primary}
@@ -408,6 +458,9 @@ const styles = StyleSheet.create({
   },
   dialog: {
     borderRadius: 8,
+    maxWidth: 500,
+    width: '90%',
+    alignSelf: 'center',
   },
   dialogText: {
     marginBottom: 16,
@@ -418,6 +471,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 16,
     overflow: "hidden",
+  },
+  messagePreviewContainer: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+  },
+  messagePreviewText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontStyle: "italic",
   },
   linkInput: {
     borderWidth: 1,

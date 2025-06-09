@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   ScrollView,
@@ -31,6 +31,7 @@ import GameReportDisplay from "./GameReportDisplay";
 import GraphVisualization from "./GraphVisualization";
 import PlayerPathDisplay from "./PlayerPathDisplay";
 import WordDefinitionDialog from "./WordDefinitionDialog";
+import { QRCodeDisplay } from "./QRCodeDisplay";
 import { useAuth } from "../context/AuthContext";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
 import { allAchievements, Achievement } from "../features/achievements";
@@ -42,6 +43,8 @@ import {
   shareChallenge,
   generateSecureGameDeepLink,
   generateSecureDailyChallengeDeepLink,
+  generateChallengeMessage,
+  generateDailyChallengeTaunt,
 } from "../services/SharingService";
 import {
   loadGameHistory,
@@ -58,7 +61,7 @@ import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type { GameReport } from "../utils/gameReportUtils";
 
 // GameHistoryCard component for displaying game history entries
-const GameHistoryCard = ({
+const GameHistoryCard = React.memo(({
   report,
   theme,
   onPress,
@@ -174,10 +177,10 @@ const GameHistoryCard = ({
       </Card>
     </TouchableOpacity>
   );
-};
+});
 
 // AchievementCard component for displaying achievement items
-const AchievementCard = ({
+const AchievementCard = React.memo(({
   achievement,
   unlocked,
   theme,
@@ -247,7 +250,7 @@ const AchievementCard = ({
       </Card>
     </TouchableOpacity>
   );
-};
+});
 
 // Updated WordCollectionCard - Using Surface instead of Card to avoid text node errors
 const WordCollectionCard = ({
@@ -580,6 +583,8 @@ const StatsModal = () => {
 
   // State for historical challenge sharing
   const [historicalChallengeLink, setHistoricalChallengeLink] = useState("");
+  const [historicalChallengeMessage, setHistoricalChallengeMessage] =
+    useState("");
   const [
     historicalChallengeDialogVisible,
     setHistoricalChallengeDialogVisible,
@@ -629,9 +634,36 @@ const StatsModal = () => {
   }, [statsModalVisible]);
 
   // Handle game history item press
-  const handleReportPress = (report: GameReport) => {
+  const handleReportPress = useCallback((report: GameReport) => {
     setSelectedReport(report);
-  };
+  }, []);
+
+  // Show achievement detail modal
+  const showAchievementDetail = useCallback((achievement: Achievement) => {
+    setSelectedAchievement(achievement);
+    setAchievementDialogVisible(true);
+  }, []);
+
+  // Memoized render functions for FlatList optimization
+  const renderGameHistoryItem = useCallback(({ item }: { item: GameReport }) => (
+    <GameHistoryCard
+      report={item}
+      theme={appTheme}
+      onPress={() => handleReportPress(item)}
+      onAchievementPress={showAchievementDetail}
+    />
+  ), [appTheme, handleReportPress, showAchievementDetail]);
+
+  const keyExtractor = useCallback((item: GameReport) => item.id, []);
+
+  // Calculate consistent item height for getItemLayout optimization
+  const GAME_HISTORY_ITEM_HEIGHT = 120; // Approximate height of GameHistoryCard
+
+  const getItemLayout = useCallback((data: any, index: number) => ({
+    length: GAME_HISTORY_ITEM_HEIGHT,
+    offset: GAME_HISTORY_ITEM_HEIGHT * index,
+    index,
+  }), []);
 
   // Close selected report view
   const handleBackToHistory = () => {
@@ -652,11 +684,6 @@ const StatsModal = () => {
   };
 
   // Achievement dialog functions
-  const showAchievementDetail = (achievement: Achievement) => {
-    setSelectedAchievement(achievement);
-    setAchievementDialogVisible(true);
-  };
-
   const hideAchievementDetail = () => {
     setSelectedAchievement(null);
     setAchievementDialogVisible(false);
@@ -740,6 +767,8 @@ const StatsModal = () => {
       if (Platform.OS === "web") {
         // Check if this is a daily challenge and generate appropriate link
         let link: string;
+        let message: string;
+
         if (
           selectedReport.isDailyChallenge &&
           selectedReport.dailyChallengeId
@@ -749,10 +778,23 @@ const StatsModal = () => {
             startWord,
             targetWord,
           );
+          // For daily challenges, we'd need the AI steps and other data
+          // For now, use a simple message since we don't have all the data
+          message = `Daily challenge: "${startWord}" → "${targetWord}"`;
         } else {
           link = generateSecureGameDeepLink(startWord, targetWord);
+          message = generateChallengeMessage({
+            startWord,
+            targetWord,
+            playerPath,
+            steps: pathLength,
+            deepLink: link,
+            gameStatus: selectedReport.status,
+          });
         }
+
         setHistoricalChallengeLink(link);
+        setHistoricalChallengeMessage(message);
         setHistoricalChallengeDialogVisible(true);
       } else {
         const success = await shareChallenge({
@@ -908,7 +950,13 @@ const StatsModal = () => {
         <View style={styles.reportContainer} ref={historicalReportRef}>
           <View style={styles.reportHeader}>
             <Button
-              icon={() => <CustomIcon source="arrow-left" size={20} color={appTheme.colors.primary} />}
+              icon={() => (
+                <CustomIcon
+                  source="arrow-left"
+                  size={20}
+                  color={appTheme.colors.primary}
+                />
+              )}
               mode="text"
               onPress={handleBackToHistory}
               textColor={appTheme.colors.primary}
@@ -937,15 +985,13 @@ const StatsModal = () => {
     return (
       <FlatList
         data={history}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <GameHistoryCard
-            report={item}
-            theme={appTheme}
-            onPress={() => handleReportPress(item)}
-            onAchievementPress={showAchievementDetail}
-          />
-        )}
+        keyExtractor={keyExtractor}
+        renderItem={renderGameHistoryItem}
+        getItemLayout={getItemLayout}
+        initialNumToRender={10}
+        maxToRenderPerBatch={5}
+        windowSize={10}
+        removeClippedSubviews={true}
         ListEmptyComponent={
           <Text
             style={[
@@ -1118,9 +1164,10 @@ const StatsModal = () => {
       // Determine path length color (no difficulty labels)
       const getPathLengthColor = (moves: number) => {
         if (moves === 3) return appTheme.customColors.startNode; // 3 moves - green
-        if (moves === 4) return appTheme.colors.primary; // 4 moves - blue
-        if (moves === 5) return appTheme.customColors.warningColor; // 5 moves - orange
-        if (moves === 6) return appTheme.customColors.endNode; // 6 moves - red
+        if (moves === 4) return appTheme.customColors.currentNode; // 4 moves - blue
+        if (moves === 5) return appTheme.customColors.localOptimalNode; // 5 moves - purple
+        if (moves === 6) return appTheme.customColors.warningColor; // 6 moves - orange
+        if (moves === 7) return appTheme.customColors.endNode; // 7 moves - red
         return appTheme.colors.onSurface; // fallback for any outliers
       };
 
@@ -1405,10 +1452,8 @@ const StatsModal = () => {
               expanded={achievementsExpanded}
               onToggle={() => {
                 setAchievementsExpanded(!achievementsExpanded);
-                // Mark achievements as viewed when section is expanded
-                if (!achievementsExpanded) {
-                  markAchievementsAsViewed();
-                }
+                // Mark achievements as viewed when section is opened or closed
+                markAchievementsAsViewed();
               }}
             />
 
@@ -1448,10 +1493,8 @@ const StatsModal = () => {
               expanded={collectionsExpanded}
               onToggle={() => {
                 setCollectionsExpanded(!collectionsExpanded);
-                // Mark word collections as viewed when section is expanded
-                if (!collectionsExpanded) {
-                  markWordCollectionsAsViewed();
-                }
+                // Mark word collections as viewed when section is opened or closed
+                markWordCollectionsAsViewed();
               }}
             />
 
@@ -1528,7 +1571,13 @@ const StatsModal = () => {
           <Button
             mode="text"
             onPress={() => setStatsModalVisible(false)}
-            icon={() => <CustomIcon source="close" size={20} color={appTheme.colors.onSurfaceVariant} />}
+            icon={() => (
+              <CustomIcon
+                source="close"
+                size={20}
+                color={appTheme.colors.onSurfaceVariant}
+              />
+            )}
             compact
             style={styles.closeButton}
             labelStyle={{ color: appTheme.colors.onSurfaceVariant }}
@@ -1590,21 +1639,44 @@ const StatsModal = () => {
                   { color: appTheme.colors.onSurfaceVariant },
                 ]}
               >
-                Share this link for a friend to play this exact game!
+                This message will be shared with the challenge:
               </Text>
 
-              <View style={styles.graphPreviewContainer} ref={graphPreviewRef}>
-                {selectedReport && (
-                  <GraphVisualization
-                    height={180}
-                    gameReport={selectedReport}
-                    pathDisplayModeOverride={{
-                      player: true,
-                      optimal: false,
-                      suggested: false,
-                    }}
-                  />
-                )}
+              {/* Challenge message preview */}
+              <View
+                style={[
+                  styles.messagePreviewContainer,
+                  {
+                    backgroundColor: appTheme.colors.surfaceVariant,
+                    borderColor: appTheme.colors.outline,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.messagePreviewText,
+                    { color: appTheme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {historicalChallengeMessage}
+                </Text>
+              </View>
+
+              <View style={{ position: 'relative' }}>
+                <View style={styles.graphPreviewContainer} ref={graphPreviewRef}>
+                  {selectedReport && (
+                    <GraphVisualization
+                      height={180}
+                      gameReport={selectedReport}
+                      pathDisplayModeOverride={{
+                        player: true,
+                        optimal: false,
+                        suggested: false,
+                      }}
+                    />
+                  )}
+                </View>
+                <QRCodeDisplay value={historicalChallengeLink} size={60} overlay />
               </View>
 
               <TextInput
@@ -1623,11 +1695,15 @@ const StatsModal = () => {
             </Dialog.Content>
             <Dialog.Actions>
               <Button
-                onPress={() => copyToClipboard(historicalChallengeLink)}
+                onPress={() =>
+                  copyToClipboard(
+                    `${historicalChallengeMessage}\n\n${historicalChallengeLink}`,
+                  )
+                }
                 mode="contained"
                 textColor={appTheme.colors.onPrimary}
               >
-                Copy Link
+                Copy Challenge
               </Button>
               <Button
                 onPress={() => setHistoricalChallengeDialogVisible(false)}
@@ -1999,6 +2075,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1,
     borderColor: "rgba(0,0,0,0.1)",
+  },
+  messagePreviewContainer: {
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+  },
+  messagePreviewText: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontStyle: "italic",
   },
   highlightStatHeader: {
     flexDirection: "row",

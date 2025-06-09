@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Alert } from "react-native";
+import { View, StyleSheet } from "react-native";
 
 import {
   Modal,
@@ -152,28 +152,6 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
     onUpgrade();
   };
 
-  const handleDebugPurchase = async () => {
-    if (process.env.NODE_ENV === "development") {
-      setIsLoading(true);
-      try {
-        const result = await stripeService.debugPurchasePremium();
-        if (result.success) {
-          Alert.alert(
-            "Debug Purchase",
-            "Galaxy Brain status activated! (Debug mode)",
-          );
-          onDismiss();
-        } else {
-          Alert.alert("Debug Error", result.error || "Debug purchase failed");
-        }
-      } catch (error) {
-        console.error("Debug purchase error:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-  };
-
   // Debug logging
   console.log(
     "UpgradePrompt: render called with visible =",
@@ -200,7 +178,7 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
               <CustomIcon
                 source="brain"
                 size={48}
-                color={customColors.achievementIcon}
+                color={customColors.localOptimalNode}
               />
               <Text
                 variant="headlineSmall"
@@ -268,7 +246,17 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
                 mode="contained"
                 onPress={handleUpgrade}
                 style={styles.upgradeButton}
-                icon={isLoading ? undefined : () => <CustomIcon source="brain" size={20} color={colors.onPrimary} />}
+                icon={
+                  isLoading
+                    ? undefined
+                    : () => (
+                        <CustomIcon
+                          source="brain"
+                          size={20}
+                          color={colors.onPrimary}
+                        />
+                      )
+                }
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -278,20 +266,6 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
                 )}
               </Button>
             </View>
-
-            {/* Debug button for development */}
-            {process.env.NODE_ENV === "development" && (
-              <View style={styles.debugActions}>
-                <Button
-                  mode="text"
-                  onPress={handleDebugPurchase}
-                  disabled={isLoading}
-                  textColor={colors.outline}
-                >
-                  🧪 Debug: Activate Galaxy Brain
-                </Button>
-              </View>
-            )}
           </Card>
         </View>
       )}
@@ -365,11 +339,6 @@ const styles = StyleSheet.create({
   },
   upgradeButton: {
     flex: 1,
-  },
-  debugActions: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 12,
   },
 });
 

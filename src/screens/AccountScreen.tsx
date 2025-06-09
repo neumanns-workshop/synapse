@@ -14,6 +14,7 @@ import {
   Dialog,
 } from "react-native-paper";
 import CustomIcon from "../components/CustomIcon";
+import { ProgressiveSyncIndicator } from "../components/ProgressiveSyncIndicator";
 
 import { useAuth } from "../context/AuthContext";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
@@ -28,6 +29,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
   const { theme: appTheme } = useAppTheme();
   const auth = useAuth();
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showProgressiveSync, setShowProgressiveSync] = useState(false);
   const [isUpdatingPreferences, setIsUpdatingPreferences] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -42,58 +44,67 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
     setSnackbarVisible(true);
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     console.log("🔓 AccountScreen handleSignOut called");
-    auth.signOut();
+    try {
+      await auth.signOut();
+      console.log("🔓 Sign out completed successfully");
+    } catch (error) {
+      console.error("🔓 Sign out error:", error);
+    }
     onClose();
   };
 
   const handleSyncData = async () => {
-    console.log("🔄 Manual sync started from AccountScreen");
+    console.log("🔄 Manual progressive sync started from AccountScreen");
     setIsSyncing(true);
+    setShowProgressiveSync(true);
+    
+    // The ProgressiveSyncIndicator will automatically listen to the sync progress
+    // We just need to trigger a single sync operation
     try {
-      // Sync local data to cloud first
-      console.log("🔄 Starting manual upload to cloud...");
-      const uploadResult = await auth.syncDataToCloud();
-      console.log("🔄 Upload result:", uploadResult);
-      if (uploadResult.error) {
-        console.log("🔄 Upload failed:", uploadResult.error);
-        throw new Error("Failed to upload data to cloud");
+      console.log("🔄 Starting progressive sync to cloud...");
+      
+      // For manual sync, we typically want to sync TO cloud (backup local data)
+      const result = await auth.syncDataToCloud();
+      if (result.error) {
+        throw result.error;
       }
-      console.log("🔄 Upload completed successfully");
-
-      // Then sync cloud data back to local (in case there were updates)
-      console.log("🔄 Starting manual download from cloud...");
-      const downloadResult = await auth.syncDataFromCloud();
-      console.log("🔄 Download result:", downloadResult);
-      if (downloadResult.error) {
-        console.log("🔄 Download failed:", downloadResult.error);
-        throw new Error("Failed to download data from cloud");
-      }
-      console.log("🔄 Download completed successfully");
-
-      console.log("🔄 Manual sync completed successfully");
-      showMessage("Data synced successfully!");
+      
+      console.log("🔄 Progressive sync completed successfully");
     } catch (error) {
-      console.log("🔄 Manual sync failed:", error);
+      console.error("🔄 Progressive sync failed:", error);
+      // Error will be handled by the ProgressiveSyncIndicator onComplete callback
+    }
+  };
+
+  const handleSyncComplete = async (success: boolean) => {
+    console.log("🔄 Progressive sync completed:", success ? "success" : "failed");
+    setShowProgressiveSync(false);
+    setIsSyncing(false);
+    
+    if (success) {
+      showMessage("Data synced successfully!");
+    } else {
       Alert.alert("Sync Error", "Failed to sync data. Please try again.");
-    } finally {
-      console.log("🔄 Setting isSyncing to false");
-      setIsSyncing(false);
     }
   };
 
   const handleEmailPreferenceChange = async (value: boolean) => {
+    console.log("📧 Email preference toggle pressed:", value);
     setIsUpdatingPreferences(true);
     try {
       const { error } = await auth.updateEmailPreferences(value);
       if (error) {
+        console.error("📧 Email preference update failed:", error);
         throw error;
       }
+      console.log("📧 Email preference update successful");
       showMessage(
         value ? "You will now receive email updates" : "Email updates disabled",
       );
     } catch (error) {
+      console.error("📧 Email preference error:", error);
       Alert.alert(
         "Error",
         "Failed to update email preferences. Please try again.",
@@ -104,16 +115,24 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
   };
 
   const handleDataCollectionChange = async (value: boolean) => {
+    console.log("📊 Data collection toggle pressed:", value);
     setIsUpdatingPreferences(true);
     try {
-      const { error } = await auth.updatePrivacySettings({ data_collection: value });
+      const { error } = await auth.updatePrivacySettings({
+        data_collection: value,
+      });
       if (error) {
+        console.error("📊 Data collection update failed:", error);
         throw error;
       }
+      console.log("📊 Data collection update successful");
       showMessage(
-        value ? "Analytics enabled - thank you for helping improve Synapse!" : "Analytics disabled",
+        value
+          ? "Analytics enabled - thank you for helping improve Synapse!"
+          : "Analytics disabled",
       );
     } catch (error) {
+      console.error("📊 Data collection error:", error);
       Alert.alert(
         "Error",
         "Failed to update analytics preference. Please try again.",
@@ -124,16 +143,24 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
   };
 
   const handleLeaderboardsChange = async (value: boolean) => {
+    console.log("🏆 Leaderboard toggle pressed:", value);
     setIsUpdatingPreferences(true);
     try {
-      const { error } = await auth.updatePrivacySettings({ allow_leaderboards: value });
+      const { error } = await auth.updatePrivacySettings({
+        allow_leaderboards: value,
+      });
       if (error) {
+        console.error("🏆 Leaderboard update failed:", error);
         throw error;
       }
+      console.log("🏆 Leaderboard update successful");
       showMessage(
-        value ? "Leaderboard participation enabled" : "Leaderboard participation disabled",
+        value
+          ? "Leaderboard participation enabled"
+          : "Leaderboard participation disabled",
       );
     } catch (error) {
+      console.error("🏆 Leaderboard error:", error);
       Alert.alert(
         "Error",
         "Failed to update leaderboard preference. Please try again.",
@@ -154,18 +181,27 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
     try {
       console.log("🗑️ Starting account deletion process...");
       const { error } = await auth.deleteAccount();
-      
+
       if (error) {
         console.error("🗑️ Account deletion failed:", error);
         // Check if it's a function not found error
-        if (error.message?.includes("delete-user-account") || error.message?.includes("Function not found")) {
-          showMessage("Account deletion functionality is being implemented. Please contact support if you need to delete your account immediately.");
+        if (
+          error.message?.includes("delete-user-account") ||
+          error.message?.includes("Function not found")
+        ) {
+          showMessage(
+            "Account deletion functionality is being implemented. Please contact support if you need to delete your account immediately.",
+          );
         } else {
-          showMessage("Failed to delete account. Please try again or contact support if the problem persists.");
+          showMessage(
+            "Failed to delete account. Please try again or contact support if the problem persists.",
+          );
         }
       } else {
         console.log("🗑️ Account deletion successful");
-        showMessage("Your Galaxy Brain account has been permanently deleted. Thank you for using Synapse.");
+        showMessage(
+          "Your Galaxy Brain account has been permanently deleted. Thank you for using Synapse.",
+        );
         setTimeout(() => onClose(), 2000); // Close after showing message
       }
     } catch (error) {
@@ -248,8 +284,10 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
   const profile = auth.profile;
   const createdDate = new Date(profile.created_at).toLocaleDateString();
   const emailUpdatesEnabled = profile.privacy_settings?.email_updates || false;
-  const dataCollectionEnabled = profile.privacy_settings?.data_collection || false;
-  const leaderboardsEnabled = profile.privacy_settings?.allow_leaderboards ?? true;
+  const dataCollectionEnabled =
+    profile.privacy_settings?.data_collection || false;
+  const leaderboardsEnabled =
+    profile.privacy_settings?.allow_leaderboards ?? true;
 
   return (
     <Portal>
@@ -275,7 +313,13 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
               onPress={handleSignOut}
               compact
               buttonColor={appTheme.colors.error}
-              icon={() => <CustomIcon source="brain" size={18} color={appTheme.colors.onError} />}
+              icon={() => (
+                <CustomIcon
+                  source="brain"
+                  size={18}
+                  color={appTheme.colors.onError}
+                />
+              )}
               style={{ marginRight: 8 }}
               labelStyle={{
                 color: appTheme.colors.onError,
@@ -288,7 +332,13 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
             <Button
               mode="text"
               onPress={onClose}
-              icon={() => <CustomIcon source="close" size={20} color={appTheme.colors.onSurfaceVariant} />}
+              icon={() => (
+                <CustomIcon
+                  source="close"
+                  size={20}
+                  color={appTheme.colors.onSurfaceVariant}
+                />
+              )}
               compact
               labelStyle={{ color: appTheme.colors.onSurfaceVariant }}
             >
@@ -322,7 +372,11 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
                 title="Email"
                 description={profile.email}
                 left={(props) => (
-                  <CustomIcon source="email" size={24} color={appTheme.colors.primary} />
+                  <CustomIcon
+                    source="email"
+                    size={24}
+                    color={appTheme.colors.primary}
+                  />
                 )}
                 titleStyle={{ color: appTheme.colors.onSurface }}
                 descriptionStyle={{ color: appTheme.colors.onSurfaceVariant }}
@@ -332,10 +386,10 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
                 title="Account Type"
                 description={profile.is_premium ? "Galaxy Brain" : "Free"}
                 left={(props) => (
-                  <CustomIcon 
-                    source={profile.is_premium ? "brain" : "account"} 
-                    size={24} 
-                    color={appTheme.colors.primary} 
+                  <CustomIcon
+                    source={profile.is_premium ? "brain" : "account"}
+                    size={24}
+                    color={appTheme.colors.primary}
                   />
                 )}
                 titleStyle={{ color: appTheme.colors.onSurface }}
@@ -346,7 +400,11 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
                 title="Member Since"
                 description={createdDate}
                 left={(props) => (
-                  <CustomIcon source="calendar" size={24} color={appTheme.colors.primary} />
+                  <CustomIcon
+                    source="calendar"
+                    size={24}
+                    color={appTheme.colors.primary}
+                  />
                 )}
                 titleStyle={{ color: appTheme.colors.onSurface }}
                 descriptionStyle={{ color: appTheme.colors.onSurfaceVariant }}
@@ -388,8 +446,13 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
                 mode="outlined"
                 onPress={handleSyncData}
                 disabled={isSyncing}
-                loading={isSyncing}
-                icon={() => <CustomIcon source="sync" size={20} color={appTheme.colors.primary} />}
+                icon={() => (
+                  <CustomIcon
+                    source="sync"
+                    size={20}
+                    color={appTheme.colors.primary}
+                  />
+                )}
                 style={[
                   styles.syncButton,
                   { borderColor: appTheme.colors.primary },
@@ -425,7 +488,11 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
                 title="Email Updates"
                 description="Receive news and updates via email"
                 left={(props) => (
-                  <CustomIcon source="email-newsletter" size={24} color={appTheme.colors.primary} />
+                  <CustomIcon
+                    source="email-newsletter"
+                    size={24}
+                    color={appTheme.colors.primary}
+                  />
                 )}
                 right={() => (
                   <Switch
@@ -443,7 +510,11 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
                 title="Analytics & Improvement"
                 description="Help improve Synapse with anonymized usage data"
                 left={(props) => (
-                  <CustomIcon source="chart-line" size={24} color={appTheme.colors.primary} />
+                  <CustomIcon
+                    source="chart-line"
+                    size={24}
+                    color={appTheme.colors.primary}
+                  />
                 )}
                 right={() => (
                   <Switch
@@ -461,7 +532,11 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
                 title="Leaderboard Participation"
                 description="Share daily challenge scores for percentile rankings"
                 left={(props) => (
-                  <CustomIcon source="trophy" size={24} color={appTheme.colors.primary} />
+                  <CustomIcon
+                    source="trophy"
+                    size={24}
+                    color={appTheme.colors.primary}
+                  />
                 )}
                 right={() => (
                   <Switch
@@ -520,7 +595,12 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
                       { color: appTheme.colors.onSurfaceVariant },
                     ]}
                   >
-                    <Text style={{ fontWeight: "bold" }}>Your Privacy Matters:</Text> Synapse is designed with privacy in mind. We only collect data necessary to provide and improve the game experience, and to explore semantic reasoning for independent research.
+                    <Text style={{ fontWeight: "bold" }}>
+                      Your Privacy Matters:
+                    </Text>{" "}
+                    Synapse is designed with privacy in mind. We only collect
+                    data necessary to provide and improve the game experience,
+                    and to explore semantic reasoning for independent research.
                   </Text>
 
                   <Text
@@ -529,7 +609,10 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
                       { color: appTheme.colors.onSurfaceVariant },
                     ]}
                   >
-                    <Text style={{ fontWeight: "bold" }}>What We Collect:</Text> Game progress, achievements, and anonymized usage patterns (if enabled above). We never sell your data or share it with third parties.
+                    <Text style={{ fontWeight: "bold" }}>What We Collect:</Text>{" "}
+                    Game progress, achievements, and anonymized usage patterns
+                    (if enabled above). We never sell your data or share it with
+                    third parties.
                   </Text>
 
                   <Text
@@ -538,7 +621,10 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
                       { color: appTheme.colors.onSurfaceVariant },
                     ]}
                   >
-                    <Text style={{ fontWeight: "bold" }}>Your Control:</Text> You can disable analytics, manage email preferences, and delete your account at any time. All data is encrypted and securely stored.
+                    <Text style={{ fontWeight: "bold" }}>Your Control:</Text>{" "}
+                    You can disable analytics, manage email preferences, and
+                    delete your account at any time. All data is encrypted and
+                    securely stored.
                   </Text>
                 </View>
               )}
@@ -557,10 +643,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
           >
             <Card.Content>
               <Text
-                style={[
-                  styles.sectionTitle,
-                  { color: appTheme.colors.error },
-                ]}
+                style={[styles.sectionTitle, { color: appTheme.colors.error }]}
               >
                 ⚠️ Danger Zone
               </Text>
@@ -571,13 +654,20 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
                   { color: appTheme.colors.onErrorContainer },
                 ]}
               >
-                <Text style={{ fontWeight: "bold" }}>Permanent Actions:</Text> These actions cannot be undone. Please proceed with caution.
+                <Text style={{ fontWeight: "bold" }}>Permanent Actions:</Text>{" "}
+                These actions cannot be undone. Please proceed with caution.
               </Text>
 
               <Button
                 mode="outlined"
                 onPress={handleDeleteAccount}
-                icon={() => <CustomIcon source="delete-forever" size={20} color={appTheme.colors.error} />}
+                icon={() => (
+                  <CustomIcon
+                    source="delete-forever"
+                    size={20}
+                    color={appTheme.colors.error}
+                  />
+                )}
                 style={[
                   styles.deleteButton,
                   { borderColor: appTheme.colors.error },
@@ -588,26 +678,26 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
               </Button>
             </Card.Content>
           </Card>
-
-
         </ScrollView>
 
         <Snackbar
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
           duration={3000}
-          style={{ 
+          style={{
             backgroundColor: appTheme.colors.inverseSurface,
             marginHorizontal: 20,
             maxWidth: 500,
             alignSelf: "center",
           }}
         >
-          <Text style={{ 
-            color: appTheme.colors.inverseOnSurface,
-            flexWrap: "wrap",
-            textAlign: "center",
-          }}>
+          <Text
+            style={{
+              color: appTheme.colors.inverseOnSurface,
+              flexWrap: "wrap",
+              textAlign: "center",
+            }}
+          >
             {snackbarMessage}
           </Text>
         </Snackbar>
@@ -626,8 +716,8 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
           alignSelf: "center",
         }}
       >
-        <Dialog.Title 
-          style={{ 
+        <Dialog.Title
+          style={{
             color: appTheme.colors.error,
             fontSize: 20,
             fontWeight: "bold",
@@ -647,44 +737,75 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
             }}
           >
             <Card.Content style={{ padding: 16 }}>
-              <Text style={{ 
-                color: appTheme.colors.onErrorContainer, 
-                fontSize: 14,
-                lineHeight: 20,
-                marginBottom: 12,
-              }}>
-                This will permanently delete your Galaxy Brain account and all associated data. This action cannot be undone.
+              <Text
+                style={{
+                  color: appTheme.colors.onErrorContainer,
+                  fontSize: 14,
+                  lineHeight: 20,
+                  marginBottom: 12,
+                }}
+              >
+                This will permanently delete your Galaxy Brain account and all
+                associated data. This action cannot be undone.
               </Text>
-              <Text style={{ 
-                color: appTheme.colors.error, 
-                fontWeight: "bold", 
-                fontSize: 14,
-                marginBottom: 8,
-              }}>
+              <Text
+                style={{
+                  color: appTheme.colors.error,
+                  fontWeight: "bold",
+                  fontSize: 14,
+                  marginBottom: 8,
+                }}
+              >
                 You will lose your Galaxy Brain benefits:
               </Text>
               <View style={{ marginLeft: 8 }}>
-                <Text style={{ color: appTheme.colors.onErrorContainer, fontSize: 14, lineHeight: 22 }}>
+                <Text
+                  style={{
+                    color: appTheme.colors.onErrorContainer,
+                    fontSize: 14,
+                    lineHeight: 22,
+                  }}
+                >
                   • Unlimited random games daily
                 </Text>
-                <Text style={{ color: appTheme.colors.onErrorContainer, fontSize: 14, lineHeight: 22 }}>
+                <Text
+                  style={{
+                    color: appTheme.colors.onErrorContainer,
+                    fontSize: 14,
+                    lineHeight: 22,
+                  }}
+                >
                   • Access to all past daily challenges
                 </Text>
-                <Text style={{ color: appTheme.colors.onErrorContainer, fontSize: 14, lineHeight: 22 }}>
+                <Text
+                  style={{
+                    color: appTheme.colors.onErrorContainer,
+                    fontSize: 14,
+                    lineHeight: 22,
+                  }}
+                >
                   • Sync progress across all devices
                 </Text>
-                <Text style={{ color: appTheme.colors.onErrorContainer, fontSize: 14, lineHeight: 22 }}>
+                <Text
+                  style={{
+                    color: appTheme.colors.onErrorContainer,
+                    fontSize: 14,
+                    lineHeight: 22,
+                  }}
+                >
                   • Early access to Lab features
                 </Text>
               </View>
             </Card.Content>
           </Card>
-          <Text style={{ 
-            color: appTheme.colors.onSurface, 
-            fontSize: 16,
-            fontWeight: "bold",
-            textAlign: "center",
-          }}>
+          <Text
+            style={{
+              color: appTheme.colors.onSurface,
+              fontSize: 16,
+              fontWeight: "bold",
+              textAlign: "center",
+            }}
+          >
             Are you absolutely sure?
           </Text>
         </Dialog.Content>
@@ -692,7 +813,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
           <Button
             mode="outlined"
             onPress={() => setDeleteDialogVisible(false)}
-            style={{ 
+            style={{
               flex: 1,
               marginRight: 8,
               borderColor: appTheme.colors.outline,
@@ -707,9 +828,17 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
             loading={isUpdatingPreferences}
             disabled={isUpdatingPreferences}
             buttonColor={appTheme.colors.error}
-            icon={() => !isUpdatingPreferences ? <CustomIcon source="delete-forever" size={18} color={appTheme.colors.onError} /> : undefined}
+            icon={() =>
+              !isUpdatingPreferences ? (
+                <CustomIcon
+                  source="delete-forever"
+                  size={18}
+                  color={appTheme.colors.onError}
+                />
+              ) : undefined
+            }
             style={{ flex: 1 }}
-            labelStyle={{ 
+            labelStyle={{
               color: appTheme.colors.onError,
               fontWeight: "bold",
             }}
@@ -718,6 +847,12 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
           </Button>
         </Dialog.Actions>
       </Dialog>
+
+      {/* Progressive Sync Indicator */}
+      <ProgressiveSyncIndicator
+        visible={showProgressiveSync}
+        onComplete={handleSyncComplete}
+      />
     </Portal>
   );
 };

@@ -331,29 +331,41 @@ const GameScreen: React.FC<GameScreenProps> = ({
   // Render loading indicator if data is loading or game status is loading
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.centeredContainer}>
+      <SafeAreaView style={styles.centeredContainer} testID="loading-indicator">
         <ActivityIndicator testID="activity-indicator" animating size="large" />
         <Text style={styles.loadingText}>Loading Game...</Text>
       </SafeAreaView>
     );
   }
 
+  // Show error state if there's an error
+  if (errorLoadingData) {
+    return (
+      <SafeAreaView style={styles.centeredContainer} testID="error-state">
+        <Text style={styles.errorText}>{errorLoadingData}</Text>
+        <Button onPress={() => startGame()}>Try Again</Button>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} testID="game-screen">
       <AppHeader
         onNewGame={startGame}
         onGiveUp={handleGiveUp}
         onShowAuth={onShowAuth}
-                  onShowAccount={onShowAccount}
+        onShowAccount={onShowAccount}
         newGameDisabled={gameStatus === "playing"}
         giveUpDisabled={gameStatus !== "playing"}
         gameInProgress={gameStatus === "playing"}
       />
       {showReport ? (
-        <ReportScreen />
+        <View testID="report-screen">
+          <ReportScreen />
+        </View>
       ) : (
         <>
-          <View style={styles.gameContainer}>
+          <View style={styles.gameContainer} testID={gameStatus === "playing" ? "game-interface" : "idle-state"}>
             <View style={[styles.graphContainer, styles.transparentBackground]}>
               {isLoading ? (
                 <ActivityIndicator

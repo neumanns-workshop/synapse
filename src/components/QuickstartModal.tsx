@@ -263,7 +263,13 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                           onDismiss();
                           startTutorial();
                         }}
-                        icon={() => <CustomIcon source="school" size={20} color={colors.onPrimary} />}
+                        icon={() => (
+                          <CustomIcon
+                            source="school"
+                            size={20}
+                            color={colors.onPrimary}
+                          />
+                        )}
                         style={{ marginBottom: 16 }}
                       >
                         Start Tutorial
