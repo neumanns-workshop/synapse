@@ -3,7 +3,7 @@
 // Simple hash function for URL validation (matches the one in SharingService.ts)
 const generateUrlHash = (data) => {
   let hash = 0;
-  const secret = "synapse_challenge_2024"; // Simple secret salt
+  const secret = "synapse_challenge_2025"; // Simple secret salt
   const combined = data + secret;
 
   for (let i = 0; i < combined.length; i++) {

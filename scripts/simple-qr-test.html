@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple QR Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+    <h1>QR Code Test</h1>
+    <p>URL: <span id="url-display"></span></p>
+    <canvas id="qr" width="300" height="300" style="border: 1px solid black;"></canvas>
+    <p id="status">Loading...</p>
+
+    <script>
+        // Hash function
+        function generateUrlHash(data) {
+            let hash = 0;
+            const secret = "synapse_challenge_2025";
+            const combined = data + secret;
+            for (let i = 0; i < combined.length; i++) {
+                const char = combined.charCodeAt(i);
+                hash = (hash << 5) - hash + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(36).substring(0, 8);
+        }
+
+        // Generate URL
+        const startWord = "music";
+        const targetWord = "memory";
+        const data = `${startWord}:${targetWord}`;
+        const hash = generateUrlHash(data);
+        const url = `https://synapse.game/challenge?start=${startWord}&target=${targetWord}&theme=summer-vibes&hash=${hash}`;
+        
+        document.getElementById('url-display').textContent = url;
+        
+        // Add debugging
+        console.log('Script starting...');
+        console.log('QRCode available?', typeof QRCode);
+        console.log('Window object:', Object.keys(window).filter(k => k.includes('QR')));
+        
+        // Wait a bit for libraries to load
+        setTimeout(function() {
+            console.log('After timeout - QRCode available?', typeof QRCode);
+            
+            // Test if QRCode is available
+            if (typeof QRCode !== 'undefined') {
+                document.getElementById('status').textContent = 'QRCode library loaded. Generating...';
+                console.log('Generating QR code for:', url);
+                
+                QRCode.toCanvas(document.getElementById('qr'), url, {
+                    width: 300,
+                    margin: 2,
+                    color: {
+                        dark: '#000000',
+                        light: '#ffffff'
+                    }
+                }, function(error) {
+                    if (error) {
+                        document.getElementById('status').textContent = 'Error: ' + error;
+                        console.error('QR generation error:', error);
+                    } else {
+                        document.getElementById('status').textContent = 'QR Code generated successfully!';
+                        console.log('QR code generated successfully');
+                    }
+                });
+            } else {
+                document.getElementById('status').textContent = 'QRCode library not loaded! Check browser console.';
+                console.error('QRCode library not available');
+                console.log('Available globals:', Object.keys(window).slice(0, 20));
+            }
+        }, 1000);
+        
+        // Also try immediately
+        if (typeof QRCode !== 'undefined') {
+            console.log('QRCode available immediately');
+        }
+    </script>
+</body>
+</html> 

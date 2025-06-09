@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test QR Code Generation</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin: 10px 0;
+        }
+        input, button {
+            margin: 5px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .url-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Synapse QR Code Test</h1>
+    
+    <div class="test-section">
+        <h2>Generate Challenge QR Code</h2>
+        <div>
+            <input type="text" id="startWord" placeholder="Start word (e.g., music)" value="music">
+            <input type="text" id="targetWord" placeholder="Target word (e.g., memory)" value="memory">
+            <input type="text" id="theme" placeholder="Theme (e.g., summer-vibes)" value="summer-vibes">
+        </div>
+        <button onclick="generateQR()">Generate QR Code</button>
+        
+        <div id="urlDisplay" class="url-display" style="display: none;"></div>
+        <canvas id="qrcode" style="display: none;"></canvas>
+        
+        <div id="instructions" style="display: none; margin-top: 20px;">
+            <h3>✅ Test Instructions:</h3>
+            <ol>
+                <li>Scan the QR code with your phone camera</li>
+                <li>It should open your browser to the URL above</li>
+                <li>If your dev server is running on localhost:19006, the challenge should load!</li>
+                <li>If not, you'll see the production URL (which proves the QR works)</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Hash function matching SharingService.ts
+        function generateUrlHash(data) {
+            let hash = 0;
+            const secret = "synapse_challenge_2025";
+            const combined = data + secret;
+
+            for (let i = 0; i < combined.length; i++) {
+                const char = combined.charCodeAt(i);
+                hash = (hash << 5) - hash + char;
+                hash = hash & hash;
+            }
+
+            return Math.abs(hash).toString(36).substring(0, 8);
+        }
+
+        // Generate challenge URL with proper hash
+        function generateChallengeUrl(startWord, targetWord, theme = 'summer-vibes') {
+            const data = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+            const hash = generateUrlHash(data);
+            return `https://synapse.game/challenge?start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&theme=${encodeURIComponent(theme)}&hash=${hash}`;
+        }
+
+        function generateQR() {
+            const startWord = document.getElementById('startWord').value.trim();
+            const targetWord = document.getElementById('targetWord').value.trim();
+            const theme = document.getElementById('theme').value.trim();
+
+            if (!startWord || !targetWord) {
+                alert('Please enter both start and target words');
+                return;
+            }
+
+            // Generate URL
+            const url = generateChallengeUrl(startWord, targetWord, theme);
+            
+            // Display URL
+            document.getElementById('urlDisplay').textContent = url;
+            document.getElementById('urlDisplay').style.display = 'block';
+
+            // Generate QR code
+            const canvas = document.getElementById('qrcode');
+            QRCode.toCanvas(canvas, url, {
+                width: 300,
+                margin: 2,
+                color: {
+                    dark: '#000000',
+                    light: '#ffffff'
+                }
+            }, function(error) {
+                if (error) {
+                    console.error('Error generating QR code:', error);
+                } else {
+                    canvas.style.display = 'block';
+                    document.getElementById('instructions').style.display = 'block';
+                    console.log('QR code generated successfully!');
+                }
+            });
+        }
+
+        // Generate default QR on page load
+        window.onload = function() {
+            generateQR();
+        };
+    </script>
+</body>
+</html> 

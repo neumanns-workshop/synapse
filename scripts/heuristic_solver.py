@@ -11,7 +11,7 @@ import random
 # --- Configuration ---
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DAILY_CHALLENGES_PATH = PROJECT_ROOT / "src" / "data" / "daily_challenges.json"
-GRAPH_PATH = PROJECT_ROOT / "client" / "public" / "data" / "graph.json"
+GRAPH_PATH = PROJECT_ROOT / "src" / "data" / "graph.json"
 
 class HeuristicSolver:
     """A rule-based heuristic solver for word navigation puzzles."""
@@ -210,7 +210,8 @@ class HeuristicSolver:
                     return result
                 else:
                     # Try again with more randomness
-                    print(f"  Rejecting solution (steps: {steps_taken}, optimal: {optimal_length}) - retrying with more randomness")
+                    if not hasattr(__builtins__, '_cli_mode'):
+                        print(f"  Rejecting solution (steps: {steps_taken}, optimal: {optimal_length}) - retrying with more randomness")
                     continue
         
         # If we couldn't find a non-optimal solution, return the best one we found
@@ -689,6 +690,46 @@ def filter_and_sample_results(results: List[Dict], target_distribution: Dict[int
     return sampled_results
 
 if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='Heuristic solver for word puzzles')
+    parser.add_argument('--solve-pair', nargs=2, metavar=('START', 'TARGET'), 
+                       help='Solve a single word pair')
+    args = parser.parse_args()
+    
+    if args.solve_pair:
+        # Set CLI mode flag to suppress debug output
+        import builtins
+        builtins._cli_mode = True
+        
+        # Load graph data
+        try:
+            graph_file_data = load_json_file(GRAPH_PATH)
+            # Handle graph format with "nodes" wrapper
+            graph_data = graph_file_data.get("nodes", graph_file_data)
+        except Exception as e:
+            print(json.dumps({"status": "error", "reason": f"Failed to load graph: {e}"}))
+            sys.exit(1)
+        
+        # Create solver and solve single pair
+        solver = HeuristicSolver(graph_data)
+        start_word, target_word = args.solve_pair
+        
+        result = solver.solve_puzzle(start_word, target_word)
+        
+        # Output result as JSON for easy parsing
+        output = {
+            "startWord": start_word,
+            "targetWord": target_word,
+            "status": result["status"],
+            "steps": result["steps"],
+            "path": result["path"],
+            "reason": result.get("reason", "")
+        }
+        print(json.dumps(output))
+        sys.exit(0)
+    
+    # Default behavior: run the full pipeline
     # Set random seed for reproducibility
     random.seed(42)
     

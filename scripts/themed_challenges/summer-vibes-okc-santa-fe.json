@@ -1,0 +1,514 @@
+{
+  "generatedAt": "2025-06-09T14:30:09.728Z",
+  "description": "Themed challenges for guerrilla marketing QR codes - OKC to Santa Fe summer road trip",
+  "totalChallenges": 50,
+  "themes": [
+    {
+      "theme": "summer-vibes",
+      "name": "Summer Vibes",
+      "description": "Chase the sun on endless summer adventures from OKC to Santa Fe",
+      "challenges": [
+        {
+          "id": "summer-vibes_star_peace_1749479400928",
+          "startWord": "star",
+          "targetWord": "peace",
+          "optimalPathLength": 7,
+          "theme": "summer-vibes",
+          "description": "Nature's eternal wisdom",
+          "url": "https://synapse.game/challenge?start=star&target=peace&theme=summer-vibes&hash=2xvkpl",
+          "hash": "2xvkpl"
+        },
+        {
+          "id": "summer-vibes_guitar_story_1749479401108",
+          "startWord": "guitar",
+          "targetWord": "story",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Guitar stories by the campfire",
+          "url": "https://synapse.game/challenge?start=guitar&target=story&theme=summer-vibes&hash=seowm0",
+          "hash": "seowm0"
+        },
+        {
+          "id": "summer-vibes_home_relief_1749479401122",
+          "startWord": "home",
+          "targetWord": "relief",
+          "optimalPathLength": 3,
+          "theme": "summer-vibes",
+          "description": "Oasis moments in vast spaces",
+          "url": "https://synapse.game/challenge?start=home&target=relief&theme=summer-vibes&hash=6q5wm7",
+          "hash": "6q5wm7"
+        },
+        {
+          "id": "summer-vibes_road_freedom_1749479401326",
+          "startWord": "road",
+          "targetWord": "freedom",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Following the open road",
+          "url": "https://synapse.game/challenge?start=road&target=freedom&theme=summer-vibes&hash=e85x69",
+          "hash": "e85x69"
+        },
+        {
+          "id": "summer-vibes_travel_freedom_1749479401600",
+          "startWord": "travel",
+          "targetWord": "freedom",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Following the open road",
+          "url": "https://synapse.game/challenge?start=travel&target=freedom&theme=summer-vibes&hash=uzupft",
+          "hash": "uzupft"
+        },
+        {
+          "id": "summer-vibes_shelter_peace_1749479401875",
+          "startWord": "shelter",
+          "targetWord": "peace",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Finding comfort on the road",
+          "url": "https://synapse.game/challenge?start=shelter&target=peace&theme=summer-vibes&hash=nmfn0",
+          "hash": "nmfn0"
+        },
+        {
+          "id": "summer-vibes_star_guide_1749479402108",
+          "startWord": "star",
+          "targetWord": "guide",
+          "optimalPathLength": 7,
+          "theme": "summer-vibes",
+          "description": "Stars guiding the journey",
+          "url": "https://synapse.game/challenge?start=star&target=guide&theme=summer-vibes&hash=i9qjdz",
+          "hash": "i9qjdz"
+        },
+        {
+          "id": "summer-vibes_melody_soul_1749479402411",
+          "startWord": "melody",
+          "targetWord": "soul",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Music under starlit skies",
+          "url": "https://synapse.game/challenge?start=melody&target=soul&theme=summer-vibes&hash=vx7lps",
+          "hash": "vx7lps"
+        },
+        {
+          "id": "summer-vibes_star_infinite_1749479402456",
+          "startWord": "star",
+          "targetWord": "infinite",
+          "optimalPathLength": 4,
+          "theme": "summer-vibes",
+          "description": "Mountain views show perspective",
+          "url": "https://synapse.game/challenge?start=star&target=infinite&theme=summer-vibes&hash=y7hdlb",
+          "hash": "y7hdlb"
+        },
+        {
+          "id": "summer-vibes_sky_peace_1749479402704",
+          "startWord": "sky",
+          "targetWord": "peace",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Mountain views show perspective",
+          "url": "https://synapse.game/challenge?start=sky&target=peace&theme=summer-vibes&hash=4gd6hk",
+          "hash": "4gd6hk"
+        },
+        {
+          "id": "summer-vibes_rest_oasis_1749479402972",
+          "startWord": "rest",
+          "targetWord": "oasis",
+          "optimalPathLength": 7,
+          "theme": "summer-vibes",
+          "description": "Relief found under desert trees",
+          "url": "https://synapse.game/challenge?start=rest&target=oasis&theme=summer-vibes&hash=o5bolk",
+          "hash": "o5bolk"
+        },
+        {
+          "id": "summer-vibes_guitar_heart_1749479402985",
+          "startWord": "guitar",
+          "targetWord": "heart",
+          "optimalPathLength": 3,
+          "theme": "summer-vibes",
+          "description": "Songs that carry memories",
+          "url": "https://synapse.game/challenge?start=guitar&target=heart&theme=summer-vibes&hash=ap4zhl",
+          "hash": "ap4zhl"
+        },
+        {
+          "id": "summer-vibes_rhythm_memory_1749479403220",
+          "startWord": "rhythm",
+          "targetWord": "memory",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Southwest sounds and spirits",
+          "url": "https://synapse.game/challenge?start=rhythm&target=memory&theme=summer-vibes&hash=4aaet4",
+          "hash": "4aaet4"
+        },
+        {
+          "id": "summer-vibes_safe_comfort_1749479403241",
+          "startWord": "safe",
+          "targetWord": "comfort",
+          "optimalPathLength": 4,
+          "theme": "summer-vibes",
+          "description": "Finding comfort on the road",
+          "url": "https://synapse.game/challenge?start=safe&target=comfort&theme=summer-vibes&hash=3pcinm",
+          "hash": "3pcinm"
+        },
+        {
+          "id": "summer-vibes_cloud_peace_1749479403480",
+          "startWord": "cloud",
+          "targetWord": "peace",
+          "optimalPathLength": 7,
+          "theme": "summer-vibes",
+          "description": "Mountain views show perspective",
+          "url": "https://synapse.game/challenge?start=cloud&target=peace&theme=summer-vibes&hash=q5rmrg",
+          "hash": "q5rmrg"
+        },
+        {
+          "id": "summer-vibes_tree_wisdom_1749479403622",
+          "startWord": "tree",
+          "targetWord": "wisdom",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Desert nights reveal celestial maps",
+          "url": "https://synapse.game/challenge?start=tree&target=wisdom&theme=summer-vibes&hash=8rilsg",
+          "hash": "8rilsg"
+        },
+        {
+          "id": "summer-vibes_mountain_wisdom_1749479403838",
+          "startWord": "mountain",
+          "targetWord": "wisdom",
+          "optimalPathLength": 7,
+          "theme": "summer-vibes",
+          "description": "Desert nights reveal celestial maps",
+          "url": "https://synapse.game/challenge?start=mountain&target=wisdom&theme=summer-vibes&hash=fyb7oh",
+          "hash": "fyb7oh"
+        },
+        {
+          "id": "summer-vibes_music_memory_1749479404337",
+          "startWord": "music",
+          "targetWord": "memory",
+          "optimalPathLength": 7,
+          "theme": "summer-vibes",
+          "description": "Guitar stories by the campfire",
+          "url": "https://synapse.game/challenge?start=music&target=memory&theme=summer-vibes&hash=vgzt5",
+          "hash": "vgzt5"
+        },
+        {
+          "id": "summer-vibes_smile_sunshine_1749479404476",
+          "startWord": "smile",
+          "targetWord": "sunshine",
+          "optimalPathLength": 7,
+          "theme": "summer-vibes",
+          "description": "Inner light that rivals the sun",
+          "url": "https://synapse.game/challenge?start=smile&target=sunshine&theme=summer-vibes&hash=918c84",
+          "hash": "918c84"
+        },
+        {
+          "id": "summer-vibes_bird_wisdom_1749479404636",
+          "startWord": "bird",
+          "targetWord": "wisdom",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Nature's eternal wisdom",
+          "url": "https://synapse.game/challenge?start=bird&target=wisdom&theme=summer-vibes&hash=la2q5x",
+          "hash": "la2q5x"
+        },
+        {
+          "id": "summer-vibes_sky_calm_1749479404790",
+          "startWord": "sky",
+          "targetWord": "calm",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Mountain views show perspective",
+          "url": "https://synapse.game/challenge?start=sky&target=calm&theme=summer-vibes&hash=pcgzkl",
+          "hash": "pcgzkl"
+        },
+        {
+          "id": "summer-vibes_bird_calm_1749479404834",
+          "startWord": "bird",
+          "targetWord": "calm",
+          "optimalPathLength": 5,
+          "theme": "summer-vibes",
+          "description": "Mountain views show perspective",
+          "url": "https://synapse.game/challenge?start=bird&target=calm&theme=summer-vibes&hash=9g0bx",
+          "hash": "9g0bx"
+        },
+        {
+          "id": "summer-vibes_bird_guide_1749479405114",
+          "startWord": "bird",
+          "targetWord": "guide",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Wind whispers ancient stories",
+          "url": "https://synapse.game/challenge?start=bird&target=guide&theme=summer-vibes&hash=753ixa",
+          "hash": "753ixa"
+        },
+        {
+          "id": "summer-vibes_wind_infinite_1749479405358",
+          "startWord": "wind",
+          "targetWord": "infinite",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Desert nights reveal celestial maps",
+          "url": "https://synapse.game/challenge?start=wind&target=infinite&theme=summer-vibes&hash=sr36ah",
+          "hash": "sr36ah"
+        },
+        {
+          "id": "summer-vibes_rhythm_emotion_1749479405375",
+          "startWord": "rhythm",
+          "targetWord": "emotion",
+          "optimalPathLength": 4,
+          "theme": "summer-vibes",
+          "description": "Songs that carry memories",
+          "url": "https://synapse.game/challenge?start=rhythm&target=emotion&theme=summer-vibes&hash=kkrtoq",
+          "hash": "kkrtoq"
+        },
+        {
+          "id": "summer-vibes_cloud_infinite_1749479405426",
+          "startWord": "cloud",
+          "targetWord": "infinite",
+          "optimalPathLength": 5,
+          "theme": "summer-vibes",
+          "description": "Mountain views show perspective",
+          "url": "https://synapse.game/challenge?start=cloud&target=infinite&theme=summer-vibes&hash=d7f5tg",
+          "hash": "d7f5tg"
+        },
+        {
+          "id": "summer-vibes_shade_comfort_1749479405481",
+          "startWord": "shade",
+          "targetWord": "comfort",
+          "optimalPathLength": 5,
+          "theme": "summer-vibes",
+          "description": "Relief found under desert trees",
+          "url": "https://synapse.game/challenge?start=shade&target=comfort&theme=summer-vibes&hash=v2z9wu",
+          "hash": "v2z9wu"
+        },
+        {
+          "id": "summer-vibes_shade_relief_1749479405598",
+          "startWord": "shade",
+          "targetWord": "relief",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Cool shade in blazing heat",
+          "url": "https://synapse.game/challenge?start=shade&target=relief&theme=summer-vibes&hash=q9uevl",
+          "hash": "q9uevl"
+        },
+        {
+          "id": "summer-vibes_song_story_1749479405812",
+          "startWord": "song",
+          "targetWord": "story",
+          "optimalPathLength": 5,
+          "theme": "summer-vibes",
+          "description": "Southwest sounds and spirits",
+          "url": "https://synapse.game/challenge?start=song&target=story&theme=summer-vibes&hash=wxgo4j",
+          "hash": "wxgo4j"
+        },
+        {
+          "id": "summer-vibes_sun_treasure_1749479406040",
+          "startWord": "sun",
+          "targetWord": "treasure",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Ancient secrets in the sand",
+          "url": "https://synapse.game/challenge?start=sun&target=treasure&theme=summer-vibes&hash=3eraa8",
+          "hash": "3eraa8"
+        },
+        {
+          "id": "summer-vibes_bird_navigation_1749479406300",
+          "startWord": "bird",
+          "targetWord": "navigation",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Wind whispers ancient stories",
+          "url": "https://synapse.game/challenge?start=bird&target=navigation&theme=summer-vibes&hash=weer2g",
+          "hash": "weer2g"
+        },
+        {
+          "id": "summer-vibes_desert_treasure_1749479406668",
+          "startWord": "desert",
+          "targetWord": "treasure",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Southwestern treasures under blazing sun",
+          "url": "https://synapse.game/challenge?start=desert&target=treasure&theme=summer-vibes&hash=4u8eo7",
+          "hash": "4u8eo7"
+        },
+        {
+          "id": "summer-vibes_bird_perspective_1749479406944",
+          "startWord": "bird",
+          "targetWord": "perspective",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Wind whispers ancient stories",
+          "url": "https://synapse.game/challenge?start=bird&target=perspective&theme=summer-vibes&hash=e6p2sy",
+          "hash": "e6p2sy"
+        },
+        {
+          "id": "summer-vibes_bird_infinite_1749479407210",
+          "startWord": "bird",
+          "targetWord": "infinite",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Mountain views show perspective",
+          "url": "https://synapse.game/challenge?start=bird&target=infinite&theme=summer-vibes&hash=4nnarc",
+          "hash": "4nnarc"
+        },
+        {
+          "id": "summer-vibes_adobe_gold_1749479407473",
+          "startWord": "adobe",
+          "targetWord": "gold",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Heat mirages and hidden wonders",
+          "url": "https://synapse.game/challenge?start=adobe&target=gold&theme=summer-vibes&hash=f671pe",
+          "hash": "f671pe"
+        },
+        {
+          "id": "summer-vibes_bird_peace_1749479407623",
+          "startWord": "bird",
+          "targetWord": "peace",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Stars guiding the journey",
+          "url": "https://synapse.game/challenge?start=bird&target=peace&theme=summer-vibes&hash=86rfr4",
+          "hash": "86rfr4"
+        },
+        {
+          "id": "summer-vibes_melody_spirit_1749479407921",
+          "startWord": "melody",
+          "targetWord": "spirit",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Songs that carry memories",
+          "url": "https://synapse.game/challenge?start=melody&target=spirit&theme=summer-vibes&hash=lwedzi",
+          "hash": "lwedzi"
+        },
+        {
+          "id": "summer-vibes_desert_mystery_1749479408172",
+          "startWord": "desert",
+          "targetWord": "mystery",
+          "optimalPathLength": 7,
+          "theme": "summer-vibes",
+          "description": "Desert wisdom waiting",
+          "url": "https://synapse.game/challenge?start=desert&target=mystery&theme=summer-vibes&hash=pssnxp",
+          "hash": "pssnxp"
+        },
+        {
+          "id": "summer-vibes_mountain_calm_1749479408253",
+          "startWord": "mountain",
+          "targetWord": "calm",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Desert nights reveal celestial maps",
+          "url": "https://synapse.game/challenge?start=mountain&target=calm&theme=summer-vibes&hash=jhh3i9",
+          "hash": "jhh3i9"
+        },
+        {
+          "id": "summer-vibes_melody_memory_1749479408458",
+          "startWord": "melody",
+          "targetWord": "memory",
+          "optimalPathLength": 7,
+          "theme": "summer-vibes",
+          "description": "Music under starlit skies",
+          "url": "https://synapse.game/challenge?start=melody&target=memory&theme=summer-vibes&hash=pz0yq",
+          "hash": "pz0yq"
+        },
+        {
+          "id": "summer-vibes_voice_heart_1749479408504",
+          "startWord": "voice",
+          "targetWord": "heart",
+          "optimalPathLength": 5,
+          "theme": "summer-vibes",
+          "description": "Music under starlit skies",
+          "url": "https://synapse.game/challenge?start=voice&target=heart&theme=summer-vibes&hash=hro8y9",
+          "hash": "hro8y9"
+        },
+        {
+          "id": "summer-vibes_wind_perspective_1749479408530",
+          "startWord": "wind",
+          "targetWord": "perspective",
+          "optimalPathLength": 4,
+          "theme": "summer-vibes",
+          "description": "Mountain views show perspective",
+          "url": "https://synapse.game/challenge?start=wind&target=perspective&theme=summer-vibes&hash=2bafoj",
+          "hash": "2bafoj"
+        },
+        {
+          "id": "summer-vibes_tree_peace_1749479408814",
+          "startWord": "tree",
+          "targetWord": "peace",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Mountain views show perspective",
+          "url": "https://synapse.game/challenge?start=tree&target=peace&theme=summer-vibes&hash=mx67z9",
+          "hash": "mx67z9"
+        },
+        {
+          "id": "summer-vibes_smile_medicine_1749479408846",
+          "startWord": "smile",
+          "targetWord": "medicine",
+          "optimalPathLength": 5,
+          "theme": "summer-vibes",
+          "description": "Inner light that rivals the sun",
+          "url": "https://synapse.game/challenge?start=smile&target=medicine&theme=summer-vibes&hash=au4l35",
+          "hash": "au4l35"
+        },
+        {
+          "id": "summer-vibes_wind_wisdom_1749479408972",
+          "startWord": "wind",
+          "targetWord": "wisdom",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Desert nights reveal celestial maps",
+          "url": "https://synapse.game/challenge?start=wind&target=wisdom&theme=summer-vibes&hash=l0om4m",
+          "hash": "l0om4m"
+        },
+        {
+          "id": "summer-vibes_music_soul_1749479409251",
+          "startWord": "music",
+          "targetWord": "soul",
+          "optimalPathLength": 8,
+          "theme": "summer-vibes",
+          "description": "Southwest sounds and spirits",
+          "url": "https://synapse.game/challenge?start=music&target=soul&theme=summer-vibes&hash=5uk8aj",
+          "hash": "5uk8aj"
+        },
+        {
+          "id": "summer-vibes_melody_story_1749479409339",
+          "startWord": "melody",
+          "targetWord": "story",
+          "optimalPathLength": 5,
+          "theme": "summer-vibes",
+          "description": "Music under starlit skies",
+          "url": "https://synapse.game/challenge?start=melody&target=story&theme=summer-vibes&hash=krvrzy",
+          "hash": "krvrzy"
+        },
+        {
+          "id": "summer-vibes_cloud_perspective_1749479409391",
+          "startWord": "cloud",
+          "targetWord": "perspective",
+          "optimalPathLength": 5,
+          "theme": "summer-vibes",
+          "description": "Nature's eternal wisdom",
+          "url": "https://synapse.game/challenge?start=cloud&target=perspective&theme=summer-vibes&hash=b50sne",
+          "hash": "b50sne"
+        },
+        {
+          "id": "summer-vibes_joy_sunshine_1749479409539",
+          "startWord": "joy",
+          "targetWord": "sunshine",
+          "optimalPathLength": 7,
+          "theme": "summer-vibes",
+          "description": "Smiles warmer than summer heat",
+          "url": "https://synapse.game/challenge?start=joy&target=sunshine&theme=summer-vibes&hash=xdl2u0",
+          "hash": "xdl2u0"
+        },
+        {
+          "id": "summer-vibes_rhythm_story_1749479409728",
+          "startWord": "rhythm",
+          "targetWord": "story",
+          "optimalPathLength": 6,
+          "theme": "summer-vibes",
+          "description": "Melodies that touch the heart",
+          "url": "https://synapse.game/challenge?start=rhythm&target=story&theme=summer-vibes&hash=pio7qc",
+          "hash": "pio7qc"
+        }
+      ]
+    }
+  ]
+}
