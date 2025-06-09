@@ -3,7 +3,12 @@
 // Phase 1: Easy wins for 70% storage reduction
 // ============================================================================
 
-import type { GameReport, OptimalChoice, BacktrackReportEntry, PotentialRarestMove } from "./gameReportUtils";
+import type {
+  GameReport,
+  OptimalChoice,
+  BacktrackReportEntry,
+  PotentialRarestMove,
+} from "./gameReportUtils";
 import type { Achievement } from "../features/achievements";
 import { allAchievements } from "../features/achievements/definitions";
 
@@ -186,7 +191,9 @@ export class GameReportCompressor {
       backtrackEvents: report.backtrackEvents,
       earnedAchievements: report.earnedAchievements,
       potentialRarestMoves: report.potentialRarestMoves,
-      startTime: report.startTime ? TimestampCompressor.timestampToDays(report.startTime) : undefined,
+      startTime: report.startTime
+        ? TimestampCompressor.timestampToDays(report.startTime)
+        : undefined,
     };
   }
 
@@ -223,7 +230,9 @@ export class GameReportCompressor {
       backtrackEvents: compressed.backtrackEvents,
       earnedAchievements: compressed.earnedAchievements || [],
       potentialRarestMoves: compressed.potentialRarestMoves,
-      startTime: compressed.startTime ? TimestampCompressor.daysToTimestamp(compressed.startTime) : undefined,
+      startTime: compressed.startTime
+        ? TimestampCompressor.daysToTimestamp(compressed.startTime)
+        : undefined,
     };
   }
 }
@@ -384,7 +393,9 @@ export class PersistentGameStateCompressor {
         suggested: false,
         ai: false,
       },
-      startTimeDay: TimestampCompressor.timestampToDays(gameState.startTime || Date.now()),
+      startTimeDay: TimestampCompressor.timestampToDays(
+        gameState.startTime || Date.now(),
+      ),
       isChallenge: gameState.isChallenge,
       isDailyChallenge: gameState.isDailyChallenge,
       aiPath: gameState.aiPath,
@@ -427,7 +438,9 @@ export class CollectionsCompressor {
       const collectionData = data as any;
       compressed[collectionId] = {
         collectedWords: collectionData.collectedWords || [],
-        lastUpdatedDay: TimestampCompressor.timestampToDays(collectionData.lastUpdated || Date.now()),
+        lastUpdatedDay: TimestampCompressor.timestampToDays(
+          collectionData.lastUpdated || Date.now(),
+        ),
       };
     }
     return compressed;
@@ -448,8 +461,11 @@ export class CollectionsCompressor {
 export class WordCollectionsCompressor {
   static compress(wordCollections: any): CompressedWordCollections {
     const completionTimestampsCompressed: Record<string, number> = {};
-    for (const [collectionId, timestamp] of Object.entries(wordCollections?.completionTimestamps || {})) {
-      completionTimestampsCompressed[collectionId] = TimestampCompressor.timestampToDays(timestamp as number);
+    for (const [collectionId, timestamp] of Object.entries(
+      wordCollections?.completionTimestamps || {},
+    )) {
+      completionTimestampsCompressed[collectionId] =
+        TimestampCompressor.timestampToDays(timestamp as number);
     }
 
     return {
@@ -462,8 +478,11 @@ export class WordCollectionsCompressor {
 
   static decompress(compressed: CompressedWordCollections): any {
     const completionTimestamps: Record<string, number> = {};
-    for (const [collectionId, days] of Object.entries(compressed?.completionTimestampsCompressed || {})) {
-      completionTimestamps[collectionId] = TimestampCompressor.daysToTimestamp(days);
+    for (const [collectionId, days] of Object.entries(
+      compressed?.completionTimestampsCompressed || {},
+    )) {
+      completionTimestamps[collectionId] =
+        TimestampCompressor.daysToTimestamp(days);
     }
 
     return {
@@ -479,14 +498,18 @@ export class NewsCompressor {
   static compress(news: any): CompressedNews {
     return {
       readArticleIds: news?.readArticleIds || [],
-      lastCheckedDay: TimestampCompressor.timestampToDays(news?.lastChecked || Date.now()),
+      lastCheckedDay: TimestampCompressor.timestampToDays(
+        news?.lastChecked || Date.now(),
+      ),
     };
   }
 
   static decompress(compressed: CompressedNews): any {
     return {
       readArticleIds: compressed?.readArticleIds || [],
-      lastChecked: TimestampCompressor.daysToTimestamp(compressed?.lastCheckedDay || 0),
+      lastChecked: TimestampCompressor.daysToTimestamp(
+        compressed?.lastCheckedDay || 0,
+      ),
     };
   }
 }
@@ -496,8 +519,12 @@ export class MetaCompressor {
     return {
       version: meta?.version || "1.0.0",
       schemaVersion: meta?.schemaVersion || 1,
-      lastSyncAtDay: meta?.lastSyncAt ? TimestampCompressor.timestampToDays(meta.lastSyncAt) : undefined,
-      lastBackupAtDay: meta?.lastBackupAt ? TimestampCompressor.timestampToDays(meta.lastBackupAt) : undefined,
+      lastSyncAtDay: meta?.lastSyncAt
+        ? TimestampCompressor.timestampToDays(meta.lastSyncAt)
+        : undefined,
+      lastBackupAtDay: meta?.lastBackupAt
+        ? TimestampCompressor.timestampToDays(meta.lastBackupAt)
+        : undefined,
       deviceId: meta?.deviceId,
     };
   }
@@ -506,8 +533,12 @@ export class MetaCompressor {
     return {
       version: compressed?.version || "1.0.0",
       schemaVersion: compressed?.schemaVersion || 1,
-      lastSyncAt: compressed?.lastSyncAtDay ? TimestampCompressor.daysToTimestamp(compressed.lastSyncAtDay) : undefined,
-      lastBackupAt: compressed?.lastBackupAtDay ? TimestampCompressor.daysToTimestamp(compressed.lastBackupAtDay) : undefined,
+      lastSyncAt: compressed?.lastSyncAtDay
+        ? TimestampCompressor.daysToTimestamp(compressed.lastSyncAtDay)
+        : undefined,
+      lastBackupAt: compressed?.lastBackupAtDay
+        ? TimestampCompressor.daysToTimestamp(compressed.lastBackupAtDay)
+        : undefined,
       deviceId: compressed?.deviceId,
     };
   }
@@ -540,9 +571,15 @@ export class DataCompressor {
       news: NewsCompressor.compress(data.news),
       meta: MetaCompressor.compress(data.meta),
       currentGames: {
-        regular: data.currentGames?.regular ? PersistentGameStateCompressor.compress(data.currentGames.regular) : null,
-        challenge: data.currentGames?.challenge ? PersistentGameStateCompressor.compress(data.currentGames.challenge) : null,
-        temp: data.currentGames?.temp ? PersistentGameStateCompressor.compress(data.currentGames.temp) : null,
+        regular: data.currentGames?.regular
+          ? PersistentGameStateCompressor.compress(data.currentGames.regular)
+          : null,
+        challenge: data.currentGames?.challenge
+          ? PersistentGameStateCompressor.compress(data.currentGames.challenge)
+          : null,
+        temp: data.currentGames?.temp
+          ? PersistentGameStateCompressor.compress(data.currentGames.temp)
+          : null,
       },
       dailyChallenges: {
         progress: data.dailyChallenges?.progress || {},
@@ -572,13 +609,27 @@ export class DataCompressor {
         schemaVersion: compressed.achievements?.schemaVersion || 1,
       },
       collections: CollectionsCompressor.decompress(compressed.collections),
-      wordCollections: WordCollectionsCompressor.decompress(compressed.wordCollections),
+      wordCollections: WordCollectionsCompressor.decompress(
+        compressed.wordCollections,
+      ),
       news: NewsCompressor.decompress(compressed.news),
       meta: MetaCompressor.decompress(compressed.meta),
       currentGames: {
-        regular: compressed.currentGames?.regular ? PersistentGameStateCompressor.decompress(compressed.currentGames.regular) : null,
-        challenge: compressed.currentGames?.challenge ? PersistentGameStateCompressor.decompress(compressed.currentGames.challenge) : null,
-        temp: compressed.currentGames?.temp ? PersistentGameStateCompressor.decompress(compressed.currentGames.temp) : null,
+        regular: compressed.currentGames?.regular
+          ? PersistentGameStateCompressor.decompress(
+              compressed.currentGames.regular,
+            )
+          : null,
+        challenge: compressed.currentGames?.challenge
+          ? PersistentGameStateCompressor.decompress(
+              compressed.currentGames.challenge,
+            )
+          : null,
+        temp: compressed.currentGames?.temp
+          ? PersistentGameStateCompressor.decompress(
+              compressed.currentGames.temp,
+            )
+          : null,
       },
       dailyChallenges: {
         progress: compressed.dailyChallenges?.progress || {},
