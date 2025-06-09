@@ -1,17 +1,19 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@13.6.0";
 
 // Initialize Supabase client with SERVICE_ROLE_KEY for admin actions
 const supabaseAdmin = createClient(
-  Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
 );
 
 // Initialize Stripe (optional - only if you want to clean up Stripe customers)
-const stripe = Deno.env.get("STRIPE_SECRET_KEY") ? new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-  apiVersion: "2023-10-16",
-}) : null;
+const stripe = Deno.env.get("STRIPE_SECRET_KEY")
+  ? new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+      apiVersion: "2023-10-16",
+    })
+  : null;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,8 +29,11 @@ serve(async (req) => {
   try {
     // 1. Authenticate the request
     const authHeader = req.headers.get("Authorization");
-    console.log("🗑️ Auth header received:", authHeader ? `Bearer ${authHeader.substring(7, 27)}...` : "MISSING");
-    
+    console.log(
+      "🗑️ Auth header received:",
+      authHeader ? `Bearer ${authHeader.substring(7, 27)}...` : "MISSING",
+    );
+
     if (!authHeader) {
       console.error("🗑️ Missing Authorization header");
       throw new Error("Missing Authorization header");
@@ -38,21 +43,24 @@ serve(async (req) => {
     console.log("🗑️ Extracted token length:", token.length);
     console.log("🗑️ Token starts with:", token.substring(0, 20) + "...");
 
-    const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseAdmin.auth.getUser(token);
 
-    console.log("🗑️ Auth result:", { 
-      hasUser: !!user, 
-      userId: user?.id, 
+    console.log("🗑️ Auth result:", {
+      hasUser: !!user,
+      userId: user?.id,
       userEmail: user?.email,
       errorCode: userError?.code,
-      errorMessage: userError?.message 
+      errorMessage: userError?.message,
     });
 
     if (userError || !user) {
       console.error("🗑️ Auth error for user deletion:", userError);
-      return new Response(JSON.stringify({ error: "Authentication failed." }), { 
-        status: 401, 
-        headers: corsHeaders 
+      return new Response(JSON.stringify({ error: "Authentication failed." }), {
+        status: 401,
+        headers: corsHeaders,
       });
     }
 
@@ -66,21 +74,30 @@ serve(async (req) => {
       .eq("id", userId)
       .single();
 
-    if (profileError && profileError.code !== 'PGRST116') {
+    if (profileError && profileError.code !== "PGRST116") {
       console.error(`Error fetching profile for user ${userId}:`, profileError);
       // Continue with deletion even if profile fetch fails
     }
 
-    console.log(`📋 User profile: premium=${profile?.is_premium}, stripe_customer=${profile?.stripe_customer_id}`);
+    console.log(
+      `📋 User profile: premium=${profile?.is_premium}, stripe_customer=${profile?.stripe_customer_id}`,
+    );
 
     // 3. Clean up Stripe customer (if exists and Stripe is configured)
     if (stripe && profile?.stripe_customer_id) {
       try {
-        console.log(`🧹 Deleting Stripe customer: ${profile.stripe_customer_id}`);
+        console.log(
+          `🧹 Deleting Stripe customer: ${profile.stripe_customer_id}`,
+        );
         await stripe.customers.del(profile.stripe_customer_id);
-        console.log(`✅ Stripe customer deleted: ${profile.stripe_customer_id}`);
+        console.log(
+          `✅ Stripe customer deleted: ${profile.stripe_customer_id}`,
+        );
       } catch (stripeError) {
-        console.warn(`⚠️ Failed to delete Stripe customer ${profile.stripe_customer_id}:`, stripeError);
+        console.warn(
+          `⚠️ Failed to delete Stripe customer ${profile.stripe_customer_id}:`,
+          stripeError,
+        );
         // Continue with account deletion even if Stripe cleanup fails
       }
     }
@@ -92,7 +109,10 @@ serve(async (req) => {
       .eq("user_id", userId);
 
     if (userDataError) {
-      console.warn(`⚠️ Failed to delete user_data for ${userId}:`, userDataError);
+      console.warn(
+        `⚠️ Failed to delete user_data for ${userId}:`,
+        userDataError,
+      );
       // Continue with deletion - user_data might not exist
     } else {
       console.log(`✅ Deleted user_data for ${userId}`);
@@ -105,53 +125,65 @@ serve(async (req) => {
       .eq("id", userId);
 
     if (profileDeleteError) {
-      console.warn(`⚠️ Failed to delete user_profiles for ${userId}:`, profileDeleteError);
+      console.warn(
+        `⚠️ Failed to delete user_profiles for ${userId}:`,
+        profileDeleteError,
+      );
       // Continue with deletion - profile might not exist
     } else {
       console.log(`✅ Deleted user_profiles for ${userId}`);
     }
 
     // 6. Delete auth user (this is the critical step that requires admin privileges)
-    const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    const { error: authDeleteError } =
+      await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (authDeleteError) {
-      console.error(`❌ CRITICAL: Failed to delete auth user ${userId}:`, authDeleteError);
-      return new Response(JSON.stringify({ 
-        error: "Failed to delete user account. Please contact support." 
-      }), { 
-        status: 500, 
-        headers: corsHeaders 
-      });
+      console.error(
+        `❌ CRITICAL: Failed to delete auth user ${userId}:`,
+        authDeleteError,
+      );
+      return new Response(
+        JSON.stringify({
+          error: "Failed to delete user account. Please contact support.",
+        }),
+        {
+          status: 500,
+          headers: corsHeaders,
+        },
+      );
     }
 
     console.log(`✅ Successfully deleted auth user: ${userId}`);
     console.log(`🎉 Account deletion completed for user: ${userId}`);
 
-    return new Response(JSON.stringify({ 
-      message: "Account deleted successfully.",
-      userId: userId 
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
-
+    return new Response(
+      JSON.stringify({
+        message: "Account deleted successfully.",
+        userId: userId,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      },
+    );
   } catch (error) {
     console.error("Error in delete-user-account:", error);
-    
+
     let status = 500;
     let errorMessage = "An unexpected error occurred during account deletion.";
-    
-    if (error.message === "Missing Authorization header" || error.message.includes("Authentication failed")) {
+
+    if (
+      error.message === "Missing Authorization header" ||
+      error.message.includes("Authentication failed")
+    ) {
       status = 401;
       errorMessage = "Authentication failed.";
     }
-    
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: status,
-      },
-    );
+
+    return new Response(JSON.stringify({ error: errorMessage }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: status,
+    });
   }
-}); 
+});
