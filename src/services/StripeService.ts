@@ -29,7 +29,7 @@ export class StripeService {
   private unifiedStore: UnifiedDataStore;
 
   // Premium unlock product details
-  public readonly PREMIUM_PRICE = 5.00;
+  public readonly PREMIUM_PRICE = 5.0;
   public readonly PREMIUM_CURRENCY = "usd";
   public readonly PREMIUM_PRODUCT_NAME = "Galaxy Brain Synapse Premium Account";
   public readonly PREMIUM_PRODUCT_DESCRIPTION =
@@ -52,17 +52,18 @@ export class StripeService {
    * Purchase premium using Stripe Checkout (hosted payment page)
    * TRANSACTIONAL APPROACH: Create account first, then payment
    */
-  public async initiatePurchaseAndAccountCreation(
-    signupData: { // Assuming this is what AuthScreen.tsx provides
-      email: string;
-      password: string; // Be very careful about handling/storing this, even temporarily
-      emailUpdatesOptIn: boolean;
-      captchaToken?: string; // Add captcha token here
-    }
-  ): Promise<InitiatePurchaseResult> {
+  public async initiatePurchaseAndAccountCreation(signupData: {
+    // Assuming this is what AuthScreen.tsx provides
+    email: string;
+    password: string; // Be very careful about handling/storing this, even temporarily
+    emailUpdatesOptIn: boolean;
+    captchaToken?: string; // Add captcha token here
+  }): Promise<InitiatePurchaseResult> {
     try {
       if (!signupData || !signupData.email || !signupData.password) {
-        throw new Error("Email and password are required to create a premium account.");
+        throw new Error(
+          "Email and password are required to create a premium account.",
+        );
       }
 
       // STEP A: Temporarily sign in anonymously to get a JWT for the payment function
@@ -107,46 +108,56 @@ export class StripeService {
       // This part needs to be adapted to your actual AsyncStorage implementation.
       await this.unifiedStore.storePendingConversionDetails(anonymousUserId, {
         email: signupData.email,
-        password: signupData.password, 
+        password: signupData.password,
         emailUpdatesOptIn: signupData.emailUpdatesOptIn,
         anonymousUserJwt: anonymousUserJwt,
       });
 
       // STEP C: Call the create-checkout-session Edge Function
       // The SupabaseService.invokeFunction needs to be capable of adding the JWT header
-      console.log(`Calling create-checkout-session for anonymous user ${anonymousUserId}`);
-      const { data: checkoutData, error: checkoutError } = 
+      console.log(
+        `Calling create-checkout-session for anonymous user ${anonymousUserId}`,
+      );
+      const { data: checkoutData, error: checkoutError } =
         await this.supabaseService.invokeFunction<{ checkoutUrl: string }>(
           "create-checkout-session",
-          {}, 
-          anonymousUserJwt 
+          {},
+          anonymousUserJwt,
         );
 
       if (checkoutError || !checkoutData?.checkoutUrl) {
         console.error("create-checkout-session failed:", checkoutError);
         await this.unifiedStore.clearPendingConversionDetails(anonymousUserId);
-        
+
         // Simplified error message handling to satisfy linter
         let errorMessage = "Failed to initialize Stripe Checkout.";
         if (checkoutError instanceof Error) {
           errorMessage = checkoutError.message;
-        } else if (typeof checkoutError === 'string') {
+        } else if (typeof checkoutError === "string") {
           errorMessage = checkoutError;
         } else {
-            // For other types of errors, or if it's an object, log it and use a generic message.
-            // This avoids complex type guards that the linter might be struggling with.
-            console.error("Non-standard error object during checkout:", checkoutError);
+          // For other types of errors, or if it's an object, log it and use a generic message.
+          // This avoids complex type guards that the linter might be struggling with.
+          console.error(
+            "Non-standard error object during checkout:",
+            checkoutError,
+          );
         }
         throw new Error(errorMessage);
       }
 
       console.log("Stripe Checkout session created:", checkoutData.checkoutUrl);
-      return { checkoutUrl: checkoutData.checkoutUrl, temporaryUserId: anonymousUserId };
-
+      return {
+        checkoutUrl: checkoutData.checkoutUrl,
+        temporaryUserId: anonymousUserId,
+      };
     } catch (error) {
       console.error("Error in initiatePurchaseAndAccountCreation:", error);
       return {
-        error: error instanceof Error ? error.message : "Unknown error occurred during purchase initiation.",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Unknown error occurred during purchase initiation.",
       };
     }
   }
@@ -210,6 +221,45 @@ export class StripeService {
       return !!stripe && !!stripePublishableKey;
     } catch {
       return false;
+    }
+  }
+
+  /**
+   * Create a premium account using a promo code (for beta testers)
+   */
+  public async createPromoAccount(promoCode: string): Promise<PaymentResult> {
+    try {
+      console.log("🎫 Creating promo account with code:", promoCode);
+
+      // Set premium status immediately (optimistic)
+      await this.unifiedStore.setPremiumStatus(true);
+
+      // Create a promo "transaction" record for tracking
+      const promoTransactionId = `promo_${promoCode}_${Date.now()}`;
+      
+      // If user is authenticated, sync promo data to Supabase
+      const user = this.supabaseService.getUser();
+      if (user) {
+        await this.supabaseService.syncPurchaseData({
+          platform: "web", // Use web platform for promo codes
+          transactionId: promoTransactionId,
+          purchaseDate: Date.now(),
+          receiptData: promoCode, // Store the promo code as receipt
+          validated: true,
+          lastValidated: Date.now(),
+        });
+      } else {
+        console.log("No authenticated user - promo data will sync after sign in");
+      }
+
+      console.log("✅ Premium status activated via promo code!");
+      return { success: true, paymentIntent: promoTransactionId };
+    } catch (error) {
+      console.error("Error creating promo account:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to apply promo code",
+      };
     }
   }
 
