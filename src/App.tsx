@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Platform, Linking, View, Alert } from "react-native";
+import { Platform, Linking, View, Alert, AppState } from "react-native";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -26,6 +26,7 @@ import AccountScreen from "./screens/AccountScreen";
 import { gameFlowManager } from "./services/GameFlowManager";
 import PaymentHandler from "./services/PaymentHandler";
 import { resetAllPlayerData } from "./services/StorageAdapter";
+import { unifiedDataStore } from "./services/UnifiedDataStore";
 import { useGameStore } from "./stores/useGameStore";
 import { SynapseLightTheme } from "./theme/SynapseTheme";
 import type { PaymentRedirectResult } from "./services/PaymentHandler";
@@ -53,8 +54,12 @@ function AppContent() {
   const { theme } = useTheme();
   const auth = useAuth();
   const [showAuth, setShowAuth] = useState(false);
-  const [authScreenMode, setAuthScreenMode] = useState<"signin" | "signup" | "reset" | "signin_after_purchase">("signup");
-  const [authScreenInitialEmail, setAuthScreenInitialEmail] = useState<string | undefined>(undefined);
+  const [authScreenMode, setAuthScreenMode] = useState<
+    "signin" | "signup" | "reset" | "signin_after_purchase"
+  >("signup");
+  const [authScreenInitialEmail, setAuthScreenInitialEmail] = useState<
+    string | undefined
+  >(undefined);
   const [showAccount, setShowAccount] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
 
@@ -85,8 +90,6 @@ function AppContent() {
     (state) => state.setLabsModalVisible,
   );
 
-
-
   // Initialize web compatibility layers and load data
   useEffect(() => {
     const initializeApp = async () => {
@@ -101,7 +104,8 @@ function AppContent() {
       // --- Handle Payment Redirects FIRST ---
       // For web, direct URL access. For native, initial deep link.
       const paymentHandler = PaymentHandler.getInstance();
-      const paymentResult: PaymentRedirectResult = await paymentHandler.handlePaymentRedirect();
+      const paymentResult: PaymentRedirectResult =
+        await paymentHandler.handlePaymentRedirect();
 
       if (paymentResult.wasPaymentAttempt) {
         setPaymentMessage(paymentResult.message || paymentResult.error || null);
@@ -118,14 +122,19 @@ function AppContent() {
         // unless payment flow specifically dictates it.
         // Ensure essential data is loaded if needed, but primary flow might stop here.
         await loadInitialData(); // Load essential data regardless
-        if (auth.user && paymentResult.success) { 
+        if (auth.user && paymentResult.success) {
           // User got signed in during payment flow and payment was successful
           // Refresh game access state to ensure they can play immediately
           try {
             await useGameStore.getState().refreshGameAccessState();
-            console.log("✅ Game access state refreshed after successful payment");
+            console.log(
+              "✅ Game access state refreshed after successful payment",
+            );
           } catch (error) {
-            console.error("❌ Error refreshing game access state after payment:", error);
+            console.error(
+              "❌ Error refreshing game access state after payment:",
+              error,
+            );
           }
         }
         return; // Stop further processing in initializeApp if it was a payment attempt
@@ -133,7 +142,8 @@ function AppContent() {
       // --- End of Payment Redirect Handling ---
 
       // If not a payment redirect, proceed with normal app initialization
-      const { entryType, challengeData } = gameFlowManager.parseEntryUrl(entryUrl);
+      const { entryType, challengeData } =
+        gameFlowManager.parseEntryUrl(entryUrl);
       await loadInitialData();
 
       if (auth.user) {
@@ -141,15 +151,20 @@ function AppContent() {
         // With new SupabaseService, sync happens on auth state change handled by service.
       }
 
-      const flowDecision = await gameFlowManager.determineGameFlow(entryType, challengeData);
+      const flowDecision = await gameFlowManager.determineGameFlow(
+        entryType,
+        challengeData,
+      );
       await gameFlowManager.executeFlowDecision(flowDecision);
     };
 
     if (!auth.isLoading) {
-      initializeApp().catch(err => console.error("Error during initializeApp:", err));
+      initializeApp().catch((err) =>
+        console.error("Error during initializeApp:", err),
+      );
     }
-  // Ensure all dependencies are correct for when this should re-run
-  }, [auth.isLoading, auth.user, loadInitialData]); 
+    // Ensure all dependencies are correct for when this should re-run
+  }, [auth.isLoading, auth.user, loadInitialData]);
 
   // Set up deep link handling for when app is ALREADY open
   useEffect(() => {
@@ -160,16 +175,20 @@ function AppContent() {
       // Temporarily set window.location.search for PaymentHandler if on web and app is already open
       // This is a bit of a hack for web. Native Linking gives the full URL.
       let originalSearch = "";
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      if (Platform.OS === "web" && typeof window !== "undefined") {
         originalSearch = window.location.search;
         const urlObj = new URL(event.url);
         window.history.replaceState({}, "", urlObj.pathname + urlObj.search); // Update URL without reload so PaymentHandler can parse it
       }
 
       const paymentResult = await paymentHandler.handlePaymentRedirect();
-      
-      if (Platform.OS === 'web' && typeof window !== 'undefined') {
-         window.history.replaceState({}, "", window.location.pathname + originalSearch); // Restore original search if needed
+
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        window.history.replaceState(
+          {},
+          "",
+          window.location.pathname + originalSearch,
+        ); // Restore original search if needed
       }
 
       if (paymentResult.wasPaymentAttempt) {
@@ -181,30 +200,58 @@ function AppContent() {
         } else if (paymentResult.error) {
           Alert.alert("Payment Status", paymentResult.error);
         }
-        
+
         // If user is signed in and payment was successful, refresh game access state
         if (auth.user && paymentResult.success) {
           try {
             await useGameStore.getState().refreshGameAccessState();
-            console.log("✅ Game access state refreshed after successful payment (deep link)");
+            console.log(
+              "✅ Game access state refreshed after successful payment (deep link)",
+            );
           } catch (error) {
-            console.error("❌ Error refreshing game access state after payment (deep link):", error);
+            console.error(
+              "❌ Error refreshing game access state after payment (deep link):",
+              error,
+            );
           }
         }
-        
+
         return; // Stop further processing if it was a payment attempt
       }
       // --- End of Payment Redirect Handling for open app ---
 
       // If not a payment redirect, proceed with normal deep link handling
-      const { entryType, challengeData } = gameFlowManager.parseEntryUrl(event.url);
-      const flowDecision = await gameFlowManager.determineGameFlow(entryType, challengeData);
+      const { entryType, challengeData } = gameFlowManager.parseEntryUrl(
+        event.url,
+      );
+      const flowDecision = await gameFlowManager.determineGameFlow(
+        entryType,
+        challengeData,
+      );
       await gameFlowManager.executeFlowDecision(flowDecision);
     };
 
     const subscription = Linking.addEventListener("url", handleDeepLink);
     return () => subscription.remove();
   }, []); // Dependencies: gameFlowManager or other services if they change
+
+  // Set up AppState handling to flush pending data saves when app backgrounds
+  useEffect(() => {
+    const handleAppStateChange = async (nextAppState: string) => {
+      if (nextAppState === 'background' || nextAppState === 'inactive') {
+        // Flush any pending saves before the app goes to background
+        try {
+          await unifiedDataStore.flushPendingChanges();
+          console.log('✅ Flushed pending data saves on app background');
+        } catch (error) {
+          console.error('❌ Error flushing pending saves:', error);
+        }
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => subscription?.remove();
+  }, []);
 
   // Show loading screen while auth is initializing
   if (auth.isLoading) {
@@ -289,7 +336,7 @@ function AppContent() {
               setShowAuth(false);
               setPaymentMessage(null);
               setAuthScreenInitialEmail(undefined);
-              
+
               // Refresh game access state after successful sign-in
               // This ensures premium status and free games are updated,
               // and upgrade prompt dismissal is reset if user now has access

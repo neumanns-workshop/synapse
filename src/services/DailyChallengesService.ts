@@ -107,9 +107,15 @@ export class DailyChallengesService {
    */
   public async saveDailyChallengeProgress(
     challengeId: string,
-    progress: Omit<DailyChallengeProgress, "challengeId">,
+    progress: Omit<DailyChallengeProgress, "challengeId" | "completed"> & {
+      status: "won" | "given_up";
+    },
   ): Promise<void> {
-    const fullProgress: DailyChallengeProgress = { challengeId, ...progress };
+    const fullProgress: DailyChallengeProgress = {
+      challengeId,
+      completed: true, // Mark as completed regardless of status
+      ...progress,
+    };
     await unifiedDataStore.updateDailyChallengeProgress(
       challengeId,
       fullProgress,

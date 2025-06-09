@@ -234,6 +234,9 @@ export class UnifiedDataStore {
   private static instance: UnifiedDataStore;
   private data: UnifiedAppData | null = null;
   private isLoaded = false;
+  // Debounced save optimization
+  private saveTimeout: NodeJS.Timeout | null = null;
+  private hasPendingChanges = false;
 
   private constructor() {}
 
@@ -313,14 +316,73 @@ export class UnifiedDataStore {
       if (__DEV__) {
         const sizeInfo = StorageSizeEstimator.estimateSize(this.data);
         console.log(
-          `💾 Storage compression: ${sizeInfo.uncompressed} → ${jsonData.length} bytes (${Math.round(((sizeInfo.uncompressed - jsonData.length) / sizeInfo.uncompressed) * 100)}% saved)`,
+          `💾 Storage compression: ${sizeInfo.original} → ${jsonData.length} bytes (${Math.round(((sizeInfo.original - jsonData.length) / sizeInfo.original) * 100)}% saved)`,
         );
       }
 
       await AsyncStorage.setItem(UNIFIED_DATA_KEY, jsonData);
+      this.hasPendingChanges = false;
     } catch (error) {
       console.error("Failed to save data:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Save data with debouncing to avoid frequent writes
+   * @param immediate - If true, saves immediately without debouncing (default: false)
+   * @param debounceMs - Debounce delay in milliseconds (default: 500)
+   */
+  public async saveDataDebounced(immediate: boolean = false, debounceMs: number = 500): Promise<void> {
+    this.hasPendingChanges = true;
+
+    // Clear existing timeout
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+      this.saveTimeout = null;
+    }
+
+    if (immediate || debounceMs <= 0) {
+      // Save immediately for critical operations
+      await this.saveData();
+      return;
+    }
+
+    // Set up debounced save
+    this.saveTimeout = setTimeout(async () => {
+      if (this.hasPendingChanges) {
+        try {
+          await this.saveData();
+        } catch (error) {
+          console.error("Debounced save failed:", error);
+          // Retry once after a short delay
+          setTimeout(async () => {
+            if (this.hasPendingChanges) {
+              try {
+                await this.saveData();
+              } catch (retryError) {
+                console.error("Debounced save retry failed:", retryError);
+              }
+            }
+          }, 1000);
+        }
+      }
+      this.saveTimeout = null;
+    }, debounceMs);
+  }
+
+  /**
+   * Force immediate save of any pending changes
+   * Should be called when app is backgrounding or closing
+   */
+  public async flushPendingChanges(): Promise<void> {
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+      this.saveTimeout = null;
+    }
+    
+    if (this.hasPendingChanges) {
+      await this.saveData();
     }
   }
 
@@ -453,7 +515,7 @@ export class UnifiedDataStore {
     const data = await this.getData();
     if (!data.achievements.viewedIds.includes(achievementId)) {
       data.achievements.viewedIds.push(achievementId);
-      await this.saveData();
+      await this.saveDataDebounced(); // Non-critical, can be debounced
     }
   }
 
@@ -471,7 +533,7 @@ export class UnifiedDataStore {
     }
 
     if (hasChanges) {
-      await this.saveData();
+      await this.saveDataDebounced(); // Non-critical, can be debounced
     }
   }
 
@@ -613,10 +675,10 @@ export class UnifiedDataStore {
     // Return default privacy settings if not set
     return (
       data.user.privacy || {
-              allowChallengeSharing: true,
-      allowStatsSharing: true,
-      allowLeaderboards: true,
-      dataCollection: false,
+        allowChallengeSharing: true,
+        allowStatsSharing: true,
+        allowLeaderboards: true,
+        dataCollection: false,
       }
     );
   }
@@ -688,7 +750,7 @@ export class UnifiedDataStore {
     if (!data.collections[collectionId].collectedWords.includes(word)) {
       data.collections[collectionId].collectedWords.push(word);
       data.collections[collectionId].lastUpdated = Date.now();
-      await this.saveData();
+      await this.saveDataDebounced(); // Collection progress can be debounced
 
       // Check if this collection is now completed
       await this.checkAndUpdateWordCollectionCompletion();
@@ -1194,58 +1256,75 @@ export class UnifiedDataStore {
 
   public async storePendingConversionDetails(
     anonymousUserId: string,
-    details: { 
-      email: string; 
+    details: {
+      email: string;
       password?: string; // Password becomes optional if JWT is used for auth to finalize
-      emailUpdatesOptIn: boolean; 
+      emailUpdatesOptIn: boolean;
       anonymousUserJwt?: string; // Add JWT here
-    }
+    },
   ): Promise<void> {
     const key = `pending_conversion_${anonymousUserId}`;
     try {
       if (details.password) {
-        console.warn(`Storing password temporarily for user ${anonymousUserId}. Ensure it's cleared after conversion.`);
+        console.warn(
+          `Storing password temporarily for user ${anonymousUserId}. Ensure it's cleared after conversion.`,
+        );
       }
       if (!details.anonymousUserJwt) {
-        console.warn(`Storing pending conversion details without JWT for ${anonymousUserId}. Finalize function call might need it.`);
+        console.warn(
+          `Storing pending conversion details without JWT for ${anonymousUserId}. Finalize function call might need it.`,
+        );
       }
       await AsyncStorage.setItem(key, JSON.stringify(details));
       console.log(`Stored pending conversion details for ${anonymousUserId}`);
     } catch (error) {
-      console.error(`Failed to store pending conversion details for ${anonymousUserId}:`, error);
-      throw error; 
+      console.error(
+        `Failed to store pending conversion details for ${anonymousUserId}:`,
+        error,
+      );
+      throw error;
     }
   }
 
   public async retrievePendingConversionDetails(
-    anonymousUserId: string
-  ): Promise<{ 
-    email: string; 
-    password?: string; 
-    emailUpdatesOptIn: boolean; 
-    anonymousUserJwt?: string; 
+    anonymousUserId: string,
+  ): Promise<{
+    email: string;
+    password?: string;
+    emailUpdatesOptIn: boolean;
+    anonymousUserJwt?: string;
   } | null> {
     const key = `pending_conversion_${anonymousUserId}`;
     try {
       const detailsString = await AsyncStorage.getItem(key);
       if (detailsString) {
-        console.log(`Retrieved pending conversion details for ${anonymousUserId}`);
+        console.log(
+          `Retrieved pending conversion details for ${anonymousUserId}`,
+        );
         return JSON.parse(detailsString);
       }
       return null;
     } catch (error) {
-      console.error(`Failed to retrieve pending conversion details for ${anonymousUserId}:`, error);
-      return null; 
+      console.error(
+        `Failed to retrieve pending conversion details for ${anonymousUserId}:`,
+        error,
+      );
+      return null;
     }
   }
 
-  public async clearPendingConversionDetails(anonymousUserId: string): Promise<void> {
+  public async clearPendingConversionDetails(
+    anonymousUserId: string,
+  ): Promise<void> {
     const key = `pending_conversion_${anonymousUserId}`;
     try {
       await AsyncStorage.removeItem(key);
       console.log(`Cleared pending conversion details for ${anonymousUserId}`);
     } catch (error) {
-      console.error(`Failed to clear pending conversion details for ${anonymousUserId}:`, error);
+      console.error(
+        `Failed to clear pending conversion details for ${anonymousUserId}:`,
+        error,
+      );
       // Optionally re-throw
     }
   }

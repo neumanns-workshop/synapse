@@ -95,40 +95,45 @@ export const recordEndedGame = async (
   isChallenge = false,
   isDailyChallenge = false,
 ): Promise<void> => {
-  // Ensure gameReport has an id and timestamp
-  const reportToSave = {
-    ...gameReport,
-    id: gameReport.id || Date.now().toString(),
-    timestamp: gameReport.timestamp || Date.now(),
-    isChallenge: isChallenge,
-    isDailyChallenge: isDailyChallenge,
-  };
-
-  await unifiedDataStore.addGameToHistory(reportToSave);
-  await unifiedDataStore.updateStatsOnGameEnd(reportToSave);
-
-  // Save any achievements earned in this game
-  if (
-    reportToSave.earnedAchievements &&
-    reportToSave.earnedAchievements.length > 0
-  ) {
-    for (const achievement of reportToSave.earnedAchievements) {
-      await unifiedDataStore.unlockAchievement(achievement.id);
-    }
-  }
-
-  // Handle progressive achievements (increment counters for achievements that triggered)
   try {
-    const progressiveAchievementsTriggered =
-      await handleProgressiveAchievements(reportToSave, reportToSave.status);
+    // Ensure gameReport has an id and timestamp
+    const reportToSave = {
+      ...gameReport,
+      id: gameReport.id || Date.now().toString(),
+      timestamp: gameReport.timestamp || Date.now(),
+      isChallenge: isChallenge,
+      isDailyChallenge: isDailyChallenge,
+    };
 
-    if (progressiveAchievementsTriggered.length > 0) {
-      console.log(
-        `Progressive achievements triggered: ${progressiveAchievementsTriggered.join(", ")}`,
-      );
+    await unifiedDataStore.addGameToHistory(reportToSave);
+    await unifiedDataStore.updateStatsOnGameEnd(reportToSave);
+
+    // Save any achievements earned in this game
+    if (
+      reportToSave.earnedAchievements &&
+      reportToSave.earnedAchievements.length > 0
+    ) {
+      for (const achievement of reportToSave.earnedAchievements) {
+        await unifiedDataStore.unlockAchievement(achievement.id);
+      }
+    }
+
+    // Handle progressive achievements (increment counters for achievements that triggered)
+    try {
+      const progressiveAchievementsTriggered =
+        await handleProgressiveAchievements(reportToSave, reportToSave.status);
+
+      if (progressiveAchievementsTriggered.length > 0) {
+        console.log(
+          `Progressive achievements triggered: ${progressiveAchievementsTriggered.join(", ")}`,
+        );
+      }
+    } catch (error) {
+      console.error("Error handling progressive achievements:", error);
     }
   } catch (error) {
-    console.error("Error handling progressive achievements:", error);
+    console.error("Error recording ended game:", error);
+    // Don't re-throw the error to allow graceful handling
   }
 };
 

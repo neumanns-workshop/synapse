@@ -666,18 +666,18 @@ describe("useGameStore - startGame", () => {
     });
 
     const tempGameData: SavedGame = {
-      startWord: "tempA",
-      targetWord: "tempC",
-      currentWord: "tempB",
-      playerPath: ["tempA", "tempB"],
-      optimalPath: ["tempA", "tempB", "tempC"],
-      suggestedPathFromCurrent: ["tempB", "tempC"],
+      startWord: "wordA",
+      targetWord: "wordC",
+      currentWord: "wordB",
+      playerPath: ["wordA", "wordB"],
+      optimalPath: ["wordA", "wordB", "wordC"],
+      suggestedPathFromCurrent: ["wordB", "wordC"],
       gameStatus: "playing",
-      optimalChoices: [
+              optimalChoices: [
         {
-          playerPosition: "tempA",
-          playerChose: "tempB",
-          optimalChoice: "tempB",
+          playerPosition: "wordA",
+          playerChose: "wordB",
+          optimalChoice: "wordB",
           isGlobalOptimal: true,
           isLocalOptimal: true,
         },

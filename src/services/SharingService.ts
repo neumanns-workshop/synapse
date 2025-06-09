@@ -34,6 +34,7 @@ interface ShareChallengeOptions {
   screenshotRef?: React.RefObject<View | null>;
   includeScreenshot?: boolean;
   steps?: number;
+  theme?: string;
 }
 
 interface ShareDailyChallengeOptions {
@@ -59,10 +60,11 @@ export const shareChallenge = async ({
   screenshotRef,
   includeScreenshot = true,
   steps,
+  theme,
 }: ShareChallengeOptions): Promise<boolean> => {
   try {
     // Generate the deep link
-    const deepLink = generateSecureGameDeepLink(startWord, targetWord);
+    const deepLink = generateSecureGameDeepLink(startWord, targetWord, theme);
 
     // Generate challenge message
     const challengeMessage = generateChallengeMessage({
@@ -261,6 +263,7 @@ interface ChallengeMessageOptions {
   playerPath?: string[];
   steps?: number;
   deepLink: string;
+  gameStatus?: "won" | "given_up";
 }
 
 export const generateChallengeMessage = (
@@ -272,14 +275,26 @@ export const generateChallengeMessage = (
     playerPath,
     steps,
     deepLink: _deepLink,
+    gameStatus,
   } = options;
 
   let challengeMessage = `Can you connect "${startWord}" to "${targetWord}" in Synapse?`;
 
-  // If player completed this challenge, add their score
+  // If player has a path (either completed or gave up)
   if (playerPath && playerPath.length > 1) {
     const pathLength = steps || playerPath.length - 1;
-    challengeMessage = `I connected "${startWord}" to "${targetWord}" in ${pathLength} steps! Can you beat my score in Synapse?`;
+
+    if (gameStatus === "won") {
+      const stepText = pathLength === 1 ? "step" : "steps";
+      challengeMessage = `I connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText}! Can you beat my score in Synapse?`;
+    } else if (gameStatus === "given_up") {
+      const stepText = pathLength === 1 ? "step" : "steps";
+      challengeMessage = `I gave up trying to connect "${startWord}" to "${targetWord}" after ${pathLength} ${stepText}. Think you can do better in Synapse?`;
+    } else {
+      // Fallback for when gameStatus is not provided (backwards compatibility)
+      const stepText = pathLength === 1 ? "step" : "steps";
+      challengeMessage = `I connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText}! Can you beat my score in Synapse?`;
+    }
   }
 
   // We won't include the deep link in the message as it will be included as URL in the share options
@@ -406,22 +421,28 @@ export const generateDailyChallengeTaunt = (
 
   // If user completed it, compare with AI
   if (userCompleted && userSteps) {
+    const userMoveText = userSteps === 1 ? "move" : "moves";
+    const aiMoveText = aiSteps === 1 ? "move" : "moves";
+
     if (userSteps < aiSteps) {
-      return `I crushed the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} moves (AI took ${aiSteps}). Think you can beat me?`;
+      return `I crushed the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (AI took ${aiSteps} ${aiMoveText}). Think you can beat me?`;
     } else if (userSteps === aiSteps) {
-      return `I matched the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} moves. Can you do better?`;
+      return `I matched the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText}. Can you do better?`;
     } else {
-      return `I got ${formattedDate}'s challenge in ${userSteps} moves ("${startWord}" → "${targetWord}"). The AI did it in ${aiSteps}... can you beat us both?`;
+      return `I got ${formattedDate}'s challenge in ${userSteps} ${userMoveText} ("${startWord}" → "${targetWord}"). The AI did it in ${aiSteps} ${aiMoveText}... can you beat us both?`;
     }
   }
 
   // If user gave up, acknowledge that but still challenge them
   if (userGaveUp && userSteps) {
-    return `I gave up on ${formattedDate}'s challenge after ${userSteps} moves ("${startWord}" → "${targetWord}"), but the AI got it in ${aiSteps}. Think you can beat the AI?`;
+    const moveText = userSteps === 1 ? "move" : "moves";
+    const aiMoveText = aiSteps === 1 ? "move" : "moves";
+    return `I gave up on ${formattedDate}'s challenge after ${userSteps} ${moveText} ("${startWord}" → "${targetWord}"), but the AI got it in ${aiSteps} ${aiMoveText}. Think you can beat the AI?`;
   }
 
   // If user hasn't attempted it or no steps recorded, just taunt with AI score
-  return `I beat the AI in ${aiSteps} moves on ${formattedDate}'s challenge ("${startWord}" → "${targetWord}"). Can you do better?`;
+  const aiMoveText = aiSteps === 1 ? "move" : "moves";
+  return `I beat the AI in ${aiSteps} ${aiMoveText} on ${formattedDate}'s challenge ("${startWord}" → "${targetWord}"). Can you do better?`;
 };
 
 /**
@@ -429,7 +450,7 @@ export const generateDailyChallengeTaunt = (
  */
 const generateUrlHash = (data: string): string => {
   let hash = 0;
-  const secret = "synapse_challenge_2024"; // Simple secret salt
+  const secret = "synapse_challenge_2025"; // Simple secret salt
   const combined = data + secret;
 
   for (let i = 0; i < combined.length; i++) {
@@ -460,9 +481,15 @@ const validateChallengeHash = (
 export const generateSecureGameDeepLink = (
   startWord: string,
   targetWord: string,
+  theme?: string,
 ): string => {
   const data = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
   const hash = generateUrlHash(data);
+
+  // Build base URL parameters
+  const params = `start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
+  const themeParam = theme ? `&theme=${encodeURIComponent(theme)}` : '';
+  const fullParams = `${params}${themeParam}`;
 
   // Use the app's scheme for deep linking
   // For web, use the web URL format
@@ -472,11 +499,11 @@ export const generateSecureGameDeepLink = (
       typeof window !== "undefined"
         ? window.location.origin
         : "https://synapse-game.example.com";
-    return `${origin}/challenge?start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
+    return `${origin}/challenge?${fullParams}`;
   }
 
   // For native apps, use the custom scheme
-  return `synapse://challenge?start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
+  return `synapse://challenge?${fullParams}`;
 };
 
 /**
@@ -524,21 +551,41 @@ export const generateSecureDailyChallengeDeepLink = (
  */
 export const parseGameDeepLink = (
   url: string,
-): { startWord?: string; targetWord?: string; isValid?: boolean } | null => {
+): { startWord?: string; targetWord?: string; theme?: string; isValid?: boolean } | null => {
   try {
     console.log("🎮 parseGameDeepLink: Parsing URL:", url);
 
     // Handle both web URLs and custom scheme URLs - REQUIRE hash validation
     if (url.includes("://challenge") || url.includes("/challenge")) {
-      // Only accept hash-validated URLs
+      // Updated regex to handle theme parameter in either position
       const secureRegex =
-        /(?:\/\/|\/+)challenge\?start=([^&]+)&target=([^&]+)&hash=([^&]+)/;
+        /(?:\/\/|\/+)challenge\?start=([^&]+)&target=([^&]+)&(?:hash=([^&]+)&theme=([^&]+)|theme=([^&]+)&hash=([^&]+)|hash=([^&]+))/;
       const secureMatch = url.match(secureRegex);
 
       if (secureMatch && secureMatch.length >= 4) {
         const startWord = decodeURIComponent(secureMatch[1]);
         const targetWord = decodeURIComponent(secureMatch[2]);
-        const providedHash = secureMatch[3];
+        
+        // Handle different parameter orders
+        let providedHash: string;
+        let theme: string | undefined;
+        
+        if (secureMatch[3] && secureMatch[4]) {
+          // hash=X&theme=Y format
+          providedHash = secureMatch[3];
+          theme = decodeURIComponent(secureMatch[4]);
+        } else if (secureMatch[5] && secureMatch[6]) {
+          // theme=Y&hash=X format
+          theme = decodeURIComponent(secureMatch[5]);
+          providedHash = secureMatch[6];
+        } else if (secureMatch[7]) {
+          // hash=X only format
+          providedHash = secureMatch[7];
+          theme = undefined;
+        } else {
+          console.log("🎮 parseGameDeepLink: Unable to parse hash from URL");
+          return null;
+        }
 
         const isValid = validateChallengeHash(
           startWord,
@@ -555,6 +602,7 @@ export const parseGameDeepLink = (
         return {
           startWord,
           targetWord,
+          theme,
           isValid: true,
         };
       }

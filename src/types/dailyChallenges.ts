@@ -21,6 +21,7 @@ export interface DailyChallengesData {
 export interface DailyChallengeProgress {
   challengeId: string;
   completed: boolean;
+  status: "won" | "given_up";
   completedAt?: string;
   playerMoves?: number;
   playerPath?: string[];

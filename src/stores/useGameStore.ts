@@ -567,8 +567,14 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     // Prevent calling startGame if upgrade prompt was dismissed this session and user has no free games
     // This should NOT apply to premium users.
-    if (!isPremium && upgradePromptDismissedThisSession && remainingFreeGames <= 0) {
-      console.log("startGame: upgrade prompt was dismissed and no free games, skipping for non-premium user");
+    if (
+      !isPremium &&
+      upgradePromptDismissedThisSession &&
+      remainingFreeGames <= 0
+    ) {
+      console.log(
+        "startGame: upgrade prompt was dismissed and no free games, skipping for non-premium user",
+      );
       set({ gameStatus: "idle" });
       return;
     }
@@ -687,7 +693,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     // 4. The previous game wasn't a daily challenge that was just completed
     // 5. Upgrade prompt wasn't dismissed this session (respect user's intent to not auto-start)
     if (
-      (currentGameStatus === "idle" || currentGameStatus === "won" || currentGameStatus === "given_up" || currentGameStatus === "lost") &&
+      (currentGameStatus === "idle" ||
+        currentGameStatus === "won" ||
+        currentGameStatus === "given_up" ||
+        currentGameStatus === "lost") &&
       !freshHasPlayedTodaysChallenge &&
       freshCurrentDailyChallenge &&
       !upgradePromptDismissedThisSession
@@ -767,8 +776,9 @@ export const useGameStore = create<GameState>((set, get) => ({
       currentDailyChallenge: get().currentDailyChallenge,
       hasPlayedTodaysChallenge: get().hasPlayedTodaysChallenge,
       remainingFreeGames: get().remainingFreeGames,
-      upgradePromptDismissedThisSession: get().upgradePromptDismissedThisSession,
-      
+      upgradePromptDismissedThisSession:
+        get().upgradePromptDismissedThisSession,
+
       // Now, set the loading status for the new game
       gameStatus: "loading",
       errorLoadingData: null,
@@ -1234,19 +1244,25 @@ export const useGameStore = create<GameState>((set, get) => ({
       if (get().isDailyChallenge && get().currentDailyChallenge) {
         const currentChallenge = get().currentDailyChallenge;
         if (currentChallenge) {
-          await dailyChallengesService.saveDailyChallengeProgress(
-            currentChallenge.id,
-            {
-              completed: true,
-              completedAt: new Date().toISOString(),
-              playerMoves: playerPath.length - 1,
-              playerPath: playerPath,
-              // No score for winning
-            },
-          );
+          try {
+            await dailyChallengesService.saveDailyChallengeProgress(
+              currentChallenge.id,
+              {
+                status: "won",
+                completedAt: new Date().toISOString(),
+                playerMoves: newPlayerPath.length - 1,
+                playerPath: newPlayerPath,
+                // No score for winning
+              },
+            );
 
-          // Update the store state to reflect completion
-          set({ hasPlayedTodaysChallenge: true });
+            // Update the store state to reflect completion
+            set({ hasPlayedTodaysChallenge: true });
+          } catch (error) {
+            console.error("Failed to save daily challenge progress:", error);
+            // Continue with game completion even if save fails
+            // The user has still won the game, we just couldn't save the progress
+          }
         }
       }
       return;
@@ -1333,19 +1349,25 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (isDailyChallenge && currentDailyChallenge) {
       const currentChallenge = currentDailyChallenge;
       if (currentChallenge) {
-        await dailyChallengesService.saveDailyChallengeProgress(
-          currentChallenge.id,
-          {
-            completed: true,
-            completedAt: new Date().toISOString(),
-            playerMoves: playerPath.length - 1,
-            playerPath: playerPath,
-            // No score for giving up
-          },
-        );
+        try {
+          await dailyChallengesService.saveDailyChallengeProgress(
+            currentChallenge.id,
+            {
+              status: "given_up",
+              completedAt: new Date().toISOString(),
+              playerMoves: playerPath.length - 1,
+              playerPath: playerPath,
+              // No score for giving up
+            },
+          );
 
-        // Update the store state to reflect completion
-        set({ hasPlayedTodaysChallenge: true });
+          // Update the store state to reflect completion
+          set({ hasPlayedTodaysChallenge: true });
+        } catch (error) {
+          console.error("Failed to save daily challenge progress:", error);
+          // Continue with game completion even if save fails
+          // The user has still given up the game, we just couldn't save the progress
+        }
       }
     }
   },
@@ -1537,7 +1559,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       context,
       currentGameStatus: get().gameStatus,
       hasActiveGame: !!(get().startWord && get().targetWord),
-      remainingFreeGames: get().remainingFreeGames
+      remainingFreeGames: get().remainingFreeGames,
     });
     set({
       upgradePromptVisible: true,
@@ -1554,29 +1576,30 @@ export const useGameStore = create<GameState>((set, get) => ({
     const currentContext = get().upgradePromptContext;
     const currentGameStatus = get().gameStatus;
     const hasActiveGame = get().startWord && get().targetWord;
-    
+
     console.log("🔍 hideUpgradePrompt debug:", {
       currentContext,
       currentGameStatus,
       hasActiveGame,
       startWord: get().startWord,
       targetWord: get().targetWord,
-      playerPath: get().playerPath?.length || 0
+      playerPath: get().playerPath?.length || 0,
     });
-    
+
     // Only clear game state if this was a "no free games" upgrade prompt
     // Don't clear state for general upgrades, experimental features, etc.
     // Also don't clear if user has an active game in progress (they should be able to continue)
-    const shouldClearGameState = currentContext === "freeGamesLimited" && 
-                                 currentGameStatus !== "playing" && 
-                                 currentGameStatus !== "won";
-    
+    const shouldClearGameState =
+      currentContext === "freeGamesLimited" &&
+      currentGameStatus !== "playing" &&
+      currentGameStatus !== "won";
+
     console.log("🔍 shouldClearGameState:", shouldClearGameState, "because:", {
       isFreeGamesLimited: currentContext === "freeGamesLimited",
       notPlaying: currentGameStatus !== "playing",
-      notWon: currentGameStatus !== "won"
+      notWon: currentGameStatus !== "won",
     });
-    
+
     if (shouldClearGameState) {
       // User hit free games limit and dismissed - clear partial game state
       set({
@@ -1641,11 +1664,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   // Function to refresh user's game access state after sign-in
   refreshGameAccessState: async () => {
     console.log("🔄 Refreshing game access state after sign-in...");
-    
+
     try {
       // Get fresh daily challenge state (includes premium status and free games)
-      const dailyChallengeState = await dailyChallengesService.getDailyChallengeState();
-      
+      const dailyChallengeState =
+        await dailyChallengesService.getDailyChallengeState();
+
       console.log("🔄 Fresh daily challenge state:", {
         isPremium: dailyChallengeState.isPremium,
         remainingFreeGames: dailyChallengeState.remainingFreeGames,
@@ -1653,42 +1677,51 @@ export const useGameStore = create<GameState>((set, get) => ({
         todaysChallengeId: dailyChallengeState.todaysChallenge?.id,
         progressKeys: Object.keys(dailyChallengeState.progress),
       });
-      
+
       // Update store with fresh data
       set({
         currentDailyChallenge: dailyChallengeState.todaysChallenge,
         hasPlayedTodaysChallenge: dailyChallengeState.hasPlayedToday,
         remainingFreeGames: dailyChallengeState.remainingFreeGames,
       });
-      
-      // If user now has access to games (premium or free games available), 
+
+      // If user now has access to games (premium or free games available),
       // reset the upgrade prompt dismissal state
-      const hasGameAccess = dailyChallengeState.isPremium || dailyChallengeState.remainingFreeGames > 0;
-      
+      const hasGameAccess =
+        dailyChallengeState.isPremium ||
+        dailyChallengeState.remainingFreeGames > 0;
+
       if (hasGameAccess) {
-        console.log("🎮 User now has game access - resetting upgrade prompt dismissal");
-        set({ 
+        console.log(
+          "🎮 User now has game access - resetting upgrade prompt dismissal",
+        );
+        set({
           upgradePromptDismissedThisSession: false,
           upgradePromptVisible: false, // Hide any visible upgrade prompt
           upgradePromptMessage: "",
           upgradePromptContext: undefined,
         });
       }
-      
+
       console.log("✅ Game access state refreshed successfully");
       return { success: true };
     } catch (error) {
       console.error("❌ Error refreshing game access state:", error);
-      return { success: false, error: (error as Error).message || "An unknown error occurred" };
+      return {
+        success: false,
+        error: (error as Error).message || "An unknown error occurred",
+      };
     }
   },
 
   // Reset function implementation - CONSERVATIVE: Only clear UI state, preserve all user data
   reset: () => {
-    console.log("🔄 Resetting useGameStore UI state only (preserving all user data)");
+    console.log(
+      "🔄 Resetting useGameStore UI state only (preserving all user data)",
+    );
     set({
       // ONLY clear UI state that might show stale "logged in" appearance
-      
+
       // Close all modals and dialogs
       quickstartModalVisible: false,
       newsModalVisible: false,

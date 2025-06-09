@@ -41,7 +41,7 @@ export class PaymentHandler {
   public async handlePaymentRedirect(): Promise<PaymentRedirectResult> {
     try {
       const urlParams = new URLSearchParams(
-        typeof window !== "undefined" ? window.location.search : ""
+        typeof window !== "undefined" ? window.location.search : "",
       );
       const paymentStatus = urlParams.get("payment");
       // const sessionId = urlParams.get("session_id"); // No longer primary focus
@@ -52,28 +52,43 @@ export class PaymentHandler {
 
       this.cleanupUrl(); // Clean up URL query params
 
-      const temporaryUserId = await AsyncStorage.getItem(PENDING_CONVERSION_USER_ID);
+      const temporaryUserId = await AsyncStorage.getItem(
+        PENDING_CONVERSION_USER_ID,
+      );
 
       if (paymentStatus === "success") {
         if (!temporaryUserId) {
-          console.error("Payment success redirect, but no temporaryUserId found in AsyncStorage.");
+          console.error(
+            "Payment success redirect, but no temporaryUserId found in AsyncStorage.",
+          );
           return {
             wasPaymentAttempt: true,
             success: false,
-            error: "Payment processed, but session data lost. Please contact support if your account isn't upgraded.",
+            error:
+              "Payment processed, but session data lost. Please contact support if your account isn't upgraded.",
           };
         }
 
         // Retrieve stored conversion details
-        const conversionDetails = await this.unifiedStore.retrievePendingConversionDetails(temporaryUserId);
-        if (!conversionDetails || !conversionDetails.email || !conversionDetails.password) {
+        const conversionDetails =
+          await this.unifiedStore.retrievePendingConversionDetails(
+            temporaryUserId,
+          );
+        if (
+          !conversionDetails ||
+          !conversionDetails.email ||
+          !conversionDetails.password
+        ) {
           // Password might be optional if not changing it, but for new signup, it's expected
-          await this.unifiedStore.clearPendingConversionDetails(temporaryUserId);
+          await this.unifiedStore.clearPendingConversionDetails(
+            temporaryUserId,
+          );
           await AsyncStorage.removeItem(PENDING_CONVERSION_USER_ID);
           return {
             wasPaymentAttempt: true,
             success: false,
-            error: "Could not retrieve account details for finalization. Please try signing up again or contact support.",
+            error:
+              "Could not retrieve account details for finalization. Please try signing up again or contact support.",
             showAuthModal: true,
             authMode: "signup",
           };
@@ -83,56 +98,76 @@ export class PaymentHandler {
         // Grant premium access immediately (optimistic)
         // The webhook will confirm this in the background
         console.log("Payment successful! Granting immediate premium access...");
-        
+
         // Set premium status locally immediately
         this.unifiedStore.setPremiumStatus(true);
-        
+
         // Create user profile in database immediately
-        const profileResult = await this.supabaseService.createPremiumProfile(temporaryUserId, email);
+        const profileResult = await this.supabaseService.createPremiumProfile(
+          temporaryUserId,
+          email,
+        );
         if (profileResult.error) {
-          console.error("Failed to create premium profile immediately:", profileResult.error);
+          console.error(
+            "Failed to create premium profile immediately:",
+            profileResult.error,
+          );
           // Don't fail the flow - webhook will handle it as fallback
         } else {
           console.log("✅ Premium profile created immediately in database");
         }
 
         // Convert anonymous user to permanent user by calling the new Edge Function
-        console.log(`Attempting to finalize account for user ${temporaryUserId} via Edge Function with email ${email}`);
+        console.log(
+          `Attempting to finalize account for user ${temporaryUserId} via Edge Function with email ${email}`,
+        );
 
         if (!anonymousUserJwt) {
-          console.error("Critical: Missing anonymousUserJwt for finalize-premium-account call.");
+          console.error(
+            "Critical: Missing anonymousUserJwt for finalize-premium-account call.",
+          );
           return {
             wasPaymentAttempt: true,
             success: false, // Technically payment was fine, premium is set, but conversion step cannot proceed
-            error: "Failed to finalize account: session token missing. Please contact support.",
+            error:
+              "Failed to finalize account: session token missing. Please contact support.",
             showAuthModal: false,
           };
         }
 
-        const { data: finalizeResult, error: finalizeError } = 
+        const { data: finalizeResult, error: finalizeError } =
           await this.supabaseService.invokeFunction(
-            "finalize-premium-account", 
-            { temporaryUserId, email, password }, 
-            anonymousUserJwt // Pass the JWT of the (temporary) anonymous user
+            "finalize-premium-account",
+            { temporaryUserId, email, password },
+            anonymousUserJwt, // Pass the JWT of the (temporary) anonymous user
           );
 
         if (finalizeError || !finalizeResult || (finalizeResult as any).error) {
           // Premium is set, but account conversion via Edge Function failed.
-          const errorMessage = (finalizeError as any)?.message || (finalizeResult as any)?.error || "Unknown error during account finalization.";
-          console.error(`finalize-premium-account Edge Function failed for ${temporaryUserId}:`, errorMessage);
+          const errorMessage =
+            (finalizeError as any)?.message ||
+            (finalizeResult as any)?.error ||
+            "Unknown error during account finalization.";
+          console.error(
+            `finalize-premium-account Edge Function failed for ${temporaryUserId}:`,
+            errorMessage,
+          );
           return {
             wasPaymentAttempt: true,
             success: true, // Payment was successful, premium IS active in DB
             error: `Premium activated, but failed to update account credentials via server. Please contact support with ID: ${temporaryUserId}. Details: ${errorMessage}`,
-            showAuthModal: false, 
+            showAuthModal: false,
           };
         }
 
         // Success! Cleanup and user is already signed in with permanent account
-        console.log("finalize-premium-account Edge Function succeeded.", finalizeResult);
+        console.log(
+          "finalize-premium-account Edge Function succeeded.",
+          finalizeResult,
+        );
         await this.unifiedStore.clearPendingConversionDetails(temporaryUserId);
         await AsyncStorage.removeItem(PENDING_CONVERSION_USER_ID);
-        
+
         // No need to sign out - the Edge Function already converted the anonymous user
         // to a permanent user, so they should stay logged in with premium access
 
@@ -142,12 +177,16 @@ export class PaymentHandler {
           showAuthModal: false, // Don't show auth modal - user is already signed in
           message: "Premium Activated! Welcome to Galaxy Brain Premium!",
         };
-
       } else if (paymentStatus === "cancel") {
         if (temporaryUserId) {
-          await this.unifiedStore.clearPendingConversionDetails(temporaryUserId);
+          await this.unifiedStore.clearPendingConversionDetails(
+            temporaryUserId,
+          );
           await AsyncStorage.removeItem(PENDING_CONVERSION_USER_ID);
-          console.log("Payment cancelled by user. Cleaned up pending conversion details for:", temporaryUserId);
+          console.log(
+            "Payment cancelled by user. Cleaned up pending conversion details for:",
+            temporaryUserId,
+          );
         }
         return {
           wasPaymentAttempt: true,
@@ -169,12 +208,18 @@ export class PaymentHandler {
           await AsyncStorage.removeItem(PENDING_CONVERSION_USER_ID);
         }
       } catch (cleanupError) {
-        console.error("Failed to cleanup temp data during error handling:", cleanupError);
+        console.error(
+          "Failed to cleanup temp data during error handling:",
+          cleanupError,
+        );
       }
       return {
         wasPaymentAttempt: true, // It was an attempt, but it failed globally
         success: false,
-        error: error instanceof Error ? error.message : "Error processing payment result. Please contact support.",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Error processing payment result. Please contact support.",
       };
     }
   }
@@ -183,7 +228,10 @@ export class PaymentHandler {
    * Clean up payment parameters from URL (Web only)
    */
   private cleanupUrl(): void {
-    if (typeof window !== "undefined" && typeof window.history.replaceState === 'function') {
+    if (
+      typeof window !== "undefined" &&
+      typeof window.history.replaceState === "function"
+    ) {
       try {
         const url = new URL(window.location.href);
         url.searchParams.delete("payment");
@@ -191,7 +239,7 @@ export class PaymentHandler {
         url.searchParams.delete("temporaryUserId"); // And temporaryUserId if we ever add it
         window.history.replaceState({}, document.title, url.toString());
       } catch (e) {
-        console.warn("Could not clean up URL:", e)
+        console.warn("Could not clean up URL:", e);
       }
     }
   }

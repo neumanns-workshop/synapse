@@ -93,7 +93,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return { error: result?.error || null };
   };
 
-  const updatePrivacySettings = async (privacyUpdates: Partial<UserProfile["privacy_settings"]>) => {
+  const updatePrivacySettings = async (
+    privacyUpdates: Partial<UserProfile["privacy_settings"]>,
+  ) => {
     const result = await supabaseService.updatePrivacySettings(privacyUpdates);
     return { error: result?.error || null };
   };
@@ -104,13 +106,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const syncDataToCloud = async () => {
-    const result = await supabaseService.syncLocalDataToCloud();
-    return { error: result?.error || null };
+    const { ProgressiveSyncService } = await import('../services/ProgressiveSyncService');
+    const progressiveSync = ProgressiveSyncService.getInstance();
+    const result = await progressiveSync.syncToCloud();
+    return { error: result.success ? null : result.error };
   };
 
   const syncDataFromCloud = async () => {
-    const result = await supabaseService.syncCloudDataToLocal();
-    return { error: result?.error || null };
+    const { ProgressiveSyncService } = await import('../services/ProgressiveSyncService');
+    const progressiveSync = ProgressiveSyncService.getInstance();
+    const result = await progressiveSync.syncFromCloud();
+    return { error: result.success ? null : result.error };
   };
 
   const refreshProfile = async () => {
