@@ -1,5 +1,6 @@
 import { unifiedDataStore } from "./UnifiedDataStore";
 import dailyChallengesData from "../data/daily_challenges_v2.json";
+import { Logger } from "../utils/logger";
 import type {
   DailyChallenge,
   DailyChallengesData,
@@ -64,7 +65,7 @@ export class DailyChallengesService {
    */
   public async hasCompletedTodaysChallenge(): Promise<boolean> {
     const todaysChallenge = this.getTodaysChallenge();
-    console.log(
+    Logger.debug(
       "🔍 DailyChallengesService: hasCompletedTodaysChallenge called:",
       {
         todaysChallengeExists: !!todaysChallenge,
@@ -73,7 +74,7 @@ export class DailyChallengesService {
     );
 
     if (!todaysChallenge) {
-      console.log(
+      Logger.debug(
         "🔍 DailyChallengesService: No challenge for today, returning false",
       );
       return false; // No challenge available for today
@@ -89,7 +90,7 @@ export class DailyChallengesService {
 
     // Use the challenge ID as the key, not the date
     const isCompleted = progress[todaysChallenge.id]?.completed || false;
-    console.log("🔍 DailyChallengesService: Final result:", isCompleted);
+    Logger.debug(" DailyChallengesService: Final result:", isCompleted);
     return isCompleted;
   }
 
@@ -223,7 +224,7 @@ export class DailyChallengesService {
       lastResetDate: this.getTodayString(),
     };
     await unifiedDataStore.saveData();
-    console.log("Daily challenge data cleared");
+    Logger.debug("Daily challenge data cleared");
   }
 }
 

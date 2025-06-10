@@ -8,6 +8,7 @@ import type {
   // ImageManipulationAction, // Keeping as any[] as direct export not found, actions can be various object types (CropAction, ResizeAction etc.)
 } from "expo-image-manipulator";
 import { captureRef } from "react-native-view-shot";
+import { Logger } from "../utils/logger";
 
 // Import image manipulator conditionally to avoid web errors
 let manipulateAsync:
@@ -553,7 +554,7 @@ export const parseGameDeepLink = (
   url: string,
 ): { startWord?: string; targetWord?: string; theme?: string; isValid?: boolean } | null => {
   try {
-    console.log("🎮 parseGameDeepLink: Parsing URL:", url);
+    Logger.debug(" parseGameDeepLink: Parsing URL:", url);
 
     // Handle both web URLs and custom scheme URLs - REQUIRE hash validation
     if (url.includes("://challenge") || url.includes("/challenge")) {
@@ -583,7 +584,7 @@ export const parseGameDeepLink = (
           providedHash = secureMatch[7];
           theme = undefined;
         } else {
-          console.log("🎮 parseGameDeepLink: Unable to parse hash from URL");
+          Logger.debug(" parseGameDeepLink: Unable to parse hash from URL");
           return null;
         }
 
@@ -592,10 +593,10 @@ export const parseGameDeepLink = (
           targetWord,
           providedHash,
         );
-        console.log("🎮 parseGameDeepLink: Hash validation result:", isValid);
+        Logger.debug(" parseGameDeepLink: Hash validation result:", isValid);
 
         if (!isValid) {
-          console.log("🎮 parseGameDeepLink: Invalid hash - rejecting URL");
+          Logger.debug(" parseGameDeepLink: Invalid hash - rejecting URL");
           return null; // Reject invalid URLs
         }
 
@@ -608,7 +609,7 @@ export const parseGameDeepLink = (
       }
 
       // Reject URLs without hash
-      console.log(
+      Logger.debug(
         "🎮 parseGameDeepLink: No hash found in challenge URL - rejecting",
       );
       return null;
@@ -616,7 +617,7 @@ export const parseGameDeepLink = (
 
     // Legacy format still supported for non-challenge URLs
     const legacyRegex = /(?:\/\/|\/+)game\?start=([^&]+)&target=([^&]+)/;
-    console.log("🎮 parseGameDeepLink: Testing legacy regex");
+    Logger.debug(" parseGameDeepLink: Testing legacy regex");
     const legacyMatch = url.match(legacyRegex);
 
     if (legacyMatch && legacyMatch.length >= 3) {
@@ -626,7 +627,7 @@ export const parseGameDeepLink = (
       return null; // Reject legacy URLs without hash
     }
 
-    console.log("🎮 parseGameDeepLink: No valid URL format found");
+    Logger.debug(" parseGameDeepLink: No valid URL format found");
     return null;
   } catch (error) {
     console.error("🎮 parseGameDeepLink: Error parsing URL:", error);
@@ -665,13 +666,13 @@ export const parseDailyChallengeDeepLink = (
           targetWord,
           providedHash,
         );
-        console.log(
+        Logger.debug(
           "🎮 parseDailyChallengeDeepLink: Hash validation result:",
           isValid,
         );
 
         if (!isValid) {
-          console.log(
+          Logger.debug(
             "🎮 parseDailyChallengeDeepLink: Invalid hash - rejecting URL",
           );
           return null; // Reject invalid URLs
@@ -686,7 +687,7 @@ export const parseDailyChallengeDeepLink = (
       }
 
       // Reject URLs without hash
-      console.log(
+      Logger.debug(
         "🎮 parseDailyChallengeDeepLink: No hash found in daily challenge URL - rejecting",
       );
       return null;

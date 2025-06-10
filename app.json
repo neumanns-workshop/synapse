@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -16,25 +16,51 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.synapse"
+      "bundleIdentifier": "com.yourcompany.synapse",
+      "buildNumber": "1",
+      "requireFullScreen": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app does not use the camera.",
+        "NSMicrophoneUsageDescription": "This app does not use the microphone."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.yourcompany.synapse"
+      "package": "com.yourcompany.synapse",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "title": "Synapse",
+      "title": "Synapse - Word Navigation Puzzle",
       "bundler": "webpack",
-      "webpackConfigPath": "webpack.config.js"
+      "webpackConfigPath": "webpack.config.js",
+      "build": {
+        "babel": {
+          "include": ["@supabase/supabase-js"]
+        }
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/your-project-id"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     },
     "extra": {
       "eas": {
         "projectId": "your-project-id"
       }
     }
+
   }
 } 

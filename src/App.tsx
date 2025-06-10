@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense, lazy } from "react";
 import { Platform, Linking, View, Alert, AppState } from "react-native";
 
 import { NavigationContainer } from "@react-navigation/native";
@@ -10,13 +10,20 @@ import { PaperProvider, ActivityIndicator, Text } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClient, QueryClientProvider } from "react-query";
 
-import ContactModal from "./components/ContactModal";
-import DailiesModal from "./components/DailiesModal";
-import LabsModal from "./components/LabsModal";
-import NewsModal from "./components/NewsModal";
-import QuickstartModal from "./components/QuickstartModal";
-import StatsModal from "./components/StatsModal";
-import TutorialModal from "./components/TutorialModal";
+// Initialize logger early (includes anti-tampering protection)
+import { Logger } from "./utils/logger";
+
+// Lazy load heavy modal components for better web performance
+const ContactModal = lazy(() => import("./components/ContactModal"));
+const DailiesModal = lazy(() => import("./components/DailiesModal"));
+const LabsModal = lazy(() => import("./components/LabsModal"));
+const NewsModal = lazy(() => import("./components/NewsModal"));
+const QuickstartModal = lazy(() => import("./components/QuickstartModal"));
+const StatsModal = lazy(() => import("./components/StatsModal"));
+const TutorialModal = lazy(() => import("./components/TutorialModal"));
+
+import ErrorBoundary from "./components/ErrorBoundary";
+
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { TutorialProvider } from "./context/TutorialContext";
@@ -27,8 +34,10 @@ import { gameFlowManager } from "./services/GameFlowManager";
 import PaymentHandler from "./services/PaymentHandler";
 import { resetAllPlayerData } from "./services/StorageAdapter";
 import { unifiedDataStore } from "./services/UnifiedDataStore";
+import { preloadAllData } from "./services/dataLoader";
 import { useGameStore } from "./stores/useGameStore";
 import { SynapseLightTheme } from "./theme/SynapseTheme";
+import { initializeWebOptimizations } from "./utils/webOptimizations";
 import type { PaymentRedirectResult } from "./services/PaymentHandler";
 
 // Define the root stack parameter list
@@ -49,6 +58,13 @@ const customScreenOptions: Partial<NativeStackNavigationOptions> = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const queryClient = new QueryClient();
+
+// Loading fallback component for lazy-loaded modals
+const ModalLoadingFallback: React.FC = () => (
+  <View style={{ justifyContent: "center", alignItems: "center", padding: 20 }}>
+    <ActivityIndicator size="small" />
+  </View>
+);
 
 function AppContent() {
   const { theme } = useTheme();
@@ -93,6 +109,11 @@ function AppContent() {
   // Initialize web compatibility layers and load data
   useEffect(() => {
     const initializeApp = async () => {
+      // Initialize web-specific optimizations first
+      if (Platform.OS === "web") {
+        initializeWebOptimizations();
+      }
+
       let entryUrl = "";
       if (Platform.OS === "web") {
         if (typeof window !== "undefined") entryUrl = window.location.href;
@@ -144,7 +165,12 @@ function AppContent() {
       // If not a payment redirect, proceed with normal app initialization
       const { entryType, challengeData } =
         gameFlowManager.parseEntryUrl(entryUrl);
-      await loadInitialData();
+      
+      // Start data preloading in parallel with loadInitialData for better performance
+      const [, ] = await Promise.all([
+        loadInitialData(),
+        preloadAllData().catch(err => console.warn("Data preloading failed:", err))
+      ]);
 
       if (auth.user) {
         // await auth.syncDataFromCloud(); // This was old logic
@@ -280,54 +306,71 @@ function AppContent() {
   return (
     <PaperProvider theme={theme}>
       <SafeAreaProvider>
-        <NavigationContainer>
-          <Stack.Navigator
-            initialRouteName="Synapse"
-            screenOptions={{
-              headerShown: false,
-              animation: customScreenOptions.animation,
-              animationDuration: customScreenOptions.animationDuration,
-              contentStyle: { backgroundColor: theme.colors.background },
-            }}
-          >
-            <Stack.Screen name="Synapse">
-              {(props) => (
-                <GameScreen
-                  {...props}
-                  onShowAuth={() => {
-                    setAuthScreenMode("signup");
-                    setShowAuth(true);
-                  }}
-                  onShowAuthUpgrade={() => {
-                    setAuthScreenMode("signup");
-                    setShowAuth(true);
-                  }}
-                  onShowAccount={() => setShowAccount(true)}
-                />
-              )}
-            </Stack.Screen>
-          </Stack.Navigator>
+        <ErrorBoundary>
+          <NavigationContainer>
+            <Stack.Navigator
+              initialRouteName="Synapse"
+              screenOptions={{
+                headerShown: false,
+                animation: customScreenOptions.animation,
+                animationDuration: customScreenOptions.animationDuration,
+                contentStyle: { backgroundColor: theme.colors.background },
+              }}
+            >
+              <Stack.Screen name="Synapse">
+                {(props) => (
+                  <ErrorBoundary>
+                    <GameScreen
+                      {...props}
+                      onShowAuth={() => {
+                        setAuthScreenMode("signup");
+                        setShowAuth(true);
+                      }}
+                      onShowAuthUpgrade={() => {
+                        setAuthScreenMode("signup");
+                        setShowAuth(true);
+                      }}
+                      onShowAccount={() => setShowAccount(true)}
+                    />
+                  </ErrorBoundary>
+                )}
+              </Stack.Screen>
+            </Stack.Navigator>
 
           {/* Modals */}
-          <QuickstartModal
-            visible={quickstartModalVisible}
-            onDismiss={() => setQuickstartModalVisible(false)}
-          />
-          <NewsModal
-            visible={newsModalVisible}
-            onDismiss={() => setNewsModalVisible(false)}
-          />
-          <ContactModal
-            visible={contactModalVisible}
-            onDismiss={() => setContactModalVisible(false)}
-          />
-          <LabsModal
-            visible={labsModalVisible}
-            onDismiss={() => setLabsModalVisible(false)}
-          />
-          <StatsModal />
-          <DailiesModal />
-          <TutorialModal />
+          <Suspense fallback={<ModalLoadingFallback />}>
+            <QuickstartModal
+              visible={quickstartModalVisible}
+              onDismiss={() => setQuickstartModalVisible(false)}
+            />
+          </Suspense>
+          <Suspense fallback={<ModalLoadingFallback />}>
+            <NewsModal
+              visible={newsModalVisible}
+              onDismiss={() => setNewsModalVisible(false)}
+            />
+          </Suspense>
+          <Suspense fallback={<ModalLoadingFallback />}>
+            <ContactModal
+              visible={contactModalVisible}
+              onDismiss={() => setContactModalVisible(false)}
+            />
+          </Suspense>
+          <Suspense fallback={<ModalLoadingFallback />}>
+            <LabsModal
+              visible={labsModalVisible}
+              onDismiss={() => setLabsModalVisible(false)}
+            />
+          </Suspense>
+          <Suspense fallback={<ModalLoadingFallback />}>
+            <StatsModal />
+          </Suspense>
+          <Suspense fallback={<ModalLoadingFallback />}>
+            <DailiesModal />
+          </Suspense>
+          <Suspense fallback={<ModalLoadingFallback />}>
+            <TutorialModal />
+          </Suspense>
 
           {/* Auth Modal */}
           <AuthScreen
@@ -361,8 +404,9 @@ function AppContent() {
           {showAccount && auth.user && (
             <AccountScreen onClose={() => setShowAccount(false)} />
           )}
-        </NavigationContainer>
-        <StatusBar style={theme.dark ? "light" : "dark"} />
+          </NavigationContainer>
+          <StatusBar style={theme.dark ? "light" : "dark"} />
+        </ErrorBoundary>
       </SafeAreaProvider>
     </PaperProvider>
   );

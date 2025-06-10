@@ -5,6 +5,7 @@ import {
 } from "./SharingService";
 import type { UpgradeContext } from "../components/UpgradePrompt";
 import { useGameStore } from "../stores/useGameStore";
+import { Logger } from "../utils/logger";
 
 export interface GameFlowState {
   isFirstTimeUser: boolean;
@@ -52,7 +53,7 @@ export class GameFlowManager {
   public async analyzePlayerState(): Promise<GameFlowState> {
     const gameStore = useGameStore.getState();
 
-    console.log("🎮 GameFlowManager.analyzePlayerState: Game store state:", {
+    Logger.debug("GameFlowManager.analyzePlayerState: Game store state", {
       initialDataLoaded: gameStore.initialDataLoaded,
       currentDailyChallenge: !!gameStore.currentDailyChallenge,
       challengeId: gameStore.currentDailyChallenge?.id,
@@ -100,7 +101,7 @@ export class GameFlowManager {
   ): Promise<FlowDecision> {
     const state = await this.analyzePlayerState();
 
-    console.log("🎮 GameFlowManager.determineGameFlow:", {
+    Logger.debug(" GameFlowManager.determineGameFlow:", {
       entryPoint,
       challengeData,
       state: {
@@ -118,7 +119,7 @@ export class GameFlowManager {
       challengeData?.startWord &&
       challengeData?.targetWord
     ) {
-      console.log("🎮 Starting validated player challenge");
+      Logger.info("Starting validated player challenge");
       return {
         action: "playerChallenge",
         startWord: challengeData.startWord,
@@ -130,14 +131,14 @@ export class GameFlowManager {
     // Handle daily challenge entry (high priority but respects tutorial/news)
     if (entryPoint === "dailyChallenge" && challengeData?.challengeId) {
       if (state.shouldShowTutorial) {
-        console.log("🎮 Daily challenge entry but showing tutorial first");
+        Logger.debug(" Daily challenge entry but showing tutorial first");
         return { action: "tutorial" };
       }
       if (state.shouldShowNews) {
-        console.log("🎮 Daily challenge entry but showing news first");
+        Logger.debug(" Daily challenge entry but showing news first");
         return { action: "news" };
       }
-      console.log("🎮 Starting daily challenge from entry");
+      Logger.debug(" Starting daily challenge from entry");
       return {
         action: "dailyChallenge",
         challengeId: challengeData.challengeId,
@@ -150,25 +151,25 @@ export class GameFlowManager {
     if (entryPoint === "landing") {
       // First priority: Tutorial for new users
       if (state.shouldShowTutorial) {
-        console.log("🎮 Showing tutorial for new user");
+        Logger.debug(" Showing tutorial for new user");
         return { action: "tutorial" };
       }
 
       // Second priority: News cards if no game history
       if (state.shouldShowNews) {
-        console.log("🎮 Showing news");
+        Logger.debug(" Showing news");
         return { action: "news" };
       }
 
       // Third priority: Restore unfinished games
       if (state.hasUnfinishedGame) {
-        console.log("🎮 Restoring unfinished regular game");
+        Logger.debug(" Restoring unfinished regular game");
         return { action: "restoreGame" };
       }
 
       // Fourth priority: Restore unfinished daily challenges
       if (state.hasUnfinishedDailyChallenge) {
-        console.log("🎮 Restoring unfinished daily challenge");
+        Logger.debug(" Restoring unfinished daily challenge");
         return { action: "restoreGame" };
       }
 
@@ -177,7 +178,7 @@ export class GameFlowManager {
       const todaysChallenge = gameStore.currentDailyChallenge;
       const hasPlayedToday = gameStore.hasPlayedTodaysChallenge;
 
-      console.log("🎮 Checking daily challenge priority:", {
+      Logger.debug(" Checking daily challenge priority:", {
         todaysChallenge: !!todaysChallenge,
         hasPlayedToday,
         challengeId: todaysChallenge?.id,
@@ -186,7 +187,7 @@ export class GameFlowManager {
       });
 
       if (todaysChallenge && !hasPlayedToday) {
-        console.log("🎮 Starting today's daily challenge");
+        Logger.debug(" Starting today's daily challenge");
         return {
           action: "dailyChallenge",
           challengeId: todaysChallenge.id,
@@ -207,7 +208,7 @@ export class GameFlowManager {
         );
         return { action: "randomGame" };
       } else {
-        console.log(
+        Logger.debug(
           "🎮 Showing upgrade prompt - no free games and not premium",
         );
         return {
@@ -220,7 +221,7 @@ export class GameFlowManager {
     }
 
     // Default fallback
-    console.log("🎮 Default fallback to random game");
+    Logger.debug(" Default fallback to random game");
     return { action: "randomGame" };
   }
 
@@ -236,11 +237,11 @@ export class GameFlowManager {
       isValid?: boolean;
     };
   } {
-    console.log("🎮 GameFlowManager.parseEntryUrl: Parsing URL:", url);
+    Logger.debug(" GameFlowManager.parseEntryUrl: Parsing URL:", url);
 
     // Check for daily challenge link
     const dailyChallengeParams = parseDailyChallengeDeepLink(url);
-    console.log(
+    Logger.debug(
       "🎮 GameFlowManager.parseEntryUrl: Daily challenge params:",
       dailyChallengeParams,
     );
@@ -258,7 +259,7 @@ export class GameFlowManager {
 
     // Check for player challenge link
     const playerChallengeParams = parseGameDeepLink(url);
-    console.log(
+    Logger.debug(
       "🎮 GameFlowManager.parseEntryUrl: Player challenge params:",
       playerChallengeParams,
     );
@@ -273,7 +274,7 @@ export class GameFlowManager {
       };
     }
 
-    console.log(
+    Logger.debug(
       "🎮 GameFlowManager.parseEntryUrl: No challenge detected, defaulting to landing",
     );
     return { entryType: "landing" };
@@ -285,21 +286,21 @@ export class GameFlowManager {
   public async executeFlowDecision(decision: FlowDecision): Promise<void> {
     const gameStore = useGameStore.getState();
 
-    console.log("🎮 GameFlowManager.executeFlowDecision:", decision);
+    Logger.debug(" GameFlowManager.executeFlowDecision:", decision);
 
     switch (decision.action) {
       case "tutorial":
-        console.log("🎮 Executing: tutorial");
+        Logger.debug(" Executing: tutorial");
         // Tutorial will be handled by TutorialContext
         break;
 
       case "news":
-        console.log("🎮 Executing: news");
+        Logger.debug(" Executing: news");
         // News cards will be handled by NewsContext (to be implemented)
         break;
 
       case "playerChallenge":
-        console.log("🎮 Executing: playerChallenge");
+        Logger.debug(" Executing: playerChallenge");
         if (decision.startWord && decision.targetWord) {
           await gameStore.startChallengeGame(
             decision.startWord,
@@ -309,23 +310,23 @@ export class GameFlowManager {
         break;
 
       case "dailyChallenge":
-        console.log("🎮 Executing: dailyChallenge");
+        Logger.debug(" Executing: dailyChallenge");
         await gameStore.startDailyChallengeGame();
         break;
 
       case "randomGame":
-        console.log("🎮 Executing: randomGame");
+        Logger.debug(" Executing: randomGame");
         // Free game consumption is now handled in startGame function
         await gameStore.startGame();
         break;
 
       case "restoreGame":
-        console.log("🎮 Executing: restoreGame");
+        Logger.debug(" Executing: restoreGame");
         // Game restoration is handled automatically by gameStore.loadInitialData
         break;
 
       case "upgradePrompt":
-        console.log("🎮 Executing: upgradePrompt");
+        Logger.debug(" Executing: upgradePrompt");
         // Show upgrade prompt (to be implemented in UI)
         gameStore.showUpgradePrompt(
           decision.message ||

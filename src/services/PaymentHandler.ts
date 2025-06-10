@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SupabaseService from "./SupabaseService";
 import { UnifiedDataStore } from "./UnifiedDataStore"; // Assuming UnifiedDataStore is exported like this
+import { Logger } from "../utils/logger";
 
 // Key for AsyncStorage, needs to be consistent with AuthScreen.tsx
 // It's better to define this in a shared constants file, but for now, duplicating
@@ -97,7 +98,7 @@ export class PaymentHandler {
 
         // Grant premium access immediately (optimistic)
         // The webhook will confirm this in the background
-        console.log("Payment successful! Granting immediate premium access...");
+        Logger.debug("Payment successful! Granting immediate premium access...");
 
         // Set premium status locally immediately
         this.unifiedStore.setPremiumStatus(true);
@@ -114,11 +115,11 @@ export class PaymentHandler {
           );
           // Don't fail the flow - webhook will handle it as fallback
         } else {
-          console.log("✅ Premium profile created immediately in database");
+          Logger.info(" Premium profile created immediately in database");
         }
 
         // Convert anonymous user to permanent user by calling the new Edge Function
-        console.log(
+        Logger.debug(
           `Attempting to finalize account for user ${temporaryUserId} via Edge Function with email ${email}`,
         );
 
@@ -161,7 +162,7 @@ export class PaymentHandler {
         }
 
         // Success! Cleanup and user is already signed in with permanent account
-        console.log(
+        Logger.debug(
           "finalize-premium-account Edge Function succeeded.",
           finalizeResult,
         );
@@ -183,7 +184,7 @@ export class PaymentHandler {
             temporaryUserId,
           );
           await AsyncStorage.removeItem(PENDING_CONVERSION_USER_ID);
-          console.log(
+          Logger.debug(
             "Payment cancelled by user. Cleaned up pending conversion details for:",
             temporaryUserId,
           );

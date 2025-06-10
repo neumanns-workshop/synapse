@@ -151,7 +151,7 @@ export const trackOptimalChoice = (
     if (neighborDetails.length > 0) {
       // Similarity sorting
       const sortedBySimilarity = [...neighborDetails].sort(
-        (a, b) => b.similarity - a.similarity,
+        (a, b) => (b.similarity as number) - (a.similarity as number),
       );
       if (playerChoice === sortedBySimilarity[0].word) {
         wasMostSimilar = true;

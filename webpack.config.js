@@ -6,6 +6,51 @@ module.exports = async function(env, argv) {
   // Get the default Expo webpack config
   const config = await createExpoWebpackConfigAsync(env, argv);
 
+  // Add optimization for better bundle splitting
+  config.optimization = {
+    ...config.optimization,
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        // Vendor chunk for external libraries
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendor',
+          chunks: 'all',
+          priority: 10,
+        },
+        // Data chunk for large JSON files
+        data: {
+          test: /[\\/]src[\\/]data[\\/].*\.json$/,
+          name: 'data',
+          chunks: 'all',
+          priority: 20,
+        },
+        // Components chunk for modal and heavy components
+        components: {
+          test: /[\\/]src[\\/]components[\\/](.*Modal|StatsModal|GraphVisualization)\.tsx?$/,
+          name: 'components',
+          chunks: 'all',
+          priority: 15,
+        },
+        // Services chunk
+        services: {
+          test: /[\\/]src[\\/]services[\\/]/,
+          name: 'services',
+          chunks: 'all',
+          priority: 5,
+        },
+        // Common chunk for shared code
+        common: {
+          name: 'common',
+          minChunks: 2,
+          chunks: 'all',
+          priority: 1,
+        },
+      },
+    },
+  };
+
   // Customize aliases
   config.resolve.alias = {
     ...(config.resolve.alias || {}),
@@ -77,6 +122,16 @@ module.exports = async function(env, argv) {
         definePlugin.definitions[`process.env.${key}`] = JSON.stringify(envConfig[key]);
       });
     }
+  }
+
+  // Add performance hints for production
+  const mode = argv?.mode || env?.mode || process.env.NODE_ENV || 'development';
+  if (mode === 'production') {
+    config.performance = {
+      hints: 'warning',
+      maxEntrypointSize: 512000, // 500KB
+      maxAssetSize: 512000, // 500KB
+    };
   }
 
   return config;

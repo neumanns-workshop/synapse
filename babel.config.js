@@ -1,7 +1,11 @@
 module.exports = function(api) {
   api.cache(true);
   return {
-    presets: ['babel-preset-expo'],
+    presets: [
+      ['babel-preset-expo', {
+        jsxRuntime: 'classic' // Force classic JSX transform
+      }]
+    ],
     plugins: [
       ['@babel/plugin-transform-runtime', {
         helpers: true,
@@ -35,11 +39,7 @@ module.exports = function(api) {
           '@types': './src/types',
           '@data': './src/data'
         },
-        resolvePath: (sourcePath, currentFile, opts) => {
-          // Add logging for debugging module resolution
-          console.log(`Resolving: ${sourcePath} from ${currentFile}`);
-          return require('babel-plugin-module-resolver').resolvePath(sourcePath, currentFile, opts);
-        }
+        // resolvePath: Custom resolution handled by default
       }],
       'react-native-reanimated/plugin',
       '@babel/plugin-proposal-export-namespace-from',

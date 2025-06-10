@@ -1,17 +1,8 @@
 // src/services/dataLoader.ts
 
 // Define interfaces for the data structures
-interface Edge {
-  [neighbor: string]: number;
-}
-
-interface NodeData {
-  edges: Edge;
-  tsne: number[]; // Changed from [number, number] to number[] to match actual data
-}
-
 export interface GraphData {
-  [word: string]: NodeData;
+  [word: string]: any;
 }
 
 export interface DefinitionsData {
@@ -22,13 +13,22 @@ export interface WordFrequencies {
   [word: string]: number;
 }
 
-// Import JSON files directly
-import definitionsDataJson from "../data/definitions.json";
-import wordFrequenciesJson from "../data/filtered_word_frequencies.json";
-import graphDataJson from "../data/graph.json";
+// Data caching for performance
+let graphDataCache: GraphData | null = null;
+let wordFrequenciesCache: WordFrequencies | null = null;
+let definitionsCache: DefinitionsData | null = null;
 
 export const loadGraphData = async (): Promise<GraphData> => {
   try {
+    // Return cached data if available
+    if (graphDataCache) {
+      return graphDataCache;
+    }
+
+    // Dynamic import for better bundle splitting
+    const graphDataModule = await import("../data/graph.json");
+    const graphDataJson = graphDataModule.default || graphDataModule;
+    
     // Check if the data is in the expected format
     if (typeof graphDataJson === "object" && graphDataJson !== null) {
       const keys = Object.keys(graphDataJson);
@@ -37,12 +37,14 @@ export const loadGraphData = async (): Promise<GraphData> => {
       if (
         keys.length === 1 &&
         keys[0] === "nodes" &&
-        typeof graphDataJson.nodes === "object" &&
-        graphDataJson.nodes !== null
+        typeof (graphDataJson as any).nodes === "object" &&
+        (graphDataJson as any).nodes !== null
       ) {
-        return graphDataJson.nodes as unknown as GraphData;
+        graphDataCache = (graphDataJson as any).nodes as GraphData;
+        return graphDataCache;
       } else if (keys.length > 1) {
-        return graphDataJson as unknown as GraphData;
+        graphDataCache = graphDataJson as GraphData;
+        return graphDataCache;
       } else {
         throw new Error("Invalid graph data structure.");
       }
@@ -56,27 +58,73 @@ export const loadGraphData = async (): Promise<GraphData> => {
   }
 };
 
-export const loadDefinitionsData = async (): Promise<DefinitionsData> => {
+export const loadDefinitions = async (): Promise<DefinitionsData> => {
   try {
-    return definitionsDataJson as DefinitionsData;
+    // Return cached data if available
+    if (definitionsCache) {
+      return definitionsCache;
+    }
+
+    // Dynamic import for better bundle splitting
+    const definitionsModule = await import("../data/definitions.json");
+    const definitions = definitionsModule.default || definitionsModule;
+    
+    if (typeof definitions === "object" && definitions !== null) {
+      definitionsCache = definitions as DefinitionsData;
+      return definitionsCache;
+    } else {
+      throw new Error("Failed to load definitions: Invalid format.");
+    }
   } catch (error) {
-    throw new Error("Failed to load definitions data.");
+    throw error instanceof Error
+      ? error
+      : new Error("Failed to load definitions.");
   }
 };
 
 export const loadWordFrequencies = async (): Promise<WordFrequencies> => {
   try {
-    if (
-      typeof wordFrequenciesJson === "object" &&
-      wordFrequenciesJson !== null
-    ) {
-      return wordFrequenciesJson as WordFrequencies;
+    // Return cached data if available
+    if (wordFrequenciesCache) {
+      return wordFrequenciesCache;
+    }
+
+    // Dynamic import for better bundle splitting
+    const wordFrequenciesModule = await import("../data/filtered_word_frequencies.json");
+    const wordFrequencies = wordFrequenciesModule.default || wordFrequenciesModule;
+    
+    if (typeof wordFrequencies === "object" && wordFrequencies !== null) {
+      wordFrequenciesCache = wordFrequencies as WordFrequencies;
+      return wordFrequenciesCache;
     } else {
-      throw new Error("Invalid word frequencies data format.");
+      throw new Error("Failed to load word frequencies: Invalid format.");
     }
   } catch (error) {
     throw error instanceof Error
       ? error
-      : new Error("Failed to load word frequencies data.");
+      : new Error("Failed to load word frequencies.");
   }
 };
+
+// Helper function to preload all data (for better UX)
+export const preloadAllData = async (): Promise<void> => {
+  try {
+    await Promise.all([
+      loadGraphData(),
+      loadWordFrequencies(),
+      loadDefinitions()
+    ]);
+  } catch (error) {
+    console.warn("Failed to preload some data:", error);
+  }
+};
+
+// Clear cache if needed (useful for testing or memory management)
+export const clearDataCache = (): void => {
+  graphDataCache = null;
+  wordFrequenciesCache = null;
+  definitionsCache = null;
+};
+
+// Legacy function name for backwards compatibility
+export const loadDefinitionsData = loadDefinitions;

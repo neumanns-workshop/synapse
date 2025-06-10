@@ -7,6 +7,7 @@ import {
 import { useGameStore } from "../stores/useGameStore";
 
 import { UnifiedDataStore, UnifiedAppData } from "./UnifiedDataStore";
+import { Logger } from "../utils/logger";
 
 // Environment variables (set in your .env file)
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
@@ -121,18 +122,18 @@ export class SupabaseService {
 
     // Listen for auth changes
     this.supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event);
+      Logger.debug("Auth state changed:", event);
       await this.handleAuthStateChange(session);
     });
   }
 
   private async handleAuthStateChange(session: Session | null) {
-    console.log("🔄 handleAuthStateChange called with session:", !!session);
+    Logger.debug(" handleAuthStateChange called with session:", !!session);
     if (session?.user) {
-      console.log("🔄 User is signed in, fetching profile...");
+      Logger.debug(" User is signed in, fetching profile...");
       // User is signed in
       const profile = await this.fetchUserProfile(session.user.id);
-      console.log("🔄 Profile fetched:", !!profile);
+      Logger.debug(" Profile fetched:", !!profile);
 
       // If no profile exists, this might be a database reset scenario
       if (!profile) {
@@ -146,53 +147,53 @@ export class SupabaseService {
         return; // Exit early, don't continue with sync
       }
 
-      console.log("🔄 Updating auth state...");
+      Logger.debug(" Updating auth state...");
       this.updateAuthState({
         user: session.user,
         session,
         profile,
         isLoading: false,
       });
-      console.log("🔄 Auth state updated");
+      Logger.debug(" Auth state updated");
 
       // PROGRESSIVE SYNC FLOW: Use new progressive sync system
-      console.log("🔄 Starting progressive data sync...");
+      Logger.debug(" Starting progressive data sync...");
       
       // Import ProgressiveSyncService dynamically to avoid circular dependency
       const { ProgressiveSyncService } = await import('./ProgressiveSyncService');
       const progressiveSync = ProgressiveSyncService.getInstance();
 
       // Fetch cloud data first (like git fetch)
-      console.log("🔄 Starting progressive cloud data sync (fetch)...");
+      Logger.debug(" Starting progressive cloud data sync (fetch)...");
       const fetchResult = await progressiveSync.syncFromCloud();
 
       // If sync failed due to missing data, user was already signed out
       if (!fetchResult.success && fetchResult.error && typeof fetchResult.error === 'object' && 'message' in fetchResult.error && 
           typeof fetchResult.error.message === 'string' && 
           fetchResult.error.message.includes("signed out for consistency")) {
-        console.log("🔄 User was signed out during sync due to missing data");
+        Logger.debug(" User was signed out during sync due to missing data");
         return; // Exit early
       }
 
-      console.log("🔄 Progressive cloud data sync completed in", fetchResult.totalTime, "ms");
+      Logger.debug(" Progressive cloud data sync completed in", fetchResult.totalTime, "ms");
 
       // Then sync local data to cloud (like git push)
-      console.log("🔄 Starting progressive local data sync (push)...");
+      Logger.debug(" Starting progressive local data sync (push)...");
       const pushResult = await progressiveSync.syncToCloud();
-      console.log("🔄 Progressive local data sync completed in", pushResult.totalTime, "ms");
+      Logger.debug(" Progressive local data sync completed in", pushResult.totalTime, "ms");
 
       // Refresh profile after sync in case premium status changed
-      console.log("🔄 Refreshing profile after sync...");
+      Logger.debug(" Refreshing profile after sync...");
       const updatedProfile = await this.fetchUserProfile(session.user.id);
       if (updatedProfile) {
         this.updateAuthState({
           profile: updatedProfile,
         });
-        console.log("🔄 Profile refreshed and updated");
+        Logger.debug(" Profile refreshed and updated");
       }
-      console.log("🔄 handleAuthStateChange completed successfully");
+      Logger.debug(" handleAuthStateChange completed successfully");
     } else {
-      console.log("🔄 User is signed out, clearing auth state");
+      Logger.debug(" User is signed out, clearing auth state");
       // User is signed out
       this.updateAuthState({
         user: null,
@@ -297,7 +298,7 @@ export class SupabaseService {
   }
 
   public async signIn(email: string, password: string, captchaToken?: string) {
-    console.log("🔐 SupabaseService.signIn called with email:", email);
+    Logger.debug(" SupabaseService.signIn called with email:", email);
     try {
       const signInOptions: any = {
         email,
@@ -311,10 +312,10 @@ export class SupabaseService {
         };
       }
 
-      console.log("🔐 Calling supabase.auth.signInWithPassword...");
+      Logger.debug(" Calling supabase.auth.signInWithPassword...");
       const { data, error } =
         await this.supabase.auth.signInWithPassword(signInOptions);
-      console.log(
+      Logger.debug(
         "🔐 signInWithPassword response - user:",
         !!data.user,
         "session:",
@@ -328,7 +329,7 @@ export class SupabaseService {
         return { user: null, session: null, error };
       }
 
-      console.log("🔐 Sign-in successful, returning data");
+      Logger.debug(" Sign-in successful, returning data");
       return { user: data.user, session: data.session, error: null };
     } catch (error) {
       console.error("🔐 Sign in exception:", error);
@@ -341,17 +342,17 @@ export class SupabaseService {
       if (options.accountDeleted) {
         // After account deletion, we want a completely fresh start,
         // but we preserve their gameplay history and stats as an anonymous user.
-        console.log("👤 Account deleted. Anonymizing local data...");
+        Logger.debug("👤 Account deleted. Anonymizing local data...");
         await this.unifiedStore.anonymizeDataOnAccountDeletion();
-        console.log("✅ Local data anonymized.");
+        Logger.info(" Local data anonymized.");
       } else {
         // For a standard sign-out, we reset the session (e.g., free games)
         // but keep all their progress.
-        console.log(
+        Logger.debug(
           "➡️ Performing standard sign-out, resetting session state...",
         );
         await this.unifiedStore.resetForNewAnonymousSession();
-        console.log("✅ Session state reset for new anonymous user.");
+        Logger.info(" Session state reset for new anonymous user.");
       }
 
       // Sign out from all sessions
@@ -367,10 +368,10 @@ export class SupabaseService {
           for (const key of keys) {
             if (key.startsWith("sb-") || key.includes("supabase")) {
               localStorage.removeItem(key);
-              console.log("🗑️ Cleared localStorage key:", key);
+              Logger.debug(" Cleared localStorage key:", key);
             }
           }
-          console.log("✅ Manual localStorage cleanup complete");
+          Logger.info(" Manual localStorage cleanup complete");
         }
       }
 
@@ -387,11 +388,11 @@ export class SupabaseService {
 
       // After account deletion, a reload is the safest way to ensure a clean state.
       if (options.accountDeleted) {
-        console.log("🔄 Reloading application for a clean slate...");
+        Logger.debug(" Reloading application for a clean slate...");
         window.location.reload();
       }
 
-      console.log("✅ Sign-out complete.");
+      Logger.info(" Sign-out complete.");
       return { error: null };
     } catch (error) {
       console.error("Sign out error:", error);
@@ -450,7 +451,7 @@ export class SupabaseService {
           this.currentAuthState.profile.email !== email
         ) {
           await this.updateUserProfile({ email: email });
-          console.log(
+          Logger.debug(
             `Updated user_profiles email for user ${data.user.id} to ${email}`,
           );
         }
@@ -515,16 +516,16 @@ export class SupabaseService {
   }
 
   private async fetchUserProfile(userId: string): Promise<UserProfile | null> {
-    console.log("🔍 fetchUserProfile called for userId:", userId);
+    Logger.debug(" fetchUserProfile called for userId:", userId);
     try {
-      console.log("🔍 Executing Supabase query for user_profiles...");
+      Logger.debug(" Executing Supabase query for user_profiles...");
       const { data, error } = await this.supabase
         .from("user_profiles")
         .select("*")
         .eq("id", userId)
         .single();
 
-      console.log(
+      Logger.debug(
         "🔍 Supabase query completed. Data:",
         !!data,
         "Error:",
@@ -536,7 +537,7 @@ export class SupabaseService {
         return null;
       }
 
-      console.log("🔍 Profile fetched successfully:", data);
+      Logger.debug(" Profile fetched successfully:", data);
       return data;
     } catch (error) {
       console.error("🔍 Exception in fetchUserProfile:", error);
@@ -549,7 +550,7 @@ export class SupabaseService {
       const userId = this.currentAuthState.user?.id;
       if (!userId) throw new Error("No authenticated user");
 
-      console.log("🔧 Attempting to update user profile:", { userId, updates });
+      Logger.debug("🔧 Attempting to update user profile:", { userId, updates });
 
       const { error } = await this.supabase
         .from("user_profiles")
@@ -561,14 +562,14 @@ export class SupabaseService {
         throw error;
       }
 
-      console.log("✅ Database update successful");
+      Logger.info(" Database update successful");
 
       // Update local auth state
       if (this.currentAuthState.profile) {
         this.updateAuthState({
           profile: { ...this.currentAuthState.profile, ...updates },
         });
-        console.log("✅ Local auth state updated");
+        Logger.info(" Local auth state updated");
       }
 
       return { error: null };
@@ -593,7 +594,7 @@ export class SupabaseService {
     // This prevents sync operations from overwriting the preference change
     if (!result.error) {
       try {
-        console.log("📧 Updating local UnifiedDataStore with email preference:", emailUpdatesOptIn);
+        Logger.info(" Updating local UnifiedDataStore with email preference:", emailUpdatesOptIn);
         // Note: email_updates is managed in the profile table, not in the local privacy settings
         // But we should sync any other privacy changes to keep things consistent
         
@@ -625,7 +626,7 @@ export class SupabaseService {
     // This prevents sync operations from overwriting the preference changes
     if (!result.error) {
       try {
-        console.log("🔒 Updating local UnifiedDataStore with privacy settings:", privacyUpdates);
+        Logger.debug("🔒 Updating local UnifiedDataStore with privacy settings:", privacyUpdates);
         
         // Map the privacy settings to the local format
         const localPrivacyUpdates: any = {};
@@ -660,14 +661,14 @@ export class SupabaseService {
       const userId = this.currentAuthState.user?.id;
       if (!userId) throw new Error("No authenticated user");
 
-      console.log("🔄 Force refreshing user profile from database...");
+      Logger.debug(" Force refreshing user profile from database...");
       const freshProfile = await this.fetchUserProfile(userId);
 
       if (freshProfile) {
         this.updateAuthState({
           profile: freshProfile,
         });
-        console.log("✅ Profile refreshed:", freshProfile);
+        Logger.info(" Profile refreshed:", freshProfile);
         return { profile: freshProfile, error: null };
       } else {
         throw new Error("Could not fetch fresh profile");
@@ -739,7 +740,7 @@ export class SupabaseService {
         profile: newProfile,
       });
 
-      console.log("✅ Premium profile created immediately:", newProfile);
+      Logger.info(" Premium profile created immediately:", newProfile);
       return { error: null };
     } catch (error) {
       console.error("Error creating premium profile:", error);
@@ -788,7 +789,7 @@ export class SupabaseService {
       const progressiveSync = ProgressiveSyncService.getInstance();
       await progressiveSync.syncToCloud();
 
-      console.log("Purchase data synced successfully");
+      Logger.debug("Purchase data synced successfully");
       return { error: null };
     } catch (error) {
       console.error("Error syncing purchase data:", error);
@@ -871,7 +872,7 @@ export class SupabaseService {
       // Update local sync timestamp
       await this.unifiedStore.updateSyncMetadata(Date.now());
 
-      console.log("Data synced to cloud successfully");
+      Logger.debug("Data synced to cloud successfully");
       return { error: null };
     } catch (error) {
       console.error("Error syncing data to cloud:", error);
@@ -938,7 +939,7 @@ export class SupabaseService {
         // Check if data is compressed and decompress if needed
         let cloudData: UnifiedAppData;
         if (userData.is_compressed) {
-          console.log("🗜️ Decompressing cloud data...");
+          Logger.debug("🗜️ Decompressing cloud data...");
           cloudData = this.unifiedStore.decompressData(userData.data);
         } else {
           console.log("📄 Using uncompressed cloud data (legacy format)");
@@ -1052,7 +1053,7 @@ export class SupabaseService {
 
         // Import merged cloud data to local storage
         await this.unifiedStore.importData(cloudData);
-        console.log("Cloud data synced to local successfully");
+        Logger.debug("Cloud data synced to local successfully");
       } else {
         // No full data backup, but we might have profile data
         if (profileData) {
@@ -1084,9 +1085,9 @@ export class SupabaseService {
           );
 
           await this.unifiedStore.importData(localData);
-          console.log("Profile data synced to local successfully");
+          Logger.debug("Profile data synced to local successfully");
         } else {
-          console.log("No cloud data found for user");
+          Logger.debug("No cloud data found for user");
         }
       }
 
@@ -1348,23 +1349,23 @@ export class SupabaseService {
 
   public async deleteAccount() {
     try {
-      console.log(
+      Logger.debug(
         "🗑️ SupabaseService.deleteAccount: Starting deletion process...",
       );
 
       // Get current user info for debugging
       const user = this.currentAuthState.user;
       const session = this.currentAuthState.session;
-      console.log("🗑️ Current user:", user?.id, user?.email);
-      console.log("🗑️ Session exists:", !!session);
-      console.log("🗑️ Access token exists:", !!session?.access_token);
+      Logger.debug(" Current user:", user?.id, user?.email);
+      Logger.debug(" Session exists:", !!session);
+      Logger.debug(" Access token exists:", !!session?.access_token);
 
       if (!session?.access_token) {
         throw new Error("No valid session found. Please sign in again.");
       }
 
       // Call edge function - try with current token first, then refresh if needed
-      console.log("🗑️ Calling delete-user-account edge function...");
+      Logger.debug(" Calling delete-user-account edge function...");
 
       // Try with the current session first
       let { data, error } = await this.supabase.functions.invoke(
@@ -1379,7 +1380,7 @@ export class SupabaseService {
         error &&
         (error.context?.status === 401 || String(error.message).includes("401"))
       ) {
-        console.log("🗑️ Got 401 error, attempting session refresh...");
+        Logger.debug(" Got 401 error, attempting session refresh...");
 
         // Explicitly pass the refresh token to be sure
         if (!session?.refresh_token) {
@@ -1400,7 +1401,7 @@ export class SupabaseService {
           );
         }
 
-        console.log("🗑️ Session refreshed, retrying delete...");
+        Logger.debug(" Session refreshed, retrying delete...");
 
         // Retry the function call with refreshed session
         const result = await this.supabase.functions.invoke(
@@ -1414,11 +1415,11 @@ export class SupabaseService {
         error = result.error;
       }
 
-      console.log("🗑️ Edge function response:", { data, error });
+      Logger.debug(" Edge function response:", { data, error });
 
       if (error) throw error;
 
-      console.log(
+      Logger.debug(
         "🗑️ Account deletion successful, now performing hard sign-out...",
       );
       await this.signOut({ accountDeleted: true });

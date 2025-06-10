@@ -387,6 +387,18 @@ export class UnifiedDataStore {
   }
 
   /**
+   * Cleanup method to be called when the service is no longer needed
+   * Prevents memory leaks from pending timeouts
+   */
+  public cleanup(): void {
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+      this.saveTimeout = null;
+    }
+    this.hasPendingChanges = false;
+  }
+
+  /**
    * Get current data (load if not loaded)
    */
   public async getData(): Promise<UnifiedAppData> {
