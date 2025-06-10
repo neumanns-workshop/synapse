@@ -45,6 +45,18 @@ export interface UserProfile {
     data_collection: boolean;
     email_updates: boolean;
   };
+  legal_consent?: {
+    terms_of_service: {
+      accepted: boolean;
+      accepted_at?: string;
+      version?: string;
+    };
+    privacy_policy: {
+      accepted: boolean;
+      accepted_at?: string;
+      version?: string;
+    };
+  };
 }
 
 export interface AuthState {
@@ -494,8 +506,11 @@ export class SupabaseService {
     userId: string,
     email: string,
     emailUpdatesOptIn: boolean,
+    termsAccepted: boolean = false,
+    privacyAccepted: boolean = false,
   ) {
     try {
+      const now = new Date().toISOString();
       const { error } = await this.supabase.from("user_profiles").insert({
         id: userId,
         email,
@@ -505,6 +520,18 @@ export class SupabaseService {
           allow_leaderboards: true,
           data_collection: false,
           email_updates: emailUpdatesOptIn,
+        },
+        legal_consent: {
+          terms_of_service: {
+            accepted: termsAccepted,
+            accepted_at: termsAccepted ? now : undefined,
+            version: "1.0",
+          },
+          privacy_policy: {
+            accepted: privacyAccepted,
+            accepted_at: privacyAccepted ? now : undefined,
+            version: "1.0",
+          },
         },
       });
 
@@ -656,6 +683,99 @@ export class SupabaseService {
     return result;
   }
 
+  // ============================================================================
+  // LEGAL CONSENT METHODS
+  // ============================================================================
+
+  public async updateLegalConsent(
+    consentType: 'terms_of_service' | 'privacy_policy' | 'marketing_emails' | 'analytics',
+    accepted: boolean,
+    version: string = '1.0'
+  ) {
+    if (!this.currentAuthState.user) {
+      throw new Error("No authenticated user");
+    }
+
+    try {
+      const { error } = await this.supabase.rpc('update_user_legal_consent', {
+        user_id: this.currentAuthState.user.id,
+        consent_type: consentType,
+        accepted: accepted,
+        version: version
+      });
+
+      if (error) throw error;
+
+      // Refresh the user profile to get updated consent status
+      await this.refreshUserProfile();
+
+      Logger.info(`✅ Legal consent updated: ${consentType} = ${accepted}`);
+      return { error: null };
+    } catch (error) {
+      console.error("Error updating legal consent:", error);
+      return { error };
+    }
+  }
+
+  public async checkLegalConsent() {
+    if (!this.currentAuthState.user) {
+      throw new Error("No authenticated user");
+    }
+
+    try {
+      const { data, error } = await this.supabase.rpc('check_required_legal_consent', {
+        user_id: this.currentAuthState.user.id
+      });
+
+      if (error) throw error;
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error checking legal consent:", error);
+      return { data: null, error };
+    }
+  }
+
+  public async getLegalConsent() {
+    if (!this.currentAuthState.user) {
+      throw new Error("No authenticated user");
+    }
+
+    try {
+      const { data, error } = await this.supabase.rpc('get_user_legal_consent', {
+        user_id: this.currentAuthState.user.id
+      });
+
+      if (error) throw error;
+
+      return { data, error: null };
+    } catch (error) {
+      console.error("Error getting legal consent:", error);
+      return { data: null, error };
+    }
+  }
+
+  public async updateMultipleLegalConsents(consents: {
+    terms_of_service?: boolean;
+    privacy_policy?: boolean;
+    marketing_emails?: boolean;
+    analytics?: boolean;
+  }) {
+    const results: Array<{ consentType: string; result: { error: any } }> = [];
+    
+    for (const [consentType, accepted] of Object.entries(consents)) {
+      if (accepted !== undefined) {
+        const result = await this.updateLegalConsent(
+          consentType as 'terms_of_service' | 'privacy_policy' | 'marketing_emails' | 'analytics',
+          accepted
+        );
+        results.push({ consentType, result });
+      }
+    }
+
+    return results;
+  }
+
   public async refreshUserProfile() {
     try {
       const userId = this.currentAuthState.user?.id;
@@ -686,15 +806,18 @@ export class SupabaseService {
   public async createPremiumProfile(
     userId: string,
     email: string,
+    termsAccepted: boolean = true,
+    privacyAccepted: boolean = true,
   ): Promise<{ error: any }> {
     try {
+      const now = new Date().toISOString();
       // Use UPSERT instead of INSERT to handle existing profiles
       const { error } = await this.supabase.from("user_profiles").upsert(
         {
           id: userId,
           email,
           is_premium: true,
-          updated_at: new Date().toISOString(),
+          updated_at: now,
           privacy_settings: {
             allow_challenge_sharing: true,
             allow_stats_sharing: true,
@@ -706,6 +829,18 @@ export class SupabaseService {
             platform: "stripe" as const,
             purchaseDate: Date.now(),
             validated: false, // Will be set to true by webhook
+          },
+          legal_consent: {
+            terms_of_service: {
+              accepted: termsAccepted,
+              accepted_at: termsAccepted ? now : undefined,
+              version: "1.0",
+            },
+            privacy_policy: {
+              accepted: privacyAccepted,
+              accepted_at: privacyAccepted ? now : undefined,
+              version: "1.0",
+            },
           },
         },
         {
@@ -721,7 +856,7 @@ export class SupabaseService {
         email,
         is_premium: true,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        updated_at: now,
         privacy_settings: {
           allow_challenge_sharing: true,
           allow_stats_sharing: true,
@@ -733,6 +868,18 @@ export class SupabaseService {
           platform: "stripe",
           purchaseDate: Date.now(),
           validated: false,
+        },
+        legal_consent: {
+          terms_of_service: {
+            accepted: termsAccepted,
+            accepted_at: termsAccepted ? now : undefined,
+            version: "1.0",
+          },
+          privacy_policy: {
+            accepted: privacyAccepted,
+            accepted_at: privacyAccepted ? now : undefined,
+            version: "1.0",
+          },
         },
       };
 

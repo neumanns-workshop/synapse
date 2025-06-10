@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 
 import {
   Text,
@@ -20,6 +20,7 @@ import PathDisplayConfigurator from "../components/PathDisplayConfigurator";
 import PlayerPathDisplay from "../components/PlayerPathDisplay";
 import UpgradePrompt from "../components/UpgradePrompt";
 import WordDefinitionDialog from "../components/WordDefinitionDialog";
+import { Footer } from "../components/Footer";
 import { useTutorial } from "../context/TutorialContext";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -28,12 +29,14 @@ interface GameScreenProps {
   onShowAuth?: () => void;
   onShowAuthUpgrade?: () => void;
   onShowAccount?: () => void;
+  onLegalPageRequest?: (page: 'terms' | 'privacy' | 'dmca' | 'about' | 'contact') => void;
 }
 
 const GameScreen: React.FC<GameScreenProps> = ({
   onShowAuth,
   onShowAuthUpgrade,
   onShowAccount,
+  onLegalPageRequest,
 }) => {
   // const navigation = useNavigation<NavigationProp>(); // Removing unused navigation variable
   const { customColors, colors } = useTheme() as ExtendedTheme;
@@ -359,6 +362,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
         giveUpDisabled={gameStatus !== "playing"}
         gameInProgress={gameStatus === "playing"}
       />
+      <View style={{ flex: 1 }}>
       {showReport ? (
         <View testID="report-screen">
           <ReportScreen />
@@ -450,6 +454,12 @@ const GameScreen: React.FC<GameScreenProps> = ({
           customMessage={upgradePromptMessage}
         />
       </Portal>
+      </View>
+      
+      {/* Footer only for web platform */}
+      {Platform.OS === 'web' && (
+        <Footer onLegalPageRequest={onLegalPageRequest} />
+      )}
     </SafeAreaView>
   );
 };

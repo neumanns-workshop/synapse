@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 32 32"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (ebf0e940, 2025-05-08)"
+   sodipodi:docname="favicon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#000000"
+     bordercolor="#000000"
+     borderopacity="0"
+     inkscape:showpageshadow="false"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#000000"
+     inkscape:document-units="px"
+     inkscape:zoom="18.261421"
+     inkscape:cx="9.7199446"
+     inkscape:cy="16.729257"
+     inkscape:window-width="1312"
+     inkscape:window-height="790"
+     inkscape:window-x="0"
+     inkscape:window-y="30"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="g3"
+     showborder="false"
+     borderlayer="false"
+     inkscape:antialias-rendering="true"
+     inkscape:clip-to-page="false" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g3"
+       inkscape:groupmode="layer">
+      <g
+         id="g4"
+         style="opacity:1;stroke-width:1;stroke-dasharray:none"
+         transform="translate(-0.32856151,-0.05476025)">
+        <rect
+           style="fill:#d6d6d6;fill-opacity:1;stroke-width:1.01178;stroke-dasharray:none"
+           id="rect2-8"
+           width="2.7517323"
+           height="12.921406"
+           x="21.384016"
+           y="-11.938669"
+           ry="1.1051201"
+           transform="matrix(0.79049726,0.61246558,-0.76738813,0.64118286,0,0)" />
+        <circle
+           style="fill:#000000;stroke-width:1;stroke-dasharray:none"
+           id="path1"
+           cx="26.246723"
+           cy="7.045105"
+           r="5" />
+        <circle
+           style="fill:#ff8b94;fill-opacity:1;stroke-width:1;stroke-dasharray:none"
+           id="path2"
+           cx="26.246723"
+           cy="7.0865121"
+           r="3.75" />
+        <rect
+           style="fill:#d6d6d6;fill-opacity:1;stroke-width:1.01195;stroke-dasharray:none"
+           id="rect2"
+           width="2.7969377"
+           height="13.136182"
+           x="19.320663"
+           y="14.244349"
+           ry="1.1234891"
+           transform="matrix(0.98672605,0.16239365,-0.37112665,0.92858226,0,0)" />
+        <rect
+           style="fill:#d6d6d6;fill-opacity:1;stroke-width:1.01195;stroke-dasharray:none"
+           id="rect2-5"
+           width="2.7969377"
+           height="13.136182"
+           x="-0.038641874"
+           y="8.4414644"
+           ry="1.1234891"
+           transform="matrix(0.59919366,-0.80060412,0.65274088,0.75758125,0,0)" />
+        <circle
+           style="fill:#000000;stroke-width:1;stroke-dasharray:none"
+           id="path1-0"
+           cx="15.462329"
+           cy="15.8924"
+           r="4" />
+        <circle
+           style="fill:#fff6a3;fill-opacity:1;stroke-width:1;stroke-dasharray:none"
+           id="path2-5-6"
+           cx="15.455462"
+           cy="15.878796"
+           r="3.75" />
+        <circle
+           style="fill:#000000;stroke-width:1;stroke-dasharray:none"
+           id="path1-6"
+           cx="11.254808"
+           cy="26.690033"
+           r="5" />
+        <circle
+           style="fill:#a8e6cf;fill-opacity:1;stroke-width:1;stroke-dasharray:none"
+           id="path2-5"
+           cx="11.254808"
+           cy="26.731457"
+           r="3.75" />
+        <circle
+           style="fill:#000000;stroke-width:1;stroke-dasharray:none"
+           id="path1-7"
+           cx="6.5433388"
+           cy="5.3671694"
+           r="5" />
+        <circle
+           style="fill:#a0ced9;fill-opacity:1;stroke-width:1;stroke-dasharray:none"
+           id="path2-2"
+           cx="6.5433388"
+           cy="5.4085755"
+           r="3.75" />
+      </g>
+    </g>
+  </g>
+</svg>

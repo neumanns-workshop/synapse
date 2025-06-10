@@ -57,6 +57,8 @@ export class StripeService {
     email: string;
     password: string; // Be very careful about handling/storing this, even temporarily
     emailUpdatesOptIn: boolean;
+    termsAccepted: boolean;
+    privacyAccepted: boolean;
     captchaToken?: string; // Add captcha token here
   }): Promise<InitiatePurchaseResult> {
     try {
@@ -110,6 +112,8 @@ export class StripeService {
         email: signupData.email,
         password: signupData.password,
         emailUpdatesOptIn: signupData.emailUpdatesOptIn,
+        termsAccepted: signupData.termsAccepted,
+        privacyAccepted: signupData.privacyAccepted,
         anonymousUserJwt: anonymousUserJwt,
       });
 

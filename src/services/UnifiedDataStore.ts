@@ -1272,6 +1272,8 @@ export class UnifiedDataStore {
       email: string;
       password?: string; // Password becomes optional if JWT is used for auth to finalize
       emailUpdatesOptIn: boolean;
+      termsAccepted: boolean;
+      privacyAccepted: boolean;
       anonymousUserJwt?: string; // Add JWT here
     },
   ): Promise<void> {
@@ -1304,6 +1306,8 @@ export class UnifiedDataStore {
     email: string;
     password?: string;
     emailUpdatesOptIn: boolean;
+    termsAccepted: boolean;
+    privacyAccepted: boolean;
     anonymousUserJwt?: string;
   } | null> {
     const key = `pending_conversion_${anonymousUserId}`;

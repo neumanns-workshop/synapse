@@ -136,24 +136,31 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
     setIsSubmitting(true);
 
     try {
-      // TODO: Implement actual submission logic
-      // This could be:
-      // 1. Supabase function to store in database
-      // 2. Email service API call
-      // 3. Third-party form service like Formspree
+      // Import SupabaseService to call the contact form edge function
+      const { SupabaseService } = await import('../services/SupabaseService');
+      const supabaseService = SupabaseService.getInstance();
+      const supabase = (supabaseService as any).supabase;
 
-      // For now, simulate submission
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      console.log("Contact form submission:", {
-        type: contactType,
-        subject: subject.trim(),
-        description: description.trim(),
-        userEmail: userEmail.trim(),
-        userId: auth.user?.id,
-        timestamp: new Date().toISOString(),
+      const response = await supabase.functions.invoke('submit-contact-form', {
+        body: {
+          type: contactType,
+          subject: subject.trim(),
+          description: description.trim(),
+          userEmail: userEmail.trim() || undefined,
+          userId: auth.user?.id || undefined,
+        }
       });
 
+      if (response.error) {
+        throw new Error(`Failed to submit contact form: ${response.error.message}`);
+      }
+
+      const result = response.data;
+      if (!result.success) {
+        throw new Error(result.error || 'Unknown error submitting contact form');
+      }
+
+      console.log("Contact form submitted successfully:", result.id);
       setShowSuccess(true);
 
       // Close modal after showing success

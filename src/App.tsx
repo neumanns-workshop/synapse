@@ -22,6 +22,10 @@ const QuickstartModal = lazy(() => import("./components/QuickstartModal"));
 const StatsModal = lazy(() => import("./components/StatsModal"));
 const TutorialModal = lazy(() => import("./components/TutorialModal"));
 
+// Legal page components
+import { LegalPage } from "./components/LegalPages";
+import { Footer } from "./components/Footer";
+
 import ErrorBoundary from "./components/ErrorBoundary";
 
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -78,6 +82,7 @@ function AppContent() {
   >(undefined);
   const [showAccount, setShowAccount] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+  const [currentLegalPage, setCurrentLegalPage] = useState<'terms' | 'privacy' | 'dmca' | 'about' | 'contact' | null>(null);
 
   // Get the actions from the store - updated for new modal states
   const loadInitialData = useGameStore((state) => state.loadInitialData);
@@ -116,7 +121,28 @@ function AppContent() {
 
       let entryUrl = "";
       if (Platform.OS === "web") {
-        if (typeof window !== "undefined") entryUrl = window.location.href;
+        if (typeof window !== "undefined") {
+          entryUrl = window.location.href;
+          
+          // Check if we're on a legal page
+          const pathname = window.location.pathname;
+          if (pathname === '/terms') {
+            setCurrentLegalPage('terms');
+            return;
+          } else if (pathname === '/privacy') {
+            setCurrentLegalPage('privacy');
+            return;
+          } else if (pathname === '/dmca') {
+            setCurrentLegalPage('dmca');
+            return;
+          } else if (pathname === '/about') {
+            setCurrentLegalPage('about');
+            return;
+          } else if (pathname === '/contact') {
+            setCurrentLegalPage('contact');
+            return;
+          }
+        }
       } else {
         const initialUrl = await Linking.getInitialURL();
         entryUrl = initialUrl || "";
@@ -303,6 +329,24 @@ function AppContent() {
     );
   }
 
+  // Show legal page if requested
+  if (currentLegalPage) {
+    return (
+      <PaperProvider theme={theme}>
+        <SafeAreaProvider>
+          <View style={{ flex: 1 }}>
+            <LegalPage 
+              type={currentLegalPage} 
+              onBack={() => setCurrentLegalPage(null)}
+            />
+            <Footer onLegalPageRequest={(page) => setCurrentLegalPage(page)} />
+          </View>
+          <StatusBar style={theme.dark ? "light" : "dark"} />
+        </SafeAreaProvider>
+      </PaperProvider>
+    );
+  }
+
   return (
     <PaperProvider theme={theme}>
       <SafeAreaProvider>
@@ -331,6 +375,7 @@ function AppContent() {
                         setShowAuth(true);
                       }}
                       onShowAccount={() => setShowAccount(true)}
+                      onLegalPageRequest={(page) => setCurrentLegalPage(page)}
                     />
                   </ErrorBoundary>
                 )}

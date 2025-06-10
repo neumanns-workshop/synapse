@@ -3,9 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "description": "A sophisticated word navigation puzzle game with semantic relationships and AI-powered challenges",
-  "keywords": ["word game", "puzzle", "educational", "vocabulary", "brain training"],
+  "keywords": [
+    "word game",
+    "puzzle",
+    "educational",
+    "vocabulary",
+    "brain training"
+  ],
   "author": "Your Name <your.email@example.com>",
-  "homepage": "https://synapse.game",
+  "homepage": "https://synapsegame.ai",
   "repository": {
     "type": "git",
     "url": "https://github.com/your-username/synapse.git"
@@ -22,8 +28,9 @@
     "eject": "expo eject",
     "lint": "eslint .",
     "test": "jest",
-    "build:web": "npx expo export:web",
-    "build:web-analyze": "EXPO_PUBLIC_ANALYZE_BUNDLE=true npx expo export:web",
+    "build:web": "npx expo export:web && ./scripts/post-build.sh",
+    "build:web-analyze": "EXPO_PUBLIC_ANALYZE_BUNDLE=true npx expo export:web && ./scripts/post-build.sh",
+    "serve": "npx serve web-build -p 3000 -s",
     "build:development": "eas build --profile development",
     "build:preview": "eas build --profile preview",
     "build:production": "eas build --profile production",
@@ -112,11 +119,11 @@
     "metro-react-native-babel-transformer": "^0.77.0",
     "metro-resolver": "^0.80.5",
     "metro-runtime": "^0.80.5",
-
     "prettier": "^3.2.5",
     "process": "^0.11.10",
     "react-native-performance": "^5.1.2",
     "react-test-renderer": "18.2.0",
+    "serve": "^14.2.4",
     "source-map": "^0.7.4",
     "stream-browserify": "^3.0.0",
     "ts-jest": "^29.3.4",

@@ -49,6 +49,25 @@ jest.mock("../../components/UpgradePrompt", () => ({
   default: () => null,
 }));
 
+jest.mock("../../components/Footer", () => ({
+  __esModule: true,
+  Footer: () => null,
+}));
+
+jest.mock("../../context/ThemeContext", () => ({
+  useTheme: () => ({
+    theme: {
+      colors: {
+        primary: "#6200EE",
+        onSurface: "#000000",
+        surface: "#FFFFFF",
+        onSurfaceVariant: "#666666",
+        outline: "#CCCCCC",
+      },
+    },
+  }),
+}));
+
 // Mock react-native-paper
 jest.mock("react-native-paper", () => ({
   Text: "Text",

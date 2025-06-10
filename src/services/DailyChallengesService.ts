@@ -1,5 +1,5 @@
 import { unifiedDataStore } from "./UnifiedDataStore";
-import dailyChallengesData from "../data/daily_challenges_v2.json";
+import dailyChallengesData from "../data/daily_challenges.json";
 import { Logger } from "../utils/logger";
 import type {
   DailyChallenge,

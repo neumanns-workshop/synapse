@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /terms
+Allow: /privacy
+Allow: /dmca
+Allow: /about
+Allow: /contact
+
+Sitemap: https://synapsegame.ai/sitemap.xml 

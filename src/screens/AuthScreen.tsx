@@ -65,6 +65,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [emailUpdatesOptIn, setEmailUpdatesOptIn] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [featuresExpanded, setFeaturesExpanded] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -306,6 +308,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       return;
     }
 
+    if (!termsAccepted || !privacyAccepted) {
+      console.log("Validation failed: legal consent not given");
+      setErrorMessage("Please accept the Terms of Service and Privacy Policy to continue");
+      return;
+    }
+
     // Validate promo code if the promo field section is shown
     if (showPromoField && !promoCode.trim()) {
       console.log("Validation failed: promo code field is empty but visible");
@@ -328,6 +336,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         email,
         password,
         emailUpdatesOptIn,
+        termsAccepted,
+        privacyAccepted,
         captchaToken: token,
       });
 
@@ -427,6 +437,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         email,
         password,
         emailUpdatesOptIn,
+        termsAccepted,
+        privacyAccepted,
         anonymousUserJwt,
       });
 
@@ -1074,7 +1086,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           backgroundColor: colors.surfaceVariant,
           padding: 12,
           borderRadius: 8,
-          marginBottom: 20,
+          marginBottom: 12,
           borderWidth: 1,
           borderColor: colors.outline,
         }}
@@ -1110,6 +1122,136 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         >
           Send me updates about new features and improvements
         </Text>
+      </View>
+
+      {/* Terms of Service Consent */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "flex-start",
+          backgroundColor: colors.surface,
+          padding: 12,
+          borderRadius: 8,
+          marginBottom: 12,
+          borderWidth: 1,
+          borderColor: termsAccepted ? colors.primary : colors.error,
+        }}
+      >
+        <Pressable
+          onPress={() => setTermsAccepted(!termsAccepted)}
+          style={{
+            width: 24,
+            height: 24,
+            borderWidth: 2,
+            borderColor: termsAccepted ? colors.primary : colors.error,
+            backgroundColor: termsAccepted ? colors.primary : 'transparent',
+            borderRadius: 4,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 2,
+          }}
+        >
+          {termsAccepted && (
+            <CustomIcon
+              source="check"
+              size={16}
+              color={colors.onPrimary}
+            />
+          )}
+        </Pressable>
+        <View style={{ flex: 1, marginLeft: 8 }}>
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.onSurface,
+              lineHeight: 20,
+            }}
+          >
+            I agree to the{" "}
+            <Text
+              style={{
+                color: colors.primary,
+                textDecorationLine: "underline",
+              }}
+              onPress={() => {
+                // Open Terms of Service
+                if (Platform.OS === 'web') {
+                  window.open('/terms', '_blank');
+                } else {
+                  // For native, you might want to open in a modal or WebView
+                  Alert.alert("Terms of Service", "Terms of Service will be available at synapsegame.ai/terms");
+                }
+              }}
+            >
+              Terms of Service
+            </Text>
+          </Text>
+        </View>
+      </View>
+
+      {/* Privacy Policy Consent */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "flex-start",
+          backgroundColor: colors.surface,
+          padding: 12,
+          borderRadius: 8,
+          marginBottom: 20,
+          borderWidth: 1,
+          borderColor: privacyAccepted ? colors.primary : colors.error,
+        }}
+      >
+        <Pressable
+          onPress={() => setPrivacyAccepted(!privacyAccepted)}
+          style={{
+            width: 24,
+            height: 24,
+            borderWidth: 2,
+            borderColor: privacyAccepted ? colors.primary : colors.error,
+            backgroundColor: privacyAccepted ? colors.primary : 'transparent',
+            borderRadius: 4,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginTop: 2,
+          }}
+        >
+          {privacyAccepted && (
+            <CustomIcon
+              source="check"
+              size={16}
+              color={colors.onPrimary}
+            />
+          )}
+        </Pressable>
+        <View style={{ flex: 1, marginLeft: 8 }}>
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.onSurface,
+              lineHeight: 20,
+            }}
+          >
+            I acknowledge the{" "}
+            <Text
+              style={{
+                color: colors.primary,
+                textDecorationLine: "underline",
+              }}
+              onPress={() => {
+                // Open Privacy Policy
+                if (Platform.OS === 'web') {
+                  window.open('/privacy', '_blank');
+                } else {
+                  // For native, you might want to open in a modal or WebView
+                  Alert.alert("Privacy Policy", "Privacy Policy will be available at synapsegame.ai/privacy");
+                }
+              }}
+            >
+              Privacy Policy
+            </Text>
+          </Text>
+        </View>
       </View>
 
       <Button
