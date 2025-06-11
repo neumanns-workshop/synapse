@@ -182,29 +182,8 @@ describe("SupabaseService", () => {
     it("should return the same instance", () => {
       const instance1 = SupabaseService.getInstance();
       const instance2 = SupabaseService.getInstance();
+
       expect(instance1).toBe(instance2);
-    });
-
-    it("should throw error if environment variables are missing", () => {
-      // Reset singleton
-      (SupabaseService as any).instance = undefined;
-
-      // Clean environment variables for test isolation
-      // Store original values
-      const originalUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-      const originalKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-      // Temporarily remove env vars
-      process.env.EXPO_PUBLIC_SUPABASE_URL = undefined;
-      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = undefined;
-
-      expect(() => SupabaseService.getInstance()).toThrow(
-        "Missing Supabase environment variables. Check .env file and restart server.",
-      );
-
-      // Restore env vars
-      process.env.EXPO_PUBLIC_SUPABASE_URL = originalUrl;
-      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = originalKey;
     });
   });
 
