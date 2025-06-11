@@ -1492,11 +1492,11 @@ export class SupabaseService {
             "Missing Supabase environment variables for function invocation",
           );
         }
-        
+
         // Use default test values if in test environment
         const testUrl = supabaseUrl || "https://test.supabase.co";
         const testKey = supabaseAnonKey || "test-anon-key";
-        
+
         const headers: HeadersInit = {
           apikey: testKey,
           "Content-Type": "application/json",
