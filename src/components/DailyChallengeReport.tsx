@@ -15,7 +15,6 @@ import {
   Dialog,
   Button,
   Card,
-  Surface,
 } from "react-native-paper";
 
 import CustomIcon from "./CustomIcon";
@@ -55,7 +54,6 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
   onPlayChallenge,
 }) => {
   const { colors, customColors } = useTheme() as ExtendedTheme;
-  const reportSectionRef = useRef(null);
   const graphPreviewRef = useRef(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");

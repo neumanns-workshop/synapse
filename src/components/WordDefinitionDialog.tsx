@@ -72,7 +72,7 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
   });
 
   const renderListItemIcon = React.useCallback(
-    (props: { color: string; style: ViewStyle }) => (
+    (_props: { color: string; style: ViewStyle }) => (
       <CustomIcon
         source="book-open-variant"
         size={24}

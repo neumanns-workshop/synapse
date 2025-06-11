@@ -48,7 +48,6 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
   // Use AI path data from the report instead of the store
   const isDailyChallenge = report.isDailyChallenge || false;
   const aiPath = report.aiPath || [];
-  const aiModel = report.aiModel;
 
   const handleOptimalPathPress = () => {
     setPathDisplayMode({

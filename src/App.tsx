@@ -5,13 +5,16 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { GestureHandlerRootView as _GestureHandlerRootView } from "react-native-gesture-handler";
 import { PaperProvider, ActivityIndicator, Text } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { QueryClient, QueryClientProvider } from "react-query";
+import {
+  QueryClient,
+  QueryClientProvider as _QueryClientProvider,
+} from "react-query";
 
 // Initialize logger early (includes anti-tampering protection)
-import { Logger } from "./utils/logger";
+import { Logger as _Logger } from "./utils/logger";
 
 // Lazy load heavy modal components for better web performance
 const ContactModal = lazy(() => import("./components/ContactModal"));
@@ -37,10 +40,10 @@ import { preloadAllData } from "./services/dataLoader";
 import { gameFlowManager } from "./services/GameFlowManager";
 import PaymentHandler from "./services/PaymentHandler";
 import type { PaymentRedirectResult } from "./services/PaymentHandler";
-import { resetAllPlayerData } from "./services/StorageAdapter";
+import { resetAllPlayerData as _resetAllPlayerData } from "./services/StorageAdapter";
 import { unifiedDataStore } from "./services/UnifiedDataStore";
 import { useGameStore } from "./stores/useGameStore";
-import { SynapseLightTheme } from "./theme/SynapseTheme";
+import { SynapseLightTheme as _SynapseLightTheme } from "./theme/SynapseTheme";
 import { initializeWebOptimizations } from "./utils/webOptimizations";
 
 // Define the root stack parameter list
@@ -60,7 +63,7 @@ const customScreenOptions: Partial<NativeStackNavigationOptions> = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const queryClient = new QueryClient();
+const _queryClient = new QueryClient();
 
 // Loading fallback component for lazy-loaded modals
 const ModalLoadingFallback: React.FC = () => (
@@ -288,7 +291,7 @@ function AppContent() {
 
     const subscription = Linking.addEventListener("url", handleDeepLink);
     return () => subscription.remove();
-  }, []); // Dependencies: gameFlowManager or other services if they change
+  }, [auth.user]); // Dependencies: auth.user for deep link handling
 
   // Set up AppState handling to flush pending data saves when app backgrounds
   useEffect(() => {

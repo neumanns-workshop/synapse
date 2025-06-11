@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, ScrollView, Alert, StyleSheet, Pressable } from "react-native";
 
 import {
@@ -18,8 +18,6 @@ import CustomIcon from "../components/CustomIcon";
 import { ProgressiveSyncIndicator } from "../components/ProgressiveSyncIndicator";
 import { useAuth } from "../context/AuthContext";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
-import { unifiedDataStore } from "../services/UnifiedDataStore";
-import type { ExtendedTheme } from "../theme/SynapseTheme";
 
 interface AccountScreenProps {
   onClose: () => void;
@@ -35,9 +33,6 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [privacyExpanded, setPrivacyExpanded] = useState(false);
-  const [localPremiumStatus, setLocalPremiumStatus] = useState<boolean | null>(
-    null,
-  );
 
   const showMessage = (message: string) => {
     setSnackbarMessage(message);
@@ -215,15 +210,6 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
     }
   };
 
-  useEffect(() => {
-    const loadLocalPremiumStatus = async () => {
-      const status = await unifiedDataStore.isPremiumUser();
-      setLocalPremiumStatus(status);
-    };
-
-    loadLocalPremiumStatus();
-  }, []);
-
   if (auth.isLoading) {
     return (
       <Portal>
@@ -374,7 +360,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
               <List.Item
                 title="Email"
                 description={profile.email}
-                left={(props) => (
+                left={(_props) => (
                   <CustomIcon
                     source="email"
                     size={24}
@@ -388,7 +374,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
               <List.Item
                 title="Account Type"
                 description={profile.is_premium ? "Galaxy Brain" : "Free"}
-                left={(props) => (
+                left={(_props) => (
                   <CustomIcon
                     source={profile.is_premium ? "brain" : "account"}
                     size={24}
@@ -402,7 +388,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
               <List.Item
                 title="Member Since"
                 description={createdDate}
-                left={(props) => (
+                left={(_props) => (
                   <CustomIcon
                     source="calendar"
                     size={24}
@@ -490,7 +476,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
               <List.Item
                 title="Email Updates"
                 description="Receive news and updates via email"
-                left={(props) => (
+                left={(_props) => (
                   <CustomIcon
                     source="email-newsletter"
                     size={24}
@@ -512,7 +498,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
               <List.Item
                 title="Analytics & Improvement"
                 description="Help improve Synapse with anonymized usage data"
-                left={(props) => (
+                left={(_props) => (
                   <CustomIcon
                     source="chart-line"
                     size={24}
@@ -534,7 +520,7 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
               <List.Item
                 title="Leaderboard Participation"
                 description="Share daily challenge scores for percentile rankings"
-                left={(props) => (
+                left={(_props) => (
                   <CustomIcon
                     source="trophy"
                     size={24}

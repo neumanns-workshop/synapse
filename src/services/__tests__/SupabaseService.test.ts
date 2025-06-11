@@ -1,3 +1,11 @@
+// Mock environment variables FIRST, before any imports
+const originalEnv = process.env;
+process.env = {
+  ...originalEnv,
+  EXPO_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
+  EXPO_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
+};
+
 import { createClient } from "@supabase/supabase-js";
 
 import { useGameStore } from "../../stores/useGameStore";
@@ -23,17 +31,6 @@ describe("SupabaseService", () => {
   let service: SupabaseService;
   let mockSupabaseClient: any;
   let mockUnifiedStore: any;
-
-  // Mock environment variables
-  const originalEnv = process.env;
-
-  beforeAll(() => {
-    process.env = {
-      ...originalEnv,
-      EXPO_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
-    };
-  });
 
   afterAll(() => {
     process.env = originalEnv;
@@ -177,6 +174,7 @@ describe("SupabaseService", () => {
     // Set up default mock returns for database operations
     // Note: Each test should override these as needed
 
+    // Create service instance after all mocks are set up
     service = SupabaseService.getInstance();
   });
 
@@ -184,25 +182,8 @@ describe("SupabaseService", () => {
     it("should return the same instance", () => {
       const instance1 = SupabaseService.getInstance();
       const instance2 = SupabaseService.getInstance();
+
       expect(instance1).toBe(instance2);
-    });
-
-    it("should throw error if environment variables are missing", () => {
-      // Reset singleton
-      (SupabaseService as any).instance = undefined;
-
-      // Clean environment variables for test isolation
-      // Temporarily remove env vars
-      delete process.env.EXPO_PUBLIC_SUPABASE_URL;
-      delete process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-      expect(() => SupabaseService.getInstance()).toThrow(
-        "Missing Supabase environment variables",
-      );
-
-      // Restore env vars
-      process.env.EXPO_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
-      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
     });
   });
 

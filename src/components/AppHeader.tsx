@@ -1,7 +1,6 @@
 import React from "react";
-import { Image, StyleSheet, Pressable, View, Text } from "react-native";
-
-import { Appbar, useTheme, Badge, Button, Menu } from "react-native-paper";
+import { Image, StyleSheet, View, Text } from "react-native";
+import { Appbar, useTheme, Menu } from "react-native-paper";
 
 import CustomIcon from "./CustomIcon";
 // Removed react-native-reanimated imports - using simple buttons instead
@@ -81,7 +80,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   // State for tracking unread news count, menu visibility, and premium status
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [menuVisible, setMenuVisible] = React.useState(false);
-  const [isPremium, setIsPremium] = React.useState(false);
   const [readArticleIds, setReadArticleIds] = React.useState<string[]>([]);
   const [unviewedAchievementCount, setUnviewedAchievementCount] =
     React.useState(0);
@@ -220,14 +218,19 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
         // Load premium status
         const premiumStatus = await dailyChallengesService.isPremiumUser();
-        setIsPremium(premiumStatus);
+        useGameStore.getState().setIsPremium(premiumStatus);
       } catch (error) {
         console.error("Error loading header data:", error);
       }
     };
 
     loadInitialData();
-  }, []);
+  }, [
+    checkIncompleteDailyChallenge,
+    refreshReadArticles,
+    refreshUnviewedAchievements,
+    refreshUnviewedWordCollections,
+  ]);
 
   // Watch for news modal closing and refresh read articles
   React.useEffect(() => {
@@ -243,11 +246,13 @@ const AppHeader: React.FC<AppHeaderProps> = ({
       // Modal just closed, refresh unviewed achievements and word collections
       refreshUnviewedAchievements();
       refreshUnviewedWordCollections();
+      checkIncompleteDailyChallenge();
     }
   }, [
     statsModalVisible,
     refreshUnviewedAchievements,
     refreshUnviewedWordCollections,
+    checkIncompleteDailyChallenge,
   ]);
 
   // Watch for dailies modal closing and refresh daily challenge status
@@ -286,6 +291,23 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     return () => clearInterval(interval);
   }, []);
 
+  // Handle auth changes
+  React.useEffect(() => {
+    if (!auth.user) {
+      // User signed out, reset all counts and states
+      setUnreadCount(0);
+      setUnviewedAchievementCount(0);
+      setUnviewedWordCollectionCount(0);
+      setHasIncompleteDailyChallenge(false);
+    }
+  }, [
+    auth,
+    refreshReadArticles,
+    refreshUnviewedAchievements,
+    refreshUnviewedWordCollections,
+    checkIncompleteDailyChallenge,
+  ]);
+
   // Get the highest priority color among all notifications
   // Priority order: Red (high priority news) > Gold (achievements + word collections) > Daily Challenge > Other news
   const getHighestPriorityColor = () => {
@@ -317,25 +339,15 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     }
 
     // Default fallback
-    return customColors.endNode;
+    return customColors.amethyst; // Default color
   };
 
   // Get color specifically for news badges (ignores achievements and daily challenges)
   const getNewsPriorityColor = () => {
-    const unreadArticles = getUnreadArticles(readArticleIds);
-
-    if (unreadArticles.length === 0) return customColors.endNode;
-
-    // Check for high priority first
-    if (unreadArticles.some((article) => article.priority === "high")) {
-      return customColors.endNode; // coral/red
+    if (unreadCount > 0) {
+      return customColors.malachite; // Green for unread news
     }
-    // Then medium priority
-    if (unreadArticles.some((article) => article.priority === "medium")) {
-      return customColors.currentNode; // blue
-    }
-    // Finally low priority (or default)
-    return customColors.startNode; // green
+    return customColors.amethyst; // Default color
   };
 
   // Removed all animation code - using simple buttons now
@@ -343,56 +355,122 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   // Handlers
   const handleGameAction = () => {
     if (gameInProgress) {
-      if (!giveUpDisabled) {
-        onGiveUp();
-      }
+      onGiveUp();
     } else {
-      if (!newGameDisabled) {
-        onNewGame();
-      }
+      onNewGame();
     }
   };
 
   const handleMenuPress = () => {
-    setMenuVisible(true);
+    setMenuVisible(!menuVisible);
   };
 
   const handleQuickstart = () => {
-    setMenuVisible(false);
     setQuickstartModalVisible(true);
+    setMenuVisible(false);
   };
 
   const handleNews = async () => {
-    setMenuVisible(false);
     setNewsModalVisible(true);
+    setMenuVisible(false);
   };
 
   const handleStats = () => {
-    setMenuVisible(false);
     setStatsModalVisible(true);
+    setMenuVisible(false);
   };
 
   const handleDailies = () => {
-    setMenuVisible(false);
     setDailiesModalVisible(true);
-    // Clear daily challenge notification immediately when opening modal
-    checkIncompleteDailyChallenge();
-  };
-
-  const handleUpgrade = () => {
     setMenuVisible(false);
-    showUpgradePrompt("", "generalUpgrade");
   };
 
   const handleLab = () => {
-    setMenuVisible(false);
     setLabsModalVisible(true);
+    setMenuVisible(false);
   };
 
   const handleContact = () => {
-    setMenuVisible(false);
     setContactModalVisible(true);
+    setMenuVisible(false);
   };
+
+  const menuItems = [
+    {
+      title: "Quickstart Guide",
+      icon: "rocket",
+      onPress: handleQuickstart,
+      color: customColors.amethyst,
+    },
+    {
+      title: `News (${unreadCount})`,
+      icon: "newspaper",
+      onPress: handleNews,
+      color: getNewsPriorityColor(),
+    },
+    {
+      title: "Daily Challenges",
+      icon: "calendar-star",
+      onPress: handleDailies,
+      color: customColors.amethyst,
+    },
+    {
+      title: "My Stats & Achievements",
+      icon: "trophy",
+      onPress: handleStats,
+      color: getHighestPriorityColor(),
+    },
+    {
+      title: "Synapse Labs",
+      icon: "beaker",
+      onPress: handleLab,
+      color: customColors.amethyst,
+    },
+    {
+      title: "Contact Us",
+      icon: "email",
+      onPress: handleContact,
+      color: customColors.amethyst,
+    },
+  ];
+
+  if (auth.user) {
+    menuItems.push({
+      title: "My Account",
+      icon: "account-circle",
+      onPress: () => {
+        onShowAccount?.();
+        setMenuVisible(false);
+      },
+      color: customColors.amethyst,
+    });
+  } else {
+    menuItems.push({
+      title: "Sign Up / Sign In",
+      icon: "login",
+      onPress: () => {
+        onShowAuth?.();
+        setMenuVisible(false);
+      },
+      color: customColors.amethyst,
+    });
+  }
+
+  // Add the "Upgrade to Premium" button if the user is not premium
+  if (!useGameStore.getState().isPremium) {
+    menuItems.push({
+      title: "Upgrade to Premium",
+      icon: "star-circle",
+      onPress: () => {
+        showUpgradePrompt({
+          message: "Upgrade to unlock unlimited games and access all features!",
+          context: "user_menu",
+        });
+        setMenuVisible(false);
+      },
+      color: customColors.orange, // Highlight color
+    });
+  }
 
   return (
     <Appbar.Header>
@@ -408,35 +486,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
       {/* Hamburger Menu */}
       <View style={styles.menuContainer}>
-        {/* Auth/Account Button */}
-        <Button
-          mode="contained"
-          onPress={
-            auth.user
-              ? () => {
-                  setMenuVisible(false);
-                  onShowAccount?.();
-                }
-              : () => {
-                  setMenuVisible(false);
-                  onShowAuth?.();
-                }
-          }
-          compact
-          buttonColor={auth.user ? customColors.currentNode : colors.primary}
-          icon={() => (
-            <CustomIcon source="brain" size={18} color={colors.onPrimary} />
-          )}
-          style={{ marginRight: 8 }}
-          labelStyle={{
-            color: colors.onPrimary,
-            fontWeight: "bold",
-            fontSize: 14,
-          }}
-        >
-          {auth.user ? "Account" : "Sign In/Up"}
-        </Button>
-
         <Menu
           visible={menuVisible}
           onDismiss={() => setMenuVisible(false)}
@@ -449,116 +498,17 @@ const AppHeader: React.FC<AppHeaderProps> = ({
           }
           contentStyle={{ backgroundColor: colors.surface }}
         >
-          <Menu.Item
-            onPress={handleDailies}
-            title={
-              hasIncompleteDailyChallenge ? (
-                <View style={styles.menuTitleWithBadge}>
-                  <Text style={{ color: colors.onSurface }}>
-                    Daily Challenges
-                  </Text>
-                  <CustomIcon
-                    source="circle-outline"
-                    size={16}
-                    color={colors.primary}
-                  />
-                </View>
-              ) : (
-                "Daily Challenges"
-              )
-            }
-            leadingIcon={() => (
-              <CustomIcon
-                source="calendar-today"
-                size={24}
-                color={colors.onSurface}
-              />
-            )}
-            titleStyle={{ color: colors.onSurface }}
-          />
-          <Menu.Item
-            onPress={handleStats}
-            title={
-              unviewedAchievementCount > 0 ||
-              unviewedWordCollectionCount > 0 ? (
-                <View style={styles.menuTitleWithBadge}>
-                  <Text style={{ color: colors.onSurface }}>Stats</Text>
-                  <View
-                    style={[
-                      styles.menuBadgeSticker,
-                      { backgroundColor: customColors.achievementIcon },
-                    ]}
-                  >
-                    <Text style={styles.menuBadgeText}>
-                      {unviewedAchievementCount + unviewedWordCollectionCount}
-                    </Text>
-                  </View>
-                </View>
-              ) : (
-                "Stats"
-              )
-            }
-            leadingIcon={() => (
-              <CustomIcon source="trophy" size={24} color={colors.onSurface} />
-            )}
-            titleStyle={{ color: colors.onSurface }}
-          />
-          <Menu.Item
-            onPress={handleQuickstart}
-            title="How to Play"
-            leadingIcon={() => (
-              <CustomIcon
-                source="rocket-launch"
-                size={24}
-                color={colors.onSurface}
-              />
-            )}
-            titleStyle={{ color: colors.onSurface }}
-          />
-          <Menu.Item
-            onPress={handleLab}
-            title="Lab"
-            leadingIcon={() => (
-              <CustomIcon source="flask" size={24} color={colors.onSurface} />
-            )}
-            titleStyle={{ color: colors.onSurface }}
-          />
-          <Menu.Item
-            onPress={handleNews}
-            title={
-              unreadCount > 0 ? (
-                <View style={styles.menuTitleWithBadge}>
-                  <Text style={{ color: colors.onSurface }}>News</Text>
-                  <View
-                    style={[
-                      styles.menuBadgeSticker,
-                      { backgroundColor: getNewsPriorityColor() },
-                    ]}
-                  >
-                    <Text style={styles.menuBadgeText}>{unreadCount}</Text>
-                  </View>
-                </View>
-              ) : (
-                "News"
-              )
-            }
-            leadingIcon={() => (
-              <CustomIcon
-                source="newspaper"
-                size={24}
-                color={colors.onSurface}
-              />
-            )}
-            titleStyle={{ color: colors.onSurface }}
-          />
-          <Menu.Item
-            onPress={handleContact}
-            title="Contact"
-            leadingIcon={() => (
-              <CustomIcon source="email" size={24} color={colors.onSurface} />
-            )}
-            titleStyle={{ color: colors.onSurface }}
-          />
+          {menuItems.map((item) => (
+            <Menu.Item
+              key={item.title}
+              onPress={item.onPress}
+              title={item.title}
+              leadingIcon={() => (
+                <CustomIcon source={item.icon} size={24} color={item.color} />
+              )}
+              titleStyle={{ color: colors.onSurface }}
+            />
+          ))}
         </Menu>
         {(unreadCount > 0 ||
           unviewedAchievementCount > 0 ||

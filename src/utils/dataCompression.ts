@@ -106,7 +106,7 @@ export class TimestampCompressor {
   ): Record<string, number> {
     const timestamps: Record<string, number> = {};
     for (const [bitIndexStr, days] of Object.entries(compressed)) {
-      const bitIndex = parseInt(bitIndexStr);
+      const bitIndex = parseInt(bitIndexStr, 10);
       const achievementId = Object.keys(ACHIEVEMENT_BIT_MAP).find(
         (id) => ACHIEVEMENT_BIT_MAP[id] === bitIndex,
       );

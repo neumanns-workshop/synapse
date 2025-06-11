@@ -131,13 +131,12 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
 }) => {
   const { colors, customColors } = useTheme() as ExtendedTheme;
   const [stripeService] = useState(() => StripeService.getInstance());
-  const [pricing, setPricing] = useState(stripeService.getPricingInfo());
-  const [isLoading, setIsLoading] = useState(false);
-  const [stripeAvailable, setStripeAvailable] = useState(false);
+  const [pricing] = useState(stripeService.getPricingInfo());
+  const [isLoading] = useState(false);
 
   // Check if Stripe is available
   useEffect(() => {
-    stripeService.isAvailable().then(setStripeAvailable);
+    stripeService.isAvailable();
   }, [stripeService]);
 
   // Get context-specific content

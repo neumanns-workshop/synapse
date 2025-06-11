@@ -36,7 +36,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
 import { allAchievements, Achievement } from "../features/achievements";
 import type {
-  WordCollection,
+  WordCollection as _WordCollection,
   WordCollectionWithStatus,
 } from "../features/wordCollections";
 import {
@@ -44,14 +44,14 @@ import {
   generateSecureGameDeepLink,
   generateSecureDailyChallengeDeepLink,
   generateChallengeMessage,
-  generateDailyChallengeTaunt,
+  generateDailyChallengeTaunt as _generateDailyChallengeTaunt,
 } from "../services/SharingService";
 import {
   loadGameHistory,
   getLifetimeStats,
   getUnlockedAchievementIds,
   getWordCollectionsProgress,
-  resetAllPlayerData,
+  resetAllPlayerData as _resetAllPlayerData,
   type LifetimeStats,
   type WordCollectionProgress,
 } from "../services/StorageAdapter";
@@ -454,104 +454,10 @@ const WordCollectionCard = ({
   );
 };
 
-// Add new HighlightStatBox component
-const HighlightStatBox = ({ label, value, unit = "", icon, iconColor }) => {
-  const { theme: appTheme } = useAppTheme();
-
-  return (
-    <View
-      style={[
-        styles.highlightStatBox,
-        { backgroundColor: appTheme.colors.surface },
-      ]}
-    >
-      <View style={styles.highlightStatHeader}>
-        <CustomIcon source={icon} size={20} color={iconColor} />
-        <Text
-          style={[
-            styles.highlightStatLabel,
-            { color: appTheme.colors.onSurfaceVariant },
-          ]}
-        >
-          {label}
-        </Text>
-      </View>
-      <View style={styles.highlightStatValueContainer}>
-        <Text
-          style={[
-            styles.highlightStatValue,
-            { color: appTheme.colors.onSurface },
-          ]}
-        >
-          {value}
-        </Text>
-        {unit && (
-          <Text
-            style={[
-              styles.highlightStatUnit,
-              { color: appTheme.colors.onSurfaceVariant },
-            ]}
-          >
-            {unit}
-          </Text>
-        )}
-      </View>
-    </View>
-  );
-};
-
-// Component for W/L Ratio Display
-const WLRatioDisplay = ({
-  wins: winCountInput,
-  totalGames: totalGamesInput,
-  theme,
-}) => {
-  const currentTotalGames = totalGamesInput || 0;
-  const currentWins = winCountInput || 0;
-  const currentLosses = currentTotalGames - currentWins;
-
-  const winPercentage =
-    currentTotalGames > 0 ? (currentWins / currentTotalGames) * 100 : 0;
-  const lossPercentage =
-    currentTotalGames > 0
-      ? (currentLosses / currentTotalGames) * 100
-      : currentTotalGames === 0
-        ? 100
-        : 0;
-
-  return (
-    <View style={styles.wlRatioBarWithLabels}>
-      <View style={[styles.wlRatioLine, { borderColor: theme.colors.outline }]}>
-        <View
-          style={[
-            styles.wlRatioWinsSegment,
-            {
-              width: `${winPercentage}%`,
-              backgroundColor: theme.customColors.startNode,
-            },
-          ]}
-        />
-        <View
-          style={[
-            styles.wlRatioLossesSegment,
-            {
-              width: `${lossPercentage}%`,
-              backgroundColor:
-                currentTotalGames > 0
-                  ? theme.customColors.warningColor
-                  : theme.colors.surfaceDisabled,
-            },
-          ]}
-        />
-      </View>
-    </View>
-  );
-};
-
 // --- Main StatsModal ---
 const StatsModal = () => {
   const { theme: appTheme } = useAppTheme();
-  const auth = useAuth();
+  const _auth = useAuth();
   const statsModalVisible = useGameStore((state) => state.statsModalVisible);
   const setStatsModalVisible = useGameStore(
     (state) => state.setStatsModalVisible,
@@ -1025,7 +931,7 @@ const StatsModal = () => {
   };
 
   const renderProgressTab = () => {
-    let completedCollectionsCount = 0;
+    let _completedCollectionsCount = 0;
     if (wordCollections && Object.keys(collectionsProgress).length > 0) {
       wordCollections.forEach((collection) => {
         const progress = collectionsProgress[collection.id];
@@ -1036,24 +942,24 @@ const StatsModal = () => {
           progress.collectedWords
         ) {
           if (progress.collectedWords.length === collection.words.length) {
-            completedCollectionsCount++;
+            _completedCollectionsCount++;
           }
         }
       });
     }
 
     const gamesPlayed = lifetimeStats?.totalGamesPlayed || 0;
-    const wins = lifetimeStats?.totalWins || 0;
+    const _wins = lifetimeStats?.totalWins || 0;
     // const losses = gamesPlayed - wins; // Calculated inside WLRatioDisplay
 
-    const averageMoveAccuracy =
+    const _averageMoveAccuracy =
       lifetimeStats && gamesPlayed > 0
         ? (
             (lifetimeStats.cumulativeMoveAccuracySum || 0) / gamesPlayed
           ).toFixed(1)
         : "0.0";
 
-    const actualAchievementsUnlocked = unlockedAchievementIds.length;
+    const _actualAchievementsUnlocked = unlockedAchievementIds.length;
 
     // Analyze games by difficulty (path length)
     const difficultyAnalysis = (() => {
@@ -1424,11 +1330,11 @@ const StatsModal = () => {
                 {difficultyAnalysis &&
                 Object.keys(difficultyAnalysis).length > 0 ? (
                   Object.entries(difficultyAnalysis)
-                    .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                    .sort(([a], [b]) => parseInt(a, 10) - parseInt(b, 10))
                     .map(([difficulty, stats]) => (
                       <DifficultyRow
                         key={difficulty}
-                        difficulty={parseInt(difficulty)}
+                        difficulty={parseInt(difficulty, 10)}
                         stats={stats}
                       />
                     ))
@@ -1520,7 +1426,7 @@ const StatsModal = () => {
                   const progress = collectionsProgress[collection.id];
                   const collectedCount = progress?.collectedWords?.length || 0;
                   const totalWords = collection.words?.length || 0;
-                  const isCompleted =
+                  const _isCompleted =
                     collectedCount === totalWords && totalWords > 0;
 
                   return (

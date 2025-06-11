@@ -328,7 +328,7 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                         Strategic Backtracking:
                       </Text>{" "}
                       Go sequentially backward through your path, remembering
-                      where you went. Don't hesitate to recover known
+                      where you went. Don&apos;t hesitate to recover known
                       checkpoints even if it costs a few moves.
                     </Paragraph>
                     <Paragraph style={paragraphStyle}>
@@ -356,7 +356,7 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                       >
                         Learn the Landscape:
                       </Text>{" "}
-                      Over time, you'll develop an intuitive sense of the
+                      Over time, you&apos;ll develop an intuitive sense of the
                       semantic topography - how different regions of meaning
                       connect and flow into each other.
                     </Paragraph>

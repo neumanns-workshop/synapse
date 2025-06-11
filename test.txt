@@ -1,0 +1,1951 @@
+In github, having trouble. Tests pass locally.
+
+2025-06-11T11:27:54.1811563Z Current runner version: '2.325.0'
+2025-06-11T11:27:54.1864867Z ##[group]Runner Image Provisioner
+2025-06-11T11:27:54.1866011Z Hosted Compute Agent
+2025-06-11T11:27:54.1866826Z Version: 20250529.345
+2025-06-11T11:27:54.1867812Z Commit: 22237e57af968c281070ffa8ed912c1b754f9a23
+2025-06-11T11:27:54.1868929Z Build Date: 2025-05-29T20:18:30Z
+2025-06-11T11:27:54.1892051Z ##[endgroup]
+2025-06-11T11:27:54.1892883Z ##[group]Operating System
+2025-06-11T11:27:54.1893826Z Ubuntu
+2025-06-11T11:27:54.1894637Z 24.04.2
+2025-06-11T11:27:54.1895526Z LTS
+2025-06-11T11:27:54.1896253Z ##[endgroup]
+2025-06-11T11:27:54.1897116Z ##[group]Runner Image
+2025-06-11T11:27:54.1897960Z Image: ubuntu-24.04
+2025-06-11T11:27:54.1898857Z Version: 20250602.3.0
+2025-06-11T11:27:54.1901035Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250602.3/images/ubuntu/Ubuntu2404-Readme.md
+2025-06-11T11:27:54.1903785Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250602.3
+2025-06-11T11:27:54.1905556Z ##[endgroup]
+2025-06-11T11:27:54.1913170Z ##[group]GITHUB_TOKEN Permissions
+2025-06-11T11:27:54.1916140Z Actions: write
+2025-06-11T11:27:54.1917052Z Attestations: write
+2025-06-11T11:27:54.1917822Z Checks: write
+2025-06-11T11:27:54.1918773Z Contents: write
+2025-06-11T11:27:54.1921527Z Deployments: write
+2025-06-11T11:27:54.1922342Z Discussions: write
+2025-06-11T11:27:54.1923355Z Issues: write
+2025-06-11T11:27:54.1924167Z Metadata: read
+2025-06-11T11:27:54.1924927Z Models: read
+2025-06-11T11:27:54.1925800Z Packages: write
+2025-06-11T11:27:54.1926674Z Pages: write
+2025-06-11T11:27:54.1927456Z PullRequests: write
+2025-06-11T11:27:54.1928390Z RepositoryProjects: write
+2025-06-11T11:27:54.1929656Z SecurityEvents: write
+2025-06-11T11:27:54.1930743Z Statuses: write
+2025-06-11T11:27:54.1931761Z ##[endgroup]
+2025-06-11T11:27:54.1934656Z Secret source: Actions
+2025-06-11T11:27:54.1935869Z Prepare workflow directory
+2025-06-11T11:27:54.2412129Z Prepare all required actions
+2025-06-11T11:27:54.2467133Z Getting action download info
+2025-06-11T11:27:54.6034657Z ##[group]Download immutable action package 'actions/checkout@v4'
+2025-06-11T11:27:54.6035693Z Version: 4.2.2
+2025-06-11T11:27:54.6036815Z Digest: sha256:ccb2698953eaebd21c7bf6268a94f9c26518a7e38e27e0b83c1fe1ad049819b1
+2025-06-11T11:27:54.6038075Z Source commit SHA: 11bd71901bbe5b1630ceea73d27597364c9af683
+2025-06-11T11:27:54.6038854Z ##[endgroup]
+2025-06-11T11:27:54.6961973Z ##[group]Download immutable action package 'actions/setup-node@v4'
+2025-06-11T11:27:54.6963004Z Version: 4.4.0
+2025-06-11T11:27:54.6963904Z Digest: sha256:9427cefe82346e992fb5b949e3569b39d537ae41aa3086483b14eceebfc16bc1
+2025-06-11T11:27:54.6964942Z Source commit SHA: 49933ea5288caeca8642d1e84afbd3f7d6820020
+2025-06-11T11:27:54.6965825Z ##[endgroup]
+2025-06-11T11:27:54.7932410Z Download action repository 'codecov/codecov-action@v3' (SHA:ab904c41d6ece82784817410c45d8b8c02684457)
+2025-06-11T11:27:55.1319401Z Complete job name: test_and_lint
+2025-06-11T11:27:55.2008046Z ##[group]Run actions/checkout@v4
+2025-06-11T11:27:55.2008977Z with:
+2025-06-11T11:27:55.2009786Z   repository: neumanns-workshop/synapse
+2025-06-11T11:27:55.2010543Z   token: ***
+2025-06-11T11:27:55.2010971Z   ssh-strict: true
+2025-06-11T11:27:55.2011409Z   ssh-user: git
+2025-06-11T11:27:55.2011854Z   persist-credentials: true
+2025-06-11T11:27:55.2012341Z   clean: true
+2025-06-11T11:27:55.2012779Z   sparse-checkout-cone-mode: true
+2025-06-11T11:27:55.2013316Z   fetch-depth: 1
+2025-06-11T11:27:55.2013744Z   fetch-tags: false
+2025-06-11T11:27:55.2014192Z   show-progress: true
+2025-06-11T11:27:55.2014626Z   lfs: false
+2025-06-11T11:27:55.2015033Z   submodules: false
+2025-06-11T11:27:55.2015479Z   set-safe-directory: true
+2025-06-11T11:27:55.2016346Z ##[endgroup]
+2025-06-11T11:27:55.3168240Z Syncing repository: neumanns-workshop/synapse
+2025-06-11T11:27:55.3172678Z ##[group]Getting Git version info
+2025-06-11T11:27:55.3173634Z Working directory is '/home/runner/work/synapse/synapse'
+2025-06-11T11:27:55.3176690Z [command]/usr/bin/git version
+2025-06-11T11:27:55.3243613Z git version 2.49.0
+2025-06-11T11:27:55.3271788Z ##[endgroup]
+2025-06-11T11:27:55.3289185Z Temporarily overriding HOME='/home/runner/work/_temp/b16c148b-f941-4148-93ea-30141841c597' before making global git config changes
+2025-06-11T11:27:55.3293616Z Adding repository directory to the temporary git global config as a safe directory
+2025-06-11T11:27:55.3297067Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/synapse/synapse
+2025-06-11T11:27:55.3336584Z Deleting the contents of '/home/runner/work/synapse/synapse'
+2025-06-11T11:27:55.3342348Z ##[group]Initializing the repository
+2025-06-11T11:27:55.3347666Z [command]/usr/bin/git init /home/runner/work/synapse/synapse
+2025-06-11T11:27:55.3410496Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-06-11T11:27:55.3416415Z hint: is subject to change. To configure the initial branch name to use in all
+2025-06-11T11:27:55.3420614Z hint: of your new repositories, which will suppress this warning, call:
+2025-06-11T11:27:55.3422093Z hint:
+2025-06-11T11:27:55.3423011Z hint: 	git config --global init.defaultBranch <name>
+2025-06-11T11:27:55.3424121Z hint:
+2025-06-11T11:27:55.3425219Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-06-11T11:27:55.3427086Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-06-11T11:27:55.3428185Z hint:
+2025-06-11T11:27:55.3428636Z hint: 	git branch -m <name>
+2025-06-11T11:27:55.3435069Z Initialized empty Git repository in /home/runner/work/synapse/synapse/.git/
+2025-06-11T11:27:55.3440697Z [command]/usr/bin/git remote add origin https://github.com/neumanns-workshop/synapse
+2025-06-11T11:27:55.3473552Z ##[endgroup]
+2025-06-11T11:27:55.3476889Z ##[group]Disabling automatic garbage collection
+2025-06-11T11:27:55.3481563Z [command]/usr/bin/git config --local gc.auto 0
+2025-06-11T11:27:55.3513135Z ##[endgroup]
+2025-06-11T11:27:55.3513881Z ##[group]Setting up auth
+2025-06-11T11:27:55.3514641Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-06-11T11:27:55.3550403Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-06-11T11:27:55.3824978Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-06-11T11:27:55.3858973Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-06-11T11:27:55.4099599Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-06-11T11:27:55.4148236Z ##[endgroup]
+2025-06-11T11:27:55.4151374Z ##[group]Fetching the repository
+2025-06-11T11:27:55.4159705Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +06c66259e18e51338dccd357a7c8f6324e24d5d5:refs/remotes/pull/1/merge
+2025-06-11T11:27:56.5209603Z From https://github.com/neumanns-workshop/synapse
+2025-06-11T11:27:56.5213390Z  * [new ref]         06c66259e18e51338dccd357a7c8f6324e24d5d5 -> pull/1/merge
+2025-06-11T11:27:56.5241192Z ##[endgroup]
+2025-06-11T11:27:56.5245050Z ##[group]Determining the checkout info
+2025-06-11T11:27:56.5246444Z ##[endgroup]
+2025-06-11T11:27:56.5247543Z [command]/usr/bin/git sparse-checkout disable
+2025-06-11T11:27:56.5289764Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2025-06-11T11:27:56.5320466Z ##[group]Checking out the ref
+2025-06-11T11:27:56.5323715Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/1/merge
+2025-06-11T11:27:56.6835001Z Note: switching to 'refs/remotes/pull/1/merge'.
+2025-06-11T11:27:56.6837953Z 
+2025-06-11T11:27:56.6839154Z You are in 'detached HEAD' state. You can look around, make experimental
+2025-06-11T11:27:56.6842351Z changes and commit them, and you can discard any commits you make in this
+2025-06-11T11:27:56.6845492Z state without impacting any branches by switching back to a branch.
+2025-06-11T11:27:56.6847118Z 
+2025-06-11T11:27:56.6848155Z If you want to create a new branch to retain commits you create, you may
+2025-06-11T11:27:56.6851453Z do so (now or later) by using -c with the switch command. Example:
+2025-06-11T11:27:56.6853004Z 
+2025-06-11T11:27:56.6853504Z   git switch -c <new-branch-name>
+2025-06-11T11:27:56.6854509Z 
+2025-06-11T11:27:56.6855031Z Or undo this operation with:
+2025-06-11T11:27:56.6855945Z 
+2025-06-11T11:27:56.6856429Z   git switch -
+2025-06-11T11:27:56.6857165Z 
+2025-06-11T11:27:56.6858460Z Turn off this advice by setting config variable advice.detachedHead to false
+2025-06-11T11:27:56.6860745Z 
+2025-06-11T11:27:56.6863347Z HEAD is now at 06c6625 Merge fc980d36b102b5976b2b3382fec6a8691b0b6dd9 into bcca662b8b40441e1cadc754b036ca6352b32796
+2025-06-11T11:27:56.6870399Z ##[endgroup]
+2025-06-11T11:27:56.6903263Z [command]/usr/bin/git log -1 --format=%H
+2025-06-11T11:27:56.6926978Z 06c66259e18e51338dccd357a7c8f6324e24d5d5
+2025-06-11T11:27:56.7259100Z ##[group]Run actions/setup-node@v4
+2025-06-11T11:27:56.7260430Z with:
+2025-06-11T11:27:56.7261125Z   node-version: 22.16.0
+2025-06-11T11:27:56.7261944Z   cache: npm
+2025-06-11T11:27:56.7262659Z   always-auth: false
+2025-06-11T11:27:56.7263457Z   check-latest: false
+2025-06-11T11:27:56.7264511Z   token: ***
+2025-06-11T11:27:56.7265220Z ##[endgroup]
+2025-06-11T11:27:56.9173194Z Found in cache @ /opt/hostedtoolcache/node/22.16.0/x64
+2025-06-11T11:27:56.9175698Z ##[group]Environment details
+2025-06-11T11:27:57.4506127Z node: v22.16.0
+2025-06-11T11:27:57.4511232Z npm: 10.9.2
+2025-06-11T11:27:57.4515410Z yarn: 1.22.22
+2025-06-11T11:27:57.4521502Z ##[endgroup]
+2025-06-11T11:27:57.4577722Z [command]/opt/hostedtoolcache/node/22.16.0/x64/bin/npm config get cache
+2025-06-11T11:27:57.5790064Z /home/runner/.npm
+2025-06-11T11:27:57.6762318Z npm cache is not found
+2025-06-11T11:27:57.6986815Z ##[group]Run npm ci --legacy-peer-deps
+2025-06-11T11:27:57.6987188Z [36;1mnpm ci --legacy-peer-deps[0m
+2025-06-11T11:27:57.7057480Z shell: /usr/bin/bash -e {0}
+2025-06-11T11:27:57.7057739Z ##[endgroup]
+2025-06-11T11:28:02.9889708Z npm warn deprecated sudo-prompt@9.2.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2025-06-11T11:28:03.0438239Z npm warn deprecated stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated. See the compatibility table on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#browser_compatibility
+2025-06-11T11:28:03.3756971Z npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+2025-06-11T11:28:04.2500595Z npm warn deprecated osenv@0.1.5: This package is no longer supported.
+2025-06-11T11:28:04.6639089Z npm warn deprecated text-encoding@0.7.0: no longer maintained
+2025-06-11T11:28:05.9381089Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2025-06-11T11:28:06.4074531Z npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+2025-06-11T11:28:07.3335005Z npm warn deprecated domexception@4.0.0: Use your platform's native DOMException instead
+2025-06-11T11:28:08.2295770Z npm warn deprecated abab@2.0.6: Use your platform's native atob() and btoa() methods instead
+2025-06-11T11:28:08.7916400Z npm warn deprecated @xmldom/xmldom@0.7.13: this version is no longer supported, please update to at least 0.8.*
+2025-06-11T11:28:08.9814736Z npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+2025-06-11T11:28:09.1861481Z npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+2025-06-11T11:28:09.2422939Z npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+2025-06-11T11:28:10.0954779Z npm warn deprecated @babel/plugin-proposal-optional-catch-binding@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-catch-binding instead.
+2025-06-11T11:28:10.0961821Z npm warn deprecated @babel/plugin-proposal-optional-chaining@7.21.0: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-chaining instead.
+2025-06-11T11:28:10.1252385Z npm warn deprecated @babel/plugin-proposal-numeric-separator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
+2025-06-11T11:28:10.1274323Z npm warn deprecated @babel/plugin-proposal-nullish-coalescing-operator@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
+2025-06-11T11:28:10.1283281Z npm warn deprecated @babel/plugin-proposal-export-namespace-from@7.18.9: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-export-namespace-from instead.
+2025-06-11T11:28:10.1436654Z npm warn deprecated @babel/plugin-proposal-object-rest-spread@7.20.7: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-object-rest-spread instead.
+2025-06-11T11:28:10.1523950Z npm warn deprecated @babel/plugin-proposal-class-properties@7.18.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
+2025-06-11T11:28:10.1768433Z npm warn deprecated @babel/plugin-proposal-async-generator-functions@7.20.7: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-async-generator-functions instead.
+2025-06-11T11:28:10.5195769Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2025-06-11T11:28:10.5873275Z npm warn deprecated rimraf@2.6.3: Rimraf versions prior to v4 are no longer supported
+2025-06-11T11:28:10.6350552Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2025-06-11T11:28:10.6777107Z npm warn deprecated glob@7.1.6: Glob versions prior to v9 are no longer supported
+2025-06-11T11:28:11.4961465Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2025-06-11T11:28:11.8636038Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2025-06-11T11:28:11.8637795Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2025-06-11T11:28:11.8641649Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2025-06-11T11:28:12.4183394Z npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+2025-06-11T11:28:12.7384224Z npm warn deprecated glob@7.1.6: Glob versions prior to v9 are no longer supported
+2025-06-11T11:28:12.7653010Z npm warn deprecated glob@7.1.6: Glob versions prior to v9 are no longer supported
+2025-06-11T11:28:13.6756937Z npm warn deprecated @testing-library/react-native@11.5.4: This version is no longer maintained. Upgrade to @latest (at least v12.4.0).
+2025-06-11T11:28:16.0241685Z npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+2025-06-11T11:28:19.8560948Z 
+2025-06-11T11:28:19.8561782Z added 1899 packages, and audited 1900 packages in 22s
+2025-06-11T11:28:19.8562180Z 
+2025-06-11T11:28:19.8570256Z 261 packages are looking for funding
+2025-06-11T11:28:19.8571862Z   run `npm fund` for details
+2025-06-11T11:28:19.8640107Z 
+2025-06-11T11:28:19.8641520Z 9 vulnerabilities (7 low, 2 moderate)
+2025-06-11T11:28:19.8643157Z 
+2025-06-11T11:28:19.8643567Z To address issues that do not require attention, run:
+2025-06-11T11:28:19.8644120Z   npm audit fix
+2025-06-11T11:28:19.8644331Z 
+2025-06-11T11:28:19.8644720Z To address all issues (including breaking changes), run:
+2025-06-11T11:28:19.8645290Z   npm audit fix --force
+2025-06-11T11:28:19.8645525Z 
+2025-06-11T11:28:19.8645723Z Run `npm audit` for details.
+2025-06-11T11:28:19.9387261Z ##[group]Run npm run lint
+2025-06-11T11:28:19.9387555Z [36;1mnpm run lint[0m
+2025-06-11T11:28:19.9442714Z shell: /usr/bin/bash -e {0}
+2025-06-11T11:28:19.9442958Z ##[endgroup]
+2025-06-11T11:28:20.0476633Z 
+2025-06-11T11:28:20.0477516Z > synapse-native@1.0.0 lint
+2025-06-11T11:28:20.0479696Z > eslint .
+2025-06-11T11:28:20.0479898Z 
+2025-06-11T11:28:34.3643446Z 
+2025-06-11T11:28:34.3645230Z /home/runner/work/synapse/synapse/src/App.tsx
+2025-06-11T11:28:34.3707798Z ##[warning]    8:10  warning  'GestureHandlerRootView' is defined but never used. Allowed unused vars must match /^_/u                      @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3715430Z ##[warning]   11:23  warning  'QueryClientProvider' is defined but never used. Allowed unused vars must match /^_/u                         @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3717262Z ##[warning]   14:10  warning  'Logger' is defined but never used. Allowed unused vars must match /^_/u                                      @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3718964Z ##[warning]   40:10  warning  'resetAllPlayerData' is defined but never used. Allowed unused vars must match /^_/u                          @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3741308Z ##[warning]   43:10  warning  'SynapseLightTheme' is defined but never used. Allowed unused vars must match /^_/u                           @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3743048Z ##[warning]   63:7   warning  'queryClient' is assigned a value but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3744808Z ##[warning]  291:6   warning  React Hook useEffect has a missing dependency: 'auth.user'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+2025-06-11T11:28:34.3745737Z 
+2025-06-11T11:28:34.3746018Z /home/runner/work/synapse/synapse/src/components/AppHeader.tsx
+2025-06-11T11:28:34.3747303Z ##[warning]    2:29  warning  'Pressable' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                           @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3749094Z ##[warning]    4:28  warning  'Badge' is defined but never used. Allowed unused vars must match /^_/u                                                                                                                                                               @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3751141Z ##[warning]   84:10  warning  'isPremium' is assigned a value but never used. Allowed unused vars must match /^_/u                                                                                                                                                  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3753842Z ##[warning]  230:6   warning  React Hook React.useEffect has missing dependencies: 'checkIncompleteDailyChallenge', 'refreshReadArticles', 'refreshUnviewedAchievements', and 'refreshUnviewedWordCollections'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+2025-06-11T11:28:34.3757000Z ##[warning]  287:6   warning  React Hook React.useEffect has missing dependencies: 'checkIncompleteDailyChallenge', 'refreshUnviewedAchievements', and 'refreshUnviewedWordCollections'. Either include them or remove the dependency array                         react-hooks/exhaustive-deps
+2025-06-11T11:28:34.3780005Z ##[warning]  382:9   warning  'handleUpgrade' is assigned a value but never used. Allowed unused vars must match /^_/u                                                                                                                                              @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3781135Z 
+2025-06-11T11:28:34.3781432Z /home/runner/work/synapse/synapse/src/components/ContactModal.tsx
+2025-06-11T11:28:34.3783017Z ##[warning]   72:6   warning  React Hook React.useEffect has a missing dependency: 'resetForm'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+2025-06-11T11:28:34.3784715Z ##[warning]  362:38  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                     react/no-unescaped-entities
+2025-06-11T11:28:34.3785496Z 
+2025-06-11T11:28:34.3785767Z /home/runner/work/synapse/synapse/src/components/DailiesModal.tsx
+2025-06-11T11:28:34.3786768Z ##[warning]  17:10  warning  'allAchievements' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3788324Z ##[warning]  21:15  warning  'ExtendedTheme' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3789156Z 
+2025-06-11T11:28:34.3789602Z /home/runner/work/synapse/synapse/src/components/DailyChallengeReport.tsx
+2025-06-11T11:28:34.3790651Z ##[warning]  18:3  warning  'Surface' is defined but never used. Allowed unused vars must match /^_/u                    @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3792275Z ##[warning]  58:9  warning  'reportSectionRef' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3793146Z 
+2025-06-11T11:28:34.3793459Z /home/runner/work/synapse/synapse/src/components/DailyChallengesCalendar.tsx
+2025-06-11T11:28:34.3794586Z ##[warning]    2:28  warning  'ScrollView' is defined but never used. Allowed unused vars must match /^_/u                                               @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3796402Z ##[warning]   37:6   warning  React Hook useEffect has a missing dependency: 'loadChallengesForMonth'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+2025-06-11T11:28:34.3798242Z ##[warning]  188:9   warning  'getCelestialEvent' is assigned a value but never used. Allowed unused vars must match /^_/u                               @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3820506Z ##[warning]  188:30  warning  'day' is defined but never used. Allowed unused args must match /^_/u                                                      @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3822372Z ##[warning]  318:9   warning  'getGradeLetter' is assigned a value but never used. Allowed unused vars must match /^_/u                                  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3824070Z ##[warning]  318:27  warning  'status' is defined but never used. Allowed unused args must match /^_/u                                                   @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3825691Z ##[warning]  435:62  warning  'idx' is defined but never used. Allowed unused args must match /^_/u                                                      @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3827326Z ##[warning]  548:55  warning  'index' is defined but never used. Allowed unused args must match /^_/u                                                    @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3828160Z 
+2025-06-11T11:28:34.3828460Z /home/runner/work/synapse/synapse/src/components/GameReportDisplay.tsx
+2025-06-11T11:28:34.3831052Z ##[warning]  51:9  warning  'aiModel' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3831933Z 
+2025-06-11T11:28:34.3832231Z /home/runner/work/synapse/synapse/src/components/GraphVisualization.tsx
+2025-06-11T11:28:34.3833535Z ##[warning]   67:7   warning  'BASE_LABEL_TEXT_FONT_SIZE' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3835234Z ##[warning]   68:7   warning  'MIN_LABEL_TEXT_FONT_SIZE' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3837011Z ##[warning]   69:7   warning  'MAX_LABEL_TEXT_FONT_SIZE' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3838661Z ##[warning]   97:37  warning  'fontSize' is defined but never used. Allowed unused args must match /^_/u                            @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3860801Z ##[warning]  249:5   warning  'viewBoxY' is assigned a value but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3862545Z ##[warning]  251:5   warning  'viewBoxHeight' is assigned a value but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3863438Z 
+2025-06-11T11:28:34.3863697Z /home/runner/work/synapse/synapse/src/components/LabsModal.tsx
+2025-06-11T11:28:34.3864664Z ##[warning]    8:3   warning  'Switch' is defined but never used. Allowed unused vars must match /^_/u                  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3866236Z ##[warning]   55:20  warning  'setFeatures' is assigned a value but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3867809Z ##[warning]  122:9   warning  'toggleFeature' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3869446Z ##[warning]  122:26  warning  'id' is defined but never used. Allowed unused args must match /^_/u                      @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3871015Z ##[warning]  131:9   warning  'enabledCount' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3871865Z 
+2025-06-11T11:28:34.3872129Z /home/runner/work/synapse/synapse/src/components/LegalPages.tsx
+2025-06-11T11:28:34.3873070Z ##[warning]    2:38  warning  'Pressable' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3874585Z ##[warning]    4:22  warning  'Divider' is defined but never used. Allowed unused vars must match /^_/u    @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3875947Z ##[warning]   76:46  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3877211Z ##[warning]   76:58  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3878458Z ##[warning]   77:46  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3900156Z ##[warning]   78:43  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3901561Z ##[warning]   78:51  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3902856Z ##[warning]   78:54  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3904174Z ##[warning]   78:57  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3905442Z ##[warning]   78:60  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3906692Z ##[warning]   78:63  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3908166Z ##[warning]   78:69  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3910894Z ##[warning]   78:73  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3912391Z ##[warning]   79:60  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3913685Z ##[warning]   79:66  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3914940Z ##[warning]  152:62  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3916283Z ##[warning]  225:24  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3917590Z ##[warning]  225:28  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3918860Z ##[warning]  225:30  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3932057Z ##[warning]  225:35  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3933426Z ##[warning]  225:40  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3934715Z ##[warning]  225:43  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3936015Z ##[warning]  360:66  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3937316Z ##[warning]  404:29  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3938590Z ##[warning]  404:50  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3940227Z ##[warning]  474:28  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3941595Z ##[warning]  475:68  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3942897Z ##[warning]  493:57  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3944172Z ##[warning]  546:24  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3945430Z ##[warning]  546:40  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3946686Z ##[warning]  546:45  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3947947Z ##[warning]  546:58  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3949184Z ##[warning]  568:24  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3981079Z ##[warning]  568:37  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3982491Z ##[warning]  568:42  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3983796Z ##[warning]  568:54  warning  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3985313Z ##[warning]  584:68  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`              react/no-unescaped-entities
+2025-06-11T11:28:34.3986067Z 
+2025-06-11T11:28:34.3986334Z /home/runner/work/synapse/synapse/src/components/NewsModal.tsx
+2025-06-11T11:28:34.3987481Z ##[warning]  40:10  warning  'newsLoading' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3988350Z 
+2025-06-11T11:28:34.3988645Z /home/runner/work/synapse/synapse/src/components/QuickstartModal.tsx
+2025-06-11T11:28:34.3992254Z ##[warning]  331:42  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+2025-06-11T11:28:34.3993623Z ##[warning]  359:37  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+2025-06-11T11:28:34.3994363Z 
+2025-06-11T11:28:34.3994626Z /home/runner/work/synapse/synapse/src/components/StatsModal.tsx
+2025-06-11T11:28:34.3995702Z ##[warning]    39:3   warning  'WordCollection' is defined but never used. Allowed unused vars must match /^_/u                       @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3997412Z ##[warning]    47:3   warning  'generateDailyChallengeTaunt' is defined but never used. Allowed unused vars must match /^_/u          @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.3999109Z ##[warning]    54:3   warning  'resetAllPlayerData' is defined but never used. Allowed unused vars must match /^_/u                   @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4008260Z ##[warning]   458:7   warning  'HighlightStatBox' is assigned a value but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4011349Z ##[warning]   504:7   warning  'WLRatioDisplay' is assigned a value but never used. Allowed unused vars must match /^_/u              @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4013861Z ##[warning]   554:9   warning  'auth' is assigned a value but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4016695Z ##[warning]  1028:9   warning  'completedCollectionsCount' is assigned a value but never used. Allowed unused vars must match /^_/u   @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4020745Z ##[warning]  1046:11  warning  'wins' is assigned a value but never used. Allowed unused vars must match /^_/u                        @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4023755Z ##[warning]  1049:11  warning  'averageMoveAccuracy' is assigned a value but never used. Allowed unused vars must match /^_/u         @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4026772Z ##[warning]  1056:11  warning  'actualAchievementsUnlocked' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4029416Z ##[warning]  1427:41  warning  Missing radix parameter                                                                                radix
+2025-06-11T11:28:34.4031614Z ##[warning]  1427:55  warning  Missing radix parameter                                                                                radix
+2025-06-11T11:28:34.4033791Z ##[warning]  1431:37  warning  Missing radix parameter                                                                                radix
+2025-06-11T11:28:34.4036374Z ##[warning]  1523:25  warning  'isCompleted' is assigned a value but never used. Allowed unused vars must match /^_/u                 @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4037845Z 
+2025-06-11T11:28:34.4038312Z /home/runner/work/synapse/synapse/src/components/TutorialModal.tsx
+2025-06-11T11:28:34.4043007Z ##[warning]  22:19  warning  'customColors' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4044732Z 
+2025-06-11T11:28:34.4045217Z /home/runner/work/synapse/synapse/src/components/UpgradePrompt.tsx
+2025-06-11T11:28:34.4047026Z ##[warning]  134:19  warning  'setPricing' is assigned a value but never used. Allowed unused vars must match /^_/u       @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4049950Z ##[warning]  135:21  warning  'setIsLoading' is assigned a value but never used. Allowed unused vars must match /^_/u     @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4052960Z ##[warning]  136:10  warning  'stripeAvailable' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4054484Z 
+2025-06-11T11:28:34.4055008Z /home/runner/work/synapse/synapse/src/components/WordDefinitionDialog.tsx
+2025-06-11T11:28:34.4056662Z ##[warning]  75:6  warning  'props' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4058042Z 
+2025-06-11T11:28:34.4058472Z /home/runner/work/synapse/synapse/src/context/AuthContext.tsx
+2025-06-11T11:28:34.4060530Z ##[warning]   9:10  warning  'User' is defined but never used. Allowed unused vars must match /^_/u                                              @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4063560Z ##[warning]  60:6   warning  React Hook useEffect has a missing dependency: 'supabaseService'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+2025-06-11T11:28:34.4065134Z 
+2025-06-11T11:28:34.4065921Z /home/runner/work/synapse/synapse/src/features/achievements/definitions/seasonalExplorer.achievement.ts
+2025-06-11T11:28:34.4068049Z ##[warning]  12:11  warning  'gameReport' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4070922Z ##[warning]  12:23  warning  'gameStatus' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4072330Z 
+2025-06-11T11:28:34.4073114Z /home/runner/work/synapse/synapse/src/features/achievements/definitions/wordCollector.achievement.ts
+2025-06-11T11:28:34.4074982Z ##[warning]  10:11  warning  'gameReport' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4077518Z ##[warning]  10:23  warning  'gameStatus' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4078918Z 
+2025-06-11T11:28:34.4079527Z /home/runner/work/synapse/synapse/src/screens/AccountScreen.tsx
+2025-06-11T11:28:34.4081343Z ##[warning]   22:15  warning  'ExtendedTheme' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4084196Z ##[warning]   38:10  warning  'localPremiumStatus' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4086947Z ##[warning]  377:24  warning  'props' is defined but never used. Allowed unused args must match /^_/u                        @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4089821Z ##[warning]  391:24  warning  'props' is defined but never used. Allowed unused args must match /^_/u                        @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4092546Z ##[warning]  405:24  warning  'props' is defined but never used. Allowed unused args must match /^_/u                        @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4095144Z ##[warning]  493:24  warning  'props' is defined but never used. Allowed unused args must match /^_/u                        @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4097740Z ##[warning]  515:24  warning  'props' is defined but never used. Allowed unused args must match /^_/u                        @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4100557Z ##[warning]  537:24  warning  'props' is defined but never used. Allowed unused args must match /^_/u                        @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4102181Z 
+2025-06-11T11:28:34.4102601Z /home/runner/work/synapse/synapse/src/screens/AuthScreen.tsx
+2025-06-11T11:28:34.4104437Z ##[warning]    19:3   warning  'Checkbox' is defined but never used. Allowed unused vars must match /^_/u                                                @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4107414Z ##[warning]    20:3   warning  'Divider' is defined but never used. Allowed unused vars must match /^_/u                                                 @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4110618Z ##[warning]    21:3   warning  'ActivityIndicator' is defined but never used. Allowed unused vars must match /^_/u                                       @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4113587Z ##[warning]    34:10  warning  'SafeAreaView' is defined but never used. Allowed unused vars must match /^_/u                                            @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4116513Z ##[warning]    72:10  warning  'captchaToken' is assigned a value but never used. Allowed unused vars must match /^_/u                                   @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4119826Z ##[warning]   119:6   warning  React Hook React.useEffect has a missing dependency: 'supabaseService'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+2025-06-11T11:28:34.4123086Z ##[warning]   519:9   warning  'handlePromoCodeSignup' is assigned a value but never used. Allowed unused vars must match /^_/u                          @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4125761Z ##[warning]  1350:40  warning  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                           react/no-unescaped-entities
+2025-06-11T11:28:34.4128174Z ##[warning]  1414:19  warning  Forbidden non-null assertion                                                                                              @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4129743Z 
+2025-06-11T11:28:34.4130173Z /home/runner/work/synapse/synapse/src/screens/GameScreen.tsx
+2025-06-11T11:28:34.4132076Z ##[warning]  103:9   warning  'showUpgradePrompt' is assigned a value but never used. Allowed unused vars must match /^_/u            @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4135106Z ##[warning]  104:9   warning  'resetUpgradePromptDismissal' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4138014Z ##[warning]  125:11  warning  'startTutorial' is assigned a value but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+2025-06-11T11:28:34.4139671Z 
+2025-06-11T11:28:34.4140108Z /home/runner/work/synapse/synapse/src/services/StripeService.ts
+2025-06-11T11:28:34.4141385Z ##[warning]  7:30  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4142610Z 
+2025-06-11T11:28:34.4143067Z /home/runner/work/synapse/synapse/src/services/SupabaseService.ts
+2025-06-11T11:28:34.4144307Z ##[warning]    13:21  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4146274Z ##[warning]    14:25  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4148238Z ##[warning]  1489:17  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4149708Z 
+2025-06-11T11:28:34.4150277Z /home/runner/work/synapse/synapse/src/utils/__tests__/dataCompression.test.ts
+2025-06-11T11:28:34.4151696Z ##[warning]  194:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4153695Z ##[warning]  195:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4155634Z ##[warning]  198:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4158014Z ##[warning]  199:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4160162Z ##[warning]  202:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4162186Z ##[warning]  203:14  warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4164341Z ##[warning]  205:9   warning  Forbidden non-null assertion  @typescript-eslint/no-non-null-assertion
+2025-06-11T11:28:34.4165571Z 
+2025-06-11T11:28:34.4166011Z /home/runner/work/synapse/synapse/src/utils/dataCompression.ts
+2025-06-11T11:28:34.4166969Z ##[warning]  109:24  warning  Missing radix parameter  radix
+2025-06-11T11:28:34.4167983Z 
+2025-06-11T11:28:34.4168542Z ✖ 136 problems (0 errors, 136 warnings)
+2025-06-11T11:28:34.4168840Z 
+2025-06-11T11:28:34.4637691Z ##[group]Run npm run test:ci
+2025-06-11T11:28:34.4637979Z [36;1mnpm run test:ci[0m
+2025-06-11T11:28:34.4687734Z shell: /usr/bin/bash -e {0}
+2025-06-11T11:28:34.4687979Z ##[endgroup]
+2025-06-11T11:28:34.5762905Z 
+2025-06-11T11:28:34.5763613Z > synapse-native@1.0.0 test:ci
+2025-06-11T11:28:34.5764471Z > jest --coverage --watchAll=false --ci --testTimeout=30000 --forceExit
+2025-06-11T11:28:34.5764950Z 
+2025-06-11T11:28:41.5990729Z PASS src/stores/__tests__/useGameStore.test.ts (5.517 s)
+2025-06-11T11:28:41.6387353Z   ● Console
+2025-06-11T11:28:41.6387836Z 
+2025-06-11T11:28:41.6410220Z     console.log
+2025-06-11T11:28:41.6411317Z       🔧 Added compression debug utilities to global.compressionDebug
+2025-06-11T11:28:41.6413275Z 
+2025-06-11T11:28:41.6420767Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:200:15)
+2025-06-11T11:28:41.6421470Z 
+2025-06-11T11:28:41.6421720Z     console.log
+2025-06-11T11:28:41.6430052Z          Usage: compressionDebug.test()
+2025-06-11T11:28:41.6430609Z 
+2025-06-11T11:28:41.6431187Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:203:15)
+2025-06-11T11:28:41.6441955Z 
+2025-06-11T11:28:41.6442275Z     console.log
+2025-06-11T11:28:41.6442975Z       🎮 loadInitialData: Starting
+2025-06-11T11:28:41.6443366Z 
+2025-06-11T11:28:41.6443689Z       at log (src/stores/useGameStore.ts:381:15)
+2025-06-11T11:28:41.6444127Z 
+2025-06-11T11:28:41.6444362Z     console.log
+2025-06-11T11:28:41.6445123Z       🎮 loadInitialData: Daily challenge state loaded: {
+2025-06-11T11:28:41.6445866Z         todaysChallenge: false,
+2025-06-11T11:28:41.6447848Z         challengeId: undefined,
+2025-06-11T11:28:41.6448313Z         hasPlayedToday: false,
+2025-06-11T11:28:41.6448778Z         remainingFreeGames: 2,
+2025-06-11T11:28:41.6449440Z         willPreventAutoStart: false
+2025-06-11T11:28:41.6449857Z       }
+2025-06-11T11:28:41.6450028Z 
+2025-06-11T11:28:41.6450267Z       at log (src/stores/useGameStore.ts:402:15)
+2025-06-11T11:28:41.6450631Z 
+2025-06-11T11:28:41.6450781Z     console.log
+2025-06-11T11:28:41.6451536Z       🎮 loadInitialData: Store state updated with daily challenge data
+2025-06-11T11:28:41.6452040Z 
+2025-06-11T11:28:41.6452285Z       at log (src/stores/useGameStore.ts:422:15)
+2025-06-11T11:28:41.6452593Z 
+2025-06-11T11:28:41.6452733Z     console.log
+2025-06-11T11:28:41.6453263Z       🎮 loadInitialData: No saved game to restore
+2025-06-11T11:28:41.6453596Z 
+2025-06-11T11:28:41.6453824Z       at log (src/stores/useGameStore.ts:514:19)
+2025-06-11T11:28:41.6454127Z 
+2025-06-11T11:28:41.6454278Z     console.log
+2025-06-11T11:28:41.6454868Z       🎮 loadInitialData: Completed, returning false
+2025-06-11T11:28:41.6455244Z 
+2025-06-11T11:28:41.6455471Z       at log (src/stores/useGameStore.ts:523:15)
+2025-06-11T11:28:41.6455774Z 
+2025-06-11T11:28:41.6455905Z     console.log
+2025-06-11T11:28:41.6456334Z       🎮 loadInitialData: Starting
+2025-06-11T11:28:41.6456626Z 
+2025-06-11T11:28:41.6456899Z       at log (src/stores/useGameStore.ts:381:15)
+2025-06-11T11:28:41.6457242Z 
+2025-06-11T11:28:41.6457398Z     console.error
+2025-06-11T11:28:41.6458116Z       🎮 loadInitialData: Error: Error: Failed to load graph data
+2025-06-11T11:28:41.6460206Z           at Object.<anonymous> (/home/runner/work/synapse/synapse/src/stores/__tests__/useGameStore.test.ts:312:43)
+2025-06-11T11:28:41.6461200Z           at Generator.next (<anonymous>)
+2025-06-11T11:28:41.6462352Z           at asyncGeneratorStep (/home/runner/work/synapse/synapse/node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+2025-06-11T11:28:41.6463902Z           at _next (/home/runner/work/synapse/synapse/node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+2025-06-11T11:28:41.6465289Z           at /home/runner/work/synapse/synapse/node_modules/@babel/runtime/helpers/asyncToGenerator.js:22:7
+2025-06-11T11:28:41.6466204Z           at new Promise (<anonymous>)
+2025-06-11T11:28:41.6467675Z           at Object.<anonymous> (/home/runner/work/synapse/synapse/node_modules/@babel/runtime/helpers/asyncToGenerator.js:14:12)
+2025-06-11T11:28:41.6469459Z           at Promise.then.completed (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/utils.js:298:28)
+2025-06-11T11:28:41.6470429Z           at new Promise (<anonymous>)
+2025-06-11T11:28:41.6471386Z           at callAsyncCircusFn (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/utils.js:231:10)
+2025-06-11T11:28:41.6472698Z           at _callCircusTest (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/run.js:316:40)
+2025-06-11T11:28:41.6473892Z           at _runTest (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/run.js:252:3)
+2025-06-11T11:28:41.6475205Z           at _runTestsForDescribeBlock (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/run.js:126:9)
+2025-06-11T11:28:41.6476619Z           at _runTestsForDescribeBlock (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/run.js:121:9)
+2025-06-11T11:28:41.6477901Z           at run (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/run.js:71:3)
+2025-06-11T11:28:41.6479726Z           at runAndTransformResultsToJestFormat (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+2025-06-11T11:28:41.6481726Z           at jestAdapter (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+2025-06-11T11:28:41.6483331Z           at runTestInternal (/home/runner/work/synapse/synapse/node_modules/jest-runner/build/runTest.js:367:16)
+2025-06-11T11:28:41.6484668Z           at runTest (/home/runner/work/synapse/synapse/node_modules/jest-runner/build/runTest.js:444:34)
+2025-06-11T11:28:41.6485338Z 
+2025-06-11T11:28:41.6485871Z     [0m [90m 524 |[39m       [36mreturn[39m [36mfalse[39m[33m;[39m
+2025-06-11T11:28:41.6486635Z      [90m 525 |[39m     } [36mcatch[39m (error) {
+2025-06-11T11:28:41.6487898Z     [31m[1m>[22m[39m[90m 526 |[39m       console[33m.[39merror([32m"🎮 loadInitialData: Error:"[39m[33m,[39m error)[33m;[39m
+2025-06-11T11:28:41.6488988Z      [90m     |[39m               [31m[1m^[22m[39m
+2025-06-11T11:28:41.6489857Z      [90m 527 |[39m       [36mset[39m({
+2025-06-11T11:28:41.6490671Z      [90m 528 |[39m         isLoadingData[33m:[39m [36mfalse[39m[33m,[39m
+2025-06-11T11:28:41.6491554Z      [90m 529 |[39m         errorLoadingData[33m:[39m[0m
+2025-06-11T11:28:41.6491943Z 
+2025-06-11T11:28:41.6492236Z       at error (src/stores/useGameStore.ts:526:15)
+2025-06-11T11:28:41.6492808Z           at Generator.throw (<anonymous>)
+2025-06-11T11:28:41.6493661Z       at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+2025-06-11T11:28:41.6494698Z       at _throw (node_modules/@babel/runtime/helpers/asyncToGenerator.js:20:9)
+2025-06-11T11:28:41.6495217Z 
+2025-06-11T11:28:41.6495374Z     console.log
+2025-06-11T11:28:41.6495936Z       🎮 loadInitialData: Starting
+2025-06-11T11:28:41.6496235Z 
+2025-06-11T11:28:41.6496517Z       at log (src/stores/useGameStore.ts:381:15)
+2025-06-11T11:28:41.6496871Z 
+2025-06-11T11:28:41.6497017Z     console.log
+2025-06-11T11:28:41.6497677Z       🎮 loadInitialData: Daily challenge state loaded: {
+2025-06-11T11:28:41.6498553Z         todaysChallenge: false,
+2025-06-11T11:28:41.6499025Z         challengeId: undefined,
+2025-06-11T11:28:41.6499714Z         hasPlayedToday: false,
+2025-06-11T11:28:41.6500168Z         remainingFreeGames: 2,
+2025-06-11T11:28:41.6500665Z         willPreventAutoStart: false
+2025-06-11T11:28:41.6501099Z       }
+2025-06-11T11:28:41.6501283Z 
+2025-06-11T11:28:41.6501538Z       at log (src/stores/useGameStore.ts:402:15)
+2025-06-11T11:28:41.6501884Z 
+2025-06-11T11:28:41.6502034Z     console.log
+2025-06-11T11:28:41.6502811Z       🎮 loadInitialData: Store state updated with daily challenge data
+2025-06-11T11:28:41.6503304Z 
+2025-06-11T11:28:41.6503561Z       at log (src/stores/useGameStore.ts:422:15)
+2025-06-11T11:28:41.6503915Z 
+2025-06-11T11:28:41.6504379Z     console.log
+2025-06-11T11:28:41.6505004Z       🎮 loadInitialData: Restoring saved game
+2025-06-11T11:28:41.6505367Z 
+2025-06-11T11:28:41.6505625Z       at log (src/stores/useGameStore.ts:439:19)
+2025-06-11T11:28:41.6505999Z 
+2025-06-11T11:28:41.6506153Z     console.log
+2025-06-11T11:28:41.6506772Z       🎮 loadInitialData: Game restored, returning true
+2025-06-11T11:28:41.6507162Z 
+2025-06-11T11:28:41.6507421Z       at log (src/stores/useGameStore.ts:511:19)
+2025-06-11T11:28:41.6507770Z 
+2025-06-11T11:28:41.6507928Z     console.log
+2025-06-11T11:28:41.6508450Z       🎮 loadInitialData: Starting
+2025-06-11T11:28:41.6508770Z 
+2025-06-11T11:28:41.6509010Z       at log (src/stores/useGameStore.ts:381:15)
+2025-06-11T11:28:41.6509551Z 
+2025-06-11T11:28:41.6509701Z     console.log
+2025-06-11T11:28:41.6510324Z       🎮 loadInitialData: Daily challenge state loaded: {
+2025-06-11T11:28:41.6510912Z         todaysChallenge: false,
+2025-06-11T11:28:41.6511376Z         challengeId: undefined,
+2025-06-11T11:28:41.6511847Z         hasPlayedToday: false,
+2025-06-11T11:28:41.6512304Z         remainingFreeGames: 2,
+2025-06-11T11:28:41.6512776Z         willPreventAutoStart: false
+2025-06-11T11:28:41.6513205Z       }
+2025-06-11T11:28:41.6513364Z 
+2025-06-11T11:28:41.6513615Z       at log (src/stores/useGameStore.ts:402:15)
+2025-06-11T11:28:41.6513956Z 
+2025-06-11T11:28:41.6514088Z     console.log
+2025-06-11T11:28:41.6514813Z       🎮 loadInitialData: Store state updated with daily challenge data
+2025-06-11T11:28:41.6515289Z 
+2025-06-11T11:28:41.6515541Z       at log (src/stores/useGameStore.ts:422:15)
+2025-06-11T11:28:41.6515881Z 
+2025-06-11T11:28:41.6516014Z     console.log
+2025-06-11T11:28:41.6516587Z       🎮 loadInitialData: No saved game to restore
+2025-06-11T11:28:41.6516945Z 
+2025-06-11T11:28:41.6517203Z       at log (src/stores/useGameStore.ts:514:19)
+2025-06-11T11:28:41.6517549Z 
+2025-06-11T11:28:41.6517696Z     console.log
+2025-06-11T11:28:41.6518321Z       🎮 loadInitialData: Completed, returning false
+2025-06-11T11:28:41.6518705Z 
+2025-06-11T11:28:41.6518952Z       at log (src/stores/useGameStore.ts:523:15)
+2025-06-11T11:28:41.6519501Z 
+2025-06-11T11:28:41.6519646Z     console.log
+2025-06-11T11:28:41.6520044Z       Starting game with: {
+2025-06-11T11:28:41.6520516Z         remainingFreeGames: 2,
+2025-06-11T11:28:41.6521022Z         hasPlayedTodaysChallenge: false,
+2025-06-11T11:28:41.6521553Z         currentDailyChallenge: false,
+2025-06-11T11:28:41.6522095Z         shouldRestoreTempGame: false,
+2025-06-11T11:28:41.6522610Z         initialDataLoaded: true
+2025-06-11T11:28:41.6523027Z       }
+2025-06-11T11:28:41.6523198Z 
+2025-06-11T11:28:41.6523442Z       at log (src/stores/useGameStore.ts:600:13)
+2025-06-11T11:28:41.6523806Z 
+2025-06-11T11:28:41.6523948Z     console.log
+2025-06-11T11:28:41.6524296Z       Starting game with: {
+2025-06-11T11:28:41.6524713Z         remainingFreeGames: 2,
+2025-06-11T11:28:41.6525218Z         hasPlayedTodaysChallenge: false,
+2025-06-11T11:28:41.6525779Z         currentDailyChallenge: false,
+2025-06-11T11:28:41.6526327Z         shouldRestoreTempGame: false,
+2025-06-11T11:28:41.6526855Z         initialDataLoaded: true
+2025-06-11T11:28:41.6527266Z       }
+2025-06-11T11:28:41.6527702Z 
+2025-06-11T11:28:41.6527965Z       at log (src/stores/useGameStore.ts:600:13)
+2025-06-11T11:28:41.6528328Z 
+2025-06-11T11:28:41.6528472Z     console.log
+2025-06-11T11:28:41.6529134Z       🎮 startGame: Checking daily challenge priority: {
+2025-06-11T11:28:41.6529936Z         currentGameStatus: 'idle',
+2025-06-11T11:28:41.6530510Z         freshHasPlayedTodaysChallenge: false,
+2025-06-11T11:28:41.6531100Z         freshCurrentDailyChallenge: false,
+2025-06-11T11:28:41.6531673Z         challengeId: undefined,
+2025-06-11T11:28:41.6532158Z         challengeDate: undefined,
+2025-06-11T11:28:41.6532744Z         upgradePromptVisible: false,
+2025-06-11T11:28:41.6533400Z         upgradePromptDismissedThisSession: false,
+2025-06-11T11:28:41.6533993Z         isDailyChallenge: false,
+2025-06-11T11:28:41.6534687Z         isChallenge: false,
+2025-06-11T11:28:41.6535197Z         hasPendingChallenge: false,
+2025-06-11T11:28:41.6535728Z         pendingChallengeWords: null
+2025-06-11T11:28:41.6536173Z       }
+2025-06-11T11:28:41.6536364Z 
+2025-06-11T11:28:41.6536610Z       at log (src/stores/useGameStore.ts:674:13)
+2025-06-11T11:28:41.6536958Z 
+2025-06-11T11:28:41.6537098Z     console.log
+2025-06-11T11:28:41.6537552Z       Consuming free game, remaining before: 2
+2025-06-11T11:28:41.6537886Z 
+2025-06-11T11:28:41.6538152Z       at log (src/stores/useGameStore.ts:736:15)
+2025-06-11T11:28:41.6538510Z 
+2025-06-11T11:28:41.6538644Z     console.log
+2025-06-11T11:28:41.6539060Z       Free games remaining after consumption: 2
+2025-06-11T11:28:41.6539595Z 
+2025-06-11T11:28:41.6539826Z       at log (src/stores/useGameStore.ts:745:15)
+2025-06-11T11:28:41.6540159Z 
+2025-06-11T11:28:41.6540286Z     console.log
+2025-06-11T11:28:41.6540603Z       Starting game with: {
+2025-06-11T11:28:41.6541025Z         remainingFreeGames: 2,
+2025-06-11T11:28:41.6541515Z         hasPlayedTodaysChallenge: false,
+2025-06-11T11:28:41.6542014Z         currentDailyChallenge: false,
+2025-06-11T11:28:41.6542505Z         shouldRestoreTempGame: false,
+2025-06-11T11:28:41.6542999Z         initialDataLoaded: true
+2025-06-11T11:28:41.6543365Z       }
+2025-06-11T11:28:41.6543524Z 
+2025-06-11T11:28:41.6543752Z       at log (src/stores/useGameStore.ts:600:13)
+2025-06-11T11:28:41.6544079Z 
+2025-06-11T11:28:41.6544215Z     console.log
+2025-06-11T11:28:41.6544812Z       🎮 startGame: Checking daily challenge priority: {
+2025-06-11T11:28:41.6545367Z         currentGameStatus: 'idle',
+2025-06-11T11:28:41.6545883Z         freshHasPlayedTodaysChallenge: false,
+2025-06-11T11:28:41.6546486Z         freshCurrentDailyChallenge: false,
+2025-06-11T11:28:41.6547039Z         challengeId: undefined,
+2025-06-11T11:28:41.6547517Z         challengeDate: undefined,
+2025-06-11T11:28:41.6548033Z         upgradePromptVisible: false,
+2025-06-11T11:28:41.6548621Z         upgradePromptDismissedThisSession: false,
+2025-06-11T11:28:41.6549400Z         isDailyChallenge: false,
+2025-06-11T11:28:41.6549853Z         isChallenge: false,
+2025-06-11T11:28:41.6550310Z         hasPendingChallenge: false,
+2025-06-11T11:28:41.6550816Z         pendingChallengeWords: null
+2025-06-11T11:28:41.6551239Z       }
+2025-06-11T11:28:41.6551403Z 
+2025-06-11T11:28:41.6551649Z       at log (src/stores/useGameStore.ts:674:13)
+2025-06-11T11:28:41.6552005Z 
+2025-06-11T11:28:41.6552140Z     console.log
+2025-06-11T11:28:41.6552571Z       Consuming free game, remaining before: 2
+2025-06-11T11:28:41.6552912Z 
+2025-06-11T11:28:41.6553157Z       at log (src/stores/useGameStore.ts:736:15)
+2025-06-11T11:28:41.6553512Z 
+2025-06-11T11:28:41.6553641Z     console.log
+2025-06-11T11:28:41.6554073Z       Free games remaining after consumption: 2
+2025-06-11T11:28:41.6554420Z 
+2025-06-11T11:28:41.6554669Z       at log (src/stores/useGameStore.ts:745:15)
+2025-06-11T11:28:41.6555021Z 
+2025-06-11T11:28:41.6555152Z     console.log
+2025-06-11T11:28:41.6555500Z       Starting game with: {
+2025-06-11T11:28:41.6555930Z         remainingFreeGames: 2,
+2025-06-11T11:28:41.6556422Z         hasPlayedTodaysChallenge: false,
+2025-06-11T11:28:41.6557237Z         currentDailyChallenge: false,
+2025-06-11T11:28:41.6557753Z         shouldRestoreTempGame: true,
+2025-06-11T11:28:41.6558255Z         initialDataLoaded: true
+2025-06-11T11:28:41.6558642Z       }
+2025-06-11T11:28:41.6558818Z 
+2025-06-11T11:28:41.6559060Z       at log (src/stores/useGameStore.ts:600:13)
+2025-06-11T11:28:41.6559593Z 
+2025-06-11T11:28:41.8830567Z FAIL src/services/__tests__/SupabaseService.test.ts
+2025-06-11T11:28:41.8831419Z   ● Test suite failed to run
+2025-06-11T11:28:41.8831750Z 
+2025-06-11T11:28:41.8831965Z     Jest encountered an unexpected token
+2025-06-11T11:28:41.8832384Z 
+2025-06-11T11:28:41.8833174Z     Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+2025-06-11T11:28:41.8833746Z 
+2025-06-11T11:28:41.8834530Z     Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+2025-06-11T11:28:41.8835090Z 
+2025-06-11T11:28:41.8841255Z     By default "node_modules" folder is ignored by transformers.
+2025-06-11T11:28:41.8842678Z 
+2025-06-11T11:28:41.8842871Z     Here's what you can do:
+2025-06-11T11:28:41.8844068Z      • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+2025-06-11T11:28:41.8845443Z      • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+2025-06-11T11:28:41.8846878Z      • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+2025-06-11T11:28:41.8848136Z      • If you need a custom transformation specify a "transform" option in your config.
+2025-06-11T11:28:41.8850644Z      • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+2025-06-11T11:28:41.8851365Z 
+2025-06-11T11:28:41.8851762Z     You'll find more details and examples of these config options in the docs:
+2025-06-11T11:28:41.8852481Z     https://jestjs.io/docs/configuration
+2025-06-11T11:28:41.8853091Z     For information about custom transformations, see:
+2025-06-11T11:28:41.8853709Z     https://jestjs.io/docs/code-transformation
+2025-06-11T11:28:41.8854060Z 
+2025-06-11T11:28:41.8854190Z     Details:
+2025-06-11T11:28:41.8854366Z 
+2025-06-11T11:28:41.8854916Z     /home/runner/work/synapse/synapse/src/services/__tests__/SupabaseService.test.ts:192
+2025-06-11T11:28:41.8855659Z           delete undefined;
+2025-06-11T11:28:41.8856033Z                  ^^^^^^^^^
+2025-06-11T11:28:41.8856252Z 
+2025-06-11T11:28:41.8856625Z     SyntaxError: Delete of an unqualified identifier in strict mode.
+2025-06-11T11:28:41.8857048Z 
+2025-06-11T11:28:41.8857556Z       at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1505:14)
+2025-06-11T11:28:41.8858112Z 
+2025-06-11T11:28:42.1773905Z PASS src/services/__tests__/StorageAdapter.test.ts
+2025-06-11T11:28:42.3738014Z PASS src/utils/__tests__/gameReportUtils.test.ts
+2025-06-11T11:28:42.3765986Z   ● Console
+2025-06-11T11:28:42.3769499Z 
+2025-06-11T11:28:42.3769669Z     console.error
+2025-06-11T11:28:42.3770397Z       findShortestPath: Invalid graph data or start/end words (start=wordSingle, end=end)
+2025-06-11T11:28:42.3772221Z 
+2025-06-11T11:28:42.3773688Z     [0m [90m  8 |[39m )[33m:[39m string[] [33m=>[39m {
+2025-06-11T11:28:42.3775983Z      [90m  9 |[39m   [36mif[39m ([33m![39mgraphData [33m||[39m [33m![39mgraphData[start] [33m||[39m [33m![39mgraphData[end]) {
+2025-06-11T11:28:42.3778261Z     [31m[1m>[22m[39m[90m 10 |[39m     console[33m.[39merror(
+2025-06-11T11:28:42.3779194Z      [90m    |[39m             [31m[1m^[22m[39m
+2025-06-11T11:28:42.3780802Z      [90m 11 |[39m       [32m`findShortestPath: Invalid graph data or start/end words (start=${start}, end=${end})`[39m[33m,[39m
+2025-06-11T11:28:42.3781720Z      [90m 12 |[39m     )[33m;[39m
+2025-06-11T11:28:42.3782301Z      [90m 13 |[39m     [36mreturn[39m [][33m;[39m[0m
+2025-06-11T11:28:42.3783017Z 
+2025-06-11T11:28:42.3783247Z       at error (src/utils/graphUtils.ts:10:13)
+2025-06-11T11:28:42.3783888Z       at findShortestPathFn (src/utils/gameReportUtils.ts:121:37)
+2025-06-11T11:28:42.3784728Z       at Object.<anonymous> (src/utils/__tests__/gameReportUtils.test.ts:408:40)
+2025-06-11T11:28:42.3785228Z 
+2025-06-11T11:28:42.3785361Z     console.warn
+2025-06-11T11:28:42.3785780Z       No path found from noEdgeWord to wordD
+2025-06-11T11:28:42.3786109Z 
+2025-06-11T11:28:42.3786517Z     [0m [90m 84 |[39m   [90m// If end is unreachable[39m
+2025-06-11T11:28:42.3787429Z      [90m 85 |[39m   [36mif[39m (distances[end] [33m===[39m [33mInfinity[39m) {
+2025-06-11T11:28:42.3788916Z     [31m[1m>[22m[39m[90m 86 |[39m     console[33m.[39mwarn([32m`No path found from ${start} to ${end}`[39m)[33m;[39m
+2025-06-11T11:28:42.3790067Z      [90m    |[39m             [31m[1m^[22m[39m
+2025-06-11T11:28:42.3790710Z      [90m 87 |[39m     [36mreturn[39m [][33m;[39m
+2025-06-11T11:28:42.3791258Z      [90m 88 |[39m   }
+2025-06-11T11:28:42.3791675Z      [90m 89 |[39m[0m
+2025-06-11T11:28:42.3791914Z 
+2025-06-11T11:28:42.3792162Z       at warn (src/utils/graphUtils.ts:86:13)
+2025-06-11T11:28:42.3792812Z       at findShortestPathFn (src/utils/gameReportUtils.ts:121:37)
+2025-06-11T11:28:42.3793646Z       at Object.<anonymous> (src/utils/__tests__/gameReportUtils.test.ts:462:40)
+2025-06-11T11:28:42.5704989Z 
+2025-06-11T11:28:42.5705546Z PASS src/utils/__tests__/dataCompression.test.ts
+2025-06-11T11:28:42.5711496Z   ● Console
+2025-06-11T11:28:42.5711818Z 
+2025-06-11T11:28:42.5711985Z     console.log
+2025-06-11T11:28:42.5712693Z       Sync Pipeline Compression: 2922 → 2749 bytes (94.1% of original)
+2025-06-11T11:28:42.5713120Z 
+2025-06-11T11:28:42.5713505Z       at Object.log (src/utils/__tests__/dataCompression.test.ts:695:15)
+2025-06-11T11:28:42.5713929Z 
+2025-06-11T11:28:42.9346656Z PASS src/services/__tests__/UnifiedDataStore.test.ts
+2025-06-11T11:28:42.9353706Z   ● Console
+2025-06-11T11:28:42.9354515Z 
+2025-06-11T11:28:42.9355991Z     console.log
+2025-06-11T11:28:42.9357002Z       🔧 Added compression debug utilities to global.compressionDebug
+2025-06-11T11:28:42.9358802Z 
+2025-06-11T11:28:42.9360805Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:200:15)
+2025-06-11T11:28:42.9362659Z 
+2025-06-11T11:28:42.9363055Z     console.log
+2025-06-11T11:28:42.9365489Z          Usage: compressionDebug.test()
+2025-06-11T11:28:42.9365805Z 
+2025-06-11T11:28:42.9366224Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:203:15)
+2025-06-11T11:28:42.9366711Z 
+2025-06-11T11:28:43.6500691Z PASS src/services/__tests__/GameFlowManager.test.ts
+2025-06-11T11:28:43.6531635Z   ● Console
+2025-06-11T11:28:43.6532423Z 
+2025-06-11T11:28:43.6533437Z     console.log
+2025-06-11T11:28:43.6583301Z       🧠 Synapse Neural Network Detected!
+2025-06-11T11:28:43.6583861Z 
+2025-06-11T11:28:43.6584505Z       at log (src/utils/logger.ts:14:13)
+2025-06-11T11:28:43.6585001Z 
+2025-06-11T11:28:43.6585299Z     console.log
+2025-06-11T11:28:43.6585960Z       🎯 Hey there, word wizard! 🎯
+2025-06-11T11:28:43.6586535Z       
+2025-06-11T11:28:43.6587259Z       🔍 Curious about how the magic works? We love that!
+2025-06-11T11:28:43.6588359Z       🎮 But tampering with the game state is like using a dictionary in Scrabble...
+2025-06-11T11:28:43.6589571Z       🚫 ...technically possible, but where's the fun in that?
+2025-06-11T11:28:43.6590234Z       
+2025-06-11T11:28:43.6590936Z       💡 Want to contribute? Check out our GitHub instead!
+2025-06-11T11:28:43.6591862Z       🌟 Play fair, stay clever, and enjoy the neural journey! 🌟
+2025-06-11T11:28:43.6592406Z 
+2025-06-11T11:28:43.6592746Z       at log (src/utils/logger.ts:19:13)
+2025-06-11T11:28:43.6593222Z 
+2025-06-11T11:28:43.6593548Z     console.log
+2025-06-11T11:28:43.6594226Z       P.S. Our algorithms are watching... 👁️👁️
+2025-06-11T11:28:43.6594729Z 
+2025-06-11T11:28:43.6595572Z       at log (src/utils/logger.ts:29:13)
+2025-06-11T11:28:43.6596060Z 
+2025-06-11T11:28:43.6596430Z     console.log
+2025-06-11T11:28:43.6597133Z       🧠 Synapse Neural Network Detected!
+2025-06-11T11:28:43.6597617Z 
+2025-06-11T11:28:43.6597973Z       at log (src/utils/logger.ts:14:13)
+2025-06-11T11:28:43.6599670Z 
+2025-06-11T11:28:43.6600105Z     console.log
+2025-06-11T11:28:43.6600778Z       🎯 Hey there, word wizard! 🎯
+2025-06-11T11:28:43.6601412Z       
+2025-06-11T11:28:43.6602237Z       🔍 Curious about how the magic works? We love that!
+2025-06-11T11:28:43.6603279Z       🎮 But tampering with the game state is like using a dictionary in Scrabble...
+2025-06-11T11:28:43.6604302Z       🚫 ...technically possible, but where's the fun in that?
+2025-06-11T11:28:43.6619885Z       
+2025-06-11T11:28:43.6620963Z       💡 Want to contribute? Check out our GitHub instead!
+2025-06-11T11:28:43.6621979Z       🌟 Play fair, stay clever, and enjoy the neural journey! 🌟
+2025-06-11T11:28:43.6622581Z 
+2025-06-11T11:28:43.6623121Z       at log (src/utils/logger.ts:19:13)
+2025-06-11T11:28:43.6623631Z 
+2025-06-11T11:28:43.6623778Z     console.log
+2025-06-11T11:28:43.6624326Z       P.S. Our algorithms are watching... 👁️👁️
+2025-06-11T11:28:43.6624645Z 
+2025-06-11T11:28:43.6624844Z       at log (src/utils/logger.ts:29:13)
+2025-06-11T11:28:43.6625135Z 
+2025-06-11T11:28:43.6625259Z     console.log
+2025-06-11T11:28:43.6625725Z       🎮 Starting random game (premium user)
+2025-06-11T11:28:43.6626018Z 
+2025-06-11T11:28:43.6626370Z       at GameFlowManager.log (src/services/GameFlowManager.ts:203:17)
+2025-06-11T11:28:43.6626797Z 
+2025-06-11T11:28:43.6626918Z     console.log
+2025-06-11T11:28:43.6627429Z       🎮 Starting random game (2 free games remaining)
+2025-06-11T11:28:43.6627760Z 
+2025-06-11T11:28:43.6628121Z       at GameFlowManager.log (src/services/GameFlowManager.ts:203:17)
+2025-06-11T11:28:43.6628560Z 
+2025-06-11T11:28:43.8562259Z FAIL src/services/__tests__/StripeService.test.ts
+2025-06-11T11:28:43.8564357Z   ● Test suite failed to run
+2025-06-11T11:28:43.8564684Z 
+2025-06-11T11:28:43.8564903Z     Jest encountered an unexpected token
+2025-06-11T11:28:43.8565199Z 
+2025-06-11T11:28:43.8566168Z     Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+2025-06-11T11:28:43.8567097Z 
+2025-06-11T11:28:43.8567784Z     Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+2025-06-11T11:28:43.8568526Z 
+2025-06-11T11:28:43.8568860Z     By default "node_modules" folder is ignored by transformers.
+2025-06-11T11:28:43.8569582Z 
+2025-06-11T11:28:43.8569750Z     Here's what you can do:
+2025-06-11T11:28:43.8570869Z      • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+2025-06-11T11:28:43.8572256Z      • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+2025-06-11T11:28:43.8573726Z      • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+2025-06-11T11:28:43.8575020Z      • If you need a custom transformation specify a "transform" option in your config.
+2025-06-11T11:28:43.8576462Z      • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+2025-06-11T11:28:43.8577215Z 
+2025-06-11T11:28:43.8577616Z     You'll find more details and examples of these config options in the docs:
+2025-06-11T11:28:43.8578310Z     https://jestjs.io/docs/configuration
+2025-06-11T11:28:43.8578887Z     For information about custom transformations, see:
+2025-06-11T11:28:43.8579677Z     https://jestjs.io/docs/code-transformation
+2025-06-11T11:28:43.8580010Z 
+2025-06-11T11:28:43.8580159Z     Details:
+2025-06-11T11:28:43.8580336Z 
+2025-06-11T11:28:43.8580839Z     /home/runner/work/synapse/synapse/src/services/__tests__/StripeService.test.ts:263
+2025-06-11T11:28:43.8581836Z           delete undefined;
+2025-06-11T11:28:43.8582194Z                  ^^^^^^^^^
+2025-06-11T11:28:43.8582405Z 
+2025-06-11T11:28:43.8582757Z     SyntaxError: Delete of an unqualified identifier in strict mode.
+2025-06-11T11:28:43.8583248Z 
+2025-06-11T11:28:43.8583715Z       at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1505:14)
+2025-06-11T11:28:43.8584252Z 
+2025-06-11T11:28:44.1539667Z PASS src/stores/__tests__/coreGameplay.test.ts
+2025-06-11T11:28:44.1558475Z   ● Console
+2025-06-11T11:28:44.1571273Z 
+2025-06-11T11:28:44.1571439Z     console.log
+2025-06-11T11:28:44.1571959Z       🧠 Synapse Neural Network Detected!
+2025-06-11T11:28:44.1572247Z 
+2025-06-11T11:28:44.1572442Z       at log (src/utils/logger.ts:14:13)
+2025-06-11T11:28:44.1573812Z 
+2025-06-11T11:28:44.1577622Z     console.log
+2025-06-11T11:28:44.1581597Z       🎯 Hey there, word wizard! 🎯
+2025-06-11T11:28:44.1585349Z       
+2025-06-11T11:28:44.1589193Z       🔍 Curious about how the magic works? We love that!
+2025-06-11T11:28:44.1593543Z       🎮 But tampering with the game state is like using a dictionary in Scrabble...
+2025-06-11T11:28:44.1597731Z       🚫 ...technically possible, but where's the fun in that?
+2025-06-11T11:28:44.1601657Z       
+2025-06-11T11:28:44.1606060Z       💡 Want to contribute? Check out our GitHub instead!
+2025-06-11T11:28:44.1607876Z       🌟 Play fair, stay clever, and enjoy the neural journey! 🌟
+2025-06-11T11:28:44.1610287Z 
+2025-06-11T11:28:44.1610517Z       at log (src/utils/logger.ts:19:13)
+2025-06-11T11:28:44.1610835Z 
+2025-06-11T11:28:44.1610964Z     console.log
+2025-06-11T11:28:44.1611506Z       P.S. Our algorithms are watching... 👁️👁️
+2025-06-11T11:28:44.1611837Z 
+2025-06-11T11:28:44.1612032Z       at log (src/utils/logger.ts:29:13)
+2025-06-11T11:28:44.1612327Z 
+2025-06-11T11:28:44.1612466Z     console.log
+2025-06-11T11:28:44.1613095Z       🔧 Added compression debug utilities to global.compressionDebug
+2025-06-11T11:28:44.1613492Z 
+2025-06-11T11:28:44.1613907Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:200:15)
+2025-06-11T11:28:44.1614375Z 
+2025-06-11T11:28:44.1614487Z     console.log
+2025-06-11T11:28:44.1614858Z          Usage: compressionDebug.test()
+2025-06-11T11:28:44.1615166Z 
+2025-06-11T11:28:44.1615556Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:203:15)
+2025-06-11T11:28:44.1616031Z 
+2025-06-11T11:28:44.4765390Z PASS src/stores/__tests__/challengeGameFlows.test.ts
+2025-06-11T11:28:44.5104577Z   ● Console
+2025-06-11T11:28:44.5105735Z 
+2025-06-11T11:28:44.5106002Z     console.log
+2025-06-11T11:28:44.5106793Z       🧠 Synapse Neural Network Detected!
+2025-06-11T11:28:44.5107303Z 
+2025-06-11T11:28:44.5107536Z       at log (src/utils/logger.ts:14:13)
+2025-06-11T11:28:44.5107835Z 
+2025-06-11T11:28:44.5108010Z     console.log
+2025-06-11T11:28:44.5108466Z       🎯 Hey there, word wizard! 🎯
+2025-06-11T11:28:44.5108856Z       
+2025-06-11T11:28:44.5109553Z       🔍 Curious about how the magic works? We love that!
+2025-06-11T11:28:44.5110541Z       🎮 But tampering with the game state is like using a dictionary in Scrabble...
+2025-06-11T11:28:44.5111457Z       🚫 ...technically possible, but where's the fun in that?
+2025-06-11T11:28:44.5111921Z       
+2025-06-11T11:28:44.5112441Z       💡 Want to contribute? Check out our GitHub instead!
+2025-06-11T11:28:44.5113664Z       🌟 Play fair, stay clever, and enjoy the neural journey! 🌟
+2025-06-11T11:28:44.5114084Z 
+2025-06-11T11:28:44.5114304Z       at log (src/utils/logger.ts:19:13)
+2025-06-11T11:28:44.5114623Z 
+2025-06-11T11:28:44.5114759Z     console.log
+2025-06-11T11:28:44.5115323Z       P.S. Our algorithms are watching... 👁️👁️
+2025-06-11T11:28:44.5115656Z 
+2025-06-11T11:28:44.5115856Z       at log (src/utils/logger.ts:29:13)
+2025-06-11T11:28:44.5116146Z 
+2025-06-11T11:28:44.5116293Z     console.log
+2025-06-11T11:28:44.5116927Z       🔧 Added compression debug utilities to global.compressionDebug
+2025-06-11T11:28:44.5117347Z 
+2025-06-11T11:28:44.5118274Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:200:15)
+2025-06-11T11:28:44.5118758Z 
+2025-06-11T11:28:44.5118879Z     console.log
+2025-06-11T11:28:44.5119513Z          Usage: compressionDebug.test()
+2025-06-11T11:28:44.5119910Z 
+2025-06-11T11:28:44.5120334Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:203:15)
+2025-06-11T11:28:44.5120821Z 
+2025-06-11T11:28:44.5120933Z     console.log
+2025-06-11T11:28:44.5121228Z       🎮 startDailyChallengeGame called
+2025-06-11T11:28:44.5121403Z 
+2025-06-11T11:28:44.5121541Z       at log (src/stores/useGameStore.ts:957:13)
+2025-06-11T11:28:44.5121725Z 
+2025-06-11T11:28:44.5121798Z     console.log
+2025-06-11T11:28:44.5122111Z       🎮 startDailyChallengeGame: Today's challenge: {
+2025-06-11T11:28:44.5122579Z         id: '2024-01-15',
+2025-06-11T11:28:44.5122793Z         date: '2024-01-15',
+2025-06-11T11:28:44.5123004Z         startWord: 'start',
+2025-06-11T11:28:44.5123210Z         targetWord: 'target',
+2025-06-11T11:28:44.5123454Z         optimalPathLength: 3,
+2025-06-11T11:28:44.5123681Z         aiSolution: {
+2025-06-11T11:28:44.5123929Z           path: [ 'start', 'middle', 'target' ],
+2025-06-11T11:28:44.5124187Z           stepsTaken: 2,
+2025-06-11T11:28:44.5124390Z           model: 'gpt-4'
+2025-06-11T11:28:44.5124580Z         }
+2025-06-11T11:28:44.5124745Z       }
+2025-06-11T11:28:44.5124839Z 
+2025-06-11T11:28:44.5124972Z       at log (src/stores/useGameStore.ts:970:13)
+2025-06-11T11:28:44.5125160Z 
+2025-06-11T11:28:44.5125233Z     console.log
+2025-06-11T11:28:44.5125632Z       🎮 startDailyChallengeGame: Has completed today's challenge: undefined
+2025-06-11T11:28:44.5125904Z 
+2025-06-11T11:28:44.5126031Z       at log (src/stores/useGameStore.ts:986:13)
+2025-06-11T11:28:44.5126215Z 
+2025-06-11T11:28:44.5126287Z     console.log
+2025-06-11T11:28:44.5126634Z       🎮 startDailyChallengeGame: Starting daily challenge game
+2025-06-11T11:28:44.5126863Z 
+2025-06-11T11:28:44.5126997Z       at log (src/stores/useGameStore.ts:1028:13)
+2025-06-11T11:28:44.5127201Z 
+2025-06-11T11:28:44.5127273Z     console.log
+2025-06-11T11:28:44.5127659Z       🎮 startDailyChallengeGame: Daily challenge game started successfully
+2025-06-11T11:28:44.5127927Z 
+2025-06-11T11:28:44.5128060Z       at log (src/stores/useGameStore.ts:1113:13)
+2025-06-11T11:28:44.5128247Z 
+2025-06-11T11:28:44.5128318Z     console.log
+2025-06-11T11:28:44.5128573Z       🎮 startDailyChallengeGame called
+2025-06-11T11:28:44.5128745Z 
+2025-06-11T11:28:44.5128871Z       at log (src/stores/useGameStore.ts:957:13)
+2025-06-11T11:28:44.5129067Z 
+2025-06-11T11:28:44.5129136Z     console.log
+2025-06-11T11:28:44.5129844Z       🎮 startDailyChallengeGame: Today's challenge: {
+2025-06-11T11:28:44.5130326Z         id: '2024-01-15',
+2025-06-11T11:28:44.5130672Z         date: '2024-01-15',
+2025-06-11T11:28:44.5131092Z         startWord: 'nonexistent',
+2025-06-11T11:28:44.5131488Z         targetWord: 'target',
+2025-06-11T11:28:44.5131880Z         optimalPathLength: 3,
+2025-06-11T11:28:44.5132263Z         aiSolution: {
+2025-06-11T11:28:44.5132685Z           path: [ 'start', 'middle', 'target' ],
+2025-06-11T11:28:44.5133134Z           stepsTaken: 2,
+2025-06-11T11:28:44.5133478Z           model: 'gpt-4'
+2025-06-11T11:28:44.5133808Z         }
+2025-06-11T11:28:44.5134071Z       }
+2025-06-11T11:28:44.5134234Z 
+2025-06-11T11:28:44.5134460Z       at log (src/stores/useGameStore.ts:970:13)
+2025-06-11T11:28:44.5134779Z 
+2025-06-11T11:28:44.5134910Z     console.log
+2025-06-11T11:28:44.5135650Z       🎮 startDailyChallengeGame: Has completed today's challenge: undefined
+2025-06-11T11:28:44.5136167Z 
+2025-06-11T11:28:44.5136388Z       at log (src/stores/useGameStore.ts:986:13)
+2025-06-11T11:28:44.5136705Z 
+2025-06-11T11:28:44.5136836Z     console.log
+2025-06-11T11:28:44.5137467Z       🎮 startDailyChallengeGame: Challenge words not found in graph
+2025-06-11T11:28:44.5137914Z 
+2025-06-11T11:28:44.5138142Z       at log (src/stores/useGameStore.ts:1003:15)
+2025-06-11T11:28:44.5138474Z 
+2025-06-11T11:28:44.5138780Z     console.log
+2025-06-11T11:28:44.5139441Z       🎮 startDailyChallengeGame called
+2025-06-11T11:28:44.5139767Z 
+2025-06-11T11:28:44.5139990Z       at log (src/stores/useGameStore.ts:957:13)
+2025-06-11T11:28:44.5140307Z 
+2025-06-11T11:28:44.5140434Z     console.log
+2025-06-11T11:28:44.5140953Z       🎮 startDailyChallengeGame: Today's challenge: {
+2025-06-11T11:28:44.5141430Z         id: '2024-01-15',
+2025-06-11T11:28:44.5141774Z         date: '2024-01-15',
+2025-06-11T11:28:44.5142122Z         startWord: 'start',
+2025-06-11T11:28:44.5142487Z         targetWord: 'target',
+2025-06-11T11:28:44.5142871Z         optimalPathLength: 3,
+2025-06-11T11:28:44.5143237Z         aiSolution: {
+2025-06-11T11:28:44.5143648Z           path: [ 'start', 'middle', 'target' ],
+2025-06-11T11:28:44.5144076Z           stepsTaken: 2,
+2025-06-11T11:28:44.5144586Z           model: 'gpt-4'
+2025-06-11T11:28:44.5144915Z         }
+2025-06-11T11:28:44.5145177Z       }
+2025-06-11T11:28:44.5145333Z 
+2025-06-11T11:28:44.5145566Z       at log (src/stores/useGameStore.ts:970:13)
+2025-06-11T11:28:44.5145882Z 
+2025-06-11T11:28:44.5146010Z     console.log
+2025-06-11T11:28:44.5146700Z       🎮 startDailyChallengeGame: Has completed today's challenge: undefined
+2025-06-11T11:28:44.5147190Z 
+2025-06-11T11:28:44.5147410Z       at log (src/stores/useGameStore.ts:986:13)
+2025-06-11T11:28:44.5147726Z 
+2025-06-11T11:28:44.5147853Z     console.log
+2025-06-11T11:28:44.5148431Z       🎮 startDailyChallengeGame: Starting daily challenge game
+2025-06-11T11:28:44.5148840Z 
+2025-06-11T11:28:44.5149066Z       at log (src/stores/useGameStore.ts:1028:13)
+2025-06-11T11:28:44.5149543Z 
+2025-06-11T11:28:44.5149671Z     console.log
+2025-06-11T11:28:44.5150329Z       🎮 startDailyChallengeGame: Daily challenge game started successfully
+2025-06-11T11:28:44.5150794Z 
+2025-06-11T11:28:44.5151033Z       at log (src/stores/useGameStore.ts:1113:13)
+2025-06-11T11:28:44.5151368Z 
+2025-06-11T11:28:44.5151497Z     console.log
+2025-06-11T11:28:44.5151950Z       🎮 startDailyChallengeGame called
+2025-06-11T11:28:44.5152265Z 
+2025-06-11T11:28:44.5152481Z       at log (src/stores/useGameStore.ts:957:13)
+2025-06-11T11:28:44.5152769Z 
+2025-06-11T11:28:44.5152886Z     console.log
+2025-06-11T11:28:44.5153366Z       🎮 startDailyChallengeGame: Today's challenge: {
+2025-06-11T11:28:44.5153841Z         id: '2024-01-15',
+2025-06-11T11:28:44.5154181Z         date: '2024-01-15',
+2025-06-11T11:28:44.5154503Z         startWord: 'start',
+2025-06-11T11:28:44.5154840Z         targetWord: 'target',
+2025-06-11T11:28:44.5155207Z         optimalPathLength: 3,
+2025-06-11T11:28:44.5155587Z         aiSolution: {
+2025-06-11T11:28:44.5156013Z           path: [ 'start', 'middle', 'target' ],
+2025-06-11T11:28:44.5156456Z           stepsTaken: 2,
+2025-06-11T11:28:44.5156806Z           model: 'gpt-4'
+2025-06-11T11:28:44.5157128Z         }
+2025-06-11T11:28:44.5157381Z       }
+2025-06-11T11:28:44.5157522Z 
+2025-06-11T11:28:44.5157735Z       at log (src/stores/useGameStore.ts:970:13)
+2025-06-11T11:28:44.5158036Z 
+2025-06-11T11:28:44.5158148Z     console.log
+2025-06-11T11:28:44.5158817Z       🎮 startDailyChallengeGame: Has completed today's challenge: undefined
+2025-06-11T11:28:44.5159452Z 
+2025-06-11T11:28:44.5159674Z       at log (src/stores/useGameStore.ts:986:13)
+2025-06-11T11:28:44.5159963Z 
+2025-06-11T11:28:44.5160075Z     console.log
+2025-06-11T11:28:44.5160628Z       🎮 startDailyChallengeGame: Starting daily challenge game
+2025-06-11T11:28:44.5160999Z 
+2025-06-11T11:28:44.5161214Z       at log (src/stores/useGameStore.ts:1028:13)
+2025-06-11T11:28:44.5161509Z 
+2025-06-11T11:28:44.5161622Z     console.log
+2025-06-11T11:28:44.5162254Z       🎮 startDailyChallengeGame: Daily challenge game started successfully
+2025-06-11T11:28:44.5162687Z 
+2025-06-11T11:28:44.5162901Z       at log (src/stores/useGameStore.ts:1113:13)
+2025-06-11T11:28:44.5163210Z 
+2025-06-11T11:28:44.5163322Z     console.log
+2025-06-11T11:28:44.5163745Z       🎮 startDailyChallengeGame called
+2025-06-11T11:28:44.5164017Z 
+2025-06-11T11:28:44.5164459Z       at log (src/stores/useGameStore.ts:957:13)
+2025-06-11T11:28:44.5164760Z 
+2025-06-11T11:28:44.5164872Z     console.log
+2025-06-11T11:28:44.5165362Z       🎮 startDailyChallengeGame: Today's challenge: {
+2025-06-11T11:28:44.5165804Z         id: '2024-01-15',
+2025-06-11T11:28:44.5166132Z         date: '2024-01-15',
+2025-06-11T11:28:44.5166466Z         startWord: 'start',
+2025-06-11T11:28:44.5166810Z         targetWord: 'target',
+2025-06-11T11:28:44.5167193Z         optimalPathLength: 3,
+2025-06-11T11:28:44.5167566Z         aiSolution: {
+2025-06-11T11:28:44.5167962Z           path: [ 'start', 'middle', 'target' ],
+2025-06-11T11:28:44.5168393Z           stepsTaken: 2,
+2025-06-11T11:28:44.5168728Z           model: 'gpt-4'
+2025-06-11T11:28:44.5169047Z         }
+2025-06-11T11:28:44.5169523Z       }
+2025-06-11T11:28:44.5169906Z 
+2025-06-11T11:28:44.5170142Z       at log (src/stores/useGameStore.ts:970:13)
+2025-06-11T11:28:44.5170471Z 
+2025-06-11T11:28:44.5170592Z     console.log
+2025-06-11T11:28:44.5171324Z       🎮 startDailyChallengeGame: Has completed today's challenge: undefined
+2025-06-11T11:28:44.5171817Z 
+2025-06-11T11:28:44.5172038Z       at log (src/stores/useGameStore.ts:986:13)
+2025-06-11T11:28:44.5172362Z 
+2025-06-11T11:28:44.5172483Z     console.log
+2025-06-11T11:28:44.5173069Z       🎮 startDailyChallengeGame: Starting daily challenge game
+2025-06-11T11:28:44.5173472Z 
+2025-06-11T11:28:44.5173698Z       at log (src/stores/useGameStore.ts:1028:13)
+2025-06-11T11:28:44.5174028Z 
+2025-06-11T11:28:44.5174147Z     console.log
+2025-06-11T11:28:44.5174826Z       🎮 startDailyChallengeGame: Daily challenge game started successfully
+2025-06-11T11:28:44.5175308Z 
+2025-06-11T11:28:44.5175538Z       at log (src/stores/useGameStore.ts:1113:13)
+2025-06-11T11:28:44.5175859Z 
+2025-06-11T11:28:44.5175981Z     console.log
+2025-06-11T11:28:44.5176440Z       🎮 startDailyChallengeGame called
+2025-06-11T11:28:44.5176743Z 
+2025-06-11T11:28:44.5176963Z       at log (src/stores/useGameStore.ts:957:13)
+2025-06-11T11:28:44.5177297Z 
+2025-06-11T11:28:44.5177419Z     console.log
+2025-06-11T11:28:44.5177936Z       🎮 startDailyChallengeGame: Today's challenge: {
+2025-06-11T11:28:44.5178410Z         id: '2024-01-15',
+2025-06-11T11:28:44.5178753Z         date: '2024-01-15',
+2025-06-11T11:28:44.5179118Z         startWord: 'start',
+2025-06-11T11:28:44.5179626Z         targetWord: 'target',
+2025-06-11T11:28:44.5180013Z         optimalPathLength: 3,
+2025-06-11T11:28:44.5180390Z         aiSolution: {
+2025-06-11T11:28:44.5180795Z           path: [ 'start', 'middle', 'target' ],
+2025-06-11T11:28:44.5181234Z           stepsTaken: 2,
+2025-06-11T11:28:44.5181573Z           model: 'gpt-4'
+2025-06-11T11:28:44.5181898Z         }
+2025-06-11T11:28:44.5182166Z       }
+2025-06-11T11:28:44.5182317Z 
+2025-06-11T11:28:44.5182551Z       at log (src/stores/useGameStore.ts:970:13)
+2025-06-11T11:28:44.5182876Z 
+2025-06-11T11:28:44.5182997Z     console.log
+2025-06-11T11:28:44.5183692Z       🎮 startDailyChallengeGame: Has completed today's challenge: undefined
+2025-06-11T11:28:44.5184189Z 
+2025-06-11T11:28:44.5184416Z       at log (src/stores/useGameStore.ts:986:13)
+2025-06-11T11:28:44.5184748Z 
+2025-06-11T11:28:44.5184915Z     console.log
+2025-06-11T11:28:44.5185506Z       🎮 startDailyChallengeGame: Starting daily challenge game
+2025-06-11T11:28:44.5185914Z 
+2025-06-11T11:28:44.5186141Z       at log (src/stores/useGameStore.ts:1028:13)
+2025-06-11T11:28:44.5186472Z 
+2025-06-11T11:28:44.5186592Z     console.log
+2025-06-11T11:28:44.5187272Z       🎮 startDailyChallengeGame: Daily challenge game started successfully
+2025-06-11T11:28:44.5187755Z 
+2025-06-11T11:28:44.5187979Z       at log (src/stores/useGameStore.ts:1113:13)
+2025-06-11T11:28:44.5188306Z 
+2025-06-11T11:28:44.5188426Z     console.log
+2025-06-11T11:28:44.5188873Z       🎮 startDailyChallengeGame called
+2025-06-11T11:28:44.5189188Z 
+2025-06-11T11:28:44.5189533Z       at log (src/stores/useGameStore.ts:957:13)
+2025-06-11T11:28:44.5189849Z 
+2025-06-11T11:28:44.5189966Z     console.log
+2025-06-11T11:28:44.5190668Z       🎮 startDailyChallengeGame: Today's challenge: {
+2025-06-11T11:28:44.5191122Z         id: '2024-01-15',
+2025-06-11T11:28:44.5191450Z         date: '2024-01-15',
+2025-06-11T11:28:44.5191784Z         startWord: 'start',
+2025-06-11T11:28:44.5192134Z         targetWord: 'target',
+2025-06-11T11:28:44.5192509Z         optimalPathLength: 3,
+2025-06-11T11:28:44.5192863Z         aiSolution: {
+2025-06-11T11:28:44.5193259Z           path: [ 'start', 'middle', 'target' ],
+2025-06-11T11:28:44.5193680Z           stepsTaken: 2,
+2025-06-11T11:28:44.5194012Z           model: 'gpt-4'
+2025-06-11T11:28:44.5194328Z         }
+2025-06-11T11:28:44.5194585Z       }
+2025-06-11T11:28:44.5194740Z 
+2025-06-11T11:28:44.5194961Z       at log (src/stores/useGameStore.ts:970:13)
+2025-06-11T11:28:44.5195273Z 
+2025-06-11T11:28:44.5195596Z     console.log
+2025-06-11T11:28:44.5196331Z       🎮 startDailyChallengeGame: Has completed today's challenge: undefined
+2025-06-11T11:28:44.5196845Z 
+2025-06-11T11:28:44.5197071Z       at log (src/stores/useGameStore.ts:986:13)
+2025-06-11T11:28:44.5197406Z 
+2025-06-11T11:28:44.5197537Z     console.log
+2025-06-11T11:28:44.5198126Z       🎮 startDailyChallengeGame: Starting daily challenge game
+2025-06-11T11:28:44.5198543Z 
+2025-06-11T11:28:44.5198769Z       at log (src/stores/useGameStore.ts:1028:13)
+2025-06-11T11:28:44.5199097Z 
+2025-06-11T11:28:44.5199384Z     console.log
+2025-06-11T11:28:44.5200081Z       🎮 startDailyChallengeGame: Daily challenge game started successfully
+2025-06-11T11:28:44.5200574Z 
+2025-06-11T11:28:44.5200803Z       at log (src/stores/useGameStore.ts:1113:13)
+2025-06-11T11:28:44.5201121Z 
+2025-06-11T11:28:44.5201250Z     console.log
+2025-06-11T11:28:44.5201690Z       🎮 startDailyChallengeGame called
+2025-06-11T11:28:44.5202000Z 
+2025-06-11T11:28:44.5202238Z       at log (src/stores/useGameStore.ts:957:13)
+2025-06-11T11:28:44.5202566Z 
+2025-06-11T11:28:44.5202695Z     console.log
+2025-06-11T11:28:44.5203221Z       🎮 startDailyChallengeGame: Today's challenge: {
+2025-06-11T11:28:44.5203717Z         id: '2024-01-15',
+2025-06-11T11:28:44.5204076Z         date: '2024-01-15',
+2025-06-11T11:28:44.5204426Z         startWord: 'start',
+2025-06-11T11:28:44.5204793Z         targetWord: 'target',
+2025-06-11T11:28:44.5205171Z         optimalPathLength: 3,
+2025-06-11T11:28:44.5205542Z         aiSolution: {
+2025-06-11T11:28:44.5205951Z           path: [ 'start', 'middle', 'target' ],
+2025-06-11T11:28:44.5206387Z           stepsTaken: 2,
+2025-06-11T11:28:44.5206740Z           model: 'gpt-4'
+2025-06-11T11:28:44.5207063Z         }
+2025-06-11T11:28:44.5207307Z       }
+2025-06-11T11:28:44.5207451Z 
+2025-06-11T11:28:44.5207668Z       at log (src/stores/useGameStore.ts:970:13)
+2025-06-11T11:28:44.5207960Z 
+2025-06-11T11:28:44.5208077Z     console.log
+2025-06-11T11:28:44.5208736Z       🎮 startDailyChallengeGame: Has completed today's challenge: undefined
+2025-06-11T11:28:44.5209191Z 
+2025-06-11T11:28:44.5209569Z       at log (src/stores/useGameStore.ts:986:13)
+2025-06-11T11:28:44.5209902Z 
+2025-06-11T11:28:44.5210032Z     console.log
+2025-06-11T11:28:44.5210627Z       🎮 startDailyChallengeGame: Starting daily challenge game
+2025-06-11T11:28:44.5211040Z 
+2025-06-11T11:28:44.5211267Z       at log (src/stores/useGameStore.ts:1028:13)
+2025-06-11T11:28:44.5211590Z 
+2025-06-11T11:28:44.5211715Z     console.log
+2025-06-11T11:28:44.5212392Z       🎮 startDailyChallengeGame: Daily challenge game started successfully
+2025-06-11T11:28:44.5212879Z 
+2025-06-11T11:28:44.5213104Z       at log (src/stores/useGameStore.ts:1113:13)
+2025-06-11T11:28:44.5213424Z 
+2025-06-11T11:28:44.5213551Z     console.log
+2025-06-11T11:28:44.5213991Z       🎮 startDailyChallengeGame called
+2025-06-11T11:28:44.5214298Z 
+2025-06-11T11:28:44.5214519Z       at log (src/stores/useGameStore.ts:957:13)
+2025-06-11T11:28:44.5214835Z 
+2025-06-11T11:28:44.5214972Z     console.log
+2025-06-11T11:28:44.5215483Z       🎮 startDailyChallengeGame: Today's challenge: {
+2025-06-11T11:28:44.5215961Z         id: '2024-01-15',
+2025-06-11T11:28:44.5216487Z         date: '2024-01-15',
+2025-06-11T11:28:44.5216846Z         startWord: 'start',
+2025-06-11T11:28:44.5217210Z         targetWord: 'target',
+2025-06-11T11:28:44.5217592Z         optimalPathLength: 3,
+2025-06-11T11:28:44.5217969Z         aiSolution: {
+2025-06-11T11:28:44.5218372Z           path: [ 'start', 'middle', 'target' ],
+2025-06-11T11:28:44.5218810Z           stepsTaken: 2,
+2025-06-11T11:28:44.5219157Z           model: 'gpt-4'
+2025-06-11T11:28:44.5219616Z         }
+2025-06-11T11:28:44.5219884Z       }
+2025-06-11T11:28:44.5220035Z 
+2025-06-11T11:28:44.5220264Z       at log (src/stores/useGameStore.ts:970:13)
+2025-06-11T11:28:44.5220583Z 
+2025-06-11T11:28:44.5220706Z     console.log
+2025-06-11T11:28:44.5221402Z       🎮 startDailyChallengeGame: Has completed today's challenge: undefined
+2025-06-11T11:28:44.5221887Z 
+2025-06-11T11:28:44.5222263Z       at log (src/stores/useGameStore.ts:986:13)
+2025-06-11T11:28:44.5222583Z 
+2025-06-11T11:28:44.5222705Z     console.log
+2025-06-11T11:28:44.5223299Z       🎮 startDailyChallengeGame: Starting daily challenge game
+2025-06-11T11:28:44.5223704Z 
+2025-06-11T11:28:44.5223936Z       at log (src/stores/useGameStore.ts:1028:13)
+2025-06-11T11:28:44.5224256Z 
+2025-06-11T11:28:44.5224378Z     console.log
+2025-06-11T11:28:44.5225055Z       🎮 startDailyChallengeGame: Daily challenge game started successfully
+2025-06-11T11:28:44.5225533Z 
+2025-06-11T11:28:44.5225762Z       at log (src/stores/useGameStore.ts:1113:13)
+2025-06-11T11:28:44.5226081Z 
+2025-06-11T11:28:44.5226208Z     console.error
+2025-06-11T11:28:44.5226754Z       Failed to save daily challenge progress: Error: Storage save failed
+2025-06-11T11:28:44.5227940Z           at Object.<anonymous> (/home/runner/work/synapse/synapse/src/stores/__tests__/challengeGameFlows.test.ts:442:9)
+2025-06-11T11:28:44.5228883Z           at Generator.next (<anonymous>)
+2025-06-11T11:28:44.5230049Z           at asyncGeneratorStep (/home/runner/work/synapse/synapse/node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+2025-06-11T11:28:44.5231415Z           at _next (/home/runner/work/synapse/synapse/node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+2025-06-11T11:28:44.5232645Z           at /home/runner/work/synapse/synapse/node_modules/@babel/runtime/helpers/asyncToGenerator.js:22:7
+2025-06-11T11:28:44.5233487Z           at new Promise (<anonymous>)
+2025-06-11T11:28:44.5234525Z           at Object.<anonymous> (/home/runner/work/synapse/synapse/node_modules/@babel/runtime/helpers/asyncToGenerator.js:14:12)
+2025-06-11T11:28:44.5235971Z           at Promise.then.completed (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/utils.js:298:28)
+2025-06-11T11:28:44.5236873Z           at new Promise (<anonymous>)
+2025-06-11T11:28:44.5237789Z           at callAsyncCircusFn (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/utils.js:231:10)
+2025-06-11T11:28:44.5239130Z           at _callCircusTest (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/run.js:316:40)
+2025-06-11T11:28:44.5240496Z           at _runTest (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/run.js:252:3)
+2025-06-11T11:28:44.5241763Z           at _runTestsForDescribeBlock (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/run.js:126:9)
+2025-06-11T11:28:44.5243049Z           at _runTestsForDescribeBlock (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/run.js:121:9)
+2025-06-11T11:28:44.5244394Z           at _runTestsForDescribeBlock (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/run.js:121:9)
+2025-06-11T11:28:44.5245648Z           at run (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/run.js:71:3)
+2025-06-11T11:28:44.5247239Z           at runAndTransformResultsToJestFormat (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+2025-06-11T11:28:44.5248989Z           at jestAdapter (/home/runner/work/synapse/synapse/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+2025-06-11T11:28:44.5250908Z           at runTestInternal (/home/runner/work/synapse/synapse/node_modules/jest-runner/build/runTest.js:367:16)
+2025-06-11T11:28:44.5252200Z           at runTest (/home/runner/work/synapse/synapse/node_modules/jest-runner/build/runTest.js:444:34)
+2025-06-11T11:28:44.5252851Z 
+2025-06-11T11:28:44.5253610Z     [0m [90m 1260 |[39m             [36mset[39m({ hasPlayedTodaysChallenge[33m:[39m [36mtrue[39m })[33m;[39m
+2025-06-11T11:28:44.5254549Z      [90m 1261 |[39m           } [36mcatch[39m (error) {
+2025-06-11T11:28:44.5255849Z     [31m[1m>[22m[39m[90m 1262 |[39m             console[33m.[39merror([32m"Failed to save daily challenge progress:"[39m[33m,[39m error)[33m;[39m
+2025-06-11T11:28:44.5257165Z      [90m      |[39m                     [31m[1m^[22m[39m
+2025-06-11T11:28:44.5258078Z      [90m 1263 |[39m             [90m// Continue with game completion even if save fails[39m
+2025-06-11T11:28:44.5259415Z      [90m 1264 |[39m             [90m// The user has still won the game, we just couldn't save the progress[39m
+2025-06-11T11:28:44.5260228Z      [90m 1265 |[39m           }[0m
+2025-06-11T11:28:44.5260504Z 
+2025-06-11T11:28:44.5260750Z       at error (src/stores/useGameStore.ts:1262:21)
+2025-06-11T11:28:44.5261295Z           at Generator.throw (<anonymous>)
+2025-06-11T11:28:44.5262101Z       at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+2025-06-11T11:28:44.5263053Z       at _throw (node_modules/@babel/runtime/helpers/asyncToGenerator.js:20:9)
+2025-06-11T11:28:44.5263533Z 
+2025-06-11T11:28:44.6893907Z PASS src/features/wordCollections/__tests__/seasonalLogic.test.ts
+2025-06-11T11:28:44.6953270Z   ● Console
+2025-06-11T11:28:44.6954418Z 
+2025-06-11T11:28:44.6954569Z     console.error
+2025-06-11T11:28:44.6955071Z       Invalid month or day for testing collections.
+2025-06-11T11:28:44.6955431Z 
+2025-06-11T11:28:44.6955824Z     [0m [90m 206 |[39m   [90m// Validate month and day[39m
+2025-06-11T11:28:44.6957262Z      [90m 207 |[39m   [36mif[39m (month [33m<[39m [35m1[39m [33m||[39m month [33m>[39m [35m12[39m [33m||[39m day [33m<[39m [35m1[39m [33m||[39m day [33m>[39m [35m31[39m) {
+2025-06-11T11:28:44.6958733Z     [31m[1m>[22m[39m[90m 208 |[39m     console[33m.[39merror([32m"Invalid month or day for testing collections."[39m)[33m;[39m
+2025-06-11T11:28:44.6959964Z      [90m     |[39m             [31m[1m^[22m[39m
+2025-06-11T11:28:44.6960634Z      [90m 209 |[39m     [36mreturn[39m [][33m;[39m
+2025-06-11T11:28:44.6961173Z      [90m 210 |[39m   }
+2025-06-11T11:28:44.6962719Z      [90m 211 |[39m   [36mconst[39m testDate [33m=[39m [36mnew[39m [33mDate[39m([36mnew[39m [33mDate[39m()[33m.[39mgetFullYear()[33m,[39m month [33m-[39m [35m1[39m[33m,[39m day)[33m;[39m[0m
+2025-06-11T11:28:44.6963632Z 
+2025-06-11T11:28:44.6963964Z       at error (src/features/wordCollections/logic.ts:208:13)
+2025-06-11T11:28:44.6964854Z       at Object.<anonymous> (src/features/wordCollections/__tests__/seasonalLogic.test.ts:319:36)
+2025-06-11T11:28:44.6965487Z 
+2025-06-11T11:28:44.6965634Z     console.error
+2025-06-11T11:28:44.6966085Z       Invalid month or day for testing collections.
+2025-06-11T11:28:44.6966409Z 
+2025-06-11T11:28:44.6966827Z     [0m [90m 206 |[39m   [90m// Validate month and day[39m
+2025-06-11T11:28:44.6968182Z      [90m 207 |[39m   [36mif[39m (month [33m<[39m [35m1[39m [33m||[39m month [33m>[39m [35m12[39m [33m||[39m day [33m<[39m [35m1[39m [33m||[39m day [33m>[39m [35m31[39m) {
+2025-06-11T11:28:44.6969956Z     [31m[1m>[22m[39m[90m 208 |[39m     console[33m.[39merror([32m"Invalid month or day for testing collections."[39m)[33m;[39m
+2025-06-11T11:28:44.6970933Z      [90m     |[39m             [31m[1m^[22m[39m
+2025-06-11T11:28:44.6971559Z      [90m 209 |[39m     [36mreturn[39m [][33m;[39m
+2025-06-11T11:28:44.6972053Z      [90m 210 |[39m   }
+2025-06-11T11:28:44.6973506Z      [90m 211 |[39m   [36mconst[39m testDate [33m=[39m [36mnew[39m [33mDate[39m([36mnew[39m [33mDate[39m()[33m.[39mgetFullYear()[33m,[39m month [33m-[39m [35m1[39m[33m,[39m day)[33m;[39m[0m
+2025-06-11T11:28:44.6974789Z 
+2025-06-11T11:28:44.6975099Z       at error (src/features/wordCollections/logic.ts:208:13)
+2025-06-11T11:28:44.6975997Z       at Object.<anonymous> (src/features/wordCollections/__tests__/seasonalLogic.test.ts:320:36)
+2025-06-11T11:28:44.6976610Z 
+2025-06-11T11:28:44.6976772Z     console.error
+2025-06-11T11:28:44.6977219Z       Invalid month or day for testing collections.
+2025-06-11T11:28:44.6977576Z 
+2025-06-11T11:28:44.6977990Z     [0m [90m 206 |[39m   [90m// Validate month and day[39m
+2025-06-11T11:28:44.6979822Z      [90m 207 |[39m   [36mif[39m (month [33m<[39m [35m1[39m [33m||[39m month [33m>[39m [35m12[39m [33m||[39m day [33m<[39m [35m1[39m [33m||[39m day [33m>[39m [35m31[39m) {
+2025-06-11T11:28:44.6981438Z     [31m[1m>[22m[39m[90m 208 |[39m     console[33m.[39merror([32m"Invalid month or day for testing collections."[39m)[33m;[39m
+2025-06-11T11:28:44.6982401Z      [90m     |[39m             [31m[1m^[22m[39m
+2025-06-11T11:28:44.6983044Z      [90m 209 |[39m     [36mreturn[39m [][33m;[39m
+2025-06-11T11:28:44.6983548Z      [90m 210 |[39m   }
+2025-06-11T11:28:44.6985004Z      [90m 211 |[39m   [36mconst[39m testDate [33m=[39m [36mnew[39m [33mDate[39m([36mnew[39m [33mDate[39m()[33m.[39mgetFullYear()[33m,[39m month [33m-[39m [35m1[39m[33m,[39m day)[33m;[39m[0m
+2025-06-11T11:28:44.6985997Z 
+2025-06-11T11:28:44.6986305Z       at error (src/features/wordCollections/logic.ts:208:13)
+2025-06-11T11:28:44.6987212Z       at Object.<anonymous> (src/features/wordCollections/__tests__/seasonalLogic.test.ts:321:36)
+2025-06-11T11:28:44.6987810Z 
+2025-06-11T11:28:44.8616474Z PASS src/features/wordCollections/__tests__/logic.test.ts
+2025-06-11T11:28:44.8639587Z   ● Console
+2025-06-11T11:28:44.8640921Z 
+2025-06-11T11:28:44.8642116Z     console.log
+2025-06-11T11:28:44.8643732Z       Skipping Halloween test as it's not in current definitions.
+2025-06-11T11:28:44.8669832Z 
+2025-06-11T11:28:44.8670501Z       at Object.log (src/features/wordCollections/__tests__/logic.test.ts:235:15)
+2025-06-11T11:28:44.8671161Z 
+2025-06-11T11:28:44.8671403Z     console.log
+2025-06-11T11:28:44.8672220Z       Skipping Halloween test as it's not in current definitions or misconfigured for this test.
+2025-06-11T11:28:44.8672878Z 
+2025-06-11T11:28:44.8673411Z       at Object.log (src/features/wordCollections/__tests__/logic.test.ts:253:15)
+2025-06-11T11:28:44.8673999Z 
+2025-06-11T11:28:44.8674232Z     console.log
+2025-06-11T11:28:44.8674857Z       Skipping Valentines test as it's not in current definitions.
+2025-06-11T11:28:44.8675383Z 
+2025-06-11T11:28:44.8675923Z       at Object.log (src/features/wordCollections/__tests__/logic.test.ts:278:15)
+2025-06-11T11:28:44.8676530Z 
+2025-06-11T11:28:44.8676749Z     console.error
+2025-06-11T11:28:44.8677293Z       Invalid month or day for testing collections.
+2025-06-11T11:28:44.8677737Z 
+2025-06-11T11:28:44.8678320Z     [0m [90m 206 |[39m   [90m// Validate month and day[39m
+2025-06-11T11:28:44.8679993Z      [90m 207 |[39m   [36mif[39m (month [33m<[39m [35m1[39m [33m||[39m month [33m>[39m [35m12[39m [33m||[39m day [33m<[39m [35m1[39m [33m||[39m day [33m>[39m [35m31[39m) {
+2025-06-11T11:28:44.8681671Z     [31m[1m>[22m[39m[90m 208 |[39m     console[33m.[39merror([32m"Invalid month or day for testing collections."[39m)[33m;[39m
+2025-06-11T11:28:44.8683682Z      [90m     |[39m             [31m[1m^[22m[39m
+2025-06-11T11:28:44.8684366Z      [90m 209 |[39m     [36mreturn[39m [][33m;[39m
+2025-06-11T11:28:44.8684890Z      [90m 210 |[39m   }
+2025-06-11T11:28:44.8686449Z      [90m 211 |[39m   [36mconst[39m testDate [33m=[39m [36mnew[39m [33mDate[39m([36mnew[39m [33mDate[39m()[33m.[39mgetFullYear()[33m,[39m month [33m-[39m [35m1[39m[33m,[39m day)[33m;[39m[0m
+2025-06-11T11:28:44.8687803Z 
+2025-06-11T11:28:44.8688147Z       at error (src/features/wordCollections/logic.ts:208:13)
+2025-06-11T11:28:44.8689028Z       at Object.<anonymous> (src/features/wordCollections/__tests__/logic.test.ts:313:44)
+2025-06-11T11:28:44.8689737Z 
+2025-06-11T11:28:45.1447539Z PASS src/services/__tests__/PaymentHandler.test.ts
+2025-06-11T11:28:45.1466932Z   ● Console
+2025-06-11T11:28:45.1469589Z 
+2025-06-11T11:28:45.1469752Z     console.log
+2025-06-11T11:28:45.1470287Z       🧠 Synapse Neural Network Detected!
+2025-06-11T11:28:45.1470612Z 
+2025-06-11T11:28:45.1470809Z       at log (src/utils/logger.ts:14:13)
+2025-06-11T11:28:45.1471083Z 
+2025-06-11T11:28:45.1471198Z     console.log
+2025-06-11T11:28:45.1471636Z       🎯 Hey there, word wizard! 🎯
+2025-06-11T11:28:45.1472014Z       
+2025-06-11T11:28:45.1472902Z       🔍 Curious about how the magic works? We love that!
+2025-06-11T11:28:45.1473864Z       🎮 But tampering with the game state is like using a dictionary in Scrabble...
+2025-06-11T11:28:45.1474846Z       🚫 ...technically possible, but where's the fun in that?
+2025-06-11T11:28:45.1475334Z       
+2025-06-11T11:28:45.1475856Z       💡 Want to contribute? Check out our GitHub instead!
+2025-06-11T11:28:45.1476617Z       🌟 Play fair, stay clever, and enjoy the neural journey! 🌟
+2025-06-11T11:28:45.1476992Z 
+2025-06-11T11:28:45.1477218Z       at log (src/utils/logger.ts:19:13)
+2025-06-11T11:28:45.1477515Z 
+2025-06-11T11:28:45.1477656Z     console.log
+2025-06-11T11:28:45.1478186Z       P.S. Our algorithms are watching... 👁️👁️
+2025-06-11T11:28:45.1478522Z 
+2025-06-11T11:28:45.1478740Z       at log (src/utils/logger.ts:29:13)
+2025-06-11T11:28:45.1479037Z 
+2025-06-11T11:28:45.3100801Z PASS src/services/__tests__/dataLoader.test.ts
+2025-06-11T11:28:45.4420601Z PASS src/utils/__tests__/graphUtils.test.ts
+2025-06-11T11:28:54.3046757Z PASS src/screens/__tests__/AuthScreen.test.tsx (8.848 s)
+2025-06-11T11:28:54.4421094Z PASS src/features/achievements/__tests__/achievementEvaluation.test.ts
+2025-06-11T11:28:54.6357125Z PASS src/stores/useGameStore.test.ts
+2025-06-11T11:28:54.6533924Z   ● Console
+2025-06-11T11:28:54.6536283Z 
+2025-06-11T11:28:54.6538201Z     console.log
+2025-06-11T11:28:54.6540457Z       🔧 Added compression debug utilities to global.compressionDebug
+2025-06-11T11:28:54.6560004Z 
+2025-06-11T11:28:54.6560827Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:200:15)
+2025-06-11T11:28:54.6565189Z 
+2025-06-11T11:28:54.6565528Z     console.log
+2025-06-11T11:28:54.6567516Z          Usage: compressionDebug.test()
+2025-06-11T11:28:54.6568081Z 
+2025-06-11T11:28:54.6570289Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:203:15)
+2025-06-11T11:28:54.6572350Z 
+2025-06-11T11:28:54.6572496Z     console.log
+2025-06-11T11:28:54.6572957Z       hideUpgradePrompt called
+2025-06-11T11:28:54.6573226Z 
+2025-06-11T11:28:54.6573630Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1575:13)
+2025-06-11T11:28:54.6574106Z 
+2025-06-11T11:28:54.6574651Z     console.log
+2025-06-11T11:28:54.6575306Z       🔍 hideUpgradePrompt debug: {
+2025-06-11T11:28:54.6576020Z         currentContext: undefined,
+2025-06-11T11:28:54.6576689Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6577189Z         hasActiveGame: null,
+2025-06-11T11:28:54.6577739Z         startWord: null,
+2025-06-11T11:28:54.6578140Z         targetWord: null,
+2025-06-11T11:28:54.6578779Z         playerPath: 0
+2025-06-11T11:28:54.6581372Z       }
+2025-06-11T11:28:54.6581629Z 
+2025-06-11T11:28:54.6582062Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1580:13)
+2025-06-11T11:28:54.6582786Z 
+2025-06-11T11:28:54.6582965Z     console.log
+2025-06-11T11:28:54.6584093Z       🔍 shouldClearGameState: false because: { isFreeGamesLimited: false, notPlaying: true, notWon: true }
+2025-06-11T11:28:54.6584807Z 
+2025-06-11T11:28:54.6585224Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1597:13)
+2025-06-11T11:28:54.6682161Z 
+2025-06-11T11:28:54.6682369Z     console.log
+2025-06-11T11:28:54.6682998Z       🔍 showUpgradePrompt called with: {
+2025-06-11T11:28:54.6683452Z         message: 'Test message',
+2025-06-11T11:28:54.6683863Z         context: undefined,
+2025-06-11T11:28:54.6684263Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6684655Z         hasActiveGame: false,
+2025-06-11T11:28:54.6685017Z         remainingFreeGames: 0
+2025-06-11T11:28:54.6685366Z       }
+2025-06-11T11:28:54.6685559Z 
+2025-06-11T11:28:54.6685924Z       at Object.log [as showUpgradePrompt] (src/stores/useGameStore.ts:1557:13)
+2025-06-11T11:28:54.6686391Z 
+2025-06-11T11:28:54.6686521Z     console.log
+2025-06-11T11:28:54.6686984Z       showUpgradePrompt state updated - visible should be true
+2025-06-11T11:28:54.6687419Z 
+2025-06-11T11:28:54.6688202Z       at Object.log [as showUpgradePrompt] (src/stores/useGameStore.ts:1572:13)
+2025-06-11T11:28:54.6688652Z 
+2025-06-11T11:28:54.6688766Z     console.log
+2025-06-11T11:28:54.6689142Z       hideUpgradePrompt called
+2025-06-11T11:28:54.6749659Z 
+2025-06-11T11:28:54.6750117Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1575:13)
+2025-06-11T11:28:54.6750662Z 
+2025-06-11T11:28:54.6750795Z     console.log
+2025-06-11T11:28:54.6751336Z       🔍 hideUpgradePrompt debug: {
+2025-06-11T11:28:54.6751817Z         currentContext: undefined,
+2025-06-11T11:28:54.6752317Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6752734Z         hasActiveGame: null,
+2025-06-11T11:28:54.6753115Z         startWord: null,
+2025-06-11T11:28:54.6753477Z         targetWord: null,
+2025-06-11T11:28:54.6753874Z         playerPath: 0
+2025-06-11T11:28:54.6754187Z       }
+2025-06-11T11:28:54.6754338Z 
+2025-06-11T11:28:54.6754740Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1580:13)
+2025-06-11T11:28:54.6755232Z 
+2025-06-11T11:28:54.6755385Z     console.log
+2025-06-11T11:28:54.6756309Z       🔍 shouldClearGameState: false because: { isFreeGamesLimited: false, notPlaying: true, notWon: true }
+2025-06-11T11:28:54.6757012Z 
+2025-06-11T11:28:54.6757447Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1597:13)
+2025-06-11T11:28:54.6757939Z 
+2025-06-11T11:28:54.6758083Z     console.log
+2025-06-11T11:28:54.6758470Z       hideUpgradePrompt called
+2025-06-11T11:28:54.6758783Z 
+2025-06-11T11:28:54.6759188Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1575:13)
+2025-06-11T11:28:54.6759833Z 
+2025-06-11T11:28:54.6759971Z     console.log
+2025-06-11T11:28:54.6760485Z       🔍 hideUpgradePrompt debug: {
+2025-06-11T11:28:54.6760966Z         currentContext: undefined,
+2025-06-11T11:28:54.6761409Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6761846Z         hasActiveGame: null,
+2025-06-11T11:28:54.6762230Z         startWord: null,
+2025-06-11T11:28:54.6762584Z         targetWord: null,
+2025-06-11T11:28:54.6762956Z         playerPath: 0
+2025-06-11T11:28:54.6763276Z       }
+2025-06-11T11:28:54.6763430Z 
+2025-06-11T11:28:54.6763865Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1580:13)
+2025-06-11T11:28:54.6764343Z 
+2025-06-11T11:28:54.6764470Z     console.log
+2025-06-11T11:28:54.6765398Z       🔍 shouldClearGameState: false because: { isFreeGamesLimited: false, notPlaying: true, notWon: true }
+2025-06-11T11:28:54.6766044Z 
+2025-06-11T11:28:54.6766452Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1597:13)
+2025-06-11T11:28:54.6766965Z 
+2025-06-11T11:28:54.6767095Z     console.log
+2025-06-11T11:28:54.6767476Z       hideUpgradePrompt called
+2025-06-11T11:28:54.6767731Z 
+2025-06-11T11:28:54.6768147Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1575:13)
+2025-06-11T11:28:54.6768619Z 
+2025-06-11T11:28:54.6768744Z     console.log
+2025-06-11T11:28:54.6769416Z       🔍 hideUpgradePrompt debug: {
+2025-06-11T11:28:54.6769912Z         currentContext: undefined,
+2025-06-11T11:28:54.6770375Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6770783Z         hasActiveGame: null,
+2025-06-11T11:28:54.6771531Z         startWord: null,
+2025-06-11T11:28:54.6771876Z         targetWord: null,
+2025-06-11T11:28:54.6772216Z         playerPath: 0
+2025-06-11T11:28:54.6772539Z       }
+2025-06-11T11:28:54.6772695Z 
+2025-06-11T11:28:54.6773152Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1580:13)
+2025-06-11T11:28:54.6773628Z 
+2025-06-11T11:28:54.6773757Z     console.log
+2025-06-11T11:28:54.6774792Z       🔍 shouldClearGameState: false because: { isFreeGamesLimited: false, notPlaying: true, notWon: true }
+2025-06-11T11:28:54.6775435Z 
+2025-06-11T11:28:54.6775859Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1597:13)
+2025-06-11T11:28:54.6776343Z 
+2025-06-11T11:28:54.6776513Z     console.log
+2025-06-11T11:28:54.6776905Z       hideUpgradePrompt called
+2025-06-11T11:28:54.6777173Z 
+2025-06-11T11:28:54.6777795Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1575:13)
+2025-06-11T11:28:54.6778254Z 
+2025-06-11T11:28:54.6778437Z     console.log
+2025-06-11T11:28:54.6778939Z       🔍 hideUpgradePrompt debug: {
+2025-06-11T11:28:54.6779625Z         currentContext: undefined,
+2025-06-11T11:28:54.6780075Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6780476Z         hasActiveGame: null,
+2025-06-11T11:28:54.6780833Z         startWord: null,
+2025-06-11T11:28:54.6781167Z         targetWord: null,
+2025-06-11T11:28:54.6781580Z         playerPath: 0
+2025-06-11T11:28:54.6781924Z       }
+2025-06-11T11:28:54.6782110Z 
+2025-06-11T11:28:54.6782539Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1580:13)
+2025-06-11T11:28:54.6783085Z 
+2025-06-11T11:28:54.6783243Z     console.log
+2025-06-11T11:28:54.6784297Z       🔍 shouldClearGameState: false because: { isFreeGamesLimited: false, notPlaying: true, notWon: true }
+2025-06-11T11:28:54.6785039Z 
+2025-06-11T11:28:54.6785491Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1597:13)
+2025-06-11T11:28:54.6786041Z 
+2025-06-11T11:28:54.6786203Z     console.log
+2025-06-11T11:28:54.6786790Z       🔍 showUpgradePrompt called with: {
+2025-06-11T11:28:54.6787422Z         message: "You've used all your free games for today!",
+2025-06-11T11:28:54.6788026Z         context: undefined,
+2025-06-11T11:28:54.6788481Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6788922Z         hasActiveGame: false,
+2025-06-11T11:28:54.6789537Z         remainingFreeGames: 0
+2025-06-11T11:28:54.6789963Z       }
+2025-06-11T11:28:54.6790140Z 
+2025-06-11T11:28:54.6790559Z       at Object.log [as showUpgradePrompt] (src/stores/useGameStore.ts:1557:13)
+2025-06-11T11:28:54.6791055Z 
+2025-06-11T11:28:54.6791212Z     console.log
+2025-06-11T11:28:54.6791790Z       showUpgradePrompt state updated - visible should be true
+2025-06-11T11:28:54.6792229Z 
+2025-06-11T11:28:54.6792661Z       at Object.log [as showUpgradePrompt] (src/stores/useGameStore.ts:1572:13)
+2025-06-11T11:28:54.6793151Z 
+2025-06-11T11:28:54.6793356Z     console.log
+2025-06-11T11:28:54.6793756Z       hideUpgradePrompt called
+2025-06-11T11:28:54.6794061Z 
+2025-06-11T11:28:54.6794479Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1575:13)
+2025-06-11T11:28:54.6795010Z 
+2025-06-11T11:28:54.6795176Z     console.log
+2025-06-11T11:28:54.6795707Z       🔍 hideUpgradePrompt debug: {
+2025-06-11T11:28:54.6796226Z         currentContext: undefined,
+2025-06-11T11:28:54.6796763Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6797166Z         hasActiveGame: null,
+2025-06-11T11:28:54.6797574Z         startWord: null,
+2025-06-11T11:28:54.6797951Z         targetWord: null,
+2025-06-11T11:28:54.6798389Z         playerPath: 0
+2025-06-11T11:28:54.6798739Z       }
+2025-06-11T11:28:54.6798890Z 
+2025-06-11T11:28:54.6799500Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1580:13)
+2025-06-11T11:28:54.6800030Z 
+2025-06-11T11:28:54.6800184Z     console.log
+2025-06-11T11:28:54.6801208Z       🔍 shouldClearGameState: false because: { isFreeGamesLimited: false, notPlaying: true, notWon: true }
+2025-06-11T11:28:54.6801945Z 
+2025-06-11T11:28:54.6802627Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1597:13)
+2025-06-11T11:28:54.6803138Z 
+2025-06-11T11:28:54.6803329Z     console.log
+2025-06-11T11:28:54.6803733Z       hideUpgradePrompt called
+2025-06-11T11:28:54.6804003Z 
+2025-06-11T11:28:54.6804414Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1575:13)
+2025-06-11T11:28:54.6804962Z 
+2025-06-11T11:28:54.6805110Z     console.log
+2025-06-11T11:28:54.6805649Z       🔍 hideUpgradePrompt debug: {
+2025-06-11T11:28:54.6806149Z         currentContext: undefined,
+2025-06-11T11:28:54.6806677Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6807129Z         hasActiveGame: null,
+2025-06-11T11:28:54.6807515Z         startWord: null,
+2025-06-11T11:28:54.6807899Z         targetWord: null,
+2025-06-11T11:28:54.6808564Z         playerPath: 0
+2025-06-11T11:28:54.6808943Z       }
+2025-06-11T11:28:54.6809117Z 
+2025-06-11T11:28:54.6809742Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1580:13)
+2025-06-11T11:28:54.6810298Z 
+2025-06-11T11:28:54.6810446Z     console.log
+2025-06-11T11:28:54.6811486Z       🔍 shouldClearGameState: false because: { isFreeGamesLimited: false, notPlaying: true, notWon: true }
+2025-06-11T11:28:54.6812235Z 
+2025-06-11T11:28:54.6812668Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1597:13)
+2025-06-11T11:28:54.6813227Z 
+2025-06-11T11:28:54.6813423Z     console.log
+2025-06-11T11:28:54.6813948Z       🎮 loadInitialData: Starting
+2025-06-11T11:28:54.6814249Z 
+2025-06-11T11:28:54.6814538Z       at Object.log (src/stores/useGameStore.ts:381:15)
+2025-06-11T11:28:54.6814951Z 
+2025-06-11T11:28:54.6815098Z     console.log
+2025-06-11T11:28:54.6815740Z       🎮 loadInitialData: Daily challenge state loaded: {
+2025-06-11T11:28:54.6816339Z         todaysChallenge: false,
+2025-06-11T11:28:54.6816865Z         challengeId: undefined,
+2025-06-11T11:28:54.6817328Z         hasPlayedToday: false,
+2025-06-11T11:28:54.6817779Z         remainingFreeGames: 2,
+2025-06-11T11:28:54.6818266Z         willPreventAutoStart: false
+2025-06-11T11:28:54.6818731Z       }
+2025-06-11T11:28:54.6818902Z 
+2025-06-11T11:28:54.6819188Z       at Object.log (src/stores/useGameStore.ts:402:15)
+2025-06-11T11:28:54.6819812Z 
+2025-06-11T11:28:54.6819952Z     console.log
+2025-06-11T11:28:54.6820750Z       🎮 loadInitialData: Store state updated with daily challenge data
+2025-06-11T11:28:54.6821228Z 
+2025-06-11T11:28:54.6821520Z       at Object.log (src/stores/useGameStore.ts:422:15)
+2025-06-11T11:28:54.6821924Z 
+2025-06-11T11:28:54.6822059Z     console.log
+2025-06-11T11:28:54.6822612Z       🎮 loadInitialData: No saved game to restore
+2025-06-11T11:28:54.6822966Z 
+2025-06-11T11:28:54.6823285Z       at Object.log (src/stores/useGameStore.ts:514:19)
+2025-06-11T11:28:54.6823645Z 
+2025-06-11T11:28:54.6823793Z     console.log
+2025-06-11T11:28:54.6824349Z       🎮 loadInitialData: Completed, returning false
+2025-06-11T11:28:54.6824747Z 
+2025-06-11T11:28:54.6825043Z       at Object.log (src/stores/useGameStore.ts:523:15)
+2025-06-11T11:28:54.6825425Z 
+2025-06-11T11:28:54.6825554Z     console.log
+2025-06-11T11:28:54.6826117Z       🔍 showUpgradePrompt called with: {
+2025-06-11T11:28:54.6826705Z         message: 'No free games left',
+2025-06-11T11:28:54.6827149Z         context: undefined,
+2025-06-11T11:28:54.6827600Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6828090Z         hasActiveGame: false,
+2025-06-11T11:28:54.6828515Z         remainingFreeGames: 2
+2025-06-11T11:28:54.6828903Z       }
+2025-06-11T11:28:54.6829062Z 
+2025-06-11T11:28:54.6829660Z       at Object.log [as showUpgradePrompt] (src/stores/useGameStore.ts:1557:13)
+2025-06-11T11:28:54.6830210Z 
+2025-06-11T11:28:54.6830362Z     console.log
+2025-06-11T11:28:54.6830912Z       showUpgradePrompt state updated - visible should be true
+2025-06-11T11:28:54.6831403Z 
+2025-06-11T11:28:54.6831831Z       at Object.log [as showUpgradePrompt] (src/stores/useGameStore.ts:1572:13)
+2025-06-11T11:28:54.6832325Z 
+2025-06-11T11:28:54.6832466Z     console.log
+2025-06-11T11:28:54.6833196Z       hideUpgradePrompt called
+2025-06-11T11:28:54.6833476Z 
+2025-06-11T11:28:54.6833899Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1575:13)
+2025-06-11T11:28:54.6834407Z 
+2025-06-11T11:28:54.6834553Z     console.log
+2025-06-11T11:28:54.6835126Z       🔍 hideUpgradePrompt debug: {
+2025-06-11T11:28:54.6835605Z         currentContext: undefined,
+2025-06-11T11:28:54.6836076Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6836568Z         hasActiveGame: null,
+2025-06-11T11:28:54.6836971Z         startWord: null,
+2025-06-11T11:28:54.6837355Z         targetWord: null,
+2025-06-11T11:28:54.6837735Z         playerPath: 0
+2025-06-11T11:28:54.6838139Z       }
+2025-06-11T11:28:54.6838311Z 
+2025-06-11T11:28:54.6839018Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1580:13)
+2025-06-11T11:28:54.6919835Z 
+2025-06-11T11:28:54.6920008Z     console.log
+2025-06-11T11:28:54.6921097Z       🔍 shouldClearGameState: false because: { isFreeGamesLimited: false, notPlaying: true, notWon: true }
+2025-06-11T11:28:54.6921863Z 
+2025-06-11T11:28:54.6922319Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1597:13)
+2025-06-11T11:28:54.6922882Z 
+2025-06-11T11:28:54.6923030Z     console.log
+2025-06-11T11:28:54.6923437Z       hideUpgradePrompt called
+2025-06-11T11:28:54.6923718Z 
+2025-06-11T11:28:54.6924205Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1575:13)
+2025-06-11T11:28:54.6924696Z 
+2025-06-11T11:28:54.6924842Z     console.log
+2025-06-11T11:28:54.6925393Z       🔍 hideUpgradePrompt debug: {
+2025-06-11T11:28:54.6925911Z         currentContext: undefined,
+2025-06-11T11:28:54.6926394Z         currentGameStatus: 'idle',
+2025-06-11T11:28:54.6926870Z         hasActiveGame: 'happy',
+2025-06-11T11:28:54.6927311Z         startWord: 'banana',
+2025-06-11T11:28:54.6927714Z         targetWord: 'happy',
+2025-06-11T11:28:54.6928117Z         playerPath: 0
+2025-06-11T11:28:54.6928459Z       }
+2025-06-11T11:28:54.6928661Z 
+2025-06-11T11:28:54.6929082Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1580:13)
+2025-06-11T11:28:54.6929782Z 
+2025-06-11T11:28:54.6929932Z     console.log
+2025-06-11T11:28:54.6930960Z       🔍 shouldClearGameState: false because: { isFreeGamesLimited: false, notPlaying: true, notWon: true }
+2025-06-11T11:28:54.6931662Z 
+2025-06-11T11:28:54.6932096Z       at Object.log [as hideUpgradePrompt] (src/stores/useGameStore.ts:1597:13)
+2025-06-11T11:28:54.6932625Z 
+2025-06-11T11:28:54.6932774Z     console.log
+2025-06-11T11:28:54.6933290Z       🎮 loadInitialData: Starting
+2025-06-11T11:28:54.6933596Z 
+2025-06-11T11:28:54.6933887Z       at Object.log (src/stores/useGameStore.ts:381:15)
+2025-06-11T11:28:54.6934248Z 
+2025-06-11T11:28:54.6934373Z     console.log
+2025-06-11T11:28:54.6934980Z       🎮 loadInitialData: Daily challenge state loaded: {
+2025-06-11T11:28:54.6935577Z         todaysChallenge: false,
+2025-06-11T11:28:54.6936052Z         challengeId: undefined,
+2025-06-11T11:28:54.6936520Z         hasPlayedToday: false,
+2025-06-11T11:28:54.6936983Z         remainingFreeGames: 2,
+2025-06-11T11:28:54.6937461Z         willPreventAutoStart: false
+2025-06-11T11:28:54.6937882Z       }
+2025-06-11T11:28:54.6938069Z 
+2025-06-11T11:28:54.6938348Z       at Object.log (src/stores/useGameStore.ts:402:15)
+2025-06-11T11:28:54.6938714Z 
+2025-06-11T11:28:54.6938865Z     console.log
+2025-06-11T11:28:54.6939835Z       🎮 loadInitialData: Store state updated with daily challenge data
+2025-06-11T11:28:54.6940314Z 
+2025-06-11T11:28:54.6940604Z       at Object.log (src/stores/useGameStore.ts:422:15)
+2025-06-11T11:28:54.6940974Z 
+2025-06-11T11:28:54.6941138Z     console.log
+2025-06-11T11:28:54.6941715Z       🎮 loadInitialData: No saved game to restore
+2025-06-11T11:28:54.6942061Z 
+2025-06-11T11:28:54.6942361Z       at Object.log (src/stores/useGameStore.ts:514:19)
+2025-06-11T11:28:54.6942731Z 
+2025-06-11T11:28:54.6942879Z     console.log
+2025-06-11T11:28:54.6943460Z       🎮 loadInitialData: Completed, returning false
+2025-06-11T11:28:54.6944091Z 
+2025-06-11T11:28:54.6944388Z       at Object.log (src/stores/useGameStore.ts:523:15)
+2025-06-11T11:28:54.6944759Z 
+2025-06-11T11:28:55.0805122Z PASS src/components/__tests__/GraphVisualization.test.ts
+2025-06-11T11:28:55.4634254Z PASS src/screens/__tests__/GameScreen.test.ts
+2025-06-11T11:28:55.5604440Z PASS src/features/achievements/definitions/__tests__/notAllWhoWanderAreLost.definition.test.ts
+2025-06-11T11:28:55.6390906Z PASS src/features/achievements/definitions/__tests__/hereBeDragons.definition.test.ts
+2025-06-11T11:28:55.7407207Z PASS src/features/achievements/__tests__/logic.test.ts
+2025-06-11T11:28:55.7431328Z   ● Console
+2025-06-11T11:28:55.7432259Z 
+2025-06-11T11:28:55.7433095Z     console.log
+2025-06-11T11:28:55.7434829Z       🔧 Added compression debug utilities to global.compressionDebug
+2025-06-11T11:28:55.7436030Z 
+2025-06-11T11:28:55.7437153Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:200:15)
+2025-06-11T11:28:55.7438407Z 
+2025-06-11T11:28:55.7439434Z     console.log
+2025-06-11T11:28:55.7440621Z          Usage: compressionDebug.test()
+2025-06-11T11:28:55.7441668Z 
+2025-06-11T11:28:55.7442792Z       at Function.log [as addToGlobalDebug] (src/utils/compressionDebug.ts:203:15)
+2025-06-11T11:28:55.7443986Z 
+2025-06-11T11:28:55.8419713Z PASS src/features/achievements/definitions/__tests__/puttingOnTheDog.definition.test.ts
+2025-06-11T11:28:55.9150613Z PASS src/components/__tests__/StatsModal.test.tsx
+2025-06-11T11:28:55.9850241Z PASS src/features/achievements/definitions/__tests__/comebackKid.definition.test.ts
+2025-06-11T11:28:56.0644149Z PASS src/features/achievements/definitions/__tests__/thoseWhoKnow.definition.test.ts
+2025-06-11T11:28:56.1732919Z PASS src/utils/__tests__/StyleUtils.test.ts
+2025-06-11T11:28:56.2334674Z PASS src/features/achievements/definitions/__tests__/looseCannon.definition.test.ts
+2025-06-11T11:28:56.3048785Z PASS src/features/achievements/definitions/__tests__/sellingSeashells.definition.test.ts
+2025-06-11T11:28:56.3687115Z PASS src/features/achievements/definitions/__tests__/dancingToADifferentBeat.definition.test.ts
+2025-06-11T11:28:56.4351221Z PASS src/features/achievements/definitions/__tests__/slowAndSteady.definition.test.ts
+2025-06-11T11:28:56.5050770Z PASS src/features/achievements/definitions/__tests__/epicyclesUponEpicycles.definition.test.ts
+2025-06-11T11:28:56.5666690Z PASS src/features/achievements/definitions/__tests__/stealingSecond.definition.test.ts
+2025-06-11T11:28:56.6337076Z PASS src/features/achievements/definitions/__tests__/looseCannonWins.definition.test.ts
+2025-06-11T11:28:56.7014501Z PASS src/features/achievements/definitions/__tests__/sorryWrongRoom.definition.test.ts
+2025-06-11T11:28:56.7678552Z PASS src/features/achievements/definitions/__tests__/sixFeetFromTheEdge.definition.test.ts
+2025-06-11T11:28:56.8538023Z PASS src/assets/__tests__/icons.test.ts
+2025-06-11T11:28:56.9175637Z PASS src/features/achievements/definitions/__tests__/forgotMyKeys.definition.test.ts
+2025-06-11T11:28:56.9851322Z PASS src/features/achievements/definitions/__tests__/dejaVu.definition.test.ts
+2025-06-11T11:28:57.0827437Z PASS src/utils/__tests__/svgUtils.test.ts
+2025-06-11T11:28:57.1609674Z PASS src/features/achievements/definitions/__tests__/straightAndNarrow.definition.test.ts
+2025-06-11T11:28:57.2222203Z PASS src/features/achievements/definitions/__tests__/juggernaut.definition.test.ts
+2025-06-11T11:28:57.2720636Z PASS src/stores/__tests__/gameMechanics.test.ts
+2025-06-11T11:28:57.3213668Z PASS src/services/__tests__/SharingService.test.ts
+2025-06-11T11:28:57.3900806Z PASS src/context/__tests__/ThemeContext.test.tsx
+2025-06-11T11:29:06.0111981Z ------------------------------------------|---------|----------|---------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2025-06-11T11:29:06.0115050Z File                                      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                                                                                                                                                                                                                                                          
+2025-06-11T11:29:06.0117820Z ------------------------------------------|---------|----------|---------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2025-06-11T11:29:06.0120442Z All files                                 |   24.59 |    27.18 |   28.91 |    25.1 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0121769Z  src                                      |       0 |        0 |       0 |       0 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0136698Z   App.tsx                                 |       0 |        0 |       0 |       0 | 1-470                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0138242Z   ExpoRoot.js                             |       0 |      100 |       0 |       0 | 7                                                                                                                                                                                                                                                                                                          
+2025-06-11T11:29:06.0139898Z   index.web.js                            |       0 |        0 |       0 |       0 | 9-27                                                                                                                                                                                                                                                                                                       
+2025-06-11T11:29:06.0141421Z  src/assets                               |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0142953Z   icons.ts                                |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0144548Z  src/components                           |    0.98 |        0 |       0 |    1.22 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0146462Z   AchievementDetailDialog.tsx             |       0 |        0 |       0 |       0 | 1-65                                                                                                                                                                                                                                                                                                       
+2025-06-11T11:29:06.0148327Z   AnimatedButton.tsx                      |       0 |        0 |       0 |       0 | 1-77                                                                                                                                                                                                                                                                                                       
+2025-06-11T11:29:06.0150078Z   AppHeader.tsx                           |       0 |        0 |       0 |       0 | 1-652                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0151739Z   AvailableWordsDisplay.tsx               |       0 |        0 |       0 |       0 | 1-113                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0153392Z   ContactModal.tsx                        |       0 |        0 |       0 |       0 | 1-431                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0154940Z   CustomIcon.tsx                          |       0 |        0 |       0 |       0 | 1-28                                                                                                                                                                                                                                                                                                       
+2025-06-11T11:29:06.0156487Z   DailiesModal.tsx                        |       0 |        0 |       0 |       0 | 1-335                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0158096Z   DailyChallengeReport.tsx                |       0 |        0 |       0 |       0 | 1-601                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0159930Z   DailyChallengesCalendar.tsx             |       0 |        0 |       0 |       0 | 1-755                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0161596Z   ErrorBoundary.tsx                       |       0 |        0 |       0 |       0 | 1-147                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0163349Z   Footer.tsx                              |       0 |        0 |       0 |       0 | 1-125                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0165041Z   GameReportDisplay.tsx                   |       0 |        0 |       0 |       0 | 1-407                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0166722Z   GraphVisualization.tsx                  |    9.62 |        0 |       0 |   11.16 | 80-93,99,115-671                                                                                                                                                                                                                                                                                           
+2025-06-11T11:29:06.0168343Z   LabsModal.tsx                           |       0 |        0 |       0 |       0 | 1-350                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0170016Z   LegalPages.tsx                          |       0 |        0 |       0 |       0 | 1-607                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0171552Z   NewsModal.tsx                           |       0 |        0 |       0 |       0 | 1-338                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0173198Z   PathDisplayConfigurator.tsx             |       0 |        0 |       0 |       0 | 1-171                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0174879Z   PlayerPathDisplay.tsx                   |       0 |        0 |       0 |       0 | 1-277                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0176539Z   ProgressiveSyncIndicator.tsx            |       0 |        0 |       0 |       0 | 1-239                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0178180Z   QRCodeDisplay.tsx                       |       0 |        0 |       0 |       0 | 1-115                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0180013Z   QuickstartModal.tsx                     |       0 |        0 |       0 |       0 | 1-558                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0182813Z   RadarPing.tsx                           |       0 |        0 |       0 |       0 | 1-80                                                                                                                                                                                                                                                                                                       
+2025-06-11T11:29:06.0186784Z   StatsModal.tsx                          |       0 |        0 |       0 |       0 | 1-2229                                                                                                                                                                                                                                                                                                     
+2025-06-11T11:29:06.0188303Z   SyncProgressProvider.tsx                |       0 |        0 |       0 |       0 | 1-103                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0200704Z   TouchableCircle.tsx                     |       0 |        0 |       0 |       0 | 1-128                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0202172Z   TutorialModal.tsx                       |       0 |        0 |       0 |       0 | 1-222                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0203660Z   UpgradePrompt.tsx                       |       0 |        0 |       0 |       0 | 1-345                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0205198Z   WordDefinitionDialog.tsx                |       0 |        0 |       0 |       0 | 1-266                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0206698Z  src/components/icons                     |       0 |      100 |       0 |       0 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0208213Z   SocialLeaderboardIcon.js                |       0 |      100 |       0 |       0 | 4-5                                                                                                                                                                                                                                                                                                        
+2025-06-11T11:29:06.0210161Z  src/context                              |       0 |        0 |       0 |       0 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0211664Z   AuthContext.tsx                         |       0 |        0 |       0 |       0 | 1-158                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0213040Z   ThemeContext.tsx                        |       0 |        0 |       0 |       0 | 1-43                                                                                                                                                                                                                                                                                                       
+2025-06-11T11:29:06.0214413Z   TutorialContext.tsx                     |       0 |        0 |       0 |       0 | 1-179                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0215837Z  src/data/news/posts                      |       0 |      100 |     100 |       0 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0217214Z   welcome-2025.ts                         |       0 |      100 |     100 |       0 | 3                                                                                                                                                                                                                                                                                                          
+2025-06-11T11:29:06.0218580Z  src/examples                             |       0 |        0 |       0 |       0 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0220156Z   ProgressiveSyncExample.tsx              |       0 |        0 |       0 |       0 | 1-267                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0221694Z  src/features/achievements                |   85.71 |       80 |     100 |   82.35 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0223121Z   logic.ts                                |   85.71 |       80 |     100 |   82.35 | 41-45                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0224875Z  src/features/achievements/definitions    |   99.38 |    98.63 |     100 |   99.37 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0226673Z   comebackKid.definition.ts               |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0228311Z   dancingToADifferentBeat.definition.ts   |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0230193Z   dejaVu.definition.ts                    |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0231774Z   epicyclesUponEpicycles.definition.ts    |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0233376Z   forgotMyKeys.definition.ts              |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0234902Z   hereBeDragons.definition.ts             |   95.83 |       90 |     100 |   95.65 | 46                                                                                                                                                                                                                                                                                                         
+2025-06-11T11:29:06.0236405Z   juggernaut.definition.ts                |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0237907Z   looseCannon.definition.ts               |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0239643Z   looseCannonWins.definition.ts           |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0241463Z   notAllWhoWanderAreLost.definition.ts    |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0243240Z   puttingOnTheDog.definition.ts           |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0244871Z   seasonalExplorer.achievement.ts         |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0246454Z   sellingSeashells.definition.ts          |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0248037Z   sixFeetFromTheEdge.definition.ts        |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0265605Z   slowAndSteady.definition.ts             |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0267326Z   sorryWrongRoom.definition.ts            |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0268979Z   stealingSecond.definition.ts            |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0270847Z   straightAndNarrow.definition.ts         |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0272480Z   thoseWhoKnow.definition.ts              |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0274257Z   uRobot.achievement.ts                   |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0276027Z   wordCollector.achievement.ts            |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0277737Z  src/features/wordCollections             |   94.11 |    93.15 |     100 |   93.05 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0279522Z   logic.ts                                |   94.11 |    93.15 |     100 |   93.05 | 86-96,197                                                                                                                                                                                                                                                                                                  
+2025-06-11T11:29:06.0281172Z  src/features/wordCollections/definitions |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0282887Z   affection.collection.ts                 |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0284424Z   amberHarvest.collection.ts              |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0286024Z   autumnEquinox.collection.ts             |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0287561Z   bloom.collection.ts                     |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0289063Z   ciderEmber.collection.ts                |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0291039Z   colors.collection.ts                    |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0292703Z   creatures.collection.ts                 |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0294231Z   fantasy.collection.ts                   |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0295732Z   fogFrost.collection.ts                  |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0297257Z   gardens.collection.ts                   |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0298840Z   gratitudeGathering.collection.ts        |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0300617Z   greening.collection.ts                  |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0302128Z   highSun.collection.ts                   |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0303655Z   journeys.collection.ts                  |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0305358Z   longNight.collection.ts                 |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0306915Z   machines.collection.ts                  |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0308640Z   movement.collection.ts                  |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0310342Z   renewal.collection.ts                   |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0311868Z   ripening.collection.ts                  |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0313367Z   seasons.collection.ts                   |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0314870Z   shapes.collection.ts                    |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0316350Z   sounds.collection.ts                    |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0317895Z   springEquinox.collection.ts             |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0319649Z   summerSolstice.collection.ts            |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0321400Z   textures.collection.ts                  |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0323010Z   time.collection.ts                      |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0324470Z   tools.collection.ts                     |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0326013Z   winterSolstice.collection.ts            |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0343136Z  src/screens                              |    3.57 |        0 |       0 |    4.26 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0344711Z   AccountScreen.tsx                       |       0 |        0 |       0 |       0 | 1-943                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0346178Z   AuthScreen.tsx                          |    3.38 |        0 |       0 |    3.63 | 55-1430                                                                                                                                                                                                                                                                                                    
+2025-06-11T11:29:06.0348594Z   GameScreen.tsx                          |      10 |        0 |       0 |   13.33 | 38-356                                                                                                                                                                                                                                                                                                     
+2025-06-11T11:29:06.0350228Z   ReportScreen.tsx                        |       0 |        0 |       0 |       0 | 1-407                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0351651Z  src/services                             |   31.33 |    19.47 |   48.17 |   28.85 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0353559Z   DailyChallengesService.ts               |   36.25 |     4.34 |   30.55 |   30.43 | 33-60,67-94,103,115-120,130,137,146-165,173-212,220-227                                                                                                                                                                                                                                                    
+2025-06-11T11:29:06.0355378Z   EmailService.ts                         |       0 |        0 |       0 |       0 | 21-302                                                                                                                                                                                                                                                                                                     
+2025-06-11T11:29:06.0356855Z   GameFlowManager.ts                      |     100 |    95.94 |     100 |     100 | 59,255                                                                                                                                                                                                                                                                                                     
+2025-06-11T11:29:06.0358340Z   PaymentHandler.ts                       |    27.5 |      8.1 |   85.71 |   27.02 | 55-246                                                                                                                                                                                                                                                                                                     
+2025-06-11T11:29:06.0360041Z   ProgressiveSyncService.ts               |       0 |        0 |       0 |       0 | 1-541                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0361518Z   SharingService.ts                       |       0 |        0 |       0 |       0 | 1-705                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0362968Z   StorageAdapter.ts                       |    99.2 |    97.14 |     100 |   98.86 | 127                                                                                                                                                                                                                                                                                                        
+2025-06-11T11:29:06.0364460Z   StripeService.ts                        |       0 |        0 |       0 |       0 | 1-297                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0365911Z   SupabaseService.ts                      |       0 |        0 |       0 |       0 | 1-1621                                                                                                                                                                                                                                                                                                     
+2025-06-11T11:29:06.0368213Z   UnifiedDataStore.ts                     |   59.19 |    50.39 |   69.86 |   54.68 | 259,350-351,356-373,397-401,409,540-551,588-589,617-619,650-651,680-683,786-789,794-799,803-804,808-810,814-815,835-863,872-906,920-921,937-948,955-957,964-965,996-1007,1019-1021,1028-1054,1061-1108,1116-1169,1190,1199-1200,1204-1207,1214-1225,1245-1254,1260,1283-1302,1316-1331,1338-1343,1361-1395 
+2025-06-11T11:29:06.0370949Z   dataLoader.ts                           |   74.62 |    54.28 |   81.25 |   69.09 | 45-55,65,76-79,103-106,114-121,127-129                                                                                                                                                                                                                                                                     
+2025-06-11T11:29:06.0372563Z  src/stores                               |   79.13 |     67.4 |   76.92 |   78.81 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0374630Z   useGameStore.ts                         |   79.13 |     67.4 |   76.92 |   78.81 | 234,244,260,288,300,443-462,475,561-562,575-579,584-595,619-626,663,705-720,723-726,728,751,874-875,960-965,975-980,991-995,1020-1025,1033-1034,1240,1296,1367,1430,1447,1511-1517,1524-1543,1605,1654-1661,1666-1722                                                                                      
+2025-06-11T11:29:06.0376730Z  src/theme                                |       0 |      100 |     100 |       0 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0378125Z   SynapseTheme.tsx                        |       0 |      100 |     100 |       0 | 1-110                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0379685Z  src/utils                                |   53.82 |    68.67 |   54.81 |    52.5 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0381065Z   StyleUtils.ts                           |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0382587Z   compressionDebug.ts                     |   21.42 |    14.28 |   27.77 |   16.66 | 14-33,41-65,73-95,103-183,194-197                                                                                                                                                                                                                                                                          
+2025-06-11T11:29:06.0384154Z   dataCompression.ts                      |    91.5 |    75.41 |   97.77 |   98.05 | 68-69                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0385658Z   gameReportUtils.ts                      |     100 |       95 |     100 |     100 | 99-138,304                                                                                                                                                                                                                                                                                                 
+2025-06-11T11:29:06.0387290Z   graphUtils.ts                           |     100 |    89.47 |     100 |     100 | 62                                                                                                                                                                                                                                                                                                         
+2025-06-11T11:29:06.0388941Z   logger.ts                               |   32.17 |    36.36 |   34.48 |    33.7 | 79-96,98,104,110-166,196-213,227-243,256-278                                                                                                                                                                                                                                                               
+2025-06-11T11:29:06.0390636Z   performanceMonitor.ts                   |       0 |        0 |       0 |       0 | 1-141                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0392062Z   svgUtils.ts                             |     100 |      100 |     100 |     100 |                                                                                                                                                                                                                                                                                                            
+2025-06-11T11:29:06.0393472Z   webOptimizations.ts                     |       0 |        0 |       0 |       0 | 1-189                                                                                                                                                                                                                                                                                                      
+2025-06-11T11:29:06.0395786Z ------------------------------------------|---------|----------|---------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2025-06-11T11:29:06.0687962Z 
+2025-06-11T11:29:06.0690309Z Summary of all failing tests
+2025-06-11T11:29:06.0700261Z FAIL src/services/__tests__/SupabaseService.test.ts
+2025-06-11T11:29:06.0702056Z   ● Test suite failed to run
+2025-06-11T11:29:06.0702361Z 
+2025-06-11T11:29:06.0702601Z     Jest encountered an unexpected token
+2025-06-11T11:29:06.0702917Z 
+2025-06-11T11:29:06.0710680Z     Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+2025-06-11T11:29:06.0711679Z 
+2025-06-11T11:29:06.0712414Z     Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+2025-06-11T11:29:06.0713160Z 
+2025-06-11T11:29:06.0713512Z     By default "node_modules" folder is ignored by transformers.
+2025-06-11T11:29:06.0713942Z 
+2025-06-11T11:29:06.0714096Z     Here's what you can do:
+2025-06-11T11:29:06.0722654Z      • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+2025-06-11T11:29:06.0727270Z      • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+2025-06-11T11:29:06.0733692Z      • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+2025-06-11T11:29:06.0737534Z      • If you need a custom transformation specify a "transform" option in your config.
+2025-06-11T11:29:06.0744853Z      • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+2025-06-11T11:29:06.0746395Z 
+2025-06-11T11:29:06.0747421Z     You'll find more details and examples of these config options in the docs:
+2025-06-11T11:29:06.0750659Z     https://jestjs.io/docs/configuration
+2025-06-11T11:29:06.0753591Z     For information about custom transformations, see:
+2025-06-11T11:29:06.0756132Z     https://jestjs.io/docs/code-transformation
+2025-06-11T11:29:06.0757273Z 
+2025-06-11T11:29:06.0757418Z     Details:
+2025-06-11T11:29:06.0757611Z 
+2025-06-11T11:29:06.0770549Z     /home/runner/work/synapse/synapse/src/services/__tests__/SupabaseService.test.ts:192
+2025-06-11T11:29:06.0772179Z           delete undefined;
+2025-06-11T11:29:06.0772564Z                  ^^^^^^^^^
+2025-06-11T11:29:06.0772793Z 
+2025-06-11T11:29:06.0773194Z     SyntaxError: Delete of an unqualified identifier in strict mode.
+2025-06-11T11:29:06.0773634Z 
+2025-06-11T11:29:06.0774129Z       at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1505:14)
+2025-06-11T11:29:06.0774687Z 
+2025-06-11T11:29:06.0775001Z FAIL src/services/__tests__/StripeService.test.ts
+2025-06-11T11:29:06.0775636Z   ● Test suite failed to run
+2025-06-11T11:29:06.0775892Z 
+2025-06-11T11:29:06.0776118Z     Jest encountered an unexpected token
+2025-06-11T11:29:06.0776424Z 
+2025-06-11T11:29:06.0777474Z     Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+2025-06-11T11:29:06.0789674Z 
+2025-06-11T11:29:06.0790437Z     Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+2025-06-11T11:29:06.0791185Z 
+2025-06-11T11:29:06.0791513Z     By default "node_modules" folder is ignored by transformers.
+2025-06-11T11:29:06.0791930Z 
+2025-06-11T11:29:06.0792088Z     Here's what you can do:
+2025-06-11T11:29:06.0793179Z      • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+2025-06-11T11:29:06.0794544Z      • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+2025-06-11T11:29:06.0795991Z      • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+2025-06-11T11:29:06.0798625Z      • If you need a custom transformation specify a "transform" option in your config.
+2025-06-11T11:29:06.0805892Z      • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+2025-06-11T11:29:06.0807419Z 
+2025-06-11T11:29:06.0850167Z     You'll find more details and examples of these config options in the docs:
+2025-06-11T11:29:06.0889912Z     https://jestjs.io/docs/configuration
+2025-06-11T11:29:06.0890774Z     For information about custom transformations, see:
+2025-06-11T11:29:06.0891538Z     https://jestjs.io/docs/code-transformation
+2025-06-11T11:29:06.0891993Z 
+2025-06-11T11:29:06.0892230Z     Details:
+2025-06-11T11:29:06.0892509Z 
+2025-06-11T11:29:06.0893133Z     /home/runner/work/synapse/synapse/src/services/__tests__/StripeService.test.ts:263
+2025-06-11T11:29:06.0893995Z           delete undefined;
+2025-06-11T11:29:06.0894472Z                  ^^^^^^^^^
+2025-06-11T11:29:06.0894800Z 
+2025-06-11T11:29:06.0895276Z     SyntaxError: Delete of an unqualified identifier in strict mode.
+2025-06-11T11:29:06.0895816Z 
+2025-06-11T11:29:06.0896417Z       at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1505:14)
+2025-06-11T11:29:06.0897108Z 
+2025-06-11T11:29:06.0897202Z 
+2025-06-11T11:29:06.0897629Z Test Suites: 2 failed, 44 passed, 46 total
+2025-06-11T11:29:06.0898274Z Tests:       575 passed, 575 total
+2025-06-11T11:29:06.0898804Z Snapshots:   0 total
+2025-06-11T11:29:06.0899751Z Time:        30.732 s
+2025-06-11T11:29:06.0900214Z Ran all test suites.
+2025-06-11T11:29:06.2886379Z ##[error]Process completed with exit code 1.
+2025-06-11T11:29:06.2971997Z Post job cleanup.
+2025-06-11T11:29:06.3921102Z [command]/usr/bin/git version
+2025-06-11T11:29:06.3964834Z git version 2.49.0
+2025-06-11T11:29:06.4024441Z Temporarily overriding HOME='/home/runner/work/_temp/f08ac75b-40eb-4662-b73a-e08574658bff' before making global git config changes
+2025-06-11T11:29:06.4026695Z Adding repository directory to the temporary git global config as a safe directory
+2025-06-11T11:29:06.4033603Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/synapse/synapse
+2025-06-11T11:29:06.4071154Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-06-11T11:29:06.4105442Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-06-11T11:29:06.4347943Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-06-11T11:29:06.4372389Z http.https://github.com/.extraheader
+2025-06-11T11:29:06.4385537Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-06-11T11:29:06.4418781Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-06-11T11:29:06.4764304Z Cleaning up orphan processes

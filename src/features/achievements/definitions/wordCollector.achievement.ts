@@ -7,7 +7,7 @@ export const wordCollectorAchievement: Achievement = {
   icon: "book-open-variant",
   isProgressive: true,
 
-  check: (gameReport, gameStatus) => {
+  check: (_gameReport, _gameStatus) => {
     // This achievement is checked differently - it's based on word collection completion
     // The actual checking will be done in the word collection system
     return false;
