@@ -28,7 +28,7 @@ export const loadGraphData = async (): Promise<GraphData> => {
     // Dynamic import for better bundle splitting
     const graphDataModule = await import("../data/graph.json");
     const graphDataJson = graphDataModule.default || graphDataModule;
-    
+
     // Check if the data is in the expected format
     if (typeof graphDataJson === "object" && graphDataJson !== null) {
       const keys = Object.keys(graphDataJson);
@@ -68,7 +68,7 @@ export const loadDefinitions = async (): Promise<DefinitionsData> => {
     // Dynamic import for better bundle splitting
     const definitionsModule = await import("../data/definitions.json");
     const definitions = definitionsModule.default || definitionsModule;
-    
+
     if (typeof definitions === "object" && definitions !== null) {
       definitionsCache = definitions as DefinitionsData;
       return definitionsCache;
@@ -90,9 +90,12 @@ export const loadWordFrequencies = async (): Promise<WordFrequencies> => {
     }
 
     // Dynamic import for better bundle splitting
-    const wordFrequenciesModule = await import("../data/filtered_word_frequencies.json");
-    const wordFrequencies = wordFrequenciesModule.default || wordFrequenciesModule;
-    
+    const wordFrequenciesModule = await import(
+      "../data/filtered_word_frequencies.json"
+    );
+    const wordFrequencies =
+      wordFrequenciesModule.default || wordFrequenciesModule;
+
     if (typeof wordFrequencies === "object" && wordFrequencies !== null) {
       wordFrequenciesCache = wordFrequencies as WordFrequencies;
       return wordFrequenciesCache;
@@ -112,7 +115,7 @@ export const preloadAllData = async (): Promise<void> => {
     await Promise.all([
       loadGraphData(),
       loadWordFrequencies(),
-      loadDefinitions()
+      loadDefinitions(),
     ]);
   } catch (error) {
     console.warn("Failed to preload some data:", error);

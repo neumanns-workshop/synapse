@@ -1,6 +1,16 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ProgressiveSyncService, SyncProgress } from '../services/ProgressiveSyncService';
-import ProgressiveSyncIndicator from './ProgressiveSyncIndicator';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+
+import ProgressiveSyncIndicator from "./ProgressiveSyncIndicator";
+import {
+  ProgressiveSyncService,
+  SyncProgress,
+} from "../services/ProgressiveSyncService";
 
 interface SyncProgressContextType {
   isSyncing: boolean;
@@ -9,7 +19,9 @@ interface SyncProgressContextType {
   setShowSyncProgress: (show: boolean) => void;
 }
 
-const SyncProgressContext = createContext<SyncProgressContextType | undefined>(undefined);
+const SyncProgressContext = createContext<SyncProgressContextType | undefined>(
+  undefined,
+);
 
 interface SyncProgressProviderProps {
   children: ReactNode;
@@ -18,7 +30,7 @@ interface SyncProgressProviderProps {
 /**
  * Provider that automatically displays sync progress indicators
  * when progressive sync operations are running.
- * 
+ *
  * Usage:
  * ```tsx
  * <SyncProgressProvider>
@@ -26,19 +38,23 @@ interface SyncProgressProviderProps {
  * </SyncProgressProvider>
  * ```
  */
-export const SyncProgressProvider: React.FC<SyncProgressProviderProps> = ({ children }) => {
+export const SyncProgressProvider: React.FC<SyncProgressProviderProps> = ({
+  children,
+}) => {
   const [isSyncing, setIsSyncing] = useState(false);
-  const [currentProgress, setCurrentProgress] = useState<SyncProgress | null>(null);
+  const [currentProgress, setCurrentProgress] = useState<SyncProgress | null>(
+    null,
+  );
   const [showSyncProgress, setShowSyncProgress] = useState(true); // Can be controlled by user preferences
 
   useEffect(() => {
     const progressiveSyncService = ProgressiveSyncService.getInstance();
-    
+
     // Subscribe to sync progress updates
     const unsubscribe = progressiveSyncService.onSyncProgress((progress) => {
       setCurrentProgress(progress);
       setIsSyncing(true);
-      
+
       // Auto-hide after completion
       if (progress.completed && progress.stepNumber === progress.totalSteps) {
         setTimeout(() => {
@@ -61,9 +77,9 @@ export const SyncProgressProvider: React.FC<SyncProgressProviderProps> = ({ chil
   return (
     <SyncProgressContext.Provider value={contextValue}>
       {children}
-      
+
       {/* Global sync progress indicator */}
-      <ProgressiveSyncIndicator 
+      <ProgressiveSyncIndicator
         visible={showSyncProgress && isSyncing && currentProgress !== null}
         onComplete={() => {
           setIsSyncing(false);
@@ -77,9 +93,11 @@ export const SyncProgressProvider: React.FC<SyncProgressProviderProps> = ({ chil
 export const useSyncProgress = (): SyncProgressContextType => {
   const context = useContext(SyncProgressContext);
   if (context === undefined) {
-    throw new Error('useSyncProgress must be used within a SyncProgressProvider');
+    throw new Error(
+      "useSyncProgress must be used within a SyncProgressProvider",
+    );
   }
   return context;
 };
 
-export default SyncProgressProvider; 
+export default SyncProgressProvider;

@@ -1,16 +1,23 @@
-import { SupabaseService } from "../SupabaseService";
 import { createClient } from "@supabase/supabase-js";
-import { UnifiedDataStore } from "../UnifiedDataStore";
+
 import { useGameStore } from "../../stores/useGameStore";
+import { SupabaseService } from "../SupabaseService";
+import { UnifiedDataStore } from "../UnifiedDataStore";
 
 // Mock dependencies
 jest.mock("@supabase/supabase-js");
 jest.mock("../UnifiedDataStore");
 jest.mock("../../stores/useGameStore");
 
-const mockCreateClient = createClient as jest.MockedFunction<typeof createClient>;
-const MockedUnifiedDataStore = UnifiedDataStore as jest.Mocked<typeof UnifiedDataStore>;
-const mockUseGameStore = useGameStore as jest.MockedFunction<typeof useGameStore>;
+const mockCreateClient = createClient as jest.MockedFunction<
+  typeof createClient
+>;
+const MockedUnifiedDataStore = UnifiedDataStore as jest.Mocked<
+  typeof UnifiedDataStore
+>;
+const mockUseGameStore = useGameStore as jest.MockedFunction<
+  typeof useGameStore
+>;
 
 describe("SupabaseService", () => {
   let service: SupabaseService;
@@ -39,7 +46,7 @@ describe("SupabaseService", () => {
     (SupabaseService as any).instance = undefined;
 
     // Mock localStorage for Node.js environment
-    Object.defineProperty(global, 'localStorage', {
+    Object.defineProperty(global, "localStorage", {
       value: {
         getItem: jest.fn(),
         setItem: jest.fn(),
@@ -50,7 +57,7 @@ describe("SupabaseService", () => {
     });
 
     // Mock window.location.reload
-    Object.defineProperty(global, 'window', {
+    Object.defineProperty(global, "window", {
       value: {
         location: {
           reload: jest.fn(),
@@ -129,7 +136,11 @@ describe("SupabaseService", () => {
       }),
       reset: jest.fn(),
     };
-    (MockedUnifiedDataStore.getInstance as jest.MockedFunction<typeof UnifiedDataStore.getInstance>).mockReturnValue(mockUnifiedStore);
+    (
+      MockedUnifiedDataStore.getInstance as jest.MockedFunction<
+        typeof UnifiedDataStore.getInstance
+      >
+    ).mockReturnValue(mockUnifiedStore);
 
     // Mock useGameStore
     (useGameStore as any).getState = jest.fn().mockReturnValue({
@@ -161,13 +172,13 @@ describe("SupabaseService", () => {
     it("should throw error if environment variables are missing", () => {
       // Reset singleton
       (SupabaseService as any).instance = undefined;
-      
+
       // Temporarily remove env vars
       delete process.env.EXPO_PUBLIC_SUPABASE_URL;
       delete process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
       expect(() => SupabaseService.getInstance()).toThrow(
-        "Missing Supabase environment variables"
+        "Missing Supabase environment variables",
       );
 
       // Restore env vars
@@ -189,7 +200,11 @@ describe("SupabaseService", () => {
         const mockFrom = mockSupabaseClient.from();
         mockFrom.insert.mockResolvedValue({ error: null });
 
-        const result = await service.signUp("test@example.com", "password123", true);
+        const result = await service.signUp(
+          "test@example.com",
+          "password123",
+          true,
+        );
 
         expect(result.user).toEqual(mockUser);
         expect(result.error).toBeNull();
@@ -218,7 +233,7 @@ describe("SupabaseService", () => {
       it("should sign in anonymously successfully", async () => {
         const mockUser = { id: "anon-123", is_anonymous: true };
         const mockSession = { user: mockUser, access_token: "token" };
-        
+
         mockSupabaseClient.auth.signInAnonymously.mockResolvedValue({
           data: { user: mockUser, session: mockSession },
           error: null,
@@ -248,7 +263,7 @@ describe("SupabaseService", () => {
       it("should handle anonymous sign in with captcha", async () => {
         const mockUser = { id: "anon-123", is_anonymous: true };
         const mockSession = { user: mockUser, access_token: "token" };
-        
+
         mockSupabaseClient.auth.signInAnonymously.mockResolvedValue({
           data: { user: mockUser, session: mockSession },
           error: null,
@@ -256,7 +271,12 @@ describe("SupabaseService", () => {
 
         const mockFrom = mockSupabaseClient.from();
         mockFrom.single.mockResolvedValue({
-          data: { id: "anon-123", email: "", is_premium: false, privacy_settings: {} },
+          data: {
+            id: "anon-123",
+            email: "",
+            is_premium: false,
+            privacy_settings: {},
+          },
           error: null,
         });
 
@@ -285,7 +305,7 @@ describe("SupabaseService", () => {
       it("should sign in user successfully", async () => {
         const mockUser = { id: "user-123", email: "test@example.com" };
         const mockSession = { user: mockUser, access_token: "token" };
-        
+
         mockSupabaseClient.auth.signInWithPassword.mockResolvedValue({
           data: { user: mockUser, session: mockSession },
           error: null,
@@ -296,28 +316,36 @@ describe("SupabaseService", () => {
         expect(result.user).toEqual(mockUser);
         expect(result.session).toEqual(mockSession);
         expect(result.error).toBeNull();
-        expect(mockSupabaseClient.auth.signInWithPassword).toHaveBeenCalledWith({
-          email: "test@example.com",
-          password: "password123",
-        });
+        expect(mockSupabaseClient.auth.signInWithPassword).toHaveBeenCalledWith(
+          {
+            email: "test@example.com",
+            password: "password123",
+          },
+        );
       });
 
       it("should sign in with captcha token", async () => {
         const mockUser = { id: "user-123", email: "test@example.com" };
         const mockSession = { user: mockUser, access_token: "token" };
-        
+
         mockSupabaseClient.auth.signInWithPassword.mockResolvedValue({
           data: { user: mockUser, session: mockSession },
           error: null,
         });
 
-        const result = await service.signIn("test@example.com", "password123", "captcha-token");
+        const result = await service.signIn(
+          "test@example.com",
+          "password123",
+          "captcha-token",
+        );
 
-        expect(mockSupabaseClient.auth.signInWithPassword).toHaveBeenCalledWith({
-          email: "test@example.com",
-          password: "password123",
-          options: { captchaToken: "captcha-token" },
-        });
+        expect(mockSupabaseClient.auth.signInWithPassword).toHaveBeenCalledWith(
+          {
+            email: "test@example.com",
+            password: "password123",
+            options: { captchaToken: "captcha-token" },
+          },
+        );
       });
 
       it("should handle sign in errors", async () => {
@@ -327,7 +355,10 @@ describe("SupabaseService", () => {
           error: mockError,
         });
 
-        const result = await service.signIn("test@example.com", "wrongpassword");
+        const result = await service.signIn(
+          "test@example.com",
+          "wrongpassword",
+        );
 
         expect(result.user).toBeNull();
         expect(result.error).toBe(mockError);
@@ -337,7 +368,9 @@ describe("SupabaseService", () => {
     describe("signOut", () => {
       it("should sign out successfully", async () => {
         mockSupabaseClient.auth.signOut.mockResolvedValue({ error: null });
-        mockUnifiedStore.resetForNewAnonymousSession.mockResolvedValue(undefined);
+        mockUnifiedStore.resetForNewAnonymousSession.mockResolvedValue(
+          undefined,
+        );
 
         const result = await service.signOut();
 
@@ -349,7 +382,9 @@ describe("SupabaseService", () => {
       it("should handle sign out errors", async () => {
         const mockError = new Error("Sign out failed");
         mockSupabaseClient.auth.signOut.mockResolvedValue({ error: mockError });
-        mockUnifiedStore.resetForNewAnonymousSession.mockResolvedValue(undefined);
+        mockUnifiedStore.resetForNewAnonymousSession.mockResolvedValue(
+          undefined,
+        );
 
         const result = await service.signOut();
 
@@ -364,7 +399,7 @@ describe("SupabaseService", () => {
 
         // Mock window.location.reload
         const mockReload = jest.fn();
-        Object.defineProperty(window, 'location', {
+        Object.defineProperty(window, "location", {
           value: { reload: mockReload },
           writable: true,
         });
@@ -465,7 +500,7 @@ describe("SupabaseService", () => {
         (service as any).currentAuthState.profile = null;
 
         await expect(service.updateEmailPreferences(true)).rejects.toThrow(
-          "No user profile found"
+          "No user profile found",
         );
       });
     });
@@ -475,7 +510,10 @@ describe("SupabaseService", () => {
         const mockFrom = mockSupabaseClient.from();
         mockFrom.upsert.mockResolvedValue({ error: null });
 
-        const result = await service.createPremiumProfile("user-123", "test@example.com");
+        const result = await service.createPremiumProfile(
+          "user-123",
+          "test@example.com",
+        );
 
         expect(result.error).toBeNull();
         expect(mockFrom.upsert).toHaveBeenCalledWith(
@@ -488,7 +526,7 @@ describe("SupabaseService", () => {
               validated: false,
             }),
           }),
-          { onConflict: "id" }
+          { onConflict: "id" },
         );
       });
 
@@ -497,7 +535,10 @@ describe("SupabaseService", () => {
         const mockFrom = mockSupabaseClient.from();
         mockFrom.upsert.mockResolvedValue({ error: mockError });
 
-        const result = await service.createPremiumProfile("user-123", "test@example.com");
+        const result = await service.createPremiumProfile(
+          "user-123",
+          "test@example.com",
+        );
 
         expect(result.error).toBe(mockError);
       });
@@ -525,7 +566,9 @@ describe("SupabaseService", () => {
         const mockCompressedData = "compressed-data";
 
         mockUnifiedStore.exportData.mockResolvedValue(mockLocalData);
-        mockUnifiedStore.exportCompressedData.mockResolvedValue(mockCompressedData);
+        mockUnifiedStore.exportCompressedData.mockResolvedValue(
+          mockCompressedData,
+        );
 
         const mockFrom = mockSupabaseClient.from();
         mockFrom.upsert.mockResolvedValue({ error: null });
@@ -543,7 +586,7 @@ describe("SupabaseService", () => {
             schema_version: 1,
             is_compressed: true,
           }),
-          { onConflict: "user_id" }
+          { onConflict: "user_id" },
         );
       });
 
@@ -564,13 +607,13 @@ describe("SupabaseService", () => {
         };
 
         const mockFrom = mockSupabaseClient.from();
-        
+
         // First call for user_data
         mockFrom.single.mockResolvedValueOnce({
           data: mockCloudData,
           error: null,
         });
-        
+
         // Second call for user_profiles
         mockFrom.single.mockResolvedValueOnce({
           data: { email: "test@example.com", is_premium: false },
@@ -588,13 +631,13 @@ describe("SupabaseService", () => {
 
       it("should handle missing cloud data gracefully", async () => {
         const mockFrom = mockSupabaseClient.from();
-        
+
         // First call for user_data - no data found
         mockFrom.single.mockResolvedValueOnce({
           data: null,
           error: { code: "PGRST116" }, // No rows found
         });
-        
+
         // Second call for user_profiles - no data found
         mockFrom.single.mockResolvedValueOnce({
           data: null,
@@ -604,9 +647,11 @@ describe("SupabaseService", () => {
         const result = await service.syncCloudDataToLocal();
 
         // When both user data and profile are missing, service signs out user
-        expect(result?.error).toEqual(expect.objectContaining({
-          message: expect.stringContaining("signed out for consistency")
-        }));
+        expect(result?.error).toEqual(
+          expect.objectContaining({
+            message: expect.stringContaining("signed out for consistency"),
+          }),
+        );
       });
 
       it("should handle sync errors", async () => {
@@ -629,7 +674,11 @@ describe("SupabaseService", () => {
       (service as any).currentAuthState = {
         user: { id: "user-123" },
         session: { access_token: "token" },
-        profile: { id: "user-123", email: "test@example.com", is_premium: true },
+        profile: {
+          id: "user-123",
+          email: "test@example.com",
+          is_premium: true,
+        },
         isLoading: false,
       };
     });
@@ -682,7 +731,7 @@ describe("SupabaseService", () => {
             id: "user-123",
             email: "test@example.com",
             is_premium: true,
-          })
+          }),
         );
       });
 
@@ -706,7 +755,7 @@ describe("SupabaseService", () => {
           session: null,
           profile: null,
           isLoading: false, // After initialization, isLoading becomes false
-        })
+        }),
       );
 
       // Update auth state
@@ -719,7 +768,7 @@ describe("SupabaseService", () => {
         expect.objectContaining({
           user: { id: "user-123" },
           isLoading: false,
-        })
+        }),
       );
 
       // Unsubscribe should work
@@ -738,7 +787,7 @@ describe("SupabaseService", () => {
           session: null,
           profile: null,
           isLoading: false, // After initialization, isLoading becomes false
-        })
+        }),
       );
     });
   });
@@ -746,14 +795,16 @@ describe("SupabaseService", () => {
   describe("Function Invocation", () => {
     it("should invoke Supabase function successfully", async () => {
       const mockResponse = { data: { success: true } };
-      
+
       // Mock fetch
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: jest.fn().mockResolvedValue(mockResponse),
       });
 
-      const result = await service.invokeFunction("test-function", { param: "value" });
+      const result = await service.invokeFunction("test-function", {
+        param: "value",
+      });
 
       expect(result.data).toEqual(mockResponse);
       expect(result.error).toBeNull();
@@ -765,7 +816,7 @@ describe("SupabaseService", () => {
             "Content-Type": "application/json",
           }),
           body: JSON.stringify({ param: "value" }),
-        })
+        }),
       );
     });
 
@@ -790,7 +841,7 @@ describe("SupabaseService", () => {
           headers: expect.objectContaining({
             Authorization: "Bearer user-token",
           }),
-        })
+        }),
       );
     });
 
@@ -800,7 +851,11 @@ describe("SupabaseService", () => {
         json: jest.fn().mockResolvedValue({ data: "success" }),
       });
 
-      await service.invokeFunction("test-function", { param: "value" }, "custom-jwt");
+      await service.invokeFunction(
+        "test-function",
+        { param: "value" },
+        "custom-jwt",
+      );
 
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining("/functions/v1/test-function"),
@@ -808,7 +863,7 @@ describe("SupabaseService", () => {
           headers: expect.objectContaining({
             Authorization: "Bearer custom-jwt",
           }),
-        })
+        }),
       );
     });
 
@@ -820,7 +875,9 @@ describe("SupabaseService", () => {
         json: jest.fn().mockResolvedValue({ error: "Function failed" }),
       });
 
-      const result = await service.invokeFunction("test-function", { param: "value" });
+      const result = await service.invokeFunction("test-function", {
+        param: "value",
+      });
 
       expect(result.data).toBeNull();
       expect(result.error).toBe("Function failed");
@@ -830,10 +887,12 @@ describe("SupabaseService", () => {
       const networkError = new Error("Network error");
       global.fetch = jest.fn().mockRejectedValue(networkError);
 
-      const result = await service.invokeFunction("test-function", { param: "value" });
+      const result = await service.invokeFunction("test-function", {
+        param: "value",
+      });
 
       expect(result.data).toBeNull();
       expect(result.error).toBe(networkError);
     });
   });
-}); 
+});

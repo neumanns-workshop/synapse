@@ -140,10 +140,10 @@ describe("GraphVisualization", () => {
   describe("Component Properties", () => {
     it("should be a React functional component", () => {
       const GraphVisualization = require("../GraphVisualization").default;
-      
+
       // Functional components are just functions
       expect(typeof GraphVisualization).toBe("function");
-      
+
       // Should have a length property indicating it accepts props
       expect(GraphVisualization.length).toBeGreaterThanOrEqual(0);
     });
@@ -151,12 +151,12 @@ describe("GraphVisualization", () => {
     it("should not throw when accessing component properties", () => {
       expect(() => {
         const GraphVisualization = require("../GraphVisualization").default;
-        
+
         // Access common React component properties
         const name = GraphVisualization.name;
         const length = GraphVisualization.length;
         const toString = GraphVisualization.toString();
-        
+
         expect(typeof name).toBe("string");
         expect(typeof length).toBe("number");
         expect(typeof toString).toBe("string");
@@ -167,13 +167,13 @@ describe("GraphVisualization", () => {
   describe("Store Integration", () => {
     it("should call useGameStore when imported", () => {
       const { useGameStore } = require("../../stores/useGameStore");
-      
+
       // Reset the mock to track calls
       useGameStore.mockClear();
-      
+
       // Import the component (this should trigger the hooks)
       require("../GraphVisualization");
-      
+
       // The component should be importable (hooks are called during render, not import)
       expect(useGameStore).toBeDefined();
     });
@@ -182,21 +182,25 @@ describe("GraphVisualization", () => {
   describe("Performance Integration", () => {
     it("should have access to performance monitoring utilities", () => {
       const performanceMonitor = require("../../utils/performanceMonitor");
-      
+
       expect(performanceMonitor.startMeasure).toBeDefined();
       expect(performanceMonitor.endMeasure).toBeDefined();
-      expect(performanceMonitor.PerformanceMarks.GRAPH_RENDER).toBe("graph-render");
-      expect(performanceMonitor.PerformanceMeasures.GRAPH_RENDER_TIME).toBe("graph-render-time");
+      expect(performanceMonitor.PerformanceMarks.GRAPH_RENDER).toBe(
+        "graph-render",
+      );
+      expect(performanceMonitor.PerformanceMeasures.GRAPH_RENDER_TIME).toBe(
+        "graph-render-time",
+      );
     });
   });
 
   describe("File Structure Validation", () => {
     it("should have consistent export structure", () => {
       const GraphVisualizationModule = require("../GraphVisualization");
-      
+
       // Should have default export
       expect(GraphVisualizationModule.default).toBeDefined();
-      
+
       // Should not have named exports (typical for React components)
       const keys = Object.keys(GraphVisualizationModule);
       expect(keys).toContain("default");
@@ -211,4 +215,4 @@ describe("GraphVisualization", () => {
       }).not.toThrow();
     });
   });
-}); 
+});

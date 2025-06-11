@@ -106,14 +106,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const syncDataToCloud = async () => {
-    const { ProgressiveSyncService } = await import('../services/ProgressiveSyncService');
+    const { ProgressiveSyncService } = await import(
+      "../services/ProgressiveSyncService"
+    );
     const progressiveSync = ProgressiveSyncService.getInstance();
     const result = await progressiveSync.syncToCloud();
     return { error: result.success ? null : result.error };
   };
 
   const syncDataFromCloud = async () => {
-    const { ProgressiveSyncService } = await import('../services/ProgressiveSyncService');
+    const { ProgressiveSyncService } = await import(
+      "../services/ProgressiveSyncService"
+    );
     const progressiveSync = ProgressiveSyncService.getInstance();
     const result = await progressiveSync.syncFromCloud();
     return { error: result.success ? null : result.error };

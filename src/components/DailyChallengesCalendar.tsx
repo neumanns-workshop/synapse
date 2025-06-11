@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 
 import { Text, Card, useTheme, ActivityIndicator } from "react-native-paper";
-import CustomIcon from "./CustomIcon";
 
+import CustomIcon from "./CustomIcon";
 import { allWordCollections } from "../features/wordCollections";
 import type { WordCollection } from "../features/wordCollections/collection.types";
 import { dailyChallengesService } from "../services/DailyChallengesService";

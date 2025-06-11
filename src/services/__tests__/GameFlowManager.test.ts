@@ -1,6 +1,6 @@
-import { GameFlowManager, gameFlowManager } from "../GameFlowManager";
 import { useGameStore } from "../../stores/useGameStore";
 import { dailyChallengesService } from "../DailyChallengesService";
+import { GameFlowManager, gameFlowManager } from "../GameFlowManager";
 
 // Mock dependencies
 jest.mock("../../stores/useGameStore");
@@ -20,8 +20,12 @@ jest.mock("../StorageAdapter", () => ({
   clearCurrentGame: jest.fn(),
 }));
 
-const mockedUseGameStore = useGameStore as jest.MockedFunction<typeof useGameStore>;
-const mockedDailyChallengesService = dailyChallengesService as jest.Mocked<typeof dailyChallengesService>;
+const mockedUseGameStore = useGameStore as jest.MockedFunction<
+  typeof useGameStore
+>;
+const mockedDailyChallengesService = dailyChallengesService as jest.Mocked<
+  typeof dailyChallengesService
+>;
 
 describe("GameFlowManager", () => {
   let manager: GameFlowManager;
@@ -41,13 +45,15 @@ describe("GameFlowManager", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Reset singleton instance for testing
     (GameFlowManager as any).instance = undefined;
     manager = GameFlowManager.getInstance();
 
     // Mock useGameStore.getState()
-    (mockedUseGameStore as any).getState = jest.fn().mockReturnValue(createMockGameState());
+    (mockedUseGameStore as any).getState = jest
+      .fn()
+      .mockReturnValue(createMockGameState());
 
     // Mock daily challenges service
     mockedDailyChallengesService.isPremiumUser.mockResolvedValue(false);
@@ -71,7 +77,7 @@ describe("GameFlowManager", () => {
       // Mock storage adapter functions
       const { unifiedDataStore } = require("../UnifiedDataStore");
       const storageAdapter = require("../StorageAdapter");
-      
+
       unifiedDataStore.isTutorialComplete.mockResolvedValue(true);
       storageAdapter.loadGameHistory.mockResolvedValue([]);
       storageAdapter.loadCurrentGame.mockResolvedValue(null);
@@ -80,14 +86,16 @@ describe("GameFlowManager", () => {
     it("should analyze player state correctly for new user", async () => {
       const { unifiedDataStore } = require("../UnifiedDataStore");
       const storageAdapter = require("../StorageAdapter");
-      
+
       unifiedDataStore.isTutorialComplete.mockResolvedValue(false);
       storageAdapter.loadGameHistory.mockResolvedValue([]);
 
-      (mockedUseGameStore as any).getState.mockReturnValue(createMockGameState({
-        remainingFreeGames: 5,
-        hasPendingChallenge: false,
-      }));
+      (mockedUseGameStore as any).getState.mockReturnValue(
+        createMockGameState({
+          remainingFreeGames: 5,
+          hasPendingChallenge: false,
+        }),
+      );
 
       const state = await manager.analyzePlayerState();
 
@@ -107,14 +115,16 @@ describe("GameFlowManager", () => {
     it("should analyze player state correctly for returning user", async () => {
       const { unifiedDataStore } = require("../UnifiedDataStore");
       const storageAdapter = require("../StorageAdapter");
-      
+
       unifiedDataStore.isTutorialComplete.mockResolvedValue(true);
       storageAdapter.loadGameHistory.mockResolvedValue([{ id: "game1" }]);
 
-      (mockedUseGameStore as any).getState.mockReturnValue(createMockGameState({
-        remainingFreeGames: 2,
-        hasPendingChallenge: true,
-      }));
+      (mockedUseGameStore as any).getState.mockReturnValue(
+        createMockGameState({
+          remainingFreeGames: 2,
+          hasPendingChallenge: true,
+        }),
+      );
 
       const state = await manager.analyzePlayerState();
 
@@ -133,7 +143,7 @@ describe("GameFlowManager", () => {
 
     it("should detect unfinished games", async () => {
       const storageAdapter = require("../StorageAdapter");
-      
+
       storageAdapter.loadCurrentGame
         .mockResolvedValueOnce({ gameStatus: "playing" }) // Regular game
         .mockResolvedValueOnce(null); // Daily challenge
@@ -146,7 +156,7 @@ describe("GameFlowManager", () => {
 
     it("should detect unfinished daily challenges", async () => {
       const storageAdapter = require("../StorageAdapter");
-      
+
       storageAdapter.loadCurrentGame
         .mockResolvedValueOnce(null) // Regular game
         .mockResolvedValueOnce({
@@ -171,7 +181,7 @@ describe("GameFlowManager", () => {
 
     it("should clear expired daily challenges", async () => {
       const storageAdapter = require("../StorageAdapter");
-      
+
       storageAdapter.loadCurrentGame
         .mockResolvedValueOnce(null) // Regular game
         .mockResolvedValueOnce({
@@ -198,7 +208,7 @@ describe("GameFlowManager", () => {
   describe("determineGameFlow", () => {
     beforeEach(() => {
       // Mock analyzePlayerState to return a default state
-      jest.spyOn(manager, 'analyzePlayerState').mockResolvedValue({
+      jest.spyOn(manager, "analyzePlayerState").mockResolvedValue({
         isFirstTimeUser: false,
         hasGameHistory: true,
         hasPendingPlayerChallenge: false,
@@ -254,7 +264,7 @@ describe("GameFlowManager", () => {
       });
 
       it("should show tutorial first for new users", async () => {
-        jest.spyOn(manager, 'analyzePlayerState').mockResolvedValue({
+        jest.spyOn(manager, "analyzePlayerState").mockResolvedValue({
           isFirstTimeUser: true,
           hasGameHistory: false,
           hasPendingPlayerChallenge: false,
@@ -274,7 +284,7 @@ describe("GameFlowManager", () => {
       });
 
       it("should show news first when needed", async () => {
-        jest.spyOn(manager, 'analyzePlayerState').mockResolvedValue({
+        jest.spyOn(manager, "analyzePlayerState").mockResolvedValue({
           isFirstTimeUser: false,
           hasGameHistory: false,
           hasPendingPlayerChallenge: false,
@@ -296,7 +306,7 @@ describe("GameFlowManager", () => {
 
     describe("Landing Page Entry", () => {
       it("should show tutorial for new users", async () => {
-        jest.spyOn(manager, 'analyzePlayerState').mockResolvedValue({
+        jest.spyOn(manager, "analyzePlayerState").mockResolvedValue({
           isFirstTimeUser: true,
           hasGameHistory: false,
           hasPendingPlayerChallenge: false,
@@ -314,7 +324,7 @@ describe("GameFlowManager", () => {
       });
 
       it("should show news when needed", async () => {
-        jest.spyOn(manager, 'analyzePlayerState').mockResolvedValue({
+        jest.spyOn(manager, "analyzePlayerState").mockResolvedValue({
           isFirstTimeUser: false,
           hasGameHistory: false,
           hasPendingPlayerChallenge: false,
@@ -332,7 +342,7 @@ describe("GameFlowManager", () => {
       });
 
       it("should restore unfinished regular game", async () => {
-        jest.spyOn(manager, 'analyzePlayerState').mockResolvedValue({
+        jest.spyOn(manager, "analyzePlayerState").mockResolvedValue({
           isFirstTimeUser: false,
           hasGameHistory: true,
           hasPendingPlayerChallenge: false,
@@ -350,7 +360,7 @@ describe("GameFlowManager", () => {
       });
 
       it("should restore unfinished daily challenge", async () => {
-        jest.spyOn(manager, 'analyzePlayerState').mockResolvedValue({
+        jest.spyOn(manager, "analyzePlayerState").mockResolvedValue({
           isFirstTimeUser: false,
           hasGameHistory: true,
           hasPendingPlayerChallenge: false,
@@ -368,16 +378,18 @@ describe("GameFlowManager", () => {
       });
 
       it("should start daily challenge when available", async () => {
-        (mockedUseGameStore as any).getState.mockReturnValue(createMockGameState({
-          currentDailyChallenge: {
-            id: "daily-123",
-            date: "2024-01-01",
-            startWord: "start",
-            targetWord: "target",
-            optimalPathLength: 3,
-          },
-          hasPlayedTodaysChallenge: false,
-        }));
+        (mockedUseGameStore as any).getState.mockReturnValue(
+          createMockGameState({
+            currentDailyChallenge: {
+              id: "daily-123",
+              date: "2024-01-01",
+              startWord: "start",
+              targetWord: "target",
+              optimalPathLength: 3,
+            },
+            hasPlayedTodaysChallenge: false,
+          }),
+        );
 
         const decision = await manager.determineGameFlow("landing");
 
@@ -398,7 +410,7 @@ describe("GameFlowManager", () => {
       });
 
       it("should start random game when free games available", async () => {
-        jest.spyOn(manager, 'analyzePlayerState').mockResolvedValue({
+        jest.spyOn(manager, "analyzePlayerState").mockResolvedValue({
           isFirstTimeUser: false,
           hasGameHistory: true,
           hasPendingPlayerChallenge: false,
@@ -416,7 +428,7 @@ describe("GameFlowManager", () => {
       });
 
       it("should show upgrade prompt when no free games left", async () => {
-        jest.spyOn(manager, 'analyzePlayerState').mockResolvedValue({
+        jest.spyOn(manager, "analyzePlayerState").mockResolvedValue({
           isFirstTimeUser: false,
           hasGameHistory: true,
           hasPendingPlayerChallenge: false,
@@ -435,7 +447,8 @@ describe("GameFlowManager", () => {
         expect(decision).toEqual({
           action: "upgradePrompt",
           showUpgradePrompt: true,
-          message: "You've reached your daily limit. Upgrade to a Galaxy Brain account for unlimited play!",
+          message:
+            "You've reached your daily limit. Upgrade to a Galaxy Brain account for unlimited play!",
         });
       });
     });
@@ -484,7 +497,9 @@ describe("GameFlowManager", () => {
         isValid: true,
       });
 
-      const result = manager.parseEntryUrl("https://example.com/challenge?start=start&target=target");
+      const result = manager.parseEntryUrl(
+        "https://example.com/challenge?start=start&target=target",
+      );
 
       expect(result).toEqual({
         entryType: "playerChallenge",
@@ -535,7 +550,10 @@ describe("GameFlowManager", () => {
         targetWord: "target",
       });
 
-      expect(mockGameStore.startChallengeGame).toHaveBeenCalledWith("start", "target");
+      expect(mockGameStore.startChallengeGame).toHaveBeenCalledWith(
+        "start",
+        "target",
+      );
     });
 
     it("should not execute player challenge without words", async () => {
@@ -574,7 +592,7 @@ describe("GameFlowManager", () => {
 
       expect(mockGameStore.showUpgradePrompt).toHaveBeenCalledWith(
         "Custom upgrade message",
-        "freeGamesLimited"
+        "freeGamesLimited",
       );
     });
 
@@ -583,7 +601,7 @@ describe("GameFlowManager", () => {
 
       expect(mockGameStore.showUpgradePrompt).toHaveBeenCalledWith(
         "You've reached your daily limit. Upgrade to a Galaxy Brain account for unlimited play!",
-        "freeGamesLimited"
+        "freeGamesLimited",
       );
     });
   });
@@ -592,10 +610,16 @@ describe("GameFlowManager", () => {
     it("should handle storage errors gracefully in analyzePlayerState", async () => {
       const { unifiedDataStore } = require("../UnifiedDataStore");
       const storageAdapter = require("../StorageAdapter");
-      
-      unifiedDataStore.isTutorialComplete.mockRejectedValue(new Error("Storage error"));
-      storageAdapter.loadGameHistory.mockRejectedValue(new Error("Storage error"));
-      storageAdapter.loadCurrentGame.mockRejectedValue(new Error("Storage error"));
+
+      unifiedDataStore.isTutorialComplete.mockRejectedValue(
+        new Error("Storage error"),
+      );
+      storageAdapter.loadGameHistory.mockRejectedValue(
+        new Error("Storage error"),
+      );
+      storageAdapter.loadCurrentGame.mockRejectedValue(
+        new Error("Storage error"),
+      );
 
       const state = await manager.analyzePlayerState();
 
@@ -608,7 +632,7 @@ describe("GameFlowManager", () => {
 
     it("should handle missing daily challenge gracefully", async () => {
       const storageAdapter = require("../StorageAdapter");
-      
+
       storageAdapter.loadCurrentGame
         .mockResolvedValueOnce(null) // Regular game
         .mockResolvedValueOnce({
@@ -625,4 +649,4 @@ describe("GameFlowManager", () => {
       expect(storageAdapter.clearCurrentGame).toHaveBeenCalledWith(true);
     });
   });
-}); 
+});

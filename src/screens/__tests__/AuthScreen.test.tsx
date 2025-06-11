@@ -78,7 +78,7 @@ jest.mock("react-native-reanimated", () => {
     typeof updater === "function" ? updater() : {},
   );
   Reanimated.withTiming = jest.fn((toValue, config, callback) => {
-    if (callback && typeof callback === 'function') {
+    if (callback && typeof callback === "function") {
       callback({ finished: true });
     }
     return toValue;
@@ -134,7 +134,9 @@ describe("AuthScreen", () => {
     });
 
     it("should import all dependencies without errors", () => {
-      expect(() => require("@react-native-async-storage/async-storage")).not.toThrow();
+      expect(() =>
+        require("@react-native-async-storage/async-storage"),
+      ).not.toThrow();
       expect(() => require("@hcaptcha/react-hcaptcha")).not.toThrow();
       expect(() => require("../../components/CustomIcon")).not.toThrow();
     });
@@ -143,10 +145,10 @@ describe("AuthScreen", () => {
   describe("Component Properties", () => {
     it("should be a React functional component", () => {
       const { AuthScreen } = require("../AuthScreen");
-      
+
       // Functional components are just functions
       expect(typeof AuthScreen).toBe("function");
-      
+
       // Should have a length property indicating it accepts props
       expect(AuthScreen.length).toBeGreaterThanOrEqual(0);
     });
@@ -154,12 +156,12 @@ describe("AuthScreen", () => {
     it("should not throw when accessing component properties", () => {
       expect(() => {
         const { AuthScreen } = require("../AuthScreen");
-        
+
         // Access common React component properties
         const name = AuthScreen.name;
         const length = AuthScreen.length;
         const toString = AuthScreen.toString();
-        
+
         expect(typeof name).toBe("string");
         expect(typeof length).toBe("number");
         expect(typeof toString).toBe("string");
@@ -170,20 +172,20 @@ describe("AuthScreen", () => {
   describe("Service Integration", () => {
     it("should call SupabaseService.getInstance when imported", () => {
       const SupabaseService = require("../../services/SupabaseService").default;
-      
+
       // Import the component (this should trigger service initialization)
       require("../AuthScreen");
-      
+
       // The service should be available
       expect(SupabaseService.getInstance).toBeDefined();
     });
 
     it("should call StripeService.getInstance when imported", () => {
       const StripeService = require("../../services/StripeService").default;
-      
+
       // Import the component
       require("../AuthScreen");
-      
+
       // The service should be available
       expect(StripeService.getInstance).toBeDefined();
     });
@@ -192,10 +194,10 @@ describe("AuthScreen", () => {
   describe("File Structure Validation", () => {
     it("should have consistent export structure", () => {
       const AuthScreenModule = require("../AuthScreen");
-      
+
       // Should have AuthScreen export
       expect(AuthScreenModule.AuthScreen).toBeDefined();
-      
+
       // Check for expected exports
       const keys = Object.keys(AuthScreenModule);
       expect(keys).toContain("AuthScreen");
@@ -249,7 +251,7 @@ describe("AuthScreen", () => {
     it("should accept required props without errors", () => {
       expect(() => {
         const { AuthScreen } = require("../AuthScreen");
-        
+
         // Component should accept the expected props interface
         // This tests that the component can be called with proper props
         expect(typeof AuthScreen).toBe("function");
@@ -259,7 +261,7 @@ describe("AuthScreen", () => {
     it("should handle optional props", () => {
       expect(() => {
         const { AuthScreen } = require("../AuthScreen");
-        
+
         // Component should handle optional props like defaultMode, initialEmail, etc.
         expect(typeof AuthScreen).toBe("function");
       }).not.toThrow();
@@ -286,7 +288,7 @@ describe("AuthScreen", () => {
   describe("TypeScript Compatibility", () => {
     it("should have proper TypeScript exports", () => {
       const AuthScreenModule = require("../AuthScreen");
-      
+
       // Should export AuthScreen as a named export
       expect(AuthScreenModule.AuthScreen).toBeDefined();
       expect(typeof AuthScreenModule.AuthScreen).toBe("function");
@@ -295,10 +297,10 @@ describe("AuthScreen", () => {
     it("should support TypeScript prop types", () => {
       expect(() => {
         const { AuthScreen } = require("../AuthScreen");
-        
+
         // Component should be TypeScript compatible
         expect(AuthScreen).toBeDefined();
       }).not.toThrow();
     });
   });
-}); 
+});

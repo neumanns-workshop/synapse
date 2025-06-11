@@ -13,17 +13,15 @@ export const preloadCriticalResources = (): void => {
   }
 
   // Preload important fonts
-  const fonts = [
-    '/assets/fonts/MaterialCommunityIcons.ttf',
-  ];
+  const fonts = ["/assets/fonts/MaterialCommunityIcons.ttf"];
 
-  fonts.forEach(font => {
-    const link = document.createElement('link');
-    link.rel = 'preload';
+  fonts.forEach((font) => {
+    const link = document.createElement("link");
+    link.rel = "preload";
     link.href = font;
-    link.as = 'font';
-    link.type = 'font/ttf';
-    link.crossOrigin = 'anonymous';
+    link.as = "font";
+    link.type = "font/ttf";
+    link.crossOrigin = "anonymous";
     document.head.appendChild(link);
   });
 };
@@ -37,26 +35,48 @@ export const addWebMetaTags = (): void => {
   }
 
   const metaTags = [
-    { name: 'description', content: 'Synapse - A word navigation puzzle game where you find paths between words using semantic similarity.' },
-    { name: 'keywords', content: 'word game, puzzle, semantic, vocabulary, brain training, word association' },
-    { name: 'author', content: 'Synapse Game' },
-    { name: 'viewport', content: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' },
-    { name: 'theme-color', content: '#6750A4' },
-    { property: 'og:title', content: 'Synapse - Word Navigation Game' },
-    { property: 'og:description', content: 'Find paths between words using semantic similarity in this engaging puzzle game.' },
-    { property: 'og:type', content: 'website' },
-    { property: 'og:image', content: '/assets/icon.png' },
-    { name: 'twitter:card', content: 'summary_large_image' },
-    { name: 'twitter:title', content: 'Synapse - Word Navigation Game' },
-    { name: 'twitter:description', content: 'Find paths between words using semantic similarity in this engaging puzzle game.' },
+    {
+      name: "description",
+      content:
+        "Synapse - A word navigation puzzle game where you find paths between words using semantic similarity.",
+    },
+    {
+      name: "keywords",
+      content:
+        "word game, puzzle, semantic, vocabulary, brain training, word association",
+    },
+    { name: "author", content: "Synapse Game" },
+    {
+      name: "viewport",
+      content:
+        "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
+    },
+    { name: "theme-color", content: "#6750A4" },
+    { property: "og:title", content: "Synapse - Word Navigation Game" },
+    {
+      property: "og:description",
+      content:
+        "Find paths between words using semantic similarity in this engaging puzzle game.",
+    },
+    { property: "og:type", content: "website" },
+    { property: "og:image", content: "/assets/icon.png" },
+    { name: "twitter:card", content: "summary_large_image" },
+    { name: "twitter:title", content: "Synapse - Word Navigation Game" },
+    {
+      name: "twitter:description",
+      content:
+        "Find paths between words using semantic similarity in this engaging puzzle game.",
+    },
   ];
 
   metaTags.forEach(({ name, property, content }) => {
-    const existingTag = document.querySelector(`meta[${name ? 'name' : 'property'}="${name || property}"]`);
+    const existingTag = document.querySelector(
+      `meta[${name ? "name" : "property"}="${name || property}"]`,
+    );
     if (!existingTag) {
-      const meta = document.createElement('meta');
+      const meta = document.createElement("meta");
       if (name) meta.name = name;
-      if (property) meta.setAttribute('property', property);
+      if (property) meta.setAttribute("property", property);
       meta.content = content;
       document.head.appendChild(meta);
     }
@@ -72,24 +92,24 @@ export const optimizeImageLoading = (): void => {
   }
 
   // Add support for WebP and AVIF images
-  const images = document.querySelectorAll('img[data-src]');
-  
-  if ('IntersectionObserver' in window) {
+  const images = document.querySelectorAll("img[data-src]");
+
+  if ("IntersectionObserver" in window) {
     const imageObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         if (entry.isIntersecting) {
           const img = entry.target as HTMLImageElement;
           const src = img.dataset.src;
           if (src) {
             img.src = src;
-            img.removeAttribute('data-src');
+            img.removeAttribute("data-src");
             imageObserver.unobserve(img);
           }
         }
       });
     });
 
-    images.forEach(img => imageObserver.observe(img));
+    images.forEach((img) => imageObserver.observe(img));
   }
 };
 
@@ -108,29 +128,31 @@ export const enablePWAFeatures = (): void => {
   if (!existingManifest) {
     // Only add manifest if we can verify it exists
     // For now, skip automatic manifest injection to avoid 404 errors
-    console.debug('Skipping manifest.json - file not found or not configured');
+    console.debug("Skipping manifest.json - file not found or not configured");
   }
 
   // Register service worker for caching (only if it exists)
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
       // Check if service worker file exists before registering
-      fetch('/service-worker.js', { method: 'HEAD' })
-        .then(response => {
+      fetch("/service-worker.js", { method: "HEAD" })
+        .then((response) => {
           if (response.ok) {
-            return navigator.serviceWorker.register('/service-worker.js');
+            return navigator.serviceWorker.register("/service-worker.js");
           } else {
-            console.debug('Skipping service worker registration - file not found');
+            console.debug(
+              "Skipping service worker registration - file not found",
+            );
             return null;
           }
         })
-        .then(registration => {
+        .then((registration) => {
           if (registration) {
-            console.log('SW registered: ', registration);
+            console.log("SW registered: ", registration);
           }
         })
-        .catch(registrationError => {
-          console.debug('SW registration failed: ', registrationError);
+        .catch((registrationError) => {
+          console.debug("SW registration failed: ", registrationError);
         });
     });
   }
@@ -151,17 +173,19 @@ export const initializeWebOptimizations = (): void => {
   enablePWAFeatures();
 
   // Add performance observer for monitoring
-  if ('PerformanceObserver' in window) {
+  if ("PerformanceObserver" in window) {
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         // Log slow operations in development
         if (__DEV__ && entry.duration > 100) {
-          console.warn(`Slow operation detected: ${entry.name} took ${entry.duration}ms`);
+          console.warn(
+            `Slow operation detected: ${entry.name} took ${entry.duration}ms`,
+          );
         }
       });
     });
 
-    observer.observe({ entryTypes: ['measure', 'navigation'] });
+    observer.observe({ entryTypes: ["measure", "navigation"] });
   }
-}; 
+};

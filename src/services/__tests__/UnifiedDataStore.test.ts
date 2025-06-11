@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { UnifiedDataStore } from "../UnifiedDataStore";
-import type { GameReport } from "../../utils/gameReportUtils";
+
 import type { DailyChallengeProgress } from "../../types/dailyChallenges";
+import type { GameReport } from "../../utils/gameReportUtils";
+import { UnifiedDataStore } from "../UnifiedDataStore";
 
 // Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage");
@@ -37,18 +38,18 @@ describe("UnifiedDataStore", () => {
     // Clear all mocks
     jest.clearAllMocks();
     mockAsyncStorage.clear();
-    
+
     // Reset all mock implementations to default behavior
     mockAsyncStorage.getItem.mockResolvedValue(null);
     mockAsyncStorage.setItem.mockResolvedValue(undefined);
     mockAsyncStorage.removeItem.mockResolvedValue(undefined);
-    
+
     // Reset singleton instance
     (UnifiedDataStore as any).instance = undefined;
-    
+
     // Get fresh instance
     store = UnifiedDataStore.getInstance();
-    
+
     // Mock console methods to avoid noise in tests
     jest.spyOn(console, "log").mockImplementation();
     jest.spyOn(console, "error").mockImplementation();
@@ -72,9 +73,9 @@ describe("UnifiedDataStore", () => {
   describe("Data Loading and Initialization", () => {
     it("should create default data structure for new users", async () => {
       mockAsyncStorage.getItem.mockResolvedValue(null);
-      
+
       const data = await store.loadData();
-      
+
       expect(data.user.isPremium).toBe(false);
       expect(data.user.tutorialComplete).toBe(false);
       expect(data.stats.totalGamesPlayed).toBe(0);
@@ -92,11 +93,11 @@ describe("UnifiedDataStore", () => {
         },
         // Other compressed data...
       };
-      
+
       // Mock the decompressed result
       const mockDecompressedData = {
-        user: { 
-          id: "test-user", 
+        user: {
+          id: "test-user",
           isPremium: true,
           tutorialComplete: false,
           hasPlayedBefore: true,
@@ -109,7 +110,7 @@ describe("UnifiedDataStore", () => {
             dataCollection: false,
           },
         },
-        stats: { 
+        stats: {
           totalGamesPlayed: 5,
           totalWins: 3,
           totalGaveUps: 1,
@@ -117,7 +118,7 @@ describe("UnifiedDataStore", () => {
           cumulativeMoveAccuracySum: 400,
         },
         gameHistory: [],
-        achievements: { 
+        achievements: {
           unlockedIds: ["test-achievement"],
           viewedIds: [],
           unlockTimestamps: {},
@@ -134,7 +135,7 @@ describe("UnifiedDataStore", () => {
         dailyChallenges: {
           progress: {},
           freeGamesRemaining: 2,
-          lastResetDate: new Date().toISOString().split('T')[0],
+          lastResetDate: new Date().toISOString().split("T")[0],
         },
         news: {
           readArticleIds: [],
@@ -145,22 +146,24 @@ describe("UnifiedDataStore", () => {
           challenge: null,
           temp: null,
         },
-        meta: { 
-          version: "1.0.0", 
+        meta: {
+          version: "1.0.0",
           schemaVersion: 1,
           lastSyncAt: Date.now(),
           lastBackupAt: Date.now(),
         },
       };
-      
+
       // Update the decompress mock to return our test data
       const { DataCompressor } = require("../../utils/dataCompression");
       DataCompressor.decompress.mockReturnValue(mockDecompressedData);
-      
-      mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify(mockStoredData));
-      
+
+      mockAsyncStorage.getItem.mockResolvedValue(
+        JSON.stringify(mockStoredData),
+      );
+
       const data = await store.loadData();
-      
+
       expect(data.user.isPremium).toBe(true);
       expect(data.stats.totalGamesPlayed).toBe(5);
       expect(data.achievements.unlockedIds).toContain("test-achievement");
@@ -168,9 +171,9 @@ describe("UnifiedDataStore", () => {
 
     it("should handle corrupted data gracefully", async () => {
       mockAsyncStorage.getItem.mockResolvedValue("invalid-json");
-      
+
       const data = await store.loadData();
-      
+
       // Should fall back to default data
       expect(data.user.isPremium).toBe(false);
       expect(data.stats.totalGamesPlayed).toBe(0);
@@ -181,11 +184,13 @@ describe("UnifiedDataStore", () => {
         user: { id: "test" },
         // Missing other required fields
       };
-      
-      mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify(incompleteData));
-      
+
+      mockAsyncStorage.getItem.mockResolvedValue(
+        JSON.stringify(incompleteData),
+      );
+
       const data = await store.loadData();
-      
+
       // Should have all required fields with defaults
       expect(data.user.isPremium).toBeDefined();
       expect(data.stats).toBeDefined();
@@ -204,10 +209,10 @@ describe("UnifiedDataStore", () => {
 
     it("should save data with compression", async () => {
       await store.saveData();
-      
+
       expect(mockAsyncStorage.setItem).toHaveBeenCalledWith(
         "synapse_unified_data_v1",
-        expect.any(String)
+        expect.any(String),
       );
     });
 
@@ -215,13 +220,13 @@ describe("UnifiedDataStore", () => {
       const beforeSave = Date.now();
       await store.saveData();
       const data = await store.getData();
-      
+
       expect(data.user.lastActiveAt).toBeGreaterThanOrEqual(beforeSave);
     });
 
     it("should handle save errors gracefully", async () => {
       mockAsyncStorage.setItem.mockRejectedValue(new Error("Storage full"));
-      
+
       await expect(store.saveData()).rejects.toThrow("Storage full");
     });
   });
@@ -255,7 +260,7 @@ describe("UnifiedDataStore", () => {
 
       await store.addGameToHistory(gameReport);
       const history = await store.getGameHistory();
-      
+
       expect(history).toHaveLength(1);
       expect(history[0]).toEqual(gameReport);
     });
@@ -321,7 +326,7 @@ describe("UnifiedDataStore", () => {
 
       await store.updateStatsOnGameEnd(gameReport);
       const stats = await store.getLifetimeStats();
-      
+
       expect(stats.totalGamesPlayed).toBe(1);
       expect(stats.totalWins).toBe(1);
       expect(stats.totalGaveUps).toBe(0);
@@ -351,7 +356,7 @@ describe("UnifiedDataStore", () => {
 
       await store.updateStatsOnGameEnd(gameReport);
       const stats = await store.getLifetimeStats();
-      
+
       expect(stats.totalGamesPlayed).toBe(1);
       expect(stats.totalWins).toBe(0);
       expect(stats.totalGaveUps).toBe(1);
@@ -366,7 +371,7 @@ describe("UnifiedDataStore", () => {
 
     it("should unlock achievements", async () => {
       const result = await store.unlockAchievement("test-achievement");
-      
+
       expect(result).toBe(true);
       const unlocked = await store.getUnlockedAchievements();
       expect(unlocked).toContain("test-achievement");
@@ -375,16 +380,18 @@ describe("UnifiedDataStore", () => {
     it("should not unlock the same achievement twice", async () => {
       await store.unlockAchievement("test-achievement");
       const result = await store.unlockAchievement("test-achievement");
-      
+
       expect(result).toBe(false);
       const unlocked = await store.getUnlockedAchievements();
-      expect(unlocked.filter(id => id === "test-achievement")).toHaveLength(1);
+      expect(unlocked.filter((id) => id === "test-achievement")).toHaveLength(
+        1,
+      );
     });
 
     it("should track achievement view status", async () => {
       await store.unlockAchievement("test-achievement");
       await store.markAchievementAsViewed("test-achievement");
-      
+
       const viewed = await store.getViewedAchievementIds();
       expect(viewed).toContain("test-achievement");
     });
@@ -392,8 +399,9 @@ describe("UnifiedDataStore", () => {
     it("should handle progressive achievements", async () => {
       await store.incrementProgressiveAchievement("progressive-test");
       await store.incrementProgressiveAchievement("progressive-test");
-      
-      const count = await store.getProgressiveAchievementCount("progressive-test");
+
+      const count =
+        await store.getProgressiveAchievementCount("progressive-test");
       expect(count).toBe(2);
     });
   });
@@ -415,13 +423,18 @@ describe("UnifiedDataStore", () => {
         gameStatus: "playing" as const,
         optimalChoices: [],
         backtrackHistory: [],
-        pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+        pathDisplayMode: {
+          player: true,
+          optimal: false,
+          suggested: false,
+          ai: false,
+        },
         startTime: Date.now(),
       };
 
       await store.saveCurrentGame(gameState, "regular");
       const loaded = await store.loadCurrentGame("regular");
-      
+
       expect(loaded).toEqual(gameState);
     });
 
@@ -436,7 +449,12 @@ describe("UnifiedDataStore", () => {
         gameStatus: "playing" as const,
         optimalChoices: [],
         backtrackHistory: [],
-        pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+        pathDisplayMode: {
+          player: true,
+          optimal: false,
+          suggested: false,
+          ai: false,
+        },
         startTime: Date.now(),
       };
 
@@ -450,17 +468,22 @@ describe("UnifiedDataStore", () => {
         gameStatus: "playing" as const,
         optimalChoices: [],
         backtrackHistory: [],
-        pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+        pathDisplayMode: {
+          player: true,
+          optimal: false,
+          suggested: false,
+          ai: false,
+        },
         startTime: Date.now(),
         isChallenge: true,
       };
 
       await store.saveCurrentGame(regularGame, "regular");
       await store.saveCurrentGame(challengeGame, "challenge");
-      
+
       const loadedRegular = await store.loadCurrentGame("regular");
       const loadedChallenge = await store.loadCurrentGame("challenge");
-      
+
       expect(loadedRegular?.startWord).toBe("start1");
       expect(loadedChallenge?.startWord).toBe("start2");
     });
@@ -476,13 +499,18 @@ describe("UnifiedDataStore", () => {
         gameStatus: "playing" as const,
         optimalChoices: [],
         backtrackHistory: [],
-        pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+        pathDisplayMode: {
+          player: true,
+          optimal: false,
+          suggested: false,
+          ai: false,
+        },
         startTime: Date.now(),
       };
 
       await store.saveCurrentGame(gameState, "regular");
       await store.clearCurrentGame("regular");
-      
+
       const loaded = await store.loadCurrentGame("regular");
       expect(loaded).toBeNull();
     });
@@ -497,7 +525,7 @@ describe("UnifiedDataStore", () => {
     it("should record words for collections", async () => {
       await store.recordWordForCollection("test-collection", "word1");
       await store.recordWordForCollection("test-collection", "word2");
-      
+
       const progress = await store.getCollectionProgress();
       expect(progress["test-collection"].collectedWords).toContain("word1");
       expect(progress["test-collection"].collectedWords).toContain("word2");
@@ -506,14 +534,17 @@ describe("UnifiedDataStore", () => {
     it("should not duplicate words in collections", async () => {
       await store.recordWordForCollection("test-collection", "word1");
       await store.recordWordForCollection("test-collection", "word1");
-      
+
       const progress = await store.getCollectionProgress();
-      expect(progress["test-collection"].collectedWords.filter(w => w === "word1")).toHaveLength(1);
+      expect(
+        progress["test-collection"].collectedWords.filter((w) => w === "word1"),
+      ).toHaveLength(1);
     });
 
     it("should track collection completion", async () => {
-      const wasCompleted = await store.markWordCollectionAsCompleted("test-collection");
-      
+      const wasCompleted =
+        await store.markWordCollectionAsCompleted("test-collection");
+
       expect(wasCompleted).toBe(true);
       const completed = await store.getCompletedWordCollections();
       expect(completed).toContain("test-collection");
@@ -538,7 +569,7 @@ describe("UnifiedDataStore", () => {
 
       await store.updateDailyChallengeProgress("daily-1", progress);
       const allProgress = await store.getDailyChallengeProgress();
-      
+
       expect(allProgress["daily-1"]).toEqual(progress);
     });
 
@@ -554,14 +585,14 @@ describe("UnifiedDataStore", () => {
       // Consume all free games
       await store.consumeFreeGame();
       await store.consumeFreeGame();
-      
+
       expect(await store.getRemainingFreeGames()).toBe(0);
-      
+
       // Simulate next day by calling the reset logic
       const data = await store.getData();
       data.dailyChallenges.freeGamesRemaining = 2;
       await store.saveData();
-      
+
       expect(await store.getRemainingFreeGames()).toBe(2);
     });
   });
@@ -574,7 +605,7 @@ describe("UnifiedDataStore", () => {
 
     it("should manage premium status", async () => {
       expect(await store.isPremiumUser()).toBe(false);
-      
+
       await store.setPremiumStatus(true);
       expect(await store.isPremiumUser()).toBe(true);
     });
@@ -589,7 +620,7 @@ describe("UnifiedDataStore", () => {
 
       await store.setPurchaseInfo(purchaseInfo);
       const retrieved = await store.getPurchaseInfo();
-      
+
       expect(retrieved).toEqual(purchaseInfo);
     });
   });
@@ -603,13 +634,13 @@ describe("UnifiedDataStore", () => {
     it("should manage user email", async () => {
       await store.setEmail("test@example.com");
       const email = await store.getEmail();
-      
+
       expect(email).toBe("test@example.com");
     });
 
     it("should manage tutorial completion", async () => {
       expect(await store.isTutorialComplete()).toBe(false);
-      
+
       await store.setTutorialComplete(true);
       expect(await store.isTutorialComplete()).toBe(true);
     });
@@ -624,7 +655,7 @@ describe("UnifiedDataStore", () => {
 
       await store.updatePrivacySettings(settings);
       const retrieved = await store.getPrivacySettings();
-      
+
       expect(retrieved.allowChallengeSharing).toBe(false);
       expect(retrieved.dataCollection).toBe(true);
     });
@@ -640,9 +671,9 @@ describe("UnifiedDataStore", () => {
       // Add some data first
       await store.unlockAchievement("test-achievement");
       await store.setPremiumStatus(true);
-      
+
       await store.resetAllData();
-      
+
       const data = await store.getData();
       expect(data.achievements.unlockedIds).toHaveLength(0);
       expect(data.user.isPremium).toBe(false);
@@ -650,7 +681,7 @@ describe("UnifiedDataStore", () => {
 
     it("should export data", async () => {
       await store.unlockAchievement("test-achievement");
-      
+
       const exported = await store.exportData();
       expect(exported.achievements.unlockedIds).toContain("test-achievement");
     });
@@ -659,9 +690,9 @@ describe("UnifiedDataStore", () => {
       const importData = await store.exportData();
       importData.user.isPremium = true;
       importData.achievements.unlockedIds.push("imported-achievement");
-      
+
       await store.importData(importData);
-      
+
       const data = await store.getData();
       expect(data.user.isPremium).toBe(true);
       expect(data.achievements.unlockedIds).toContain("imported-achievement");
@@ -671,7 +702,7 @@ describe("UnifiedDataStore", () => {
   describe("Error Handling", () => {
     it("should handle AsyncStorage errors gracefully", async () => {
       mockAsyncStorage.getItem.mockRejectedValue(new Error("Storage error"));
-      
+
       // Should not throw, should return default data
       const data = await store.loadData();
       expect(data.user.isPremium).toBe(false);
@@ -679,7 +710,7 @@ describe("UnifiedDataStore", () => {
 
     it("should handle malformed JSON gracefully", async () => {
       mockAsyncStorage.getItem.mockResolvedValue("{invalid json");
-      
+
       const data = await store.loadData();
       expect(data.user.isPremium).toBe(false);
     });
@@ -705,15 +736,15 @@ describe("UnifiedDataStore", () => {
     it("should debounce save operations", async () => {
       const store = UnifiedDataStore.getInstance();
       await store.loadData();
-      
+
       // Record multiple rapid changes
       await store.recordWordForCollection("test-collection", "word1");
       await store.recordWordForCollection("test-collection", "word2");
       await store.recordWordForCollection("test-collection", "word3");
-      
+
       // Flush pending changes to ensure everything is saved
       await store.flushPendingChanges();
-      
+
       // Verify data was saved correctly
       const progress = await store.getCollectionProgress();
       expect(progress["test-collection"].collectedWords).toHaveLength(3);
@@ -722,16 +753,16 @@ describe("UnifiedDataStore", () => {
     it("should flush pending changes immediately when requested", async () => {
       const store = UnifiedDataStore.getInstance();
       await store.loadData();
-      
+
       // Make a change that would normally be debounced
       await store.markAchievementAsViewed("test-achievement");
-      
+
       // Flush immediately
       await store.flushPendingChanges();
-      
+
       // Verify the change was persisted
       const viewedIds = await store.getViewedAchievementIds();
       expect(viewedIds).toContain("test-achievement");
     });
   });
-}); 
+});

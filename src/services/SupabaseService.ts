@@ -4,9 +4,9 @@ import {
   User,
   Session,
 } from "@supabase/supabase-js";
-import { useGameStore } from "../stores/useGameStore";
 
 import { UnifiedDataStore, UnifiedAppData } from "./UnifiedDataStore";
+import { useGameStore } from "../stores/useGameStore";
 import { Logger } from "../utils/logger";
 
 // Environment variables (set in your .env file)
@@ -66,8 +66,6 @@ export interface AuthState {
   isLoading: boolean;
 }
 
-
-
 export class SupabaseService {
   private static instance: SupabaseService;
   private supabase: SupabaseClient;
@@ -107,8 +105,6 @@ export class SupabaseService {
   // ============================================================================
   // AUTH STATE MANAGEMENT
   // ============================================================================
-  
-
 
   private async initializeAuth() {
     // Get initial session
@@ -170,9 +166,11 @@ export class SupabaseService {
 
       // PROGRESSIVE SYNC FLOW: Use new progressive sync system
       Logger.debug(" Starting progressive data sync...");
-      
+
       // Import ProgressiveSyncService dynamically to avoid circular dependency
-      const { ProgressiveSyncService } = await import('./ProgressiveSyncService');
+      const { ProgressiveSyncService } = await import(
+        "./ProgressiveSyncService"
+      );
       const progressiveSync = ProgressiveSyncService.getInstance();
 
       // Fetch cloud data first (like git fetch)
@@ -180,19 +178,32 @@ export class SupabaseService {
       const fetchResult = await progressiveSync.syncFromCloud();
 
       // If sync failed due to missing data, user was already signed out
-      if (!fetchResult.success && fetchResult.error && typeof fetchResult.error === 'object' && 'message' in fetchResult.error && 
-          typeof fetchResult.error.message === 'string' && 
-          fetchResult.error.message.includes("signed out for consistency")) {
+      if (
+        !fetchResult.success &&
+        fetchResult.error &&
+        typeof fetchResult.error === "object" &&
+        "message" in fetchResult.error &&
+        typeof fetchResult.error.message === "string" &&
+        fetchResult.error.message.includes("signed out for consistency")
+      ) {
         Logger.debug(" User was signed out during sync due to missing data");
         return; // Exit early
       }
 
-      Logger.debug(" Progressive cloud data sync completed in", fetchResult.totalTime, "ms");
+      Logger.debug(
+        " Progressive cloud data sync completed in",
+        fetchResult.totalTime,
+        "ms",
+      );
 
       // Then sync local data to cloud (like git push)
       Logger.debug(" Starting progressive local data sync (push)...");
       const pushResult = await progressiveSync.syncToCloud();
-      Logger.debug(" Progressive local data sync completed in", pushResult.totalTime, "ms");
+      Logger.debug(
+        " Progressive local data sync completed in",
+        pushResult.totalTime,
+        "ms",
+      );
 
       // Refresh profile after sync in case premium status changed
       Logger.debug(" Refreshing profile after sync...");
@@ -236,8 +247,6 @@ export class SupabaseService {
       }
     };
   }
-
-
 
   public getCurrentAuthState(): AuthState {
     return this.currentAuthState;
@@ -506,8 +515,8 @@ export class SupabaseService {
     userId: string,
     email: string,
     emailUpdatesOptIn: boolean,
-    termsAccepted: boolean = false,
-    privacyAccepted: boolean = false,
+    termsAccepted = false,
+    privacyAccepted = false,
   ) {
     try {
       const now = new Date().toISOString();
@@ -577,7 +586,10 @@ export class SupabaseService {
       const userId = this.currentAuthState.user?.id;
       if (!userId) throw new Error("No authenticated user");
 
-      Logger.debug("🔧 Attempting to update user profile:", { userId, updates });
+      Logger.debug("🔧 Attempting to update user profile:", {
+        userId,
+        updates,
+      });
 
       const { error } = await this.supabase
         .from("user_profiles")
@@ -621,10 +633,13 @@ export class SupabaseService {
     // This prevents sync operations from overwriting the preference change
     if (!result.error) {
       try {
-        Logger.info(" Updating local UnifiedDataStore with email preference:", emailUpdatesOptIn);
+        Logger.info(
+          " Updating local UnifiedDataStore with email preference:",
+          emailUpdatesOptIn,
+        );
         // Note: email_updates is managed in the profile table, not in the local privacy settings
         // But we should sync any other privacy changes to keep things consistent
-        
+
         // Refresh the profile to ensure local auth state is up to date
         await this.refreshUserProfile();
       } catch (error) {
@@ -653,25 +668,31 @@ export class SupabaseService {
     // This prevents sync operations from overwriting the preference changes
     if (!result.error) {
       try {
-        Logger.debug("🔒 Updating local UnifiedDataStore with privacy settings:", privacyUpdates);
-        
+        Logger.debug(
+          "🔒 Updating local UnifiedDataStore with privacy settings:",
+          privacyUpdates,
+        );
+
         // Map the privacy settings to the local format
         const localPrivacyUpdates: any = {};
         if (privacyUpdates.allow_challenge_sharing !== undefined) {
-          localPrivacyUpdates.allowChallengeSharing = privacyUpdates.allow_challenge_sharing;
+          localPrivacyUpdates.allowChallengeSharing =
+            privacyUpdates.allow_challenge_sharing;
         }
         if (privacyUpdates.allow_stats_sharing !== undefined) {
-          localPrivacyUpdates.allowStatsSharing = privacyUpdates.allow_stats_sharing;
+          localPrivacyUpdates.allowStatsSharing =
+            privacyUpdates.allow_stats_sharing;
         }
         if (privacyUpdates.allow_leaderboards !== undefined) {
-          localPrivacyUpdates.allowLeaderboards = privacyUpdates.allow_leaderboards;
+          localPrivacyUpdates.allowLeaderboards =
+            privacyUpdates.allow_leaderboards;
         }
         if (privacyUpdates.data_collection !== undefined) {
           localPrivacyUpdates.dataCollection = privacyUpdates.data_collection;
         }
-        
+
         await this.unifiedStore.updatePrivacySettings(localPrivacyUpdates);
-        
+
         // Refresh the profile to ensure local auth state is up to date
         await this.refreshUserProfile();
       } catch (error) {
@@ -688,20 +709,24 @@ export class SupabaseService {
   // ============================================================================
 
   public async updateLegalConsent(
-    consentType: 'terms_of_service' | 'privacy_policy' | 'marketing_emails' | 'analytics',
+    consentType:
+      | "terms_of_service"
+      | "privacy_policy"
+      | "marketing_emails"
+      | "analytics",
     accepted: boolean,
-    version: string = '1.0'
+    version = "1.0",
   ) {
     if (!this.currentAuthState.user) {
       throw new Error("No authenticated user");
     }
 
     try {
-      const { error } = await this.supabase.rpc('update_user_legal_consent', {
+      const { error } = await this.supabase.rpc("update_user_legal_consent", {
         user_id: this.currentAuthState.user.id,
         consent_type: consentType,
         accepted: accepted,
-        version: version
+        version: version,
       });
 
       if (error) throw error;
@@ -723,9 +748,12 @@ export class SupabaseService {
     }
 
     try {
-      const { data, error } = await this.supabase.rpc('check_required_legal_consent', {
-        user_id: this.currentAuthState.user.id
-      });
+      const { data, error } = await this.supabase.rpc(
+        "check_required_legal_consent",
+        {
+          user_id: this.currentAuthState.user.id,
+        },
+      );
 
       if (error) throw error;
 
@@ -742,9 +770,12 @@ export class SupabaseService {
     }
 
     try {
-      const { data, error } = await this.supabase.rpc('get_user_legal_consent', {
-        user_id: this.currentAuthState.user.id
-      });
+      const { data, error } = await this.supabase.rpc(
+        "get_user_legal_consent",
+        {
+          user_id: this.currentAuthState.user.id,
+        },
+      );
 
       if (error) throw error;
 
@@ -762,12 +793,16 @@ export class SupabaseService {
     analytics?: boolean;
   }) {
     const results: Array<{ consentType: string; result: { error: any } }> = [];
-    
+
     for (const [consentType, accepted] of Object.entries(consents)) {
       if (accepted !== undefined) {
         const result = await this.updateLegalConsent(
-          consentType as 'terms_of_service' | 'privacy_policy' | 'marketing_emails' | 'analytics',
-          accepted
+          consentType as
+            | "terms_of_service"
+            | "privacy_policy"
+            | "marketing_emails"
+            | "analytics",
+          accepted,
         );
         results.push({ consentType, result });
       }
@@ -806,8 +841,8 @@ export class SupabaseService {
   public async createPremiumProfile(
     userId: string,
     email: string,
-    termsAccepted: boolean = true,
-    privacyAccepted: boolean = true,
+    termsAccepted = true,
+    privacyAccepted = true,
   ): Promise<{ error: any }> {
     try {
       const now = new Date().toISOString();
@@ -932,7 +967,9 @@ export class SupabaseService {
       await this.unifiedStore.setPurchaseInfo(purchaseData);
 
       // Trigger progressive data sync to ensure everything is up to date
-      const { ProgressiveSyncService } = await import('./ProgressiveSyncService');
+      const { ProgressiveSyncService } = await import(
+        "./ProgressiveSyncService"
+      );
       const progressiveSync = ProgressiveSyncService.getInstance();
       await progressiveSync.syncToCloud();
 
@@ -1130,8 +1167,12 @@ export class SupabaseService {
 
         // For daily challenges, prioritize cloud data (user-specific, account-bound)
         // Only merge in local progress if cloud has no data for that specific challenge
-        const mergedDailyChallengeProgress = { ...localData.dailyChallenges.progress };
-        for (const [challengeId, cloudProgress] of Object.entries(cloudData.dailyChallenges.progress)) {
+        const mergedDailyChallengeProgress = {
+          ...localData.dailyChallenges.progress,
+        };
+        for (const [challengeId, cloudProgress] of Object.entries(
+          cloudData.dailyChallenges.progress,
+        )) {
           mergedDailyChallengeProgress[challengeId] = cloudProgress; // Cloud takes precedence
         }
         cloudData.dailyChallenges.progress = mergedDailyChallengeProgress;
@@ -1418,8 +1459,6 @@ export class SupabaseService {
     };
   }
 
-
-
   // ============================================================================
   // UTILITY METHODS
   // ============================================================================
@@ -1456,7 +1495,7 @@ export class SupabaseService {
         jwtToken || this.currentAuthState.session?.access_token;
 
       if (tokenToUse) {
-        headers["Authorization"] = `Bearer ${tokenToUse}`;
+        headers.Authorization = `Bearer ${tokenToUse}`;
       } else {
         // This case means no explicit JWT was passed AND no user is signed in.
         // Some functions might be designed to be called like this (fully public),

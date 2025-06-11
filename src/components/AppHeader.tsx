@@ -2,6 +2,7 @@ import React from "react";
 import { Image, StyleSheet, Pressable, View, Text } from "react-native";
 
 import { Appbar, useTheme, Badge, Button, Menu } from "react-native-paper";
+
 import CustomIcon from "./CustomIcon";
 // Removed react-native-reanimated imports - using simple buttons instead
 
@@ -564,9 +565,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             style={[
               styles.notificationBadge,
               // If it's ONLY a daily challenge notification, make it hollow
-              unreadCount === 0 && 
-              unviewedAchievementCount === 0 && 
-              unviewedWordCollectionCount === 0 && 
+              unreadCount === 0 &&
+              unviewedAchievementCount === 0 &&
+              unviewedWordCollectionCount === 0 &&
               hasIncompleteDailyChallenge
                 ? {
                     backgroundColor: "transparent",

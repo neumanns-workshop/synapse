@@ -673,7 +673,7 @@ describe("useGameStore - startGame", () => {
       optimalPath: ["wordA", "wordB", "wordC"],
       suggestedPathFromCurrent: ["wordB", "wordC"],
       gameStatus: "playing",
-              optimalChoices: [
+      optimalChoices: [
         {
           playerPosition: "wordA",
           playerChose: "wordB",

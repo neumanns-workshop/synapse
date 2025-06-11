@@ -24,14 +24,14 @@ import {
   TextInput,
   Snackbar,
 } from "react-native-paper";
-import CustomIcon from "./CustomIcon";
 
 import AchievementDetailDialog from "./AchievementDetailDialog";
+import CustomIcon from "./CustomIcon";
 import GameReportDisplay from "./GameReportDisplay";
 import GraphVisualization from "./GraphVisualization";
 import PlayerPathDisplay from "./PlayerPathDisplay";
-import WordDefinitionDialog from "./WordDefinitionDialog";
 import { QRCodeDisplay } from "./QRCodeDisplay";
+import WordDefinitionDialog from "./WordDefinitionDialog";
 import { useAuth } from "../context/AuthContext";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
 import { allAchievements, Achievement } from "../features/achievements";
@@ -61,196 +61,200 @@ import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type { GameReport } from "../utils/gameReportUtils";
 
 // GameHistoryCard component for displaying game history entries
-const GameHistoryCard = React.memo(({
-  report,
-  theme,
-  onPress,
-  onAchievementPress,
-}: {
-  report: GameReport;
-  theme: ExtendedTheme;
-  onPress: () => void;
-  onAchievementPress: (achievement: Achievement) => void;
-}) => {
-  const date = new Date(report.timestamp);
-  const formattedDate = date.toLocaleDateString();
-  const formattedTime = date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+const GameHistoryCard = React.memo(
+  ({
+    report,
+    theme,
+    onPress,
+    onAchievementPress,
+  }: {
+    report: GameReport;
+    theme: ExtendedTheme;
+    onPress: () => void;
+    onAchievementPress: (achievement: Achievement) => void;
+  }) => {
+    const date = new Date(report.timestamp);
+    const formattedDate = date.toLocaleDateString();
+    const formattedTime = date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
-  // Status indicator color
-  const statusColor =
-    report.status === "won"
-      ? theme.customColors.startNode
-      : theme.customColors.warningColor;
+    // Status indicator color
+    const statusColor =
+      report.status === "won"
+        ? theme.customColors.startNode
+        : theme.customColors.warningColor;
 
-  return (
-    <TouchableOpacity onPress={onPress}>
-      <Card
-        style={[
-          styles.historyCard,
-          {
-            backgroundColor: theme.colors.surfaceVariant,
-            borderColor: theme.colors.outline,
-          },
-        ]}
-      >
-        <Card.Content>
-          <View style={styles.historyCardHeader}>
-            <View style={styles.historyCardTitleRow}>
-              <Text
-                style={[
-                  styles.historyCardTitleText,
-                  { color: theme.colors.primary },
-                ]}
-              >
-                {report.startWord} → {report.targetWord}
-              </Text>
-              <View
-                style={[styles.statusBadge, { backgroundColor: statusColor }]}
-              >
-                <Text style={styles.statusBadgeText}>
-                  {report.status === "won" ? "WON" : "GAVE UP"}
+    return (
+      <TouchableOpacity onPress={onPress}>
+        <Card
+          style={[
+            styles.historyCard,
+            {
+              backgroundColor: theme.colors.surfaceVariant,
+              borderColor: theme.colors.outline,
+            },
+          ]}
+        >
+          <Card.Content>
+            <View style={styles.historyCardHeader}>
+              <View style={styles.historyCardTitleRow}>
+                <Text
+                  style={[
+                    styles.historyCardTitleText,
+                    { color: theme.colors.primary },
+                  ]}
+                >
+                  {report.startWord} → {report.targetWord}
+                </Text>
+                <View
+                  style={[styles.statusBadge, { backgroundColor: statusColor }]}
+                >
+                  <Text style={styles.statusBadgeText}>
+                    {report.status === "won" ? "WON" : "GAVE UP"}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.historyCardInfoRow}>
+                <Text
+                  style={[
+                    styles.historyCardInfoText,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  {formattedDate} at {formattedTime}
+                </Text>
+                {report.earnedAchievements &&
+                  report.earnedAchievements.length > 0 && (
+                    <View style={styles.trophyContainer}>
+                      {report.earnedAchievements.map((achievement, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.trophyIconTouchable}
+                          onPress={() => onAchievementPress(achievement)}
+                        >
+                          <CustomIcon
+                            source="trophy"
+                            size={16}
+                            color={theme.customColors.achievementIcon}
+                          />
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+              </View>
+            </View>
+
+            <View style={styles.historyCardStats}>
+              <View style={styles.statItem}>
+                <Text
+                  style={[
+                    styles.historyCardInfoText,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  Moves
+                </Text>
+                <Text style={{ color: theme.colors.onSurface }}>
+                  {report.totalMoves}
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text
+                  style={[
+                    styles.historyCardInfoText,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  Accuracy
+                </Text>
+                <Text style={{ color: theme.colors.onSurface }}>
+                  {report.moveAccuracy.toFixed(1)}%
                 </Text>
               </View>
             </View>
-            <View style={styles.historyCardInfoRow}>
-              <Text
-                style={[
-                  styles.historyCardInfoText,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
-              >
-                {formattedDate} at {formattedTime}
-              </Text>
-              {report.earnedAchievements &&
-                report.earnedAchievements.length > 0 && (
-                  <View style={styles.trophyContainer}>
-                    {report.earnedAchievements.map((achievement, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={styles.trophyIconTouchable}
-                        onPress={() => onAchievementPress(achievement)}
-                      >
-                        <CustomIcon
-                          source="trophy"
-                          size={16}
-                          color={theme.customColors.achievementIcon}
-                        />
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-            </View>
-          </View>
-
-          <View style={styles.historyCardStats}>
-            <View style={styles.statItem}>
-              <Text
-                style={[
-                  styles.historyCardInfoText,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
-              >
-                Moves
-              </Text>
-              <Text style={{ color: theme.colors.onSurface }}>
-                {report.totalMoves}
-              </Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text
-                style={[
-                  styles.historyCardInfoText,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
-              >
-                Accuracy
-              </Text>
-              <Text style={{ color: theme.colors.onSurface }}>
-                {report.moveAccuracy.toFixed(1)}%
-              </Text>
-            </View>
-          </View>
-        </Card.Content>
-      </Card>
-    </TouchableOpacity>
-  );
-});
+          </Card.Content>
+        </Card>
+      </TouchableOpacity>
+    );
+  },
+);
 
 // AchievementCard component for displaying achievement items
-const AchievementCard = React.memo(({
-  achievement,
-  unlocked,
-  theme,
-  onPress,
-  progressiveCount,
-}: {
-  achievement: Achievement;
-  unlocked: boolean;
-  theme: ExtendedTheme;
-  onPress: (achievement: Achievement) => void;
-  progressiveCount?: number;
-}) => {
-  const displayName =
-    achievement.isProgressive && progressiveCount && progressiveCount > 0
-      ? `${achievement.name} ${progressiveCount}x`
-      : achievement.name;
+const AchievementCard = React.memo(
+  ({
+    achievement,
+    unlocked,
+    theme,
+    onPress,
+    progressiveCount,
+  }: {
+    achievement: Achievement;
+    unlocked: boolean;
+    theme: ExtendedTheme;
+    onPress: (achievement: Achievement) => void;
+    progressiveCount?: number;
+  }) => {
+    const displayName =
+      achievement.isProgressive && progressiveCount && progressiveCount > 0
+        ? `${achievement.name} ${progressiveCount}x`
+        : achievement.name;
 
-  return (
-    <TouchableOpacity
-      onPress={() => (unlocked ? onPress(achievement) : null)}
-      disabled={!unlocked}
-      activeOpacity={unlocked ? 0.7 : 1}
-    >
-      <Card
-        style={[
-          styles.achievementCard,
-          {
-            backgroundColor: unlocked
-              ? theme.colors.surfaceVariant
-              : theme.colors.surfaceDisabled,
-            borderColor: theme.colors.outline,
-          },
-          unlocked
-            ? styles.unlockedAchievementCard
-            : styles.lockedAchievementCard,
-        ]}
+    return (
+      <TouchableOpacity
+        onPress={() => (unlocked ? onPress(achievement) : null)}
+        disabled={!unlocked}
+        activeOpacity={unlocked ? 0.7 : 1}
       >
-        <Card.Content>
-          <View style={styles.achievementCardContent}>
-            <View style={styles.achievementIconContainer}>
-              <CustomIcon
-                source={unlocked ? "trophy" : "trophy-outline"}
-                size={24}
-                color={
-                  unlocked
-                    ? theme.customColors.achievementIcon
-                    : theme.colors.onSurfaceDisabled
-                }
-              />
+        <Card
+          style={[
+            styles.achievementCard,
+            {
+              backgroundColor: unlocked
+                ? theme.colors.surfaceVariant
+                : theme.colors.surfaceDisabled,
+              borderColor: theme.colors.outline,
+            },
+            unlocked
+              ? styles.unlockedAchievementCard
+              : styles.lockedAchievementCard,
+          ]}
+        >
+          <Card.Content>
+            <View style={styles.achievementCardContent}>
+              <View style={styles.achievementIconContainer}>
+                <CustomIcon
+                  source={unlocked ? "trophy" : "trophy-outline"}
+                  size={24}
+                  color={
+                    unlocked
+                      ? theme.customColors.achievementIcon
+                      : theme.colors.onSurfaceDisabled
+                  }
+                />
+              </View>
+              <View style={styles.achievementText}>
+                <Text
+                  style={[
+                    styles.achievementCardNameText,
+                    {
+                      color: unlocked
+                        ? theme.colors.primary
+                        : theme.colors.onSurfaceDisabled,
+                    },
+                  ]}
+                >
+                  {displayName}
+                </Text>
+              </View>
             </View>
-            <View style={styles.achievementText}>
-              <Text
-                style={[
-                  styles.achievementCardNameText,
-                  {
-                    color: unlocked
-                      ? theme.colors.primary
-                      : theme.colors.onSurfaceDisabled,
-                  },
-                ]}
-              >
-                {displayName}
-              </Text>
-            </View>
-          </View>
-        </Card.Content>
-      </Card>
-    </TouchableOpacity>
-  );
-});
+          </Card.Content>
+        </Card>
+      </TouchableOpacity>
+    );
+  },
+);
 
 // Updated WordCollectionCard - Using Surface instead of Card to avoid text node errors
 const WordCollectionCard = ({
@@ -645,25 +649,31 @@ const StatsModal = () => {
   }, []);
 
   // Memoized render functions for FlatList optimization
-  const renderGameHistoryItem = useCallback(({ item }: { item: GameReport }) => (
-    <GameHistoryCard
-      report={item}
-      theme={appTheme}
-      onPress={() => handleReportPress(item)}
-      onAchievementPress={showAchievementDetail}
-    />
-  ), [appTheme, handleReportPress, showAchievementDetail]);
+  const renderGameHistoryItem = useCallback(
+    ({ item }: { item: GameReport }) => (
+      <GameHistoryCard
+        report={item}
+        theme={appTheme}
+        onPress={() => handleReportPress(item)}
+        onAchievementPress={showAchievementDetail}
+      />
+    ),
+    [appTheme, handleReportPress, showAchievementDetail],
+  );
 
   const keyExtractor = useCallback((item: GameReport) => item.id, []);
 
   // Calculate consistent item height for getItemLayout optimization
   const GAME_HISTORY_ITEM_HEIGHT = 120; // Approximate height of GameHistoryCard
 
-  const getItemLayout = useCallback((data: any, index: number) => ({
-    length: GAME_HISTORY_ITEM_HEIGHT,
-    offset: GAME_HISTORY_ITEM_HEIGHT * index,
-    index,
-  }), []);
+  const getItemLayout = useCallback(
+    (data: any, index: number) => ({
+      length: GAME_HISTORY_ITEM_HEIGHT,
+      offset: GAME_HISTORY_ITEM_HEIGHT * index,
+      index,
+    }),
+    [],
+  );
 
   // Close selected report view
   const handleBackToHistory = () => {
@@ -1662,8 +1672,11 @@ const StatsModal = () => {
                 </Text>
               </View>
 
-              <View style={{ position: 'relative' }}>
-                <View style={styles.graphPreviewContainer} ref={graphPreviewRef}>
+              <View style={{ position: "relative" }}>
+                <View
+                  style={styles.graphPreviewContainer}
+                  ref={graphPreviewRef}
+                >
                   {selectedReport && (
                     <GraphVisualization
                       height={180}
@@ -1676,7 +1689,11 @@ const StatsModal = () => {
                     />
                   )}
                 </View>
-                <QRCodeDisplay value={historicalChallengeLink} size={60} overlay />
+                <QRCodeDisplay
+                  value={historicalChallengeLink}
+                  size={60}
+                  overlay
+                />
               </View>
 
               <TextInput

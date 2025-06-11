@@ -8,6 +8,7 @@ import type {
   // ImageManipulationAction, // Keeping as any[] as direct export not found, actions can be various object types (CropAction, ResizeAction etc.)
 } from "expo-image-manipulator";
 import { captureRef } from "react-native-view-shot";
+
 import { Logger } from "../utils/logger";
 
 // Import image manipulator conditionally to avoid web errors
@@ -489,7 +490,7 @@ export const generateSecureGameDeepLink = (
 
   // Build base URL parameters
   const params = `start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
-  const themeParam = theme ? `&theme=${encodeURIComponent(theme)}` : '';
+  const themeParam = theme ? `&theme=${encodeURIComponent(theme)}` : "";
   const fullParams = `${params}${themeParam}`;
 
   // Use the app's scheme for deep linking
@@ -552,7 +553,12 @@ export const generateSecureDailyChallengeDeepLink = (
  */
 export const parseGameDeepLink = (
   url: string,
-): { startWord?: string; targetWord?: string; theme?: string; isValid?: boolean } | null => {
+): {
+  startWord?: string;
+  targetWord?: string;
+  theme?: string;
+  isValid?: boolean;
+} | null => {
   try {
     Logger.debug(" parseGameDeepLink: Parsing URL:", url);
 
@@ -566,11 +572,11 @@ export const parseGameDeepLink = (
       if (secureMatch && secureMatch.length >= 4) {
         const startWord = decodeURIComponent(secureMatch[1]);
         const targetWord = decodeURIComponent(secureMatch[2]);
-        
+
         // Handle different parameter orders
         let providedHash: string;
         let theme: string | undefined;
-        
+
         if (secureMatch[3] && secureMatch[4]) {
           // hash=X&theme=Y format
           providedHash = secureMatch[3];

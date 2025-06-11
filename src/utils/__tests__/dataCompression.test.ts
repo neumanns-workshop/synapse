@@ -1,4 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
+
 import {
   AchievementCompressor,
   TimestampCompressor,
@@ -482,9 +483,9 @@ describe("DataCompression", () => {
         decompressed.collections["test-collection"].collectedWords,
       ).toEqual(expect.arrayContaining(["word1", "word2"]));
       expect(decompressed.currentGames.regular?.startWord).toBe("current");
-      expect(
-        decompressed.dailyChallenges.progress["challenge1"].completed,
-      ).toBe(true);
+      expect(decompressed.dailyChallenges.progress.challenge1.completed).toBe(
+        true,
+      );
       expect(decompressed.news.readArticleIds).toEqual(
         expect.arrayContaining(["article1"]),
       );

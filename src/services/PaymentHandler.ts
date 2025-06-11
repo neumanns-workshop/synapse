@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import SupabaseService from "./SupabaseService";
 import { UnifiedDataStore } from "./UnifiedDataStore"; // Assuming UnifiedDataStore is exported like this
 import { Logger } from "../utils/logger";
@@ -98,7 +99,9 @@ export class PaymentHandler {
 
         // Grant premium access immediately (optimistic)
         // The webhook will confirm this in the background
-        Logger.debug("Payment successful! Granting immediate premium access...");
+        Logger.debug(
+          "Payment successful! Granting immediate premium access...",
+        );
 
         // Set premium status locally immediately
         this.unifiedStore.setPremiumStatus(true);

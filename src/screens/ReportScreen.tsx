@@ -22,8 +22,8 @@ import AchievementDetailDialog from "../components/AchievementDetailDialog";
 import GameReportDisplay from "../components/GameReportDisplay";
 import GraphVisualization from "../components/GraphVisualization";
 import PlayerPathDisplay from "../components/PlayerPathDisplay";
-import WordDefinitionDialog from "../components/WordDefinitionDialog";
 import { QRCodeDisplay } from "../components/QRCodeDisplay";
+import WordDefinitionDialog from "../components/WordDefinitionDialog";
 import {
   shareChallenge,
   generateSecureGameDeepLink,
@@ -176,9 +176,7 @@ const ReportScreen = () => {
   }
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.graphContainer}>
           {isLoading ? (
@@ -252,7 +250,7 @@ const ReportScreen = () => {
             </View>
 
             {/* Graph preview for challenge */}
-            <View style={{ position: 'relative' }}>
+            <View style={{ position: "relative" }}>
               <View
                 style={[
                   styles.graphPreviewContainer,

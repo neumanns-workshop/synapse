@@ -1,32 +1,33 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { corsHeaders } from '../_shared/cors.ts'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-const SUPPORT_EMAIL = 'social@neumannsworkshop.com' // Your actual support email
+import { corsHeaders } from "../_shared/cors.ts";
+
+const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPPORT_EMAIL = "social@neumannsworkshop.com"; // Your actual support email
 
 interface ContactSubmission {
-  type: string
-  subject: string
-  description: string
-  userEmail?: string
-  userId?: string
+  type: string;
+  subject: string;
+  description: string;
+  userEmail?: string;
+  userId?: string;
 }
 
 serve(async (req) => {
   // Handle CORS
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
     if (!RESEND_API_KEY) {
-      throw new Error('Resend API key not configured')
+      throw new Error("Resend API key not configured");
     }
 
-    const submission: ContactSubmission = await req.json()
-    
+    const submission: ContactSubmission = await req.json();
+
     if (!submission.subject || !submission.description) {
-      throw new Error('Subject and description are required')
+      throw new Error("Subject and description are required");
     }
 
     // Create email content
@@ -37,8 +38,8 @@ serve(async (req) => {
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <p><strong>Type:</strong> ${submission.type}</p>
           <p><strong>Subject:</strong> ${submission.subject}</p>
-          ${submission.userEmail ? `<p><strong>User Email:</strong> ${submission.userEmail}</p>` : ''}
-          ${submission.userId ? `<p><strong>User ID:</strong> ${submission.userId}</p>` : ''}
+          ${submission.userEmail ? `<p><strong>User Email:</strong> ${submission.userEmail}</p>` : ""}
+          ${submission.userId ? `<p><strong>User ID:</strong> ${submission.userId}</p>` : ""}
           <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
         </div>
         
@@ -52,15 +53,15 @@ serve(async (req) => {
           This email was sent from the Synapse contact form at ${new Date().toISOString()}
         </p>
       </div>
-    `
+    `;
 
     const emailText = `
 New Contact Form Submission
 
 Type: ${submission.type}
 Subject: ${submission.subject}
-${submission.userEmail ? `User Email: ${submission.userEmail}` : ''}
-${submission.userId ? `User ID: ${submission.userId}` : ''}
+${submission.userEmail ? `User Email: ${submission.userEmail}` : ""}
+${submission.userId ? `User ID: ${submission.userId}` : ""}
 Timestamp: ${new Date().toISOString()}
 
 Message:
@@ -68,17 +69,17 @@ ${submission.description}
 
 ---
 This email was sent from the Synapse contact form.
-    `.trim()
+    `.trim();
 
     // Send email to support
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: 'support@synapsegame.ai',
+        from: "support@synapsegame.ai",
         to: [SUPPORT_EMAIL],
         subject: `[Synapse Contact] ${submission.type}: ${submission.subject}`,
         html: emailHtml,
@@ -86,35 +87,31 @@ This email was sent from the Synapse contact form.
         // If user provided email, set reply-to
         ...(submission.userEmail && { reply_to: [submission.userEmail] }),
       }),
-    })
+    });
 
     if (!response.ok) {
-      const error = await response.json()
-      throw new Error(`Resend API error: ${error.message}`)
+      const error = await response.json();
+      throw new Error(`Resend API error: ${error.message}`);
     }
 
-    const result = await response.json()
-    console.log('📧 Contact form email sent successfully:', result.id)
+    const result = await response.json();
+    console.log("📧 Contact form email sent successfully:", result.id);
 
-    return new Response(
-      JSON.stringify({ success: true, id: result.id }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
-    )
-
+    return new Response(JSON.stringify({ success: true, id: result.id }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
   } catch (error) {
-    console.error('📧 Failed to send contact form email:', error)
+    console.error("📧 Failed to send contact form email:", error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
+      JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
-      }
-    )
+      },
+    );
   }
-}) 
+});

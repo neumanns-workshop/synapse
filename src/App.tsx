@@ -23,26 +23,25 @@ const StatsModal = lazy(() => import("./components/StatsModal"));
 const TutorialModal = lazy(() => import("./components/TutorialModal"));
 
 // Legal page components
-import { LegalPage } from "./components/LegalPages";
-import { Footer } from "./components/Footer";
 
 import ErrorBoundary from "./components/ErrorBoundary";
-
+import { Footer } from "./components/Footer";
+import { LegalPage } from "./components/LegalPages";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { TutorialProvider } from "./context/TutorialContext";
+import AccountScreen from "./screens/AccountScreen";
 import AuthScreen from "./screens/AuthScreen";
 import GameScreen from "./screens/GameScreen";
-import AccountScreen from "./screens/AccountScreen";
+import { preloadAllData } from "./services/dataLoader";
 import { gameFlowManager } from "./services/GameFlowManager";
 import PaymentHandler from "./services/PaymentHandler";
+import type { PaymentRedirectResult } from "./services/PaymentHandler";
 import { resetAllPlayerData } from "./services/StorageAdapter";
 import { unifiedDataStore } from "./services/UnifiedDataStore";
-import { preloadAllData } from "./services/dataLoader";
 import { useGameStore } from "./stores/useGameStore";
 import { SynapseLightTheme } from "./theme/SynapseTheme";
 import { initializeWebOptimizations } from "./utils/webOptimizations";
-import type { PaymentRedirectResult } from "./services/PaymentHandler";
 
 // Define the root stack parameter list
 export type RootStackParamList = {
@@ -82,7 +81,9 @@ function AppContent() {
   >(undefined);
   const [showAccount, setShowAccount] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
-  const [currentLegalPage, setCurrentLegalPage] = useState<'terms' | 'privacy' | 'dmca' | 'about' | 'contact' | null>(null);
+  const [currentLegalPage, setCurrentLegalPage] = useState<
+    "terms" | "privacy" | "dmca" | "about" | "contact" | null
+  >(null);
 
   // Get the actions from the store - updated for new modal states
   const loadInitialData = useGameStore((state) => state.loadInitialData);
@@ -123,23 +124,23 @@ function AppContent() {
       if (Platform.OS === "web") {
         if (typeof window !== "undefined") {
           entryUrl = window.location.href;
-          
+
           // Check if we're on a legal page
           const pathname = window.location.pathname;
-          if (pathname === '/terms') {
-            setCurrentLegalPage('terms');
+          if (pathname === "/terms") {
+            setCurrentLegalPage("terms");
             return;
-          } else if (pathname === '/privacy') {
-            setCurrentLegalPage('privacy');
+          } else if (pathname === "/privacy") {
+            setCurrentLegalPage("privacy");
             return;
-          } else if (pathname === '/dmca') {
-            setCurrentLegalPage('dmca');
+          } else if (pathname === "/dmca") {
+            setCurrentLegalPage("dmca");
             return;
-          } else if (pathname === '/about') {
-            setCurrentLegalPage('about');
+          } else if (pathname === "/about") {
+            setCurrentLegalPage("about");
             return;
-          } else if (pathname === '/contact') {
-            setCurrentLegalPage('contact');
+          } else if (pathname === "/contact") {
+            setCurrentLegalPage("contact");
             return;
           }
         }
@@ -191,11 +192,13 @@ function AppContent() {
       // If not a payment redirect, proceed with normal app initialization
       const { entryType, challengeData } =
         gameFlowManager.parseEntryUrl(entryUrl);
-      
+
       // Start data preloading in parallel with loadInitialData for better performance
-      const [, ] = await Promise.all([
+      const [,] = await Promise.all([
         loadInitialData(),
-        preloadAllData().catch(err => console.warn("Data preloading failed:", err))
+        preloadAllData().catch((err) =>
+          console.warn("Data preloading failed:", err),
+        ),
       ]);
 
       if (auth.user) {
@@ -290,18 +293,21 @@ function AppContent() {
   // Set up AppState handling to flush pending data saves when app backgrounds
   useEffect(() => {
     const handleAppStateChange = async (nextAppState: string) => {
-      if (nextAppState === 'background' || nextAppState === 'inactive') {
+      if (nextAppState === "background" || nextAppState === "inactive") {
         // Flush any pending saves before the app goes to background
         try {
           await unifiedDataStore.flushPendingChanges();
-          console.log('✅ Flushed pending data saves on app background');
+          console.log("✅ Flushed pending data saves on app background");
         } catch (error) {
-          console.error('❌ Error flushing pending saves:', error);
+          console.error("❌ Error flushing pending saves:", error);
         }
       }
     };
 
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange,
+    );
     return () => subscription?.remove();
   }, []);
 
@@ -335,8 +341,8 @@ function AppContent() {
       <PaperProvider theme={theme}>
         <SafeAreaProvider>
           <View style={{ flex: 1 }}>
-            <LegalPage 
-              type={currentLegalPage} 
+            <LegalPage
+              type={currentLegalPage}
               onBack={() => setCurrentLegalPage(null)}
             />
             <Footer onLegalPageRequest={(page) => setCurrentLegalPage(page)} />
@@ -382,73 +388,76 @@ function AppContent() {
               </Stack.Screen>
             </Stack.Navigator>
 
-          {/* Modals */}
-          <Suspense fallback={<ModalLoadingFallback />}>
-            <QuickstartModal
-              visible={quickstartModalVisible}
-              onDismiss={() => setQuickstartModalVisible(false)}
-            />
-          </Suspense>
-          <Suspense fallback={<ModalLoadingFallback />}>
-            <NewsModal
-              visible={newsModalVisible}
-              onDismiss={() => setNewsModalVisible(false)}
-            />
-          </Suspense>
-          <Suspense fallback={<ModalLoadingFallback />}>
-            <ContactModal
-              visible={contactModalVisible}
-              onDismiss={() => setContactModalVisible(false)}
-            />
-          </Suspense>
-          <Suspense fallback={<ModalLoadingFallback />}>
-            <LabsModal
-              visible={labsModalVisible}
-              onDismiss={() => setLabsModalVisible(false)}
-            />
-          </Suspense>
-          <Suspense fallback={<ModalLoadingFallback />}>
-            <StatsModal />
-          </Suspense>
-          <Suspense fallback={<ModalLoadingFallback />}>
-            <DailiesModal />
-          </Suspense>
-          <Suspense fallback={<ModalLoadingFallback />}>
-            <TutorialModal />
-          </Suspense>
+            {/* Modals */}
+            <Suspense fallback={<ModalLoadingFallback />}>
+              <QuickstartModal
+                visible={quickstartModalVisible}
+                onDismiss={() => setQuickstartModalVisible(false)}
+              />
+            </Suspense>
+            <Suspense fallback={<ModalLoadingFallback />}>
+              <NewsModal
+                visible={newsModalVisible}
+                onDismiss={() => setNewsModalVisible(false)}
+              />
+            </Suspense>
+            <Suspense fallback={<ModalLoadingFallback />}>
+              <ContactModal
+                visible={contactModalVisible}
+                onDismiss={() => setContactModalVisible(false)}
+              />
+            </Suspense>
+            <Suspense fallback={<ModalLoadingFallback />}>
+              <LabsModal
+                visible={labsModalVisible}
+                onDismiss={() => setLabsModalVisible(false)}
+              />
+            </Suspense>
+            <Suspense fallback={<ModalLoadingFallback />}>
+              <StatsModal />
+            </Suspense>
+            <Suspense fallback={<ModalLoadingFallback />}>
+              <DailiesModal />
+            </Suspense>
+            <Suspense fallback={<ModalLoadingFallback />}>
+              <TutorialModal />
+            </Suspense>
 
-          {/* Auth Modal */}
-          <AuthScreen
-            visible={showAuth}
-            onAuthComplete={async () => {
-              setShowAuth(false);
-              setPaymentMessage(null);
-              setAuthScreenInitialEmail(undefined);
+            {/* Auth Modal */}
+            <AuthScreen
+              visible={showAuth}
+              onAuthComplete={async () => {
+                setShowAuth(false);
+                setPaymentMessage(null);
+                setAuthScreenInitialEmail(undefined);
 
-              // Refresh game access state after successful sign-in
-              // This ensures premium status and free games are updated,
-              // and upgrade prompt dismissal is reset if user now has access
-              try {
-                await useGameStore.getState().refreshGameAccessState();
-                console.log("✅ Game access state refreshed after sign-in");
-              } catch (error) {
-                console.error("❌ Error refreshing game access state:", error);
-              }
-            }}
-            onDismiss={() => {
-              setShowAuth(false);
-              setPaymentMessage(null);
-              setAuthScreenInitialEmail(undefined);
-            }}
-            defaultMode={authScreenMode}
-            paymentSuccessMessage={paymentMessage}
-            initialEmail={authScreenInitialEmail}
-          />
+                // Refresh game access state after successful sign-in
+                // This ensures premium status and free games are updated,
+                // and upgrade prompt dismissal is reset if user now has access
+                try {
+                  await useGameStore.getState().refreshGameAccessState();
+                  console.log("✅ Game access state refreshed after sign-in");
+                } catch (error) {
+                  console.error(
+                    "❌ Error refreshing game access state:",
+                    error,
+                  );
+                }
+              }}
+              onDismiss={() => {
+                setShowAuth(false);
+                setPaymentMessage(null);
+                setAuthScreenInitialEmail(undefined);
+              }}
+              defaultMode={authScreenMode}
+              paymentSuccessMessage={paymentMessage}
+              initialEmail={authScreenInitialEmail}
+            />
 
-          {/* Account Modal */}
-          {showAccount && auth.user && (
-            <AccountScreen onClose={() => setShowAccount(false)} />
-          )}
+            {/* Account Modal */}
+            {showAccount && auth.user && (
+              <AccountScreen onClose={() => setShowAccount(false)} />
+            )}
           </NavigationContainer>
           <StatusBar style={theme.dark ? "light" : "dark"} />
         </ErrorBoundary>

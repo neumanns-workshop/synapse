@@ -1,54 +1,58 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-import { corsHeaders } from '../_shared/cors.ts'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const UNSUBSCRIBE_SECRET = Deno.env.get('UNSUBSCRIBE_SECRET') || 'fallback-secret-key'
+import { corsHeaders } from "../_shared/cors.ts";
+
+const UNSUBSCRIBE_SECRET =
+  Deno.env.get("UNSUBSCRIBE_SECRET") || "fallback-secret-key";
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-)
+);
 
 async function generateToken(userId: string): Promise<string> {
-  const data = userId + UNSUBSCRIBE_SECRET
-  const encoder = new TextEncoder()
-  const dataBuffer = encoder.encode(data)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  const data = userId + UNSUBSCRIBE_SECRET;
+  const encoder = new TextEncoder();
+  const dataBuffer = encoder.encode(data);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function validateTokenAndGetUserId(token: string): Promise<string | null> {
+async function validateTokenAndGetUserId(
+  token: string,
+): Promise<string | null> {
   // We need to check all users to find the matching token
   // In a production system, you might want a more efficient approach
   const { data: users, error } = await supabaseAdmin
-    .from('user_profiles')
-    .select('id')
-    .eq('privacy_settings->email_updates', true)
+    .from("user_profiles")
+    .select("id")
+    .eq("privacy_settings->email_updates", true);
 
   if (error || !users) {
-    console.error('Error fetching users:', error)
-    return null
+    console.error("Error fetching users:", error);
+    return null;
   }
 
   for (const user of users) {
-    const expectedToken = await generateToken(user.id)
+    const expectedToken = await generateToken(user.id);
     if (expectedToken === token) {
-      return user.id
+      return user.id;
     }
   }
 
-  return null
+  return null;
 }
 
 serve(async (req) => {
   // Handle CORS
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const url = new URL(req.url)
-    const token = url.searchParams.get('token')
+    const url = new URL(req.url);
+    const token = url.searchParams.get("token");
 
     if (!token) {
       return new Response(
@@ -62,14 +66,14 @@ serve(async (req) => {
           </body>
         </html>`,
         {
-          headers: { ...corsHeaders, 'Content-Type': 'text/html' },
+          headers: { ...corsHeaders, "Content-Type": "text/html" },
           status: 400,
-        }
-      )
+        },
+      );
     }
 
     // Validate token and get user ID
-    const userId = await validateTokenAndGetUserId(token)
+    const userId = await validateTokenAndGetUserId(token);
 
     if (!userId) {
       return new Response(
@@ -85,25 +89,25 @@ serve(async (req) => {
           </body>
         </html>`,
         {
-          headers: { ...corsHeaders, 'Content-Type': 'text/html' },
+          headers: { ...corsHeaders, "Content-Type": "text/html" },
           status: 400,
-        }
-      )
+        },
+      );
     }
 
     // Update user's email preferences
     const { error: updateError } = await supabaseAdmin
-      .from('user_profiles')
+      .from("user_profiles")
       .update({
         privacy_settings: {
           email_updates: false,
-          updated_at: new Date().toISOString()
-        }
+          updated_at: new Date().toISOString(),
+        },
       })
-      .eq('id', userId)
+      .eq("id", userId);
 
     if (updateError) {
-      console.error('Error updating user preferences:', updateError)
+      console.error("Error updating user preferences:", updateError);
       return new Response(
         `<!DOCTYPE html>
         <html>
@@ -115,10 +119,10 @@ serve(async (req) => {
           </body>
         </html>`,
         {
-          headers: { ...corsHeaders, 'Content-Type': 'text/html' },
+          headers: { ...corsHeaders, "Content-Type": "text/html" },
           status: 500,
-        }
-      )
+        },
+      );
     }
 
     // Success - show confirmation page
@@ -161,13 +165,12 @@ serve(async (req) => {
         </body>
       </html>`,
       {
-        headers: { ...corsHeaders, 'Content-Type': 'text/html' },
+        headers: { ...corsHeaders, "Content-Type": "text/html" },
         status: 200,
-      }
-    )
-
+      },
+    );
   } catch (error) {
-    console.error('Unsubscribe error:', error)
+    console.error("Unsubscribe error:", error);
     return new Response(
       `<!DOCTYPE html>
       <html>
@@ -179,9 +182,9 @@ serve(async (req) => {
         </body>
       </html>`,
       {
-        headers: { ...corsHeaders, 'Content-Type': 'text/html' },
+        headers: { ...corsHeaders, "Content-Type": "text/html" },
         status: 500,
-      }
-    )
+      },
+    );
   }
-}) 
+});
