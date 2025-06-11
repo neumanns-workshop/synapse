@@ -71,7 +71,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
   // Beta gatekeeping - hide payment until June 30, 2025
   const isBetaPhase = () => {
-    const betaEndDate = new Date("2025-06-30T23:59:59");
+    const betaEndDate = new Date('2025-06-30T23:59:59');
     return new Date() < betaEndDate;
   };
 
@@ -118,7 +118,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     });
 
     return unsubscribe;
-  }, [isWaitingForAuth, onAuthComplete, supabaseService]);
+  }, [isWaitingForAuth, onAuthComplete]);
 
   // Scale animation value
   const scale = useSharedValue(0.9);
@@ -1225,7 +1225,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         >
           <Card.Content>
             <View style={{ alignItems: "center", gap: 12 }}>
-              <CustomIcon source="ticket" size={32} color={colors.primary} />
+              <CustomIcon
+                source="ticket"
+                size={32}
+                color={colors.primary}
+              />
               <Text
                 variant="titleMedium"
                 style={{
@@ -1244,8 +1248,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   lineHeight: 20,
                 }}
               >
-                Galaxy Brain is currently in private beta. Please enter your
-                beta code above to create an account.
+                Galaxy Brain is currently in private beta. Please enter your beta code above to create an account.
               </Text>
               <Text
                 style={{
@@ -1386,7 +1389,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           {/* CAPTCHA component - shared for both sign-in and sign-up */}
           <HCaptcha
             ref={captchaRef}
-            sitekey={process.env.EXPO_PUBLIC_HCAPTCHA_SITE_KEY || ""}
+            sitekey={process.env.EXPO_PUBLIC_HCAPTCHA_SITE_KEY!}
             onVerify={onCaptchaVerify}
             size="invisible"
             onError={(error) => {
