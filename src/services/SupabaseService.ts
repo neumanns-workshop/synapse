@@ -1477,7 +1477,9 @@ export class SupabaseService {
       const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
       if (!supabaseUrl || !supabaseAnonKey) {
-        throw new Error("Missing Supabase environment variables for function invocation");
+        throw new Error(
+          "Missing Supabase environment variables for function invocation",
+        );
       }
 
       const headers: HeadersInit = {
