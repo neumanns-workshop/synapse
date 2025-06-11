@@ -1411,7 +1411,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           lineHeight: 20,
         }}
       >
-        Enter your email address and we'll send you a link to reset your
+        Enter your email address and we&apos;ll send you a link to reset your
         password.
       </Text>
 
