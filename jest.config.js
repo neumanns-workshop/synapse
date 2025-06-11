@@ -28,4 +28,10 @@ module.exports = {
       "<rootDir>/__mocks__/fileMock.js",
     "\\.(css|less)$": "<rootDir>/__mocks__/styleMock.js",
   },
+  // Force Jest to exit and prevent hanging
+  forceExit: true,
+  // Detect open handles that prevent Jest from exiting
+  detectOpenHandles: true,
+  // Set a reasonable timeout to prevent infinite hanging
+  testTimeout: 30000,
 };

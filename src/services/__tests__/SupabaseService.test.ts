@@ -39,6 +39,24 @@ describe("SupabaseService", () => {
     process.env = originalEnv;
   });
 
+  afterEach(async () => {
+    // Clean up any open connections or listeners
+    if (service) {
+      // If there are any auth listeners, unsubscribe them
+      const currentState = (service as any).currentAuthState;
+      if (currentState && currentState.subscription) {
+        currentState.subscription.unsubscribe();
+      }
+      
+      // Reset the singleton to prevent state leakage
+      (SupabaseService as any).instance = undefined;
+    }
+    
+    // Clear any remaining timers or promises
+    jest.clearAllTimers();
+    await new Promise(setImmediate); // Flush promise queue
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -173,6 +191,7 @@ describe("SupabaseService", () => {
       // Reset singleton
       (SupabaseService as any).instance = undefined;
 
+      // Clean environment variables for test isolation
       // Temporarily remove env vars
       delete process.env.EXPO_PUBLIC_SUPABASE_URL;
       delete process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
