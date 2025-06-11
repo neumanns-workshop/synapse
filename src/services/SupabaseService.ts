@@ -9,20 +9,7 @@ import { UnifiedDataStore, UnifiedAppData } from "./UnifiedDataStore";
 import { useGameStore } from "../stores/useGameStore";
 import { Logger } from "../utils/logger";
 
-// Environment variables (set in your .env file)
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  // Temporarily comment out the throw to see the log even if vars are missing
-  // throw new Error("Missing Supabase environment variables");
-  console.error(
-    "ERROR: Missing Supabase environment variables. Supabase URL:",
-    supabaseUrl,
-    "Anon Key:",
-    supabaseAnonKey,
-  );
-}
+// Environment variables are accessed in the constructor to allow for testing mocks
 
 export interface UserProfile {
   id: string;
@@ -1485,8 +1472,16 @@ export class SupabaseService {
     jwtToken?: string, // Optional JWT token parameter
   ): Promise<{ data: T | null; error: any }> {
     try {
+      // Get environment variables at runtime to support testing
+      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error("Missing Supabase environment variables for function invocation");
+      }
+
       const headers: HeadersInit = {
-        apikey: supabaseAnonKey!, // Keep existing apikey
+        apikey: supabaseAnonKey, // Keep existing apikey
         "Content-Type": "application/json",
       };
 
