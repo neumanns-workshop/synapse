@@ -19,21 +19,20 @@ const mockUseGameStore = useGameStore as jest.MockedFunction<
   typeof useGameStore
 >;
 
+// Mock environment variables at the module level
+const originalEnv = process.env;
+
+// Set up mock environment variables before anything else
+process.env = {
+  ...originalEnv,
+  EXPO_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
+  EXPO_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
+};
+
 describe("SupabaseService", () => {
   let service: SupabaseService;
   let mockSupabaseClient: any;
   let mockUnifiedStore: any;
-
-  // Mock environment variables
-  const originalEnv = process.env;
-
-  beforeAll(() => {
-    process.env = {
-      ...originalEnv,
-      EXPO_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
-    };
-  });
 
   afterAll(() => {
     process.env = originalEnv;
@@ -177,6 +176,7 @@ describe("SupabaseService", () => {
     // Set up default mock returns for database operations
     // Note: Each test should override these as needed
 
+    // Create service instance after all mocks are set up
     service = SupabaseService.getInstance();
   });
 
