@@ -195,7 +195,7 @@ describe("SupabaseService", () => {
       // Store original values
       const originalUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
       const originalKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-      
+
       // Temporarily remove env vars
       delete process.env.EXPO_PUBLIC_SUPABASE_URL;
       delete process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
