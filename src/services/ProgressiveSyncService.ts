@@ -65,7 +65,12 @@ export class ProgressiveSyncService {
       }
 
       const localData = await this.unifiedStore.exportData();
-      const userId = this.supabaseService.getUser()?.id!;
+      const user = this.supabaseService.getUser();
+      const userId = user?.id;
+
+      if (!userId) {
+        throw new Error("User ID not available");
+      }
 
       // Step 1: Sync user profile (critical auth data)
       const profileStep = await this.syncUserProfileToCloud(
@@ -163,11 +168,16 @@ export class ProgressiveSyncService {
         throw new Error("User not authenticated");
       }
 
-      const userId = this.supabaseService.getUser()?.id!;
+      const user2 = this.supabaseService.getUser();
+      const userId2 = user2?.id;
+
+      if (!userId2) {
+        throw new Error("User ID not available");
+      }
 
       // Step 1: Sync user profile (critical auth data)
       const profileStep = await this.syncUserProfileFromCloud(
-        userId,
+        userId2,
         1,
         totalSteps,
       );
@@ -183,7 +193,7 @@ export class ProgressiveSyncService {
 
       // Step 2: Sync daily challenges (time-sensitive)
       const challengesStep = await this.syncDailyChallengesFromCloud(
-        userId,
+        userId2,
         2,
         totalSteps,
       );
@@ -199,7 +209,7 @@ export class ProgressiveSyncService {
 
       // Step 3: Sync achievements/stats (user progress)
       const achievementsStep = await this.syncAchievementsStatsFromCloud(
-        userId,
+        userId2,
         3,
         totalSteps,
       );
@@ -215,7 +225,7 @@ export class ProgressiveSyncService {
 
       // Step 4: Sync game history (bulk data)
       const historyStep = await this.syncGameHistoryFromCloud(
-        userId,
+        userId2,
         4,
         totalSteps,
       );

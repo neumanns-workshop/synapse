@@ -4,21 +4,25 @@ import { hasTouchableProperty } from "../svgUtils";
 describe("svgUtils", () => {
   describe("hasTouchableProperty", () => {
     it("should return true when props contain onPress", () => {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const props = { onPress: () => {} };
       expect(hasTouchableProperty(props)).toBe(true);
     });
 
     it("should return true when props contain onPressIn", () => {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const props = { onPressIn: () => {} };
       expect(hasTouchableProperty(props)).toBe(true);
     });
 
     it("should return true when props contain onPressOut", () => {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const props = { onPressOut: () => {} };
       expect(hasTouchableProperty(props)).toBe(true);
     });
 
     it("should return true when props contain onLongPress", () => {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const props = { onLongPress: () => {} };
       expect(hasTouchableProperty(props)).toBe(true);
     });
@@ -35,7 +39,9 @@ describe("svgUtils", () => {
 
     it("should return true when props contain multiple touchable properties", () => {
       const props = {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         onPress: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         onLongPress: () => {},
         disabled: false,
       };
