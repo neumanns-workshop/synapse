@@ -7,19 +7,29 @@ import { useTheme } from "react-native-paper";
 let QRCode: any;
 let QRCodeSVG: any;
 
-if (Platform.OS === "web") {
-  try {
-    QRCode = require("react-qr-code").default;
-  } catch (e) {
-    console.warn("react-qr-code not available for web");
+// Conditional imports for platform-specific QR code components
+const loadQRCodeComponents = () => {
+  if (Platform.OS === "web") {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const ReactQRCode = require("react-qr-code");
+      QRCode = ReactQRCode.default;
+    } catch (e) {
+      console.warn("react-qr-code not available for web");
+    }
+  } else {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const ReactNativeQRCode = require("react-native-qrcode-svg");
+      QRCodeSVG = ReactNativeQRCode.default;
+    } catch (e) {
+      console.warn("react-native-qrcode-svg not available for native");
+    }
   }
-} else {
-  try {
-    QRCodeSVG = require("react-native-qrcode-svg").default;
-  } catch (e) {
-    console.warn("react-native-qrcode-svg not available for native");
-  }
-}
+};
+
+// Load components on module initialization
+loadQRCodeComponents();
 
 interface QRCodeDisplayProps {
   value: string;

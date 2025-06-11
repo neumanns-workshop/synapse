@@ -65,7 +65,11 @@ export class ProgressiveSyncService {
       }
 
       const localData = await this.unifiedStore.exportData();
-      const userId = this.supabaseService.getUser()?.id!;
+      const user = this.supabaseService.getUser();
+      if (!user?.id) {
+        throw new Error("User ID not available");
+      }
+      const userId = user.id;
 
       // Step 1: Sync user profile (critical auth data)
       const profileStep = await this.syncUserProfileToCloud(
@@ -163,7 +167,11 @@ export class ProgressiveSyncService {
         throw new Error("User not authenticated");
       }
 
-      const userId = this.supabaseService.getUser()?.id!;
+      const user = this.supabaseService.getUser();
+      if (!user?.id) {
+        throw new Error("User ID not available");
+      }
+      const userId = user.id;
 
       // Step 1: Sync user profile (critical auth data)
       const profileStep = await this.syncUserProfileFromCloud(

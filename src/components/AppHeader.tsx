@@ -40,6 +40,9 @@ const CustomAppbarAction = React.memo<{
   />
 ));
 
+// Add display name for debugging
+CustomAppbarAction.displayName = "CustomAppbarAction";
+
 const AppHeader: React.FC<AppHeaderProps> = ({
   onNewGame,
   onGiveUp,

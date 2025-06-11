@@ -18,8 +18,12 @@ jest.mock("../../stores/useGameStore", () => ({
 jest.mock("../../services/StorageAdapter");
 jest.mock("../../services/UnifiedDataStore");
 
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
-  React.createElement(PaperProvider, { theme: SynapseLightTheme, children });
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <PaperProvider theme={SynapseLightTheme}>{children}</PaperProvider>
+);
+
+// Add display name for debugging
+TestWrapper.displayName = "TestWrapper";
 
 describe("StatsModal Performance Optimizations", () => {
   it("validates FlatList optimization functions work correctly", () => {
@@ -91,6 +95,9 @@ describe("StatsModal Performance Optimizations", () => {
       return React.createElement("div", {}, value);
     });
 
+    // Add display name for debugging
+    TestComponent.displayName = "TestComponent";
+
     expect(TestComponent).toBeDefined();
     expect(typeof TestComponent).toBe("object"); // React.memo returns an object
   });
@@ -129,9 +136,9 @@ describe("StatsModal Performance Optimizations", () => {
 
   it("renders test wrapper without issues", () => {
     const { container } = render(
-      React.createElement(TestWrapper, {
-        children: React.createElement("div", {}, "Test content"),
-      }),
+      <TestWrapper>
+        <div>Test content</div>
+      </TestWrapper>,
     );
 
     expect(container).toBeDefined();

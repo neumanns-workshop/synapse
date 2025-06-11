@@ -1,22 +1,48 @@
-# Build artifacts
-node_modules/
-.expo/
-dist/
+# Build outputs
 web-build/
+dist/
+build/
+
+# Dependencies
+node_modules/
+
+# Generated files
+*.d.ts
+
+# Legacy/External code
+scripts/check-duplicates.js
+
+# Test coverage
 coverage/
 
-# Config files (often CommonJS, not strict TS/ESM)
+# Development utilities (can be noisy)
+src/utils/compressionDebug.ts
+src/utils/performanceMonitor.ts
+src/utils/logger.ts
+
+# Generated/Build files
+*.map
+*.min.js
+
+# Config files (often CommonJS, mixed patterns)
 metro.config.js
-babel.config.js
 webpack.config.js
-# .eslintrc.js # Don't ignore the ESLint config itself if you want to lint it
+babel.config.js
+jest.config.js
+jest.setup.js
+
+# Expo/React Native generated
+.expo/
+android/
+ios/
+
+# Data files and fixtures (often have relaxed formatting)
+src/data/
+data/
+database/
 
 # Other
 bfg.jar
-
-# Data files (if they cause issues or are very large)
-# data/
-# raw_data/
 
 # Patch files
 patches/

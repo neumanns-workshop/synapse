@@ -181,6 +181,9 @@ const GameHistoryCard = React.memo(
   },
 );
 
+// Add display name for debugging
+GameHistoryCard.displayName = "GameHistoryCard";
+
 // AchievementCard component for displaying achievement items
 const AchievementCard = React.memo(
   ({
@@ -255,6 +258,9 @@ const AchievementCard = React.memo(
     );
   },
 );
+
+// Add display name for debugging
+AchievementCard.displayName = "AchievementCard";
 
 // Updated WordCollectionCard - Using Surface instead of Card to avoid text node errors
 const WordCollectionCard = ({
