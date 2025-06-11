@@ -6,8 +6,6 @@ import React, {
   ReactNode,
 } from "react";
 
-import { User } from "@supabase/supabase-js";
-
 import SupabaseService, {
   AuthState,
   UserProfile,
@@ -57,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     return unsubscribe;
-  }, []);
+  }, [supabaseService]);
 
   const signIn = async (email: string, password: string) => {
     const result = await supabaseService.signIn(email, password);

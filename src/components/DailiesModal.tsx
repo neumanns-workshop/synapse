@@ -14,11 +14,10 @@ import DailyChallengeReport from "./DailyChallengeReport";
 import DailyChallengesCalendar from "./DailyChallengesCalendar";
 import WordDefinitionDialog from "./WordDefinitionDialog";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
-import { allAchievements, Achievement } from "../features/achievements";
+import { Achievement } from "../features/achievements";
 import { dailyChallengesService } from "../services/DailyChallengesService";
 import { loadGameHistory } from "../services/StorageAdapter";
 import { useGameStore } from "../stores/useGameStore";
-import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type { DailyChallenge } from "../types/dailyChallenges";
 import type { GameReport } from "../utils/gameReportUtils";
 

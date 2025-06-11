@@ -16,9 +16,6 @@ import {
   TextInput,
   Button,
   Card,
-  Checkbox,
-  Divider,
-  ActivityIndicator,
   SegmentedButtons,
   Portal,
   Modal,
@@ -31,7 +28,6 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import CustomIcon from "../components/CustomIcon";
 import StripeService from "../services/StripeService";
@@ -69,7 +65,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [featuresExpanded, setFeaturesExpanded] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [_captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isWaitingForAuth, setIsWaitingForAuth] = useState(false);
 
@@ -501,80 +497,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
       // STEP 7: Cleanup and wait for auth state
       await unifiedStore.clearPendingConversionDetails(anonymousUserId);
-      setIsWaitingForAuth(true);
-      // The auth state change will trigger onAuthComplete
-    } catch (error) {
-      console.error("🎫 Error during promo signup:", error);
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Failed to create account with promo code",
-      );
-    } finally {
-      setIsLoading(false);
-      setIsApplyingPromo(false);
-    }
-  };
-
-  const handlePromoCodeSignup = async () => {
-    setIsLoading(true);
-    setIsApplyingPromo(true);
-
-    try {
-      const code = promoCode.toUpperCase().trim();
-      console.log("🎫 Validating promo code:", code);
-
-      // STEP 1: Validate promo code WITHOUT authentication
-      // The edge function uses service role internally and doesn't need user auth
-      console.log("🎫 Calling promo validation edge function...");
-      const { data: validationResult, error: validationError } =
-        await supabaseService.invokeFunction("validate-promo-code", {
-          code,
-          userEmail: email,
-          userAgent: navigator.userAgent,
-        }); // No JWT token passed - function works without auth
-
-      if (validationError || !validationResult?.valid) {
-        const errorMessage =
-          validationResult?.error ||
-          (validationError instanceof Error
-            ? validationError.message
-            : "Invalid promo code");
-        setErrorMessage(errorMessage);
-        return;
-      }
-
-      console.log("🎫 Promo code validated successfully, creating account...");
-
-      // STEP 2: Create the account directly via Supabase (similar to traditional signup)
-      const { user, error: signUpError } = await supabaseService.signUp(
-        email,
-        password,
-        emailUpdatesOptIn,
-      );
-
-      if (signUpError) {
-        setErrorMessage(
-          signUpError instanceof Error
-            ? signUpError.message
-            : "Failed to create account",
-        );
-        return;
-      }
-
-      if (!user) {
-        setErrorMessage("Account created but user data missing");
-        return;
-      }
-
-      console.log("🎫 Account created, setting premium status...");
-
-      // STEP 3: Set premium status locally (same as traditional signup after payment)
-      await stripeService.createPromoAccount(code);
-
-      console.log("🎫 Premium account created successfully!");
-
-      // Wait for auth state to complete (similar to traditional signup)
       setIsWaitingForAuth(true);
       // The auth state change will trigger onAuthComplete
     } catch (error) {
@@ -1347,7 +1269,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           lineHeight: 20,
         }}
       >
-        Enter your email address and we'll send you a link to reset your
+        Enter your email address and we&apos;ll send you a link to reset your
         password.
       </Text>
 

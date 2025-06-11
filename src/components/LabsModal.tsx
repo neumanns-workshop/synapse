@@ -5,7 +5,6 @@ import {
   Modal,
   Card,
   Text,
-  Switch,
   List,
   Divider,
   Button,
@@ -52,7 +51,7 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
   }, [visible]);
 
   // This would eventually be stored in your data store
-  const [features, setFeatures] = useState<ExperimentalFeature[]>([
+  const [features] = useState<ExperimentalFeature[]>([
     {
       id: "speed_races",
       name: "Speed Races",
@@ -118,17 +117,6 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
       comingSoon: true,
     },
   ]);
-
-  const toggleFeature = (id: string) => {
-    // No longer needed since all features are coming soon
-    // setFeatures(prev => prev.map(feature =>
-    //   feature.id === id
-    //     ? { ...feature, enabled: !feature.enabled }
-    //     : feature
-    // ));
-  };
-
-  const enabledCount = 0; // All features are coming soon, none enabled
 
   return (
     <Modal

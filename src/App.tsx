@@ -1,47 +1,74 @@
-import React, { useEffect, useState, Suspense, lazy } from "react";
-import { Platform, Linking, View, Alert, AppState } from "react-native";
-
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import type { NativeStackNavigationOptions } from "@react-navigation/native-stack";
-import { StatusBar } from "expo-status-bar";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import React, { useEffect, useState, useRef, Suspense } from "react";
+import {
+  useColorScheme,
+  View,
+  Linking,
+  Platform,
+  LogBox,
+  Alert,
+  AppState,
+} from "react-native";
+import "react-native-url-polyfill/auto";
 import { PaperProvider, ActivityIndicator, Text } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { QueryClient, QueryClientProvider } from "react-query";
-
-// Initialize logger early (includes anti-tampering protection)
-import { Logger } from "./utils/logger";
+import { QueryClient } from "@tanstack/react-query";
 
 // Lazy load heavy modal components for better web performance
-const ContactModal = lazy(() => import("./components/ContactModal"));
-const DailiesModal = lazy(() => import("./components/DailiesModal"));
-const LabsModal = lazy(() => import("./components/LabsModal"));
-const NewsModal = lazy(() => import("./components/NewsModal"));
-const QuickstartModal = lazy(() => import("./components/QuickstartModal"));
-const StatsModal = lazy(() => import("./components/StatsModal"));
-const TutorialModal = lazy(() => import("./components/TutorialModal"));
-
-// Legal page components
-
-import ErrorBoundary from "./components/ErrorBoundary";
-import { Footer } from "./components/Footer";
-import { LegalPage } from "./components/LegalPages";
+import { lazy } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { GameScreen } from "./screens/GameScreen";
+import { AuthScreen } from "./screens/AuthScreen";
+import { AppHeader } from "./components/AppHeader";
+import { LegalPages } from "./components/LegalPages";
+import { DailiesModal } from "./components/DailiesModal";
+import { SettingsModal } from "./components/SettingsModal";
+import { StatsModal } from "./components/StatsModal";
+import { NewsModal } from "./components/NewsModal";
+import { TutorialModal } from "./components/TutorialModal";
+import { QuickstartModal } from "./components/QuickstartModal";
+import { ContactModal } from "./components/ContactModal";
+import { LabsModal } from "./components/LabsModal";
+import UpgradePrompt from "./components/UpgradePrompt";
+
+// Payment-related imports
+import PaymentHandler from "./services/PaymentHandler";
+import type { PaymentRedirectResult } from "./services/PaymentHandler";
+
+import { useGameStore } from "./stores/useGameStore";
+import { SynapseDarkTheme, SynapseLightTheme } from "./theme/SynapseTheme";
+import { initializeWebOptimizations } from "./utils/webOptimizations";
+import { useAchievementStore } from "./stores/useAchievementStore";
+import { useWordCollectionStore } from "./stores/useWordCollectionStore";
+import { useDailyChallengeStore } from "./stores/useDailyChallengeStore";
+import { useUserProfileStore } from "./stores/useUserProfileStore";
+import { ProgressiveSyncService } from "./services/ProgressiveSyncService";
+
+// Initialize Supabase
+import { SupabaseService } from "./services/SupabaseService";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { gameFlowManager } from "./services/GameFlowManager";
+import { preloadAllData } from "./services/dataLoader";
+import { Footer } from "./components/Footer";
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationOptions,
+} from "@react-navigation/native-stack";
+import { NavigationContainer } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { TutorialProvider } from "./context/TutorialContext";
 import AccountScreen from "./screens/AccountScreen";
-import AuthScreen from "./screens/AuthScreen";
-import GameScreen from "./screens/GameScreen";
-import { preloadAllData } from "./services/dataLoader";
-import { gameFlowManager } from "./services/GameFlowManager";
-import PaymentHandler from "./services/PaymentHandler";
-import type { PaymentRedirectResult } from "./services/PaymentHandler";
-import { resetAllPlayerData } from "./services/StorageAdapter";
-import { unifiedDataStore } from "./services/UnifiedDataStore";
-import { useGameStore } from "./stores/useGameStore";
-import { SynapseLightTheme } from "./theme/SynapseTheme";
-import { initializeWebOptimizations } from "./utils/webOptimizations";
+SupabaseService.getInstance();
+
+// Initialize Progressive Sync Service
+ProgressiveSyncService.getInstance();
+
+// Initialize other stores
+useGameStore.getState().initialize();
+useAchievementStore.getState().initialize();
+useWordCollectionStore.getState().initialize();
+useDailyChallengeStore.getState().initialize();
+useUserProfileStore.getState().initialize();
 
 // Define the root stack parameter list
 export type RootStackParamList = {
@@ -60,8 +87,6 @@ const customScreenOptions: Partial<NativeStackNavigationOptions> = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const queryClient = new QueryClient();
-
 // Loading fallback component for lazy-loaded modals
 const ModalLoadingFallback: React.FC = () => (
   <View style={{ justifyContent: "center", alignItems: "center", padding: 20 }}>
@@ -70,8 +95,8 @@ const ModalLoadingFallback: React.FC = () => (
 );
 
 function AppContent() {
+  const { auth, authLoaded } = useAuth();
   const { theme } = useTheme();
-  const auth = useAuth();
   const [showAuth, setShowAuth] = useState(false);
   const [authScreenMode, setAuthScreenMode] = useState<
     "signin" | "signup" | "reset" | "signin_after_purchase"
@@ -233,17 +258,16 @@ function AppContent() {
       if (Platform.OS === "web" && typeof window !== "undefined") {
         originalSearch = window.location.search;
         const urlObj = new URL(event.url);
-        window.history.replaceState({}, "", urlObj.pathname + urlObj.search); // Update URL without reload so PaymentHandler can parse it
+        window.location.search = urlObj.search;
       }
 
-      const paymentResult = await paymentHandler.handlePaymentRedirect();
+      const paymentResult: PaymentRedirectResult =
+        await paymentHandler.handlePaymentRedirect();
 
+      // Restore original search query if on web
       if (Platform.OS === "web" && typeof window !== "undefined") {
-        window.history.replaceState(
-          {},
-          "",
-          window.location.pathname + originalSearch,
-        ); // Restore original search if needed
+        window.history.replaceState({}, "", window.location.pathname); // Clean up URL
+        window.location.search = originalSearch;
       }
 
       if (paymentResult.wasPaymentAttempt) {
@@ -255,27 +279,24 @@ function AppContent() {
         } else if (paymentResult.error) {
           Alert.alert("Payment Status", paymentResult.error);
         }
-
-        // If user is signed in and payment was successful, refresh game access state
         if (auth.user && paymentResult.success) {
           try {
             await useGameStore.getState().refreshGameAccessState();
             console.log(
-              "✅ Game access state refreshed after successful payment (deep link)",
+              "✅ Game access state refreshed after successful payment",
             );
           } catch (error) {
             console.error(
-              "❌ Error refreshing game access state after payment (deep link):",
+              "❌ Error refreshing game access state after payment:",
               error,
             );
           }
         }
-
-        return; // Stop further processing if it was a payment attempt
+        return; // Stop further processing if it was a payment link
       }
-      // --- End of Payment Redirect Handling for open app ---
+      // --- End Payment Redirect Handling for open app ---
 
-      // If not a payment redirect, proceed with normal deep link handling
+      // Handle other deep links (e.g., game challenges)
       const { entryType, challengeData } = gameFlowManager.parseEntryUrl(
         event.url,
       );
@@ -287,20 +308,22 @@ function AppContent() {
     };
 
     const subscription = Linking.addEventListener("url", handleDeepLink);
-    return () => subscription.remove();
-  }, []); // Dependencies: gameFlowManager or other services if they change
 
-  // Set up AppState handling to flush pending data saves when app backgrounds
+    return () => {
+      subscription.remove();
+    };
+  }, [auth.user]);
+
+  // Handle app state changes (e.g., coming to foreground)
   useEffect(() => {
+    const appState = AppState.currentState;
+    console.log("Current App State:", appState);
+
     const handleAppStateChange = async (nextAppState: string) => {
-      if (nextAppState === "background" || nextAppState === "inactive") {
-        // Flush any pending saves before the app goes to background
-        try {
-          await unifiedDataStore.flushPendingChanges();
-          console.log("✅ Flushed pending data saves on app background");
-        } catch (error) {
-          console.error("❌ Error flushing pending saves:", error);
-        }
+      if (nextAppState === "active") {
+        console.log("App has come to the foreground");
+        // Refresh daily challenge data when app becomes active
+        await useDailyChallengeStore.getState().fetchTodaysChallenge();
       }
     };
 
@@ -308,172 +331,151 @@ function AppContent() {
       "change",
       handleAppStateChange,
     );
-    return () => subscription?.remove();
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
-  // Show loading screen while auth is initializing
-  if (auth.isLoading) {
+  if (!authLoaded) {
     return (
-      <PaperProvider theme={theme}>
-        <SafeAreaProvider>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: theme.colors.background,
-            }}
-          >
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-            <Text style={{ marginTop: 16, color: theme.colors.onBackground }}>
-              Loading...
-            </Text>
-          </View>
-          <StatusBar style={theme.dark ? "light" : "dark"} />
-        </SafeAreaProvider>
+      <PaperProvider theme={SynapseDarkTheme}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: SynapseDarkTheme.colors.background,
+          }}
+        >
+          <ActivityIndicator size="large" />
+          <Text style={{ marginTop: 15, color: "white" }}>
+            Loading Synapses...
+          </Text>
+        </View>
       </PaperProvider>
     );
   }
 
-  // Show legal page if requested
-  if (currentLegalPage) {
-    return (
-      <PaperProvider theme={theme}>
-        <SafeAreaProvider>
-          <View style={{ flex: 1 }}>
-            <LegalPage
-              type={currentLegalPage}
-              onBack={() => setCurrentLegalPage(null)}
-            />
-            <Footer onLegalPageRequest={(page) => setCurrentLegalPage(page)} />
-          </View>
-          <StatusBar style={theme.dark ? "light" : "dark"} />
-        </SafeAreaProvider>
-      </PaperProvider>
-    );
-  }
-
+  // Once auth is loaded, decide which main screen to show
   return (
-    <PaperProvider theme={theme}>
-      <SafeAreaProvider>
-        <ErrorBoundary>
-          <NavigationContainer>
-            <Stack.Navigator
-              initialRouteName="Synapse"
-              screenOptions={{
-                headerShown: false,
-                animation: customScreenOptions.animation,
-                animationDuration: customScreenOptions.animationDuration,
-                contentStyle: { backgroundColor: theme.colors.background },
-              }}
-            >
-              <Stack.Screen name="Synapse">
-                {(props) => (
-                  <ErrorBoundary>
-                    <GameScreen
-                      {...props}
-                      onShowAuth={() => {
-                        setAuthScreenMode("signup");
-                        setShowAuth(true);
-                      }}
-                      onShowAuthUpgrade={() => {
-                        setAuthScreenMode("signup");
-                        setShowAuth(true);
-                      }}
-                      onShowAccount={() => setShowAccount(true)}
-                      onLegalPageRequest={(page) => setCurrentLegalPage(page)}
-                    />
-                  </ErrorBoundary>
-                )}
-              </Stack.Screen>
-            </Stack.Navigator>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <StatusBar style={theme.dark ? "light" : "dark"} />
+      <AppHeader
+        onShowAuth={() => setShowAuth(true)}
+        onShowAccount={() => setShowAccount(true)}
+        onShowLegal={(page) => setCurrentLegalPage(page)}
+      />
 
-            {/* Modals */}
-            <Suspense fallback={<ModalLoadingFallback />}>
-              <QuickstartModal
-                visible={quickstartModalVisible}
-                onDismiss={() => setQuickstartModalVisible(false)}
-              />
-            </Suspense>
-            <Suspense fallback={<ModalLoadingFallback />}>
-              <NewsModal
-                visible={newsModalVisible}
-                onDismiss={() => setNewsModalVisible(false)}
-              />
-            </Suspense>
-            <Suspense fallback={<ModalLoadingFallback />}>
-              <ContactModal
-                visible={contactModalVisible}
-                onDismiss={() => setContactModalVisible(false)}
-              />
-            </Suspense>
-            <Suspense fallback={<ModalLoadingFallback />}>
-              <LabsModal
-                visible={labsModalVisible}
-                onDismiss={() => setLabsModalVisible(false)}
-              />
-            </Suspense>
-            <Suspense fallback={<ModalLoadingFallback />}>
-              <StatsModal />
-            </Suspense>
-            <Suspense fallback={<ModalLoadingFallback />}>
-              <DailiesModal />
-            </Suspense>
-            <Suspense fallback={<ModalLoadingFallback />}>
-              <TutorialModal />
-            </Suspense>
+      <GameScreen />
 
-            {/* Auth Modal */}
-            <AuthScreen
-              visible={showAuth}
-              onAuthComplete={async () => {
-                setShowAuth(false);
-                setPaymentMessage(null);
-                setAuthScreenInitialEmail(undefined);
+      <Footer
+        onShowAuth={() => setShowAuth(true)}
+        onShowLegal={(page) => setCurrentLegalPage(page)}
+      />
 
-                // Refresh game access state after successful sign-in
-                // This ensures premium status and free games are updated,
-                // and upgrade prompt dismissal is reset if user now has access
-                try {
-                  await useGameStore.getState().refreshGameAccessState();
-                  console.log("✅ Game access state refreshed after sign-in");
-                } catch (error) {
-                  console.error(
-                    "❌ Error refreshing game access state:",
-                    error,
-                  );
-                }
-              }}
-              onDismiss={() => {
-                setShowAuth(false);
-                setPaymentMessage(null);
-                setAuthScreenInitialEmail(undefined);
-              }}
-              defaultMode={authScreenMode}
-              paymentSuccessMessage={paymentMessage}
-              initialEmail={authScreenInitialEmail}
-            />
+      {/* Auth Modal */}
+      {showAuth && (
+        <AuthScreen
+          visible={showAuth}
+          onDismiss={() => setShowAuth(false)}
+          mode={authScreenMode}
+          initialEmail={authScreenInitialEmail}
+          onSuccess={() => {
+            setShowAuth(false);
+          }}
+        />
+      )}
 
-            {/* Account Modal */}
-            {showAccount && auth.user && (
-              <AccountScreen onClose={() => setShowAccount(false)} />
-            )}
-          </NavigationContainer>
-          <StatusBar style={theme.dark ? "light" : "dark"} />
-        </ErrorBoundary>
-      </SafeAreaProvider>
-    </PaperProvider>
+      {/* Account Modal */}
+      <Suspense fallback={<ModalLoadingFallback />}>
+        {showAccount && (
+          <AccountScreen
+            visible={showAccount}
+            onDismiss={() => setShowAccount(false)}
+          />
+        )}
+      </Suspense>
+
+      {/* Other Modals */}
+      <Suspense fallback={<ModalLoadingFallback />}>
+        <DailiesModal />
+        <StatsModal />
+        <SettingsModal />
+        <NewsModal
+          visible={newsModalVisible}
+          onDismiss={() => setNewsModalVisible(false)}
+        />
+        <QuickstartModal
+          visible={quickstartModalVisible}
+          onDismiss={() => setQuickstartModalVisible(false)}
+        />
+        <ContactModal
+          visible={contactModalVisible}
+          onDismiss={() => setContactModalVisible(false)}
+        />
+        <LabsModal
+          visible={labsModalVisible}
+          onDismiss={() => setLabsModalVisible(false)}
+        />
+        <TutorialModal />
+      </Suspense>
+
+      <UpgradePrompt />
+
+      {/* Legal Pages Modal */}
+      {currentLegalPage && (
+        <LegalPages
+          type={currentLegalPage}
+          onBack={() => setCurrentLegalPage(null)}
+        />
+      )}
+
+      {/* Payment success/error message */}
+      {paymentMessage && (
+        <View
+          style={{
+            position: "absolute",
+            top: 50,
+            left: 0,
+            right: 0,
+            padding: 20,
+            backgroundColor: "lightblue",
+          }}
+        >
+          <Text>{paymentMessage}</Text>
+          <button onClick={() => setPaymentMessage(null)}>Close</button>
+        </View>
+      )}
+    </View>
   );
 }
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <TutorialProvider>
-          <AppContent />
-        </TutorialProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <TutorialProvider>
+              <PaperProvider>
+                <NavigationContainer>
+                  <AppContent />
+                </NavigationContainer>
+              </PaperProvider>
+            </TutorialProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
+
+// Ignore warnings for now
+LogBox.ignoreLogs([
+  "Warning: Each child in a list should have a unique 'key' prop.",
+  "Warning: Using 'animation' in user-facing transitions is discouraged. Use 'animationType' instead.",
+  "You are setting the style 'color' as a prop. You should nest it in a style object.",
+  "You are setting the style 'backgroundColor' as a prop. You should nest it in a style object.",
+  "Prop `color` supplied to `Icon` is conflicting with transformation `color`.",
+]);

@@ -44,6 +44,16 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
   const [showError, setShowError] = useState(false);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
+  const resetForm = React.useCallback(() => {
+    setContactType("feedback");
+    setSubject("");
+    setDescription("");
+    setUserEmail(auth.user?.email || "");
+    setIsSubmitting(false);
+    setShowSuccess(false);
+    setShowError(false);
+  }, [auth.user?.email]);
+
   // Scale animation value
   const scale = useSharedValue(0.9);
   const opacity = useSharedValue(0);
@@ -69,7 +79,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
       // Reset form when modal closes
       resetForm();
     }
-  }, [visible, scale, opacity, auth.user?.email]);
+  }, [visible, scale, opacity, auth.user?.email, resetForm]);
 
   // Animation style
   const animatedStyle = useAnimatedStyle(() => {
@@ -78,16 +88,6 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
       opacity: opacity.value,
     };
   });
-
-  const resetForm = () => {
-    setContactType("feedback");
-    setSubject("");
-    setDescription("");
-    setUserEmail(auth.user?.email || "");
-    setIsSubmitting(false);
-    setShowSuccess(false);
-    setShowError(false);
-  };
 
   const contactTypeOptions = [
     { value: "bug", label: "Bug Report", icon: "bug" },
@@ -359,7 +359,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
         duration={3000}
         style={{ backgroundColor: colors.primary }}
       >
-        Message sent successfully! We'll get back to you soon.
+        Message sent successfully! We&apos;ll get back to you soon.
       </Snackbar>
 
       {/* Error Snackbar */}

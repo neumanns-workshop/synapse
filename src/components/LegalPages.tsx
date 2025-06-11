@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import { ScrollView, View, Platform, Pressable } from "react-native";
+import { ScrollView, View, Platform } from "react-native";
 
-import { Text, Card, Divider, IconButton } from "react-native-paper";
+import { Text, Card, IconButton } from "react-native-paper";
 
 import { useTheme } from "../context/ThemeContext";
 
@@ -73,10 +73,11 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onBack }) => {
               1. Acceptance of Terms
             </Text>
             <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              By accessing or using Synapse ("the Service"), a word navigation
-              puzzle game operated by Neumann's Workshop, LLC, doing business as
-              Galaxy Brain Entertainment ("Company", "we", "us", or "our"), you
-              agree to be bound by these Terms of Service ("Terms"). If you do
+              By accessing or using Synapse (&quot;the Service&quot;), a word
+              navigation puzzle game operated by Neumann&apos;s Workshop, LLC,
+              doing business as Galaxy Brain Entertainment (&quot;Company&quot;,
+              &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;), you agree to
+              be bound by these Terms of Service (&quot;Terms&quot;). If you do
               not agree to these Terms, do not use the Service.
             </Text>
           </Card.Content>
@@ -145,11 +146,12 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onBack }) => {
               variant="headlineSmall"
               style={{ color: theme.colors.onSurface, marginBottom: 10 }}
             >
-              4. Your Account & Privacy Controls
+              4. Your Account &amp; Privacy Controls
             </Text>
             <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
               <Text style={{ fontWeight: "bold" }}>Account Management:</Text>
-              {"\n"}• Access account settings through the app's Account menu
+              {"\n"}• Access account settings through the app&apos;s Account
+              menu
               {"\n"}• Manage privacy preferences including analytics and
               leaderboards{"\n"}• Update email communication preferences{"\n"}•
               Delete your account permanently at any time{"\n\n"}
@@ -222,10 +224,11 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onBack }) => {
               Introduction
             </Text>
             <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              Synapse ("we," "our," or "us") respects your privacy and is
-              committed to protecting your personal information. This Privacy
-              Policy explains how we collect, use, disclose, and safeguard your
-              information when you use our word navigation puzzle game.
+              Synapse (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;)
+              respects your privacy and is committed to protecting your personal
+              information. This Privacy Policy explains how we collect, use,
+              disclose, and safeguard your information when you use our word
+              navigation puzzle game.
             </Text>
           </Card.Content>
         </Card>
@@ -239,6 +242,17 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onBack }) => {
               style={{ color: theme.colors.onSurface, marginBottom: 10 }}
             >
               Information We Collect
+            </Text>
+            <Text
+              style={{
+                color: theme.colors.onSurface,
+                lineHeight: 24,
+                marginBottom: 10,
+              }}
+            >
+              We collect information you provide directly, such as when you
+              create an account, purchase a premium subscription, or contact us.
+              This may include:
             </Text>
             <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
               • Account Information: Email address, password (encrypted), and
@@ -277,7 +291,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onBack }) => {
               variant="headlineSmall"
               style={{ color: theme.colors.onSurface, marginBottom: 10 }}
             >
-              Your Rights & Controls
+              Your Rights &amp; Controls
             </Text>
             <Text
               style={{
@@ -301,27 +315,8 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onBack }) => {
               <Text style={{ fontWeight: "bold" }}>Account Deletion:</Text>
               {"\n"}• Delete your account permanently through Account Settings
               {"\n"}• All personal data and game progress will be removed{"\n"}•
-              Premium purchases cannot be recovered after deletion{"\n"}•
-              Deletion is immediate and cannot be undone
-            </Text>
-          </Card.Content>
-        </Card>
-
-        <Card
-          style={{ marginBottom: 20, backgroundColor: theme.colors.surface }}
-        >
-          <Card.Content>
-            <Text
-              variant="headlineSmall"
-              style={{ color: theme.colors.onSurface, marginBottom: 10 }}
-            >
-              Contact Us
-            </Text>
-            <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              If you have questions about this Privacy Policy, please contact us
-              at:{"\n"}
-              Email: synapse@neumannsworkshop.com{"\n"}
-              Website: synapsegame.ai
+              Premium purchases cannot be recovered after account deletion{"\n"}
+              • Deletion is immediate and cannot be undone
             </Text>
           </Card.Content>
         </Card>
@@ -337,13 +332,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onBack }) => {
           variant="headlineLarge"
           style={{ color: theme.colors.onBackground, marginBottom: 20 }}
         >
-          DMCA Notice & Takedown Policy
-        </Text>
-
-        <Text
-          style={{ color: theme.colors.onSurfaceVariant, marginBottom: 20 }}
-        >
-          Effective Date: January 10, 2025
+          DMCA Policy
         </Text>
 
         <Card
@@ -357,9 +346,9 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onBack }) => {
               DMCA Compliance
             </Text>
             <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              Galaxy Brain Entertainment (operating under Neumann's Workshop,
-              LLC) respects the intellectual property rights of others and
-              expects users to do the same. In accordance with the Digital
+              Galaxy Brain Entertainment (operating under Neumann&apos;s
+              Workshop, LLC) respects the intellectual property rights of others
+              and expects users to do the same. In accordance with the Digital
               Millennium Copyright Act of 1998 (DMCA), we will respond promptly
               to valid notices of alleged copyright infringement.
             </Text>
@@ -401,27 +390,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onBack }) => {
               Copyright Agent: Galaxy Brain Entertainment{"\n"}
               DMCA Compliance{"\n"}
               Email: synapse@neumannsworkshop.com{"\n"}
-              Subject Line: "DMCA Takedown Notice"
-            </Text>
-          </Card.Content>
-        </Card>
-
-        <Card
-          style={{ marginBottom: 20, backgroundColor: theme.colors.surface }}
-        >
-          <Card.Content>
-            <Text
-              variant="headlineSmall"
-              style={{ color: theme.colors.onSurface, marginBottom: 10 }}
-            >
-              AI Model Content Disclaimer
-            </Text>
-            <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              Synapse uses third-party AI models (such as Nomic AI, MiniLM, Qwen
-              embeddings) for semantic word relationships. These models are
-              licensed under open source terms and developed by third parties.
-              DMCA notices regarding AI model outputs should be directed to the
-              original model creators.
+              Subject Line: &quot;DMCA Takedown Notice&quot;
             </Text>
           </Card.Content>
         </Card>
@@ -439,60 +408,43 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onBack }) => {
         >
           About Synapse
         </Text>
-
         <Card
           style={{ marginBottom: 20, backgroundColor: theme.colors.surface }}
         >
           <Card.Content>
-            <Text
-              variant="headlineSmall"
-              style={{ color: theme.colors.onSurface, marginBottom: 10 }}
-            >
-              About the Game
-            </Text>
             <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              Synapse™ is a word navigation puzzle game that challenges players
-              to find paths between words using semantic relationships. Navigate
-              through a web of interconnected concepts to reach your target
-              word.
+              Synapse is a word navigation puzzle game born from a passion for
+              language, data, and elegant challenges. It&apos;s designed for
+              those who love to explore the hidden connections between words and
+              test their semantic intuition.
             </Text>
           </Card.Content>
         </Card>
 
+        <Text
+          variant="headlineSmall"
+          style={{
+            color: theme.colors.onBackground,
+            marginTop: 20,
+            marginBottom: 10,
+          }}
+        >
+          Our Philosophy
+        </Text>
         <Card
           style={{ marginBottom: 20, backgroundColor: theme.colors.surface }}
         >
           <Card.Content>
-            <Text
-              variant="headlineSmall"
-              style={{ color: theme.colors.onSurface, marginBottom: 10 }}
-            >
-              Business Information
-            </Text>
             <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              Synapse™ is developed by Galaxy Brain Entertainment, operating
-              under Neumann's Workshop, LLC.{"\n\n"}
-              Galaxy Brain Entertainment{"\n"}A division of Neumann's Workshop,
-              LLC{"\n\n"}
-              Contact: synapse@neumannsworkshop.com
-            </Text>
-          </Card.Content>
-        </Card>
-
-        <Card
-          style={{ marginBottom: 20, backgroundColor: theme.colors.surface }}
-        >
-          <Card.Content>
-            <Text
-              variant="headlineSmall"
-              style={{ color: theme.colors.onSurface, marginBottom: 10 }}
-            >
-              Legal Information
-            </Text>
-            <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              © 2025 Galaxy Brain Entertainment (Neumann's Workshop, LLC). All
-              rights reserved.{"\n"}
-              Synapse™ is a trademark of Galaxy Brain Entertainment.
+              We believe in creating games that are not just fun, but also
+              enriching. Synapse is built on a few core principles:{"\n"}
+              <Text style={{ fontWeight: "bold" }}>Intellectual:</Text> We
+              challenge you to think critically about language.{"\n"}
+              <Text style={{ fontWeight: "bold" }}>Minimalist:</Text> A clean,
+              distraction-free interface keeps you focused on the puzzle.{"\n"}
+              <Text style={{ fontWeight: "bold" }}>Fair:</Text> A single,
+              one-time purchase unlocks all premium features, forever. No ads,
+              no subscriptions, no nonsense.
             </Text>
           </Card.Content>
         </Card>
@@ -510,81 +462,56 @@ export const LegalPage: React.FC<LegalPageProps> = ({ type, onBack }) => {
         >
           Contact Us
         </Text>
-
         <Card
           style={{ marginBottom: 20, backgroundColor: theme.colors.surface }}
         >
           <Card.Content>
             <Text
-              variant="headlineSmall"
-              style={{ color: theme.colors.onSurface, marginBottom: 10 }}
+              style={{
+                color: theme.colors.onSurface,
+                lineHeight: 24,
+                marginBottom: 10,
+              }}
             >
-              General Support
+              We&apos;d love to hear from you! Whether you have a question, a
+              suggestion, or just want to say hello, here&apos;s how to reach
+              us.
             </Text>
             <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              For questions, support, or feedback about Synapse:{"\n\n"}
-              Email: synapse@neumannsworkshop.com{"\n"}
-              Website: synapsegame.ai
+              <Text style={{ fontWeight: "bold" }}>General Inquiries:</Text>
+              {"\n"}
+              synapse@neumannsworkshop.com{"\n\n"}
+              <Text style={{ fontWeight: "bold" }}>Support:</Text>
+              {"\n"}
+              support@neumannsworkshop.com{"\n\n"}
+              <Text style={{ fontWeight: "bold" }}>Press:</Text>
+              {"\n"}
+              press@neumannsworkshop.com
             </Text>
           </Card.Content>
         </Card>
 
+        <Text
+          variant="headlineSmall"
+          style={{
+            color: theme.colors.onBackground,
+            marginTop: 20,
+            marginBottom: 10,
+          }}
+        >
+          Follow Us
+        </Text>
         <Card
           style={{ marginBottom: 20, backgroundColor: theme.colors.surface }}
         >
           <Card.Content>
-            <Text
-              variant="headlineSmall"
-              style={{ color: theme.colors.onSurface, marginBottom: 10 }}
-            >
-              Privacy & Data Requests
-            </Text>
             <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              For privacy-related requests that cannot be completed through the
-              app:{"\n\n"}
-              Email: synapse@neumannsworkshop.com{"\n"}
-              Subject: "Privacy Request" or "Data Request"{"\n\n"}
-              <Text style={{ fontWeight: "bold" }}>We can help with:</Text>
-              {"\n"}• Data export requests{"\n"}• Questions about data
-              processing{"\n"}• Technical issues with account deletion{"\n"}•
-              Privacy compliance questions
-            </Text>
-          </Card.Content>
-        </Card>
-
-        <Card
-          style={{ marginBottom: 20, backgroundColor: theme.colors.surface }}
-        >
-          <Card.Content>
-            <Text
-              variant="headlineSmall"
-              style={{ color: theme.colors.onSurface, marginBottom: 10 }}
-            >
-              Legal & Compliance
-            </Text>
-            <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              For legal matters, DMCA notices, or compliance issues:{"\n\n"}
-              Email: synapse@neumannsworkshop.com{"\n"}
-              Subject: "Legal Matter" or "DMCA Notice"
-            </Text>
-          </Card.Content>
-        </Card>
-
-        <Card
-          style={{ marginBottom: 20, backgroundColor: theme.colors.surface }}
-        >
-          <Card.Content>
-            <Text
-              variant="headlineSmall"
-              style={{ color: theme.colors.onSurface, marginBottom: 10 }}
-            >
-              Business Information
-            </Text>
-            <Text style={{ color: theme.colors.onSurface, lineHeight: 24 }}>
-              Galaxy Brain Entertainment{"\n"}A division of Neumann's Workshop,
-              LLC{"\n\n"}
-              We aim to respond to all inquiries within 48 hours during business
-              days.
+              Stay up-to-date with the latest news, updates, and community
+              events.{"\n"}
+              <Text style={{ fontWeight: "bold" }}>Twitter:</Text> @SynapseGame
+              {"\n"}
+              <Text style={{ fontWeight: "bold" }}>Discord:</Text>{" "}
+              discord.gg/SynapseGame
             </Text>
           </Card.Content>
         </Card>

@@ -290,9 +290,10 @@ describe("StripeService", () => {
       const originalKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
       // Temporarily remove the environment variable
-      delete process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+      process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY = undefined;
 
       expect(() => {
+        delete require.cache[require.resolve("../StripeService")];
         require("../StripeService");
       }).not.toThrow();
 

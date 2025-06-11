@@ -21,7 +21,6 @@ import PathDisplayConfigurator from "../components/PathDisplayConfigurator";
 import PlayerPathDisplay from "../components/PlayerPathDisplay";
 import UpgradePrompt from "../components/UpgradePrompt";
 import WordDefinitionDialog from "../components/WordDefinitionDialog";
-import { useTutorial } from "../context/TutorialContext";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 
@@ -100,10 +99,6 @@ const GameScreen: React.FC<GameScreenProps> = ({
     (state) => state.upgradePromptDismissedThisSession,
   );
   const hideUpgradePrompt = useGameStore((state) => state.hideUpgradePrompt);
-  const showUpgradePrompt = useGameStore((state) => state.showUpgradePrompt);
-  const resetUpgradePromptDismissal = useGameStore(
-    (state) => state.resetUpgradePromptDismissal,
-  );
   const remainingFreeGames = useGameStore((state) => state.remainingFreeGames);
 
   // Debug logging for upgrade prompt
@@ -121,8 +116,6 @@ const GameScreen: React.FC<GameScreenProps> = ({
       upgradePromptVisible,
     );
   }, [upgradePromptVisible]);
-
-  const { startTutorial } = useTutorial();
 
   // Load initial data on mount and check if a game was restored.
   useEffect(() => {

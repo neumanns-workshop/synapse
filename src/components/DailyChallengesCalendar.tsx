@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 
 import { Text, Card, useTheme, ActivityIndicator } from "react-native-paper";
 
@@ -32,11 +32,7 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
   // Access upgrade prompt function from game store
   const showUpgradePrompt = useGameStore((state) => state.showUpgradePrompt);
 
-  useEffect(() => {
-    loadChallengesForMonth();
-  }, [currentMonth]);
-
-  const loadChallengesForMonth = async () => {
+  const loadChallengesForMonth = React.useCallback(async () => {
     setLoading(true);
     try {
       // Get first and last day of the month
@@ -68,7 +64,11 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentMonth]);
+
+  useEffect(() => {
+    loadChallengesForMonth();
+  }, [loadChallengesForMonth]);
 
   const navigateMonth = (direction: "prev" | "next") => {
     const newMonth = new Date(currentMonth);
@@ -184,12 +184,6 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
     return "unavailable";
   };
 
-  // Helper function to check if a date is an equinox or solstice
-  const getCelestialEvent = (day: number): string | null => {
-    // Removed celestial event detection - no longer needed
-    return null;
-  };
-
   // Helper function to get active collections for a given date
   const getActiveCollectionsForDate = (date: Date): WordCollection[] => {
     return allWordCollections.filter((collection) => {
@@ -219,7 +213,8 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
   };
 
   // Helper function to get event indicators for a day
-  const getEventIndicators = (day: number) => {
+  const getEventIndicators = (day: number | null) => {
+    if (day === null) return [];
     const date = new Date(
       currentMonth.getFullYear(),
       currentMonth.getMonth(),
@@ -313,10 +308,6 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
       default:
         return null;
     }
-  };
-
-  const getGradeLetter = (status: string): string | null => {
-    return null; // No longer using grade letters
   };
 
   const handleDayPress = async (day: number) => {
@@ -432,7 +423,7 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
                 {/* Event indicators - bottom border bars */}
                 {eventIndicators.length > 0 && (
                   <View style={styles.eventBorderBars}>
-                    {eventIndicators.slice(0, 3).map((event, idx) => (
+                    {eventIndicators.slice(0, 3).map((event) => (
                       <View
                         key={event.id}
                         style={[
@@ -545,7 +536,7 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
                   Active Collections
                 </Text>
                 <View style={styles.activeThemesList}>
-                  {activeCollections.map((collection, index) => (
+                  {activeCollections.map((collection) => (
                     <View
                       key={collection.id}
                       style={[
