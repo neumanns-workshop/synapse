@@ -289,7 +289,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({
       checkIncompleteDailyChallenge();
     }, 5000); // Check every 5 seconds
     return () => clearInterval(interval);
-  }, []);
+  }, [
+    refreshUnviewedAchievements,
+    refreshUnviewedWordCollections,
+    checkIncompleteDailyChallenge,
+  ]);
 
   // Handle auth changes
   React.useEffect(() => {

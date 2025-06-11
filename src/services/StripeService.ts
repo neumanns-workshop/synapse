@@ -4,7 +4,8 @@ import SupabaseService from "./SupabaseService";
 import { UnifiedDataStore } from "./UnifiedDataStore";
 
 // Environment variables - set these in your .env file
-const stripePublishableKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!;
+const stripePublishableKey =
+  process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY || "";
 
 if (!stripePublishableKey) {
   console.warn("Missing Stripe publishable key - payments will not work");
