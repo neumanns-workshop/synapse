@@ -1,4 +1,5 @@
 import React from "react";
+import { StyleProp, TextStyle } from "react-native";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -6,7 +7,7 @@ interface CustomIconProps {
   source: string;
   size?: number;
   color?: string;
-  style?: any;
+  style?: StyleProp<TextStyle>;
 }
 
 const CustomIcon: React.FC<CustomIconProps> = ({
@@ -17,7 +18,7 @@ const CustomIcon: React.FC<CustomIconProps> = ({
 }) => {
   return (
     <MaterialCommunityIcons
-      name={source as any}
+      name={source as keyof typeof MaterialCommunityIcons.glyphMap}
       size={size}
       color={color}
       style={style}

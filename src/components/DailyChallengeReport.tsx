@@ -23,6 +23,7 @@ import {
   generateSecureDailyChallengeDeepLink,
   generateDailyChallengeTaunt,
 } from "../services/SharingService";
+import type { Achievement } from "../features/achievements";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type {
   DailyChallenge,
@@ -41,7 +42,7 @@ interface DailyChallengeReportProps {
   gameReport?: GameReport;
   onBack: () => void;
   onWordDefinition?: (word: string, pathIndex?: number) => void;
-  onAchievementPress?: (achievement: any) => void;
+  onAchievementPress?: (achievement: Achievement) => void;
   onPlayChallenge?: () => void;
 }
 

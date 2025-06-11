@@ -1,5 +1,13 @@
 import React, { useCallback } from "react";
-import { Image, StyleSheet, Pressable, View, Text } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Pressable,
+  View,
+  Text,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 
 import { Appbar, useTheme, Badge, Button, Menu } from "react-native-paper";
 
@@ -30,7 +38,7 @@ const CustomAppbarAction = React.memo<{
   onPress: () => void;
   disabled?: boolean;
   color: string;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
 }>(({ icon, onPress, disabled, color, style }) => (
   <Appbar.Action
     onPress={onPress}

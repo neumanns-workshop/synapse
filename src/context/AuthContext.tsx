@@ -13,25 +13,27 @@ import SupabaseService, {
   UserProfile,
 } from "../services/SupabaseService";
 
+interface AuthResult {
+  error: Error | null;
+}
+
 interface AuthContextType extends AuthState {
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (
     email: string,
     password: string,
     emailUpdatesOptIn?: boolean,
-  ) => Promise<{ error: any }>;
-  signOut: () => Promise<{ error: any }>;
-  resetPassword: (email: string) => Promise<{ error: any }>;
-  updateEmailPreferences: (
-    emailUpdatesOptIn: boolean,
-  ) => Promise<{ error: any }>;
+  ) => Promise<AuthResult>;
+  signOut: () => Promise<AuthResult>;
+  resetPassword: (email: string) => Promise<AuthResult>;
+  updateEmailPreferences: (emailUpdatesOptIn: boolean) => Promise<AuthResult>;
   updatePrivacySettings: (
     privacyUpdates: Partial<UserProfile["privacy_settings"]>,
-  ) => Promise<{ error: any }>;
-  deleteAccount: () => Promise<{ error: any }>;
-  syncDataToCloud: () => Promise<{ error: any }>;
-  syncDataFromCloud: () => Promise<{ error: any }>;
-  refreshProfile: () => Promise<{ error: any }>;
+  ) => Promise<AuthResult>;
+  deleteAccount: () => Promise<AuthResult>;
+  syncDataToCloud: () => Promise<AuthResult>;
+  syncDataFromCloud: () => Promise<AuthResult>;
+  refreshProfile: () => Promise<AuthResult>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,6 +52,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const supabaseService = SupabaseService.getInstance();
 
+  // Helper to convert unknown errors to Error | null
+  const toAuthResult = (error: unknown): AuthResult => ({
+    error:
+      error instanceof Error ? error : error ? new Error(String(error)) : null,
+  });
+
   useEffect(() => {
     // Subscribe to auth state changes
     const unsubscribe = supabaseService.onAuthStateChange((newState) => {
@@ -59,73 +67,78 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return unsubscribe;
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (
+    email: string,
+    password: string,
+  ): Promise<AuthResult> => {
     const result = await supabaseService.signIn(email, password);
-    return { error: result.error };
+    return toAuthResult(result.error);
   };
 
   const signUp = async (
     email: string,
     password: string,
     emailUpdatesOptIn = false,
-  ) => {
+  ): Promise<AuthResult> => {
     const result = await supabaseService.signUp(
       email,
       password,
       emailUpdatesOptIn,
     );
-    return { error: result.error };
+    return toAuthResult(result.error);
   };
 
-  const signOut = async () => {
+  const signOut = async (): Promise<AuthResult> => {
     const result = await supabaseService.signOut();
-    return { error: result.error };
+    return toAuthResult(result.error);
   };
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = async (email: string): Promise<AuthResult> => {
     const result = await supabaseService.resetPassword(email);
-    return { error: result.error };
+    return toAuthResult(result.error);
   };
 
-  const updateEmailPreferences = async (emailUpdatesOptIn: boolean) => {
+  const updateEmailPreferences = async (
+    emailUpdatesOptIn: boolean,
+  ): Promise<AuthResult> => {
     const result =
       await supabaseService.updateEmailPreferences(emailUpdatesOptIn);
-    return { error: result?.error || null };
+    return toAuthResult(result?.error);
   };
 
   const updatePrivacySettings = async (
     privacyUpdates: Partial<UserProfile["privacy_settings"]>,
-  ) => {
+  ): Promise<AuthResult> => {
     const result = await supabaseService.updatePrivacySettings(privacyUpdates);
-    return { error: result?.error || null };
+    return toAuthResult(result?.error);
   };
 
-  const deleteAccount = async () => {
+  const deleteAccount = async (): Promise<AuthResult> => {
     const result = await supabaseService.deleteAccount();
-    return { error: result?.error || null };
+    return toAuthResult(result?.error);
   };
 
-  const syncDataToCloud = async () => {
+  const syncDataToCloud = async (): Promise<AuthResult> => {
     const { ProgressiveSyncService } = await import(
       "../services/ProgressiveSyncService"
     );
     const progressiveSync = ProgressiveSyncService.getInstance();
     const result = await progressiveSync.syncToCloud();
-    return { error: result.success ? null : result.error };
+    return toAuthResult(result.success ? null : result.error);
   };
 
-  const syncDataFromCloud = async () => {
+  const syncDataFromCloud = async (): Promise<AuthResult> => {
     const { ProgressiveSyncService } = await import(
       "../services/ProgressiveSyncService"
     );
     const progressiveSync = ProgressiveSyncService.getInstance();
     const result = await progressiveSync.syncFromCloud();
-    return { error: result.success ? null : result.error };
+    return toAuthResult(result.success ? null : result.error);
   };
 
-  const refreshProfile = async () => {
+  const refreshProfile = async (): Promise<AuthResult> => {
     const result = await supabaseService.refreshUserProfile();
-    return { error: result?.error || null };
+    return toAuthResult(result?.error);
   };
 
   const contextValue: AuthContextType = {
