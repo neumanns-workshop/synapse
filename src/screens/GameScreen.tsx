@@ -359,7 +359,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
       />
       <View style={{ flex: 1 }}>
         {showReport ? (
-          <View testID="report-screen">
+          <View testID="report-screen" style={{ flex: 1 }}>
             <ReportScreen />
           </View>
         ) : (
@@ -456,12 +456,12 @@ const GameScreen: React.FC<GameScreenProps> = ({
             customMessage={upgradePromptMessage}
           />
         </Portal>
-      </View>
 
-      {/* Footer only for web platform */}
-      {Platform.OS === "web" && (
-        <Footer onLegalPageRequest={onLegalPageRequest} />
-      )}
+        {/* Footer only for web platform - positioned at bottom of flex container */}
+        {Platform.OS === "web" && (
+          <Footer onLegalPageRequest={onLegalPageRequest} />
+        )}
+      </View>
     </SafeAreaView>
   );
 };

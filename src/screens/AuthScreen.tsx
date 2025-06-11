@@ -69,8 +69,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isWaitingForAuth, setIsWaitingForAuth] = useState(false);
 
-  // Promo code state
-  const [showPromoField, setShowPromoField] = useState(false);
+  // Beta gatekeeping - hide payment until June 30, 2025
+  const isBetaPhase = () => {
+    const betaEndDate = new Date('2025-06-30T23:59:59');
+    return new Date() < betaEndDate;
+  };
+
+  // Promo code state - auto-expand during beta
+  const [showPromoField, setShowPromoField] = useState(isBetaPhase());
   const [promoCode, setPromoCode] = useState("");
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
@@ -990,9 +996,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               color: colors.primary,
               fontSize: 14,
               textDecorationLine: "underline",
+              fontWeight: isBetaPhase() ? "bold" : "normal",
             }}
           >
-            Have a beta code?
+            {isBetaPhase() ? "Enter your beta code" : "Have a beta code?"}
           </Text>
           <CustomIcon
             source={showPromoField ? "chevron-up" : "chevron-down"}
@@ -1206,27 +1213,79 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         </View>
       </View>
 
-      <Button
-        mode="contained"
-        onPress={handleSignUp}
-        loading={isLoading}
-        disabled={isLoading}
-        style={{ marginBottom: 16 }}
-        buttonColor={customColors.startNode}
-        icon={() => (
-          <CustomIcon
-            source={promoCode.trim() ? "ticket" : "credit-card"}
-            size={20}
-            color={colors.onPrimary}
-          />
-        )}
-      >
-        {promoCode.trim()
-          ? isApplyingPromo
-            ? "Validating Beta Code..."
-            : "Activate Beta Code"
-          : "Continue to Payment - $5"}
-      </Button>
+      {/* Beta Phase: Only show button if user has entered a promo code */}
+      {isBetaPhase() && !promoCode.trim() ? (
+        <Card
+          style={{
+            backgroundColor: colors.surfaceVariant,
+            borderColor: colors.outline,
+            borderWidth: 1,
+            marginBottom: 16,
+          }}
+        >
+          <Card.Content>
+            <View style={{ alignItems: "center", gap: 12 }}>
+              <CustomIcon
+                source="ticket"
+                size={32}
+                color={colors.primary}
+              />
+              <Text
+                variant="titleMedium"
+                style={{
+                  color: colors.primary,
+                  textAlign: "center",
+                  fontWeight: "bold",
+                }}
+              >
+                Beta Access Required
+              </Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                  textAlign: "center",
+                  lineHeight: 20,
+                }}
+              >
+                Galaxy Brain is currently in private beta. Please enter your beta code above to create an account.
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: colors.onSurfaceVariant,
+                  textAlign: "center",
+                  fontStyle: "italic",
+                }}
+              >
+                Public launch: July 1, 2025
+              </Text>
+            </View>
+          </Card.Content>
+        </Card>
+      ) : (
+        <Button
+          mode="contained"
+          onPress={handleSignUp}
+          loading={isLoading}
+          disabled={isLoading}
+          style={{ marginBottom: 16 }}
+          buttonColor={customColors.startNode}
+          icon={() => (
+            <CustomIcon
+              source={promoCode.trim() ? "ticket" : "credit-card"}
+              size={20}
+              color={colors.onPrimary}
+            />
+          )}
+        >
+          {promoCode.trim()
+            ? isApplyingPromo
+              ? "Validating Beta Code..."
+              : "Activate Beta Code"
+            : "Continue to Payment - $5"}
+        </Button>
+      )}
     </>
   );
 
@@ -1330,11 +1389,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           {/* CAPTCHA component - shared for both sign-in and sign-up */}
           <HCaptcha
             ref={captchaRef}
-            sitekey={
-              __DEV__
-                ? "10000000-ffff-ffff-ffff-000000000001" // Test key for development
-                : process.env.EXPO_PUBLIC_HCAPTCHA_SITE_KEY!
-            }
+            sitekey={process.env.EXPO_PUBLIC_HCAPTCHA_SITE_KEY!}
             onVerify={onCaptchaVerify}
             size="invisible"
             onError={(error) => {
