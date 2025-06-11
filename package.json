@@ -20,6 +20,10 @@
     "url": "https://github.com/your-username/synapse/issues"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=22.16.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",

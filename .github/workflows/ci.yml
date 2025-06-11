@@ -10,18 +10,14 @@ jobs:
   test_and_lint:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x] # Test on both Node 18 (Netlify default) and 20
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Node.js ${{ matrix.node-version }}
+    - name: Set up Node.js 22.16.0
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version: 22.16.0
         cache: 'npm'
 
     - name: Install Dependencies
@@ -37,7 +33,6 @@ jobs:
       run: npm run build:web
 
     - name: Upload Coverage Reports
-      if: matrix.node-version == '20.x'
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage/lcov.info
