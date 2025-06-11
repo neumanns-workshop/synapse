@@ -73,12 +73,12 @@ export class SupabaseService {
     // Only throw error in non-test environments
     if (!supabaseUrl || !supabaseAnonKey) {
       // Skip error in test environments (Jest sets NODE_ENV to 'test')
-      if (process.env.NODE_ENV !== 'test') {
+      if (process.env.NODE_ENV !== "test") {
         throw new Error(
           "Missing Supabase environment variables. Check .env file and restart server.",
         );
       }
-      
+
       // Use default test values if in test environment
       const testUrl = supabaseUrl || "https://test.supabase.co";
       const testKey = supabaseAnonKey || "test-anon-key";
