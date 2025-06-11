@@ -73,8 +73,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isWaitingForAuth, setIsWaitingForAuth] = useState(false);
 
-  // Promo code state
-  const [showPromoField, setShowPromoField] = useState(false);
+  // Promo code state - auto-expand during beta phase (until June 30, 2025)
+  const isBetaPhase = new Date() < new Date('2025-06-30');
+  const [showPromoField, setShowPromoField] = useState(isBetaPhase);
   const [promoCode, setPromoCode] = useState('');
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
@@ -1254,26 +1255,94 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         </View>
       </View>
 
-      <Button
-        mode="contained"
-        onPress={handleSignUp}
-        loading={isLoading}
-        disabled={isLoading}
-        style={{ marginBottom: 16 }}
-        buttonColor={customColors.startNode}
-        icon={() => (
-          <CustomIcon 
-            source={promoCode.trim() ? "ticket" : "credit-card"} 
-            size={20} 
-            color={colors.onPrimary} 
-          />
-        )}
-      >
-        {promoCode.trim() 
-          ? (isApplyingPromo ? "Validating Beta Code..." : "Activate Beta Code")
-          : "Continue to Payment - $5"
-        }
-      </Button>
+      {/* Beta Gatekeeping with Hidden Payment Button */}
+      {isBetaPhase && !promoCode.trim() && (
+        <Card
+          style={{
+            backgroundColor: colors.surfaceVariant,
+            borderColor: colors.outline,
+            borderWidth: 1,
+            marginBottom: 16,
+          }}
+        >
+          <Card.Content style={{ padding: 16 }}>
+            <View style={{ alignItems: "center", marginBottom: 12 }}>
+              <CustomIcon
+                source="ticket"
+                size={24}
+                color={colors.primary}
+                style={{ marginBottom: 8 }}
+              />
+              <Text
+                variant="titleMedium"
+                style={{
+                  color: colors.primary,
+                  fontWeight: "bold",
+                  textAlign: "center",
+                }}
+              >
+                Beta Code Required
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontSize: 14,
+                color: colors.onSurface,
+                textAlign: "center",
+                lineHeight: 20,
+                marginBottom: 8,
+              }}
+            >
+              Galaxy Brain is currently in private beta. Please enter your beta
+              code above to create an account.
+            </Text>
+          </Card.Content>
+        </Card>
+      )}
+
+      {/* Payment Button - hidden during beta phase unless bypass is needed */}
+      {(!isBetaPhase || __DEV__) && !promoCode.trim() && (
+        <Button
+          mode="contained"
+          onPress={handleSignUp}
+          loading={isLoading}
+          disabled={isLoading}
+          style={{ 
+            marginBottom: 16,
+          }}
+          buttonColor={customColors.startNode}
+          icon={() => (
+            <CustomIcon 
+              source="credit-card" 
+              size={20} 
+              color={colors.onPrimary} 
+            />
+          )}
+        >
+          Continue to Payment - $5
+        </Button>
+      )}
+
+      {/* Promo Code Button (shows when promo code entered) */}
+      {promoCode.trim() && (
+        <Button
+          mode="contained"
+          onPress={handleSignUp}
+          loading={isLoading || isApplyingPromo}
+          disabled={isLoading || isApplyingPromo}
+          style={{ marginBottom: 16 }}
+          buttonColor={customColors.localOptimalNode}
+          icon={() => (
+            <CustomIcon 
+              source="ticket" 
+              size={20} 
+              color={colors.onPrimary} 
+            />
+          )}
+        >
+          {isApplyingPromo ? "Validating Beta Code..." : "Activate Beta Code"}
+        </Button>
+      )}
     </>
   );
 

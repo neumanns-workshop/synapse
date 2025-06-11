@@ -19,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/your-username/synapse/issues"
   },
-  "license": "MIT",
+  "license": "UNLICENSED",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",

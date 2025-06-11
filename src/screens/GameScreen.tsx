@@ -364,7 +364,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
       />
       <View style={{ flex: 1 }}>
       {showReport ? (
-        <View testID="report-screen">
+        <View style={{ flex: 1 }} testID="report-screen">
           <ReportScreen />
         </View>
       ) : (

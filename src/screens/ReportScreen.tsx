@@ -176,7 +176,7 @@ const ReportScreen = () => {
   }
 
   return (
-    <SafeAreaView
+    <View
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <ScrollView style={styles.scrollView}>
@@ -335,7 +335,7 @@ const ReportScreen = () => {
           onDismiss={hideAchievementDetail}
         />
       </Portal>
-    </SafeAreaView>
+    </View>
   );
 };
 
