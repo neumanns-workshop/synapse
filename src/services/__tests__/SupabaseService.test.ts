@@ -192,6 +192,10 @@ describe("SupabaseService", () => {
       (SupabaseService as any).instance = undefined;
 
       // Clean environment variables for test isolation
+      // Store original values
+      const originalUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      const originalKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+      
       // Temporarily remove env vars
       delete process.env.EXPO_PUBLIC_SUPABASE_URL;
       delete process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
@@ -201,8 +205,8 @@ describe("SupabaseService", () => {
       );
 
       // Restore env vars
-      process.env.EXPO_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
-      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
+      process.env.EXPO_PUBLIC_SUPABASE_URL = originalUrl;
+      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = originalKey;
     });
   });
 

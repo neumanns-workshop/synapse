@@ -285,18 +285,19 @@ describe("StripeService", () => {
 
   describe("Environment Variables", () => {
     it("should handle missing Stripe publishable key gracefully", () => {
-      // Clean environment for test isolation
+      // Clean environment for test isolation  
+      // Store original value
+      const originalKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+      
       // Temporarily remove the environment variable
       delete process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
       expect(() => {
-        // Re-require to test fresh initialization
-        delete require.cache[require.resolve("../StripeService")];
         require("../StripeService");
       }).not.toThrow();
-
-      // Restore the environment variable
-      process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY = "pk_test_mock_key";
+      
+      // Restore original value
+      process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY = originalKey;
     });
 
     it("should use environment variable for Stripe key", () => {
