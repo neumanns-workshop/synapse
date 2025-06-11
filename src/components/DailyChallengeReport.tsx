@@ -17,8 +17,8 @@ import {
   Card,
   Surface,
 } from "react-native-paper";
-import CustomIcon from "./CustomIcon";
 
+import CustomIcon from "./CustomIcon";
 import GameReportDisplay from "./GameReportDisplay";
 import GraphVisualization from "./GraphVisualization";
 import PlayerPathDisplay from "./PlayerPathDisplay";
@@ -219,7 +219,7 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
               </View>
 
               {/* Graph preview for challenge */}
-              <View style={{ position: 'relative' }}>
+              <View style={{ position: "relative" }}>
                 <View
                   style={[
                     styles.graphPreviewContainer,
@@ -459,8 +459,8 @@ const styles = StyleSheet.create({
   dialog: {
     borderRadius: 8,
     maxWidth: 500,
-    width: '90%',
-    alignSelf: 'center',
+    width: "90%",
+    alignSelf: "center",
   },
   dialogText: {
     marginBottom: 16,

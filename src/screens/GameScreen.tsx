@@ -15,12 +15,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ReportScreen from "./ReportScreen";
 import AppHeader from "../components/AppHeader";
 import AvailableWordsDisplay from "../components/AvailableWordsDisplay";
+import { Footer } from "../components/Footer";
 import GraphVisualization from "../components/GraphVisualization";
 import PathDisplayConfigurator from "../components/PathDisplayConfigurator";
 import PlayerPathDisplay from "../components/PlayerPathDisplay";
 import UpgradePrompt from "../components/UpgradePrompt";
 import WordDefinitionDialog from "../components/WordDefinitionDialog";
-import { Footer } from "../components/Footer";
 import { useTutorial } from "../context/TutorialContext";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -29,7 +29,9 @@ interface GameScreenProps {
   onShowAuth?: () => void;
   onShowAuthUpgrade?: () => void;
   onShowAccount?: () => void;
-  onLegalPageRequest?: (page: 'terms' | 'privacy' | 'dmca' | 'about' | 'contact') => void;
+  onLegalPageRequest?: (
+    page: "terms" | "privacy" | "dmca" | "about" | "contact",
+  ) => void;
 }
 
 const GameScreen: React.FC<GameScreenProps> = ({
@@ -363,101 +365,108 @@ const GameScreen: React.FC<GameScreenProps> = ({
         gameInProgress={gameStatus === "playing"}
       />
       <View style={{ flex: 1 }}>
-      {showReport ? (
-        <View testID="report-screen">
-          <ReportScreen />
-        </View>
-      ) : (
-        <>
-          <View style={styles.gameContainer} testID={gameStatus === "playing" ? "game-interface" : "idle-state"}>
-            <View style={[styles.graphContainer, styles.transparentBackground]}>
-              {isLoading ? (
-                <ActivityIndicator
-                  size="large"
-                  animating={true}
-                  color={colors.onSurface}
-                />
-              ) : (
-                <GraphVisualization />
+        {showReport ? (
+          <View testID="report-screen">
+            <ReportScreen />
+          </View>
+        ) : (
+          <>
+            <View
+              style={styles.gameContainer}
+              testID={
+                gameStatus === "playing" ? "game-interface" : "idle-state"
+              }
+            >
+              <View
+                style={[styles.graphContainer, styles.transparentBackground]}
+              >
+                {isLoading ? (
+                  <ActivityIndicator
+                    size="large"
+                    animating={true}
+                    color={colors.onSurface}
+                  />
+                ) : (
+                  <GraphVisualization />
+                )}
+              </View>
+              {/* Player Path Container */}
+              <View style={[styles.pathCard, styles.transparentBackground]}>
+                <View style={styles.transparentContent}>
+                  <PlayerPathDisplay
+                    playerPath={playerPath}
+                    optimalChoices={optimalChoices}
+                    suggestedPath={suggestedPathFromCurrent}
+                    onWordDefinition={handleShowDefinition}
+                  />
+                </View>
+              </View>
+              {/* Optimal Path Container (only shown when game is over) */}
+              {showPathOptions && (
+                <View style={[styles.pathCard, styles.transparentBackground]}>
+                  {renderOptimalPath()}
+                </View>
+              )}
+              {/* Available Words Display (only shown when playing) */}
+              {gameStatus === "playing" && (
+                <AvailableWordsDisplay onWordSelect={handleSelectWord} />
+              )}
+              {/* Only show path display options when game is over */}
+              {showPathOptions && (
+                <Card
+                  style={[
+                    styles.optionsCard,
+                    { backgroundColor: colors.surface },
+                  ]}
+                >
+                  <Card.Content>
+                    <Text
+                      variant="labelMedium"
+                      style={[styles.optionsLabel, { color: colors.onSurface }]}
+                    >
+                      Path Display:
+                    </Text>
+                    <PathDisplayConfigurator compact={true} />
+                  </Card.Content>
+                </Card>
               )}
             </View>
-            {/* Player Path Container */}
-            <View style={[styles.pathCard, styles.transparentBackground]}>
-              <View style={styles.transparentContent}>
-                <PlayerPathDisplay
-                  playerPath={playerPath}
-                  optimalChoices={optimalChoices}
-                  suggestedPath={suggestedPathFromCurrent}
-                  onWordDefinition={handleShowDefinition}
-                />
-              </View>
-            </View>
-            {/* Optimal Path Container (only shown when game is over) */}
-            {showPathOptions && (
-              <View style={[styles.pathCard, styles.transparentBackground]}>
-                {renderOptimalPath()}
-              </View>
-            )}
-            {/* Available Words Display (only shown when playing) */}
-            {gameStatus === "playing" && (
-              <AvailableWordsDisplay onWordSelect={handleSelectWord} />
-            )}
-            {/* Only show path display options when game is over */}
-            {showPathOptions && (
-              <Card
-                style={[
-                  styles.optionsCard,
-                  { backgroundColor: colors.surface },
-                ]}
+            {/* Dialogs and Portals */}
+            <Portal>
+              {/* Word Definition Dialog */}
+              <WordDefinitionDialog
+                visible={definitionVisible}
+                word={selectedWord || ""}
+                pathIndexInPlayerPath={selectedWordPathIndex}
+                onDismiss={handleDismissDefinition}
+              />
+              {/* Snackbar for messages */}
+              <Snackbar
+                visible={snackbarVisible}
+                onDismiss={onDismissSnackbar}
+                style={{ backgroundColor: colors.surface }}
               >
-                <Card.Content>
-                  <Text
-                    variant="labelMedium"
-                    style={[styles.optionsLabel, { color: colors.onSurface }]}
-                  >
-                    Path Display:
-                  </Text>
-                  <PathDisplayConfigurator compact={true} />
-                </Card.Content>
-              </Card>
-            )}
-          </View>
-          {/* Dialogs and Portals */}
-          <Portal>
-            {/* Word Definition Dialog */}
-            <WordDefinitionDialog
-              visible={definitionVisible}
-              word={selectedWord || ""}
-              pathIndexInPlayerPath={selectedWordPathIndex}
-              onDismiss={handleDismissDefinition}
-            />
-            {/* Snackbar for messages */}
-            <Snackbar
-              visible={snackbarVisible}
-              onDismiss={onDismissSnackbar}
-              style={{ backgroundColor: colors.surface }}
-            >
-              {snackbarMessage}
-            </Snackbar>
-          </Portal>
-        </>
-      )}
+                {snackbarMessage}
+              </Snackbar>
+            </Portal>
+          </>
+        )}
 
-      {/* Global Portals - Available in all states */}
-      <Portal>
-        <UpgradePrompt
-          visible={upgradePromptVisible}
-          onDismiss={handleUpgradeDismiss}
-          onUpgrade={handleUpgrade}
-          remainingFreeGames={remainingFreeGames}
-          context={upgradePromptContext}
-          customMessage={upgradePromptMessage}
-        />
-      </Portal>
+        {/* Global Portals - Available in all states */}
+        <Portal>
+          <UpgradePrompt
+            visible={upgradePromptVisible}
+            onDismiss={handleUpgradeDismiss}
+            onUpgrade={handleUpgrade}
+            remainingFreeGames={remainingFreeGames}
+            context={upgradePromptContext}
+            customMessage={upgradePromptMessage}
+          />
+        </Portal>
       </View>
-      
+
       {/* Footer only for web platform */}
-      {Platform.OS === 'web' && (
+      {Platform.OS === "web" && (
         <Footer onLegalPageRequest={onLegalPageRequest} />
       )}
     </SafeAreaView>

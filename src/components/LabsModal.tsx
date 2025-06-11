@@ -12,9 +12,9 @@ import {
   useTheme,
   Dialog,
 } from "react-native-paper";
-import CustomIcon from "./CustomIcon";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import CustomIcon from "./CustomIcon";
 import { dailyChallengesService } from "../services/DailyChallengesService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";

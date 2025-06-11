@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach, jest } from "@jest/globals";
-import { useGameStore } from "../useGameStore";
-import type { GraphData, WordFrequencies } from "../../services/dataLoader";
-import type { DailyChallenge } from "../../types/dailyChallenges";
-import * as storageAdapter from "../../services/StorageAdapter";
+
 import { dailyChallengesService } from "../../services/DailyChallengesService";
+import type { GraphData, WordFrequencies } from "../../services/dataLoader";
+import * as storageAdapter from "../../services/StorageAdapter";
+import type { DailyChallenge } from "../../types/dailyChallenges";
+import { useGameStore } from "../useGameStore";
 
 // Mock the services
 jest.mock("../../services/StorageAdapter");
@@ -11,7 +12,9 @@ jest.mock("../../services/DailyChallengesService");
 jest.mock("../../services/dataLoader");
 jest.mock("../../features/wordCollections");
 
-const mockedStorageAdapter = storageAdapter as jest.Mocked<typeof storageAdapter>;
+const mockedStorageAdapter = storageAdapter as jest.Mocked<
+  typeof storageAdapter
+>;
 const mockedDailyChallengesService = jest.mocked(dailyChallengesService);
 
 describe("Core Gameplay Mechanics", () => {
@@ -62,7 +65,7 @@ describe("Core Gameplay Mechanics", () => {
   beforeEach(() => {
     // Reset store to initial state
     useGameStore.setState(getInitialGameState());
-    
+
     // Reset mocks
     jest.clearAllMocks();
     mockedStorageAdapter.saveCurrentGame.mockResolvedValue(undefined);
@@ -84,10 +87,10 @@ describe("Core Gameplay Mechanics", () => {
       expect(state.playerPath).toEqual(["start", "middle1"]);
       expect(state.gameStatus).toBe("playing");
       expect(state.suggestedPathFromCurrent).toEqual(["middle1", "target"]);
-      
+
       // Should save game state
       expect(mockedStorageAdapter.saveCurrentGame).toHaveBeenCalledTimes(1);
-      
+
       // Should track optimal choice
       expect(state.optimalChoices).toHaveLength(1);
       expect(state.optimalChoices[0].playerPosition).toBe("start");
@@ -107,7 +110,7 @@ describe("Core Gameplay Mechanics", () => {
       expect(state.currentWord).toBe("start"); // Should not change
       expect(state.playerPath).toEqual(["start"]); // Should not change
       expect(state.gameStatus).toBe("playing");
-      
+
       // Should not save game state
       expect(mockedStorageAdapter.saveCurrentGame).not.toHaveBeenCalled();
     });
@@ -124,7 +127,7 @@ describe("Core Gameplay Mechanics", () => {
       const state = useGameStore.getState();
       expect(state.currentWord).toBe("start"); // Should not change
       expect(state.playerPath).toEqual(["start"]); // Should not change
-      
+
       // Should not save game state
       expect(mockedStorageAdapter.saveCurrentGame).not.toHaveBeenCalled();
     });
@@ -135,13 +138,15 @@ describe("Core Gameplay Mechanics", () => {
         ...getInitialGameState(),
         currentWord: "middle1",
         playerPath: ["start", "middle1"],
-        optimalChoices: [{
-          playerPosition: "start",
-          playerChose: "middle1",
-          optimalChoice: "middle1",
-          isGlobalOptimal: true,
-          isLocalOptimal: true,
-        }],
+        optimalChoices: [
+          {
+            playerPosition: "start",
+            playerChose: "middle1",
+            optimalChoice: "middle1",
+            isGlobalOptimal: true,
+            isLocalOptimal: true,
+          },
+        ],
       });
       const { selectWord } = useGameStore.getState();
 
@@ -155,7 +160,7 @@ describe("Core Gameplay Mechanics", () => {
       expect(state.gameStatus).toBe("won");
       expect(state.gameReport).toBeTruthy();
       expect(state.pathDisplayMode.optimal).toBe(true); // Should show optimal path on win
-      
+
       // Should clear saved game and record ended game
       expect(mockedStorageAdapter.clearCurrentGame).toHaveBeenCalledTimes(1);
       expect(mockedStorageAdapter.recordEndedGame).toHaveBeenCalledTimes(1);
@@ -197,7 +202,7 @@ describe("Core Gameplay Mechanics", () => {
           model: "test-model",
         },
       };
-      
+
       useGameStore.setState({
         ...getInitialGameState(),
         currentWord: "middle1",
@@ -205,8 +210,10 @@ describe("Core Gameplay Mechanics", () => {
         isDailyChallenge: true,
         currentDailyChallenge: mockDailyChallenge,
       });
-      
-      mockedDailyChallengesService.saveDailyChallengeProgress.mockResolvedValue(undefined);
+
+      mockedDailyChallengesService.saveDailyChallengeProgress.mockResolvedValue(
+        undefined,
+      );
       const { selectWord } = useGameStore.getState();
 
       // Act
@@ -216,16 +223,18 @@ describe("Core Gameplay Mechanics", () => {
       const state = useGameStore.getState();
       expect(state.gameStatus).toBe("won");
       expect(state.hasPlayedTodaysChallenge).toBe(true);
-      
+
       // Should save daily challenge progress
-      expect(mockedDailyChallengesService.saveDailyChallengeProgress).toHaveBeenCalledWith(
+      expect(
+        mockedDailyChallengesService.saveDailyChallengeProgress,
+      ).toHaveBeenCalledWith(
         "test-challenge",
         expect.objectContaining({
           status: "won",
           playerMoves: 2,
           playerPath: ["start", "middle1", "target"],
           completedAt: expect.any(String),
-        })
+        }),
       );
     });
   });
@@ -237,13 +246,15 @@ describe("Core Gameplay Mechanics", () => {
         ...getInitialGameState(),
         currentWord: "middle1",
         playerPath: ["start", "middle1"],
-        optimalChoices: [{
-          playerPosition: "start",
-          playerChose: "middle1",
-          optimalChoice: "middle1",
-          isGlobalOptimal: true,
-          isLocalOptimal: true,
-        }],
+        optimalChoices: [
+          {
+            playerPosition: "start",
+            playerChose: "middle1",
+            optimalChoice: "middle1",
+            isGlobalOptimal: true,
+            isLocalOptimal: true,
+          },
+        ],
       });
       const { giveUp } = useGameStore.getState();
 
@@ -256,7 +267,7 @@ describe("Core Gameplay Mechanics", () => {
       expect(state.gameReport).toBeTruthy();
       expect(state.gameReport?.status).toBe("given_up");
       expect(state.pathDisplayMode.suggested).toBe(true); // Should show suggested path on give up
-      
+
       // Should clear saved game and record ended game
       expect(mockedStorageAdapter.clearCurrentGame).toHaveBeenCalledTimes(1);
       expect(mockedStorageAdapter.recordEndedGame).toHaveBeenCalledTimes(1);
@@ -276,7 +287,7 @@ describe("Core Gameplay Mechanics", () => {
           model: "test-model",
         },
       };
-      
+
       useGameStore.setState({
         ...getInitialGameState(),
         currentWord: "middle1",
@@ -284,8 +295,10 @@ describe("Core Gameplay Mechanics", () => {
         isDailyChallenge: true,
         currentDailyChallenge: mockDailyChallenge,
       });
-      
-      mockedDailyChallengesService.saveDailyChallengeProgress.mockResolvedValue(undefined);
+
+      mockedDailyChallengesService.saveDailyChallengeProgress.mockResolvedValue(
+        undefined,
+      );
       const { giveUp } = useGameStore.getState();
 
       // Act
@@ -295,16 +308,18 @@ describe("Core Gameplay Mechanics", () => {
       const state = useGameStore.getState();
       expect(state.gameStatus).toBe("given_up");
       expect(state.hasPlayedTodaysChallenge).toBe(true);
-      
+
       // Should save daily challenge progress
-      expect(mockedDailyChallengesService.saveDailyChallengeProgress).toHaveBeenCalledWith(
+      expect(
+        mockedDailyChallengesService.saveDailyChallengeProgress,
+      ).toHaveBeenCalledWith(
         "test-challenge",
         expect.objectContaining({
           status: "given_up",
           playerMoves: 1,
           playerPath: ["start", "middle1"],
           completedAt: expect.any(String),
-        })
+        }),
       );
     });
 
@@ -365,7 +380,7 @@ describe("Core Gameplay Mechanics", () => {
         jumpedFrom: "middle2",
         landedOn: "middle1",
       });
-      
+
       // Should save the updated game state
       expect(mockedStorageAdapter.saveCurrentGame).toHaveBeenCalledTimes(1);
     });
@@ -376,10 +391,12 @@ describe("Core Gameplay Mechanics", () => {
         ...getInitialGameState(),
         currentWord: "middle2",
         playerPath: ["start", "middle1", "middle2"],
-        backtrackHistory: [{
-          jumpedFrom: "dead",
-          landedOn: "middle1",
-        }],
+        backtrackHistory: [
+          {
+            jumpedFrom: "dead",
+            landedOn: "middle1",
+          },
+        ],
       });
       const { backtrackToWord } = useGameStore.getState();
 
@@ -391,7 +408,7 @@ describe("Core Gameplay Mechanics", () => {
       expect(state.currentWord).toBe("middle2"); // Should not change
       expect(state.playerPath).toEqual(["start", "middle1", "middle2"]); // Should not change
       expect(state.backtrackHistory).toHaveLength(1); // Should not add new entry
-      
+
       // Should not save game state
       expect(mockedStorageAdapter.saveCurrentGame).not.toHaveBeenCalled();
     });
@@ -413,7 +430,7 @@ describe("Core Gameplay Mechanics", () => {
       const state = useGameStore.getState();
       expect(state.currentWord).toBe("target"); // Should not change
       expect(state.playerPath).toEqual(["start", "middle1", "target"]); // Should not change
-      
+
       // Should not save game state
       expect(mockedStorageAdapter.saveCurrentGame).not.toHaveBeenCalled();
     });
@@ -434,7 +451,7 @@ describe("Core Gameplay Mechanics", () => {
       const state = useGameStore.getState();
       expect(state.currentWord).toBe("middle1"); // Should not change
       expect(state.playerPath).toEqual(["start", "middle1"]); // Should not change
-      
+
       // Should not save game state
       expect(mockedStorageAdapter.saveCurrentGame).not.toHaveBeenCalled();
     });
@@ -488,7 +505,8 @@ describe("Core Gameplay Mechanics", () => {
 
     it("should manage word definition dialog", () => {
       // Arrange
-      const { showWordDefinition, hideWordDefinition } = useGameStore.getState();
+      const { showWordDefinition, hideWordDefinition } =
+        useGameStore.getState();
 
       // Act
       showWordDefinition("test-word", 2);
@@ -509,4 +527,4 @@ describe("Core Gameplay Mechanics", () => {
       expect(state.definitionDialogVisible).toBe(false);
     });
   });
-}); 
+});

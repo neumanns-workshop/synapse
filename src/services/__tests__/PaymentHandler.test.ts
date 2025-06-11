@@ -30,11 +30,11 @@ jest.mock("../UnifiedDataStore", () => ({
 }));
 
 // Mock window object for web environment
-Object.defineProperty(global, 'window', {
+Object.defineProperty(global, "window", {
   value: {
     location: {
-      search: '',
-      href: 'https://example.com',
+      search: "",
+      href: "https://example.com",
     },
     history: {
       replaceState: jest.fn(),
@@ -47,7 +47,7 @@ describe("PaymentHandler", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     // Reset window.location.search for each test
-    (global.window as any).location.search = '';
+    (global.window as any).location.search = "";
   });
 
   describe("Module Structure", () => {
@@ -99,7 +99,9 @@ describe("PaymentHandler", () => {
     });
 
     it("should import all dependencies without errors", () => {
-      expect(() => require("@react-native-async-storage/async-storage")).not.toThrow();
+      expect(() =>
+        require("@react-native-async-storage/async-storage"),
+      ).not.toThrow();
       expect(() => require("../SupabaseService")).not.toThrow();
       expect(() => require("../UnifiedDataStore")).not.toThrow();
     });
@@ -108,10 +110,10 @@ describe("PaymentHandler", () => {
   describe("Singleton Pattern", () => {
     it("should implement singleton pattern correctly", () => {
       const { PaymentHandler } = require("../PaymentHandler");
-      
+
       const instance1 = PaymentHandler.getInstance();
       const instance2 = PaymentHandler.getInstance();
-      
+
       expect(instance1).toBe(instance2);
       expect(instance1).toBeInstanceOf(PaymentHandler);
     });
@@ -123,7 +125,7 @@ describe("PaymentHandler", () => {
 
     it("should not allow direct instantiation", () => {
       const { PaymentHandler } = require("../PaymentHandler");
-      
+
       // Constructor should be private, but in JavaScript we can't truly enforce this
       // We test that getInstance is the intended way to get instances
       expect(typeof PaymentHandler.getInstance).toBe("function");
@@ -134,14 +136,14 @@ describe("PaymentHandler", () => {
     it("should have handlePaymentRedirect method", () => {
       const { PaymentHandler } = require("../PaymentHandler");
       const instance = PaymentHandler.getInstance();
-      
+
       expect(typeof instance.handlePaymentRedirect).toBe("function");
     });
 
     it("should have private cleanupUrl method", () => {
       const { PaymentHandler } = require("../PaymentHandler");
       const instance = PaymentHandler.getInstance();
-      
+
       // Private methods aren't directly accessible, but we can check the instance
       expect(instance).toBeDefined();
     });
@@ -149,7 +151,7 @@ describe("PaymentHandler", () => {
     it("should initialize with required services", () => {
       const { PaymentHandler } = require("../PaymentHandler");
       const instance = PaymentHandler.getInstance();
-      
+
       // The instance should be created without throwing
       expect(instance).toBeDefined();
       expect(instance).toBeInstanceOf(PaymentHandler);
@@ -159,28 +161,28 @@ describe("PaymentHandler", () => {
   describe("Service Integration", () => {
     it("should call SupabaseService.getInstance during initialization", () => {
       const SupabaseService = require("../SupabaseService").default;
-      
+
       // Clear any previous calls
       SupabaseService.getInstance.mockClear?.();
-      
+
       // Import and create instance
       const { PaymentHandler } = require("../PaymentHandler");
       PaymentHandler.getInstance();
-      
+
       // The service should be available
       expect(SupabaseService.getInstance).toBeDefined();
     });
 
     it("should call UnifiedDataStore.getInstance during initialization", () => {
       const { UnifiedDataStore } = require("../UnifiedDataStore");
-      
+
       // Clear any previous calls
       UnifiedDataStore.getInstance.mockClear?.();
-      
+
       // Import and create instance
       const { PaymentHandler } = require("../PaymentHandler");
       PaymentHandler.getInstance();
-      
+
       // The service should be available
       expect(UnifiedDataStore.getInstance).toBeDefined();
     });
@@ -192,7 +194,7 @@ describe("PaymentHandler", () => {
       // We can't directly access private constants, but we can test behavior
       const { PaymentHandler } = require("../PaymentHandler");
       const instance = PaymentHandler.getInstance();
-      
+
       expect(instance).toBeDefined();
       // The constant should be used in AsyncStorage operations
     });
@@ -219,13 +221,13 @@ describe("PaymentHandler", () => {
       // Temporarily remove window object
       const originalWindow = global.window;
       delete (global as any).window;
-      
+
       expect(() => {
         const { PaymentHandler } = require("../PaymentHandler");
         const instance = PaymentHandler.getInstance();
         expect(instance).toBeDefined();
       }).not.toThrow();
-      
+
       // Restore window object
       (global as any).window = originalWindow;
     });
@@ -234,11 +236,11 @@ describe("PaymentHandler", () => {
   describe("TypeScript Compatibility", () => {
     it("should have proper TypeScript exports", () => {
       const PaymentHandlerModule = require("../PaymentHandler");
-      
+
       // Should export PaymentHandler class
       expect(PaymentHandlerModule.PaymentHandler).toBeDefined();
       expect(typeof PaymentHandlerModule.PaymentHandler).toBe("function");
-      
+
       // Should have default export
       expect(PaymentHandlerModule.default).toBeDefined();
     });
@@ -246,7 +248,7 @@ describe("PaymentHandler", () => {
     it("should support TypeScript interfaces", () => {
       expect(() => {
         const { PaymentHandler } = require("../PaymentHandler");
-        
+
         // Component should be TypeScript compatible
         expect(PaymentHandler).toBeDefined();
       }).not.toThrow();
@@ -257,7 +259,7 @@ describe("PaymentHandler", () => {
     it("should have handlePaymentRedirect with correct signature", () => {
       const { PaymentHandler } = require("../PaymentHandler");
       const instance = PaymentHandler.getInstance();
-      
+
       expect(typeof instance.handlePaymentRedirect).toBe("function");
       expect(instance.handlePaymentRedirect.length).toBe(0); // No parameters
     });
@@ -265,11 +267,11 @@ describe("PaymentHandler", () => {
     it("should return Promise from handlePaymentRedirect", () => {
       const { PaymentHandler } = require("../PaymentHandler");
       const instance = PaymentHandler.getInstance();
-      
+
       // Mock the dependencies to avoid actual calls
       const AsyncStorage = require("@react-native-async-storage/async-storage");
       AsyncStorage.getItem.mockResolvedValue(null);
-      
+
       const result = instance.handlePaymentRedirect();
       expect(result).toBeInstanceOf(Promise);
     });
@@ -286,8 +288,8 @@ describe("PaymentHandler", () => {
 
     it("should handle window.location correctly", () => {
       // Set up window.location.search
-      (global.window as any).location.search = '?payment=success';
-      
+      (global.window as any).location.search = "?payment=success";
+
       expect(() => {
         const { PaymentHandler } = require("../PaymentHandler");
         const instance = PaymentHandler.getInstance();
@@ -307,13 +309,13 @@ describe("PaymentHandler", () => {
   describe("File Structure Validation", () => {
     it("should have consistent export structure", () => {
       const PaymentHandlerModule = require("../PaymentHandler");
-      
+
       // Should have PaymentHandler export
       expect(PaymentHandlerModule.PaymentHandler).toBeDefined();
-      
+
       // Should have default export
       expect(PaymentHandlerModule.default).toBeDefined();
-      
+
       // Check for expected exports
       const keys = Object.keys(PaymentHandlerModule);
       expect(keys).toContain("PaymentHandler");
@@ -326,7 +328,7 @@ describe("PaymentHandler", () => {
         const PaymentHandlerModule = require("../PaymentHandler");
         const DefaultExport = PaymentHandlerModule.default;
         const NamedExport = PaymentHandlerModule.PaymentHandler;
-        
+
         expect(DefaultExport).toBeDefined();
         expect(NamedExport).toBeDefined();
       }).not.toThrow();
@@ -338,7 +340,7 @@ describe("PaymentHandler", () => {
       expect(() => {
         const { PaymentHandler } = require("../PaymentHandler");
         const instance = PaymentHandler.getInstance();
-        
+
         // Should be able to handle payment success scenarios
         expect(instance.handlePaymentRedirect).toBeDefined();
       }).not.toThrow();
@@ -348,7 +350,7 @@ describe("PaymentHandler", () => {
       expect(() => {
         const { PaymentHandler } = require("../PaymentHandler");
         const instance = PaymentHandler.getInstance();
-        
+
         // Should be able to handle payment cancellation scenarios
         expect(instance.handlePaymentRedirect).toBeDefined();
       }).not.toThrow();
@@ -358,10 +360,10 @@ describe("PaymentHandler", () => {
       expect(() => {
         const { PaymentHandler } = require("../PaymentHandler");
         const instance = PaymentHandler.getInstance();
-        
+
         // Should be able to handle no payment scenarios
         expect(instance.handlePaymentRedirect).toBeDefined();
       }).not.toThrow();
     });
   });
-}); 
+});

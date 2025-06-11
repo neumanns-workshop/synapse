@@ -9,8 +9,8 @@ import {
   useTheme,
   ActivityIndicator,
 } from "react-native-paper";
-import CustomIcon from "./CustomIcon";
 
+import CustomIcon from "./CustomIcon";
 import StripeService from "../services/StripeService";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 

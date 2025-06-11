@@ -240,7 +240,7 @@ export class StripeService {
 
       // Create a promo "transaction" record for tracking
       const promoTransactionId = `promo_${promoCode}_${Date.now()}`;
-      
+
       // If user is authenticated, sync promo data to Supabase
       const user = this.supabaseService.getUser();
       if (user) {
@@ -253,7 +253,9 @@ export class StripeService {
           lastValidated: Date.now(),
         });
       } else {
-        console.log("No authenticated user - promo data will sync after sign in");
+        console.log(
+          "No authenticated user - promo data will sync after sign in",
+        );
       }
 
       console.log("✅ Premium status activated via promo code!");
@@ -262,7 +264,8 @@ export class StripeService {
       console.error("Error creating promo account:", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to apply promo code",
+        error:
+          error instanceof Error ? error.message : "Failed to apply promo code",
       };
     }
   }

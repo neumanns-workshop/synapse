@@ -137,27 +137,31 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
 
     try {
       // Import SupabaseService to call the contact form edge function
-      const { SupabaseService } = await import('../services/SupabaseService');
+      const { SupabaseService } = await import("../services/SupabaseService");
       const supabaseService = SupabaseService.getInstance();
       const supabase = (supabaseService as any).supabase;
 
-      const response = await supabase.functions.invoke('submit-contact-form', {
+      const response = await supabase.functions.invoke("submit-contact-form", {
         body: {
           type: contactType,
           subject: subject.trim(),
           description: description.trim(),
           userEmail: userEmail.trim() || undefined,
           userId: auth.user?.id || undefined,
-        }
+        },
       });
 
       if (response.error) {
-        throw new Error(`Failed to submit contact form: ${response.error.message}`);
+        throw new Error(
+          `Failed to submit contact form: ${response.error.message}`,
+        );
       }
 
       const result = response.data;
       if (!result.success) {
-        throw new Error(result.error || 'Unknown error submitting contact form');
+        throw new Error(
+          result.error || "Unknown error submitting contact form",
+        );
       }
 
       console.log("Contact form submitted successfully:", result.id);

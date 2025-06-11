@@ -13,9 +13,9 @@ import {
   Snackbar,
   Dialog,
 } from "react-native-paper";
+
 import CustomIcon from "../components/CustomIcon";
 import { ProgressiveSyncIndicator } from "../components/ProgressiveSyncIndicator";
-
 import { useAuth } from "../context/AuthContext";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
 import { unifiedDataStore } from "../services/UnifiedDataStore";
@@ -59,18 +59,18 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
     console.log("🔄 Manual progressive sync started from AccountScreen");
     setIsSyncing(true);
     setShowProgressiveSync(true);
-    
+
     // The ProgressiveSyncIndicator will automatically listen to the sync progress
     // We just need to trigger a single sync operation
     try {
       console.log("🔄 Starting progressive sync to cloud...");
-      
+
       // For manual sync, we typically want to sync TO cloud (backup local data)
       const result = await auth.syncDataToCloud();
       if (result.error) {
         throw result.error;
       }
-      
+
       console.log("🔄 Progressive sync completed successfully");
     } catch (error) {
       console.error("🔄 Progressive sync failed:", error);
@@ -79,10 +79,13 @@ export const AccountScreen: React.FC<AccountScreenProps> = ({ onClose }) => {
   };
 
   const handleSyncComplete = async (success: boolean) => {
-    console.log("🔄 Progressive sync completed:", success ? "success" : "failed");
+    console.log(
+      "🔄 Progressive sync completed:",
+      success ? "success" : "failed",
+    );
     setShowProgressiveSync(false);
     setIsSyncing(false);
-    
+
     if (success) {
       showMessage("Data synced successfully!");
     } else {

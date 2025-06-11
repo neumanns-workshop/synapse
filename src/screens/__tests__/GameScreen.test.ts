@@ -77,7 +77,7 @@ jest.mock("react-native-paper", () => ({
   useTheme: () => ({
     customColors: {
       startNode: "#4CAF50",
-      endNode: "#F44336", 
+      endNode: "#F44336",
       currentNode: "#2196F3",
     },
     colors: {
@@ -136,11 +136,19 @@ describe("GameScreen", () => {
     it("should import all child components without errors", () => {
       expect(() => require("../ReportScreen")).not.toThrow();
       expect(() => require("../../components/AppHeader")).not.toThrow();
-      expect(() => require("../../components/AvailableWordsDisplay")).not.toThrow();
-      expect(() => require("../../components/GraphVisualization")).not.toThrow();
-      expect(() => require("../../components/PathDisplayConfigurator")).not.toThrow();
+      expect(() =>
+        require("../../components/AvailableWordsDisplay"),
+      ).not.toThrow();
+      expect(() =>
+        require("../../components/GraphVisualization"),
+      ).not.toThrow();
+      expect(() =>
+        require("../../components/PathDisplayConfigurator"),
+      ).not.toThrow();
       expect(() => require("../../components/PlayerPathDisplay")).not.toThrow();
-      expect(() => require("../../components/WordDefinitionDialog")).not.toThrow();
+      expect(() =>
+        require("../../components/WordDefinitionDialog"),
+      ).not.toThrow();
       expect(() => require("../../components/UpgradePrompt")).not.toThrow();
     });
   });
@@ -148,10 +156,10 @@ describe("GameScreen", () => {
   describe("Component Properties", () => {
     it("should be a React functional component", () => {
       const GameScreen = require("../GameScreen").default;
-      
+
       // Functional components are just functions
       expect(typeof GameScreen).toBe("function");
-      
+
       // Should have a length property indicating it accepts props
       expect(GameScreen.length).toBeGreaterThanOrEqual(0);
     });
@@ -159,12 +167,12 @@ describe("GameScreen", () => {
     it("should not throw when accessing component properties", () => {
       expect(() => {
         const GameScreen = require("../GameScreen").default;
-        
+
         // Access common React component properties
         const name = GameScreen.name;
         const length = GameScreen.length;
         const toString = GameScreen.toString();
-        
+
         expect(typeof name).toBe("string");
         expect(typeof length).toBe("number");
         expect(typeof toString).toBe("string");
@@ -175,26 +183,26 @@ describe("GameScreen", () => {
   describe("Store Integration", () => {
     it("should call useGameStore when imported", () => {
       const { useGameStore } = require("../../stores/useGameStore");
-      
+
       // Reset the mock to track calls
       useGameStore.mockClear();
-      
+
       // Import the component (this should trigger the hooks)
       require("../GameScreen");
-      
+
       // The component should be importable (hooks are called during render, not import)
       expect(useGameStore).toBeDefined();
     });
 
     it("should call useTutorial when imported", () => {
       const { useTutorial } = require("../../context/TutorialContext");
-      
+
       // Reset the mock to track calls
       useTutorial.mockClear();
-      
+
       // Import the component
       require("../GameScreen");
-      
+
       // The component should be importable
       expect(useTutorial).toBeDefined();
     });
@@ -203,10 +211,10 @@ describe("GameScreen", () => {
   describe("File Structure Validation", () => {
     it("should have consistent export structure", () => {
       const GameScreenModule = require("../GameScreen");
-      
+
       // Should have default export
       expect(GameScreenModule.default).toBeDefined();
-      
+
       // Should not have named exports (typical for React components)
       const keys = Object.keys(GameScreenModule);
       expect(keys).toContain("default");
@@ -221,4 +229,4 @@ describe("GameScreen", () => {
       }).not.toThrow();
     });
   });
-}); 
+});

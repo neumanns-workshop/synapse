@@ -1,34 +1,34 @@
 /**
  * Production Logger & Anti-Tampering System
- * 
+ *
  * 🧠 Synapse Game Logging System
  * Built with love, protected with sass.
  */
 
 // Initialize cheeky warning function (called later)
 function initializeAntiTampering() {
-  const isDev = process.env.NODE_ENV === 'development';
-  
-  if (!isDev && typeof window !== 'undefined') {
+  const isDev = process.env.NODE_ENV === "development";
+
+  if (!isDev && typeof window !== "undefined") {
     // Cheeky console warning
     console.log(
-      '%c🧠 Synapse Neural Network Detected!',
-      'font-size: 20px; font-weight: bold; color: #6366f1; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);'
+      "%c🧠 Synapse Neural Network Detected!",
+      "font-size: 20px; font-weight: bold; color: #6366f1; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);",
     );
-    
+
     console.log(
-      '%c🎯 Hey there, word wizard! 🎯\n\n' +
-      '🔍 Curious about how the magic works? We love that!\n' +
-      '🎮 But tampering with the game state is like using a dictionary in Scrabble...\n' +
-      '🚫 ...technically possible, but where\'s the fun in that?\n\n' +
-      '💡 Want to contribute? Check out our GitHub instead!\n' +
-      '🌟 Play fair, stay clever, and enjoy the neural journey! 🌟',
-      'font-size: 14px; color: #4f46e5; line-height: 1.6;'
+      "%c🎯 Hey there, word wizard! 🎯\n\n" +
+        "🔍 Curious about how the magic works? We love that!\n" +
+        "🎮 But tampering with the game state is like using a dictionary in Scrabble...\n" +
+        "🚫 ...technically possible, but where's the fun in that?\n\n" +
+        "💡 Want to contribute? Check out our GitHub instead!\n" +
+        "🌟 Play fair, stay clever, and enjoy the neural journey! 🌟",
+      "font-size: 14px; color: #4f46e5; line-height: 1.6;",
     );
-    
+
     console.log(
-      '%cP.S. Our algorithms are watching... 👁️👁️',
-      'font-size: 12px; color: #dc2626; font-style: italic;'
+      "%cP.S. Our algorithms are watching... 👁️👁️",
+      "font-size: 12px; color: #dc2626; font-style: italic;",
     );
   }
 }
@@ -49,7 +49,7 @@ class ProductionLogger {
   private sessionId: string;
 
   constructor() {
-    this.isDev = process.env.NODE_ENV === 'development';
+    this.isDev = process.env.NODE_ENV === "development";
     this.sessionId = this.generateSessionId();
     this.metrics = {
       sessionStart: Date.now(),
@@ -60,7 +60,7 @@ class ProductionLogger {
       gameCompletions: 0,
       performanceMarks: new Map(),
     };
-    
+
     // Initialize anti-tampering protection
     initializeAntiTampering();
     this.initializeHealthMonitoring();
@@ -73,20 +73,20 @@ class ProductionLogger {
   private initializeHealthMonitoring() {
     // Track page load
     this.metrics.pageLoads++;
-    
+
     // Monitor performance (only in browser environment)
-    if (typeof window !== 'undefined' && window.addEventListener) {
-      window.addEventListener('error', (event) => {
-        this.error('Global Error', { 
-          message: event.message, 
-          filename: event.filename, 
-          lineno: event.lineno 
+    if (typeof window !== "undefined" && window.addEventListener) {
+      window.addEventListener("error", (event) => {
+        this.error("Global Error", {
+          message: event.message,
+          filename: event.filename,
+          lineno: event.lineno,
         });
       });
 
-      window.addEventListener('unhandledrejection', (event) => {
-        this.error('Unhandled Promise Rejection', { 
-          reason: event.reason 
+      window.addEventListener("unhandledrejection", (event) => {
+        this.error("Unhandled Promise Rejection", {
+          reason: event.reason,
         });
       });
     }
@@ -104,7 +104,7 @@ class ProductionLogger {
       console.log(`ℹ️ [INFO] ${message}`, ...args);
     }
     // In production, only log critical info to a service
-    this.sendToAnalytics('info', message, args);
+    this.sendToAnalytics("info", message, args);
   }
 
   warn(message: string, ...args: any[]) {
@@ -112,23 +112,23 @@ class ProductionLogger {
     if (this.isDev) {
       console.warn(`⚠️ [WARN] ${message}`, ...args);
     }
-    this.sendToAnalytics('warning', message, args);
+    this.sendToAnalytics("warning", message, args);
   }
 
   error(message: string, ...args: any[]) {
     this.metrics.errors++;
     console.error(`❌ [ERROR] ${message}`, ...args);
-    this.sendToAnalytics('error', message, args);
+    this.sendToAnalytics("error", message, args);
   }
 
   // Game-specific metrics
-  gameStarted(gameType: 'daily' | 'random' | 'challenge') {
+  gameStarted(gameType: "daily" | "random" | "challenge") {
     this.metrics.gameStarts++;
     this.info(`Game started: ${gameType}`);
     this.mark(`game_start_${gameType}`);
   }
 
-  gameCompleted(gameType: 'daily' | 'random' | 'challenge', success: boolean) {
+  gameCompleted(gameType: "daily" | "random" | "challenge", success: boolean) {
     this.metrics.gameCompletions++;
     this.info(`Game completed: ${gameType}`, { success });
     this.measure(`game_duration_${gameType}`, `game_start_${gameType}`);
@@ -138,8 +138,8 @@ class ProductionLogger {
   mark(name: string) {
     const timestamp = Date.now();
     this.metrics.performanceMarks.set(name, timestamp);
-    
-    if (typeof performance !== 'undefined') {
+
+    if (typeof performance !== "undefined") {
       performance.mark(name);
     }
   }
@@ -149,8 +149,8 @@ class ProductionLogger {
     if (startTime) {
       const duration = Date.now() - startTime;
       this.info(`Performance: ${name}`, { duration: `${duration}ms` });
-      
-      if (typeof performance !== 'undefined') {
+
+      if (typeof performance !== "undefined") {
         try {
           performance.measure(name, startMark);
         } catch (e) {
@@ -174,14 +174,14 @@ class ProductionLogger {
   private sendToAnalytics(level: string, message: string, data?: any) {
     // In production, this would send to your analytics service
     // For now, we'll just store locally or send to a lightweight endpoint
-    if (!this.isDev && typeof window !== 'undefined') {
+    if (!this.isDev && typeof window !== "undefined") {
       try {
         // Could integrate with services like:
         // - Sentry for error tracking
         // - Google Analytics for events
         // - PostHog for product analytics
         // - Custom endpoint for health metrics
-        
+
         const logEvent = {
           timestamp: Date.now(),
           level,
@@ -191,10 +191,9 @@ class ProductionLogger {
           url: window.location.href,
           userAgent: navigator.userAgent.substring(0, 100), // Truncated for privacy
         };
-        
+
         // Store in localStorage as fallback (with size limits)
         this.storeLogEvent(logEvent);
-        
       } catch (error) {
         // Fail silently in production
       }
@@ -203,15 +202,15 @@ class ProductionLogger {
 
   private storeLogEvent(event: any) {
     try {
-      const logs = JSON.parse(localStorage.getItem('synapse_logs') || '[]');
+      const logs = JSON.parse(localStorage.getItem("synapse_logs") || "[]");
       logs.push(event);
-      
+
       // Keep only last 50 events to prevent storage bloat
       if (logs.length > 50) {
         logs.splice(0, logs.length - 50);
       }
-      
-      localStorage.setItem('synapse_logs', JSON.stringify(logs));
+
+      localStorage.setItem("synapse_logs", JSON.stringify(logs));
     } catch (error) {
       // Storage failed, ignore
     }
@@ -227,16 +226,19 @@ export const Logger = {
   info: (message: string, ...args: any[]) => logger.info(message, ...args),
   warn: (message: string, ...args: any[]) => logger.warn(message, ...args),
   error: (message: string, ...args: any[]) => logger.error(message, ...args),
-  
+
   // Game metrics
-  gameStarted: (gameType: 'daily' | 'random' | 'challenge') => logger.gameStarted(gameType),
-  gameCompleted: (gameType: 'daily' | 'random' | 'challenge', success: boolean) => 
-    logger.gameCompleted(gameType, success),
-  
+  gameStarted: (gameType: "daily" | "random" | "challenge") =>
+    logger.gameStarted(gameType),
+  gameCompleted: (
+    gameType: "daily" | "random" | "challenge",
+    success: boolean,
+  ) => logger.gameCompleted(gameType, success),
+
   // Performance
   mark: (name: string) => logger.mark(name),
   measure: (name: string, startMark: string) => logger.measure(name, startMark),
-  
+
   // Health
   getHealthMetrics: () => logger.getHealthMetrics(),
 };
@@ -244,22 +246,28 @@ export const Logger = {
 export default Logger;
 
 // Additional anti-tampering measures (browser only)
-if (typeof window !== 'undefined' && typeof window.setInterval === 'function' && process.env.NODE_ENV !== 'development') {
+if (
+  typeof window !== "undefined" &&
+  typeof window.setInterval === "function" &&
+  process.env.NODE_ENV !== "development"
+) {
   // Detect console manipulation attempts
   let devtools = false;
   const threshold = 160;
-  
+
   setInterval(() => {
-    if (window.outerHeight - window.innerHeight > threshold || 
-        window.outerWidth - window.innerWidth > threshold) {
+    if (
+      window.outerHeight - window.innerHeight > threshold ||
+      window.outerWidth - window.innerWidth > threshold
+    ) {
       if (!devtools) {
         devtools = true;
         console.log(
-          '%c🕵️ DevTools detected! 🕵️\n' +
-          'Remember: Real neural networks don\'t need debugging! 🧠✨',
-          'font-size: 16px; color: #f59e0b; font-weight: bold;'
+          "%c🕵️ DevTools detected! 🕵️\n" +
+            "Remember: Real neural networks don't need debugging! 🧠✨",
+          "font-size: 16px; color: #f59e0b; font-weight: bold;",
         );
       }
     }
   }, 1000);
-} 
+}

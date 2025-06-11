@@ -1,7 +1,7 @@
+import type { WordCollection } from "../../features/wordCollections";
+import type { GameReport } from "../../utils/gameReportUtils";
 import * as StorageAdapter from "../StorageAdapter";
 import { unifiedDataStore } from "../UnifiedDataStore";
-import type { GameReport } from "../../utils/gameReportUtils";
-import type { WordCollection } from "../../features/wordCollections";
 
 // Mock the UnifiedDataStore
 jest.mock("../UnifiedDataStore", () => ({
@@ -28,7 +28,9 @@ jest.mock("../../features/achievements/logic", () => ({
   handleProgressiveAchievements: jest.fn().mockResolvedValue([]),
 }));
 
-const mockUnifiedDataStore = unifiedDataStore as jest.Mocked<typeof unifiedDataStore>;
+const mockUnifiedDataStore = unifiedDataStore as jest.Mocked<
+  typeof unifiedDataStore
+>;
 
 describe("StorageAdapter", () => {
   beforeEach(() => {
@@ -63,7 +65,9 @@ describe("StorageAdapter", () => {
 
         await StorageAdapter.saveGameToHistory(gameReport);
 
-        expect(mockUnifiedDataStore.addGameToHistory).toHaveBeenCalledWith(gameReport);
+        expect(mockUnifiedDataStore.addGameToHistory).toHaveBeenCalledWith(
+          gameReport,
+        );
       });
     });
 
@@ -145,7 +149,9 @@ describe("StorageAdapter", () => {
 
         await StorageAdapter.updateLifetimeStatsOnGameEnd(gameReport);
 
-        expect(mockUnifiedDataStore.updateStatsOnGameEnd).toHaveBeenCalledWith(gameReport);
+        expect(mockUnifiedDataStore.updateStatsOnGameEnd).toHaveBeenCalledWith(
+          gameReport,
+        );
       });
     });
   });
@@ -154,7 +160,9 @@ describe("StorageAdapter", () => {
     describe("getUnlockedAchievementIds", () => {
       it("should delegate to unifiedDataStore.getUnlockedAchievements", async () => {
         const mockAchievements = ["achievement1", "achievement2"];
-        mockUnifiedDataStore.getUnlockedAchievements.mockResolvedValue(mockAchievements);
+        mockUnifiedDataStore.getUnlockedAchievements.mockResolvedValue(
+          mockAchievements,
+        );
 
         const result = await StorageAdapter.getUnlockedAchievementIds();
 
@@ -167,7 +175,9 @@ describe("StorageAdapter", () => {
       it("should delegate to unifiedDataStore.unlockAchievement", async () => {
         await StorageAdapter.markAchievementAsUnlocked("test-achievement");
 
-        expect(mockUnifiedDataStore.unlockAchievement).toHaveBeenCalledWith("test-achievement");
+        expect(mockUnifiedDataStore.unlockAchievement).toHaveBeenCalledWith(
+          "test-achievement",
+        );
       });
     });
   });
@@ -292,7 +302,8 @@ describe("StorageAdapter", () => {
         await StorageAdapter.recordEndedGame(gameReport as GameReport);
         const afterCall = Date.now();
 
-        const addHistoryCall = mockUnifiedDataStore.addGameToHistory.mock.calls[0][0];
+        const addHistoryCall =
+          mockUnifiedDataStore.addGameToHistory.mock.calls[0][0];
         expect(addHistoryCall.id).toBeDefined();
         expect(addHistoryCall.timestamp).toBeGreaterThanOrEqual(beforeCall);
         expect(addHistoryCall.timestamp).toBeLessThanOrEqual(afterCall);
@@ -318,15 +329,15 @@ describe("StorageAdapter", () => {
           averageSimilarity: 1.0,
           pathEfficiency: 1.0,
           earnedAchievements: [
-            { 
-              id: "achievement1", 
-              name: "Test Achievement", 
+            {
+              id: "achievement1",
+              name: "Test Achievement",
               description: "Test",
               check: () => true,
             },
-            { 
-              id: "achievement2", 
-              name: "Another Achievement", 
+            {
+              id: "achievement2",
+              name: "Another Achievement",
               description: "Test",
               check: () => true,
             },
@@ -335,8 +346,12 @@ describe("StorageAdapter", () => {
 
         await StorageAdapter.recordEndedGame(gameReport);
 
-        expect(mockUnifiedDataStore.unlockAchievement).toHaveBeenCalledWith("achievement1");
-        expect(mockUnifiedDataStore.unlockAchievement).toHaveBeenCalledWith("achievement2");
+        expect(mockUnifiedDataStore.unlockAchievement).toHaveBeenCalledWith(
+          "achievement1",
+        );
+        expect(mockUnifiedDataStore.unlockAchievement).toHaveBeenCalledWith(
+          "achievement2",
+        );
       });
     });
   });
@@ -345,13 +360,15 @@ describe("StorageAdapter", () => {
     describe("getWordCollectionsProgress", () => {
       it("should delegate to unifiedDataStore.getCollectionProgress", async () => {
         const mockProgress = {
-          "collection1": {
+          collection1: {
             collectedWords: ["word1", "word2"],
             lastUpdated: Date.now(),
           },
         };
 
-        mockUnifiedDataStore.getCollectionProgress.mockResolvedValue(mockProgress);
+        mockUnifiedDataStore.getCollectionProgress.mockResolvedValue(
+          mockProgress,
+        );
 
         const result = await StorageAdapter.getWordCollectionsProgress();
 
@@ -364,7 +381,9 @@ describe("StorageAdapter", () => {
       it("should delegate to unifiedDataStore.recordWordForCollection", async () => {
         await StorageAdapter.recordWordForCollection("collection1", "word1");
 
-        expect(mockUnifiedDataStore.recordWordForCollection).toHaveBeenCalledWith("collection1", "word1");
+        expect(
+          mockUnifiedDataStore.recordWordForCollection,
+        ).toHaveBeenCalledWith("collection1", "word1");
       });
     });
 
@@ -372,7 +391,7 @@ describe("StorageAdapter", () => {
       it("should reset collection progress", async () => {
         const mockData = {
           collections: {
-            "collection1": {
+            collection1: {
               collectedWords: ["word1", "word2"],
               lastUpdated: Date.now() - 1000,
             },
@@ -385,9 +404,13 @@ describe("StorageAdapter", () => {
         await StorageAdapter.resetCollectionProgress("collection1");
         const afterReset = Date.now();
 
-        expect(mockData.collections["collection1"].collectedWords).toEqual([]);
-        expect(mockData.collections["collection1"].lastUpdated).toBeGreaterThanOrEqual(beforeReset);
-        expect(mockData.collections["collection1"].lastUpdated).toBeLessThanOrEqual(afterReset);
+        expect(mockData.collections.collection1.collectedWords).toEqual([]);
+        expect(
+          mockData.collections.collection1.lastUpdated,
+        ).toBeGreaterThanOrEqual(beforeReset);
+        expect(
+          mockData.collections.collection1.lastUpdated,
+        ).toBeLessThanOrEqual(afterReset);
         expect(mockUnifiedDataStore.saveData).toHaveBeenCalled();
       });
 
@@ -422,10 +445,17 @@ describe("StorageAdapter", () => {
           },
         ];
 
-        await StorageAdapter.checkAndRecordWordForCollections("word1", activeCollections);
+        await StorageAdapter.checkAndRecordWordForCollections(
+          "word1",
+          activeCollections,
+        );
 
-        expect(mockUnifiedDataStore.recordWordForCollection).toHaveBeenCalledWith("collection1", "word1");
-        expect(mockUnifiedDataStore.recordWordForCollection).not.toHaveBeenCalledWith("collection2", "word1");
+        expect(
+          mockUnifiedDataStore.recordWordForCollection,
+        ).toHaveBeenCalledWith("collection1", "word1");
+        expect(
+          mockUnifiedDataStore.recordWordForCollection,
+        ).not.toHaveBeenCalledWith("collection2", "word1");
       });
 
       it("should record word for multiple matching collections", async () => {
@@ -444,10 +474,17 @@ describe("StorageAdapter", () => {
           },
         ];
 
-        await StorageAdapter.checkAndRecordWordForCollections("word1", activeCollections);
+        await StorageAdapter.checkAndRecordWordForCollections(
+          "word1",
+          activeCollections,
+        );
 
-        expect(mockUnifiedDataStore.recordWordForCollection).toHaveBeenCalledWith("collection1", "word1");
-        expect(mockUnifiedDataStore.recordWordForCollection).toHaveBeenCalledWith("collection2", "word1");
+        expect(
+          mockUnifiedDataStore.recordWordForCollection,
+        ).toHaveBeenCalledWith("collection1", "word1");
+        expect(
+          mockUnifiedDataStore.recordWordForCollection,
+        ).toHaveBeenCalledWith("collection2", "word1");
       });
 
       it("should not record word if not in any collection", async () => {
@@ -460,9 +497,14 @@ describe("StorageAdapter", () => {
           },
         ];
 
-        await StorageAdapter.checkAndRecordWordForCollections("word1", activeCollections);
+        await StorageAdapter.checkAndRecordWordForCollections(
+          "word1",
+          activeCollections,
+        );
 
-        expect(mockUnifiedDataStore.recordWordForCollection).not.toHaveBeenCalled();
+        expect(
+          mockUnifiedDataStore.recordWordForCollection,
+        ).not.toHaveBeenCalled();
       });
     });
   });
@@ -480,13 +522,21 @@ describe("StorageAdapter", () => {
           gameStatus: "playing",
           optimalChoices: [],
           backtrackHistory: [],
-          pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+          pathDisplayMode: {
+            player: true,
+            optimal: false,
+            suggested: false,
+            ai: false,
+          },
           startTime: Date.now(),
         };
 
         await StorageAdapter.saveCurrentGame(gameState);
 
-        expect(mockUnifiedDataStore.saveCurrentGame).toHaveBeenCalledWith(gameState, "regular");
+        expect(mockUnifiedDataStore.saveCurrentGame).toHaveBeenCalledWith(
+          gameState,
+          "regular",
+        );
       });
 
       it("should save challenge game", async () => {
@@ -500,14 +550,22 @@ describe("StorageAdapter", () => {
           gameStatus: "playing",
           optimalChoices: [],
           backtrackHistory: [],
-          pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+          pathDisplayMode: {
+            player: true,
+            optimal: false,
+            suggested: false,
+            ai: false,
+          },
           startTime: Date.now(),
           isChallenge: true,
         };
 
         await StorageAdapter.saveCurrentGame(gameState);
 
-        expect(mockUnifiedDataStore.saveCurrentGame).toHaveBeenCalledWith(gameState, "challenge");
+        expect(mockUnifiedDataStore.saveCurrentGame).toHaveBeenCalledWith(
+          gameState,
+          "challenge",
+        );
       });
 
       it("should not save non-playing games", async () => {
@@ -521,7 +579,12 @@ describe("StorageAdapter", () => {
           gameStatus: "won",
           optimalChoices: [],
           backtrackHistory: [],
-          pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+          pathDisplayMode: {
+            player: true,
+            optimal: false,
+            suggested: false,
+            ai: false,
+          },
           startTime: Date.now(),
         };
 
@@ -541,15 +604,23 @@ describe("StorageAdapter", () => {
           gameStatus: "playing",
           optimalChoices: [],
           backtrackHistory: [],
-          pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+          pathDisplayMode: {
+            player: true,
+            optimal: false,
+            suggested: false,
+            ai: false,
+          },
           // startTime missing
         };
 
         const beforeCall = Date.now();
-        await StorageAdapter.saveCurrentGame(gameState as StorageAdapter.PersistentGameState);
+        await StorageAdapter.saveCurrentGame(
+          gameState as StorageAdapter.PersistentGameState,
+        );
         const afterCall = Date.now();
 
-        const savedGameState = mockUnifiedDataStore.saveCurrentGame.mock.calls[0][0];
+        const savedGameState =
+          mockUnifiedDataStore.saveCurrentGame.mock.calls[0][0];
         expect(savedGameState.startTime).toBeGreaterThanOrEqual(beforeCall);
         expect(savedGameState.startTime).toBeLessThanOrEqual(afterCall);
       });
@@ -567,7 +638,12 @@ describe("StorageAdapter", () => {
           gameStatus: "playing",
           optimalChoices: [],
           backtrackHistory: [],
-          pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+          pathDisplayMode: {
+            player: true,
+            optimal: false,
+            suggested: false,
+            ai: false,
+          },
           startTime: Date.now(),
         };
 
@@ -575,7 +651,9 @@ describe("StorageAdapter", () => {
 
         const result = await StorageAdapter.loadCurrentGame();
 
-        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith("regular");
+        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith(
+          "regular",
+        );
         expect(result).toEqual(mockGameState);
       });
 
@@ -590,7 +668,12 @@ describe("StorageAdapter", () => {
           gameStatus: "playing",
           optimalChoices: [],
           backtrackHistory: [],
-          pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+          pathDisplayMode: {
+            player: true,
+            optimal: false,
+            suggested: false,
+            ai: false,
+          },
           startTime: Date.now(),
           isChallenge: true,
         };
@@ -599,7 +682,9 @@ describe("StorageAdapter", () => {
 
         const result = await StorageAdapter.loadCurrentGame(true);
 
-        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith("challenge");
+        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith(
+          "challenge",
+        );
         expect(result).toEqual(mockGameState);
       });
     });
@@ -608,13 +693,17 @@ describe("StorageAdapter", () => {
       it("should clear regular game by default", async () => {
         await StorageAdapter.clearCurrentGame();
 
-        expect(mockUnifiedDataStore.clearCurrentGame).toHaveBeenCalledWith("regular");
+        expect(mockUnifiedDataStore.clearCurrentGame).toHaveBeenCalledWith(
+          "regular",
+        );
       });
 
       it("should clear challenge game when specified", async () => {
         await StorageAdapter.clearCurrentGame(true);
 
-        expect(mockUnifiedDataStore.clearCurrentGame).toHaveBeenCalledWith("challenge");
+        expect(mockUnifiedDataStore.clearCurrentGame).toHaveBeenCalledWith(
+          "challenge",
+        );
       });
     });
 
@@ -630,13 +719,21 @@ describe("StorageAdapter", () => {
           gameStatus: "playing",
           optimalChoices: [],
           backtrackHistory: [],
-          pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+          pathDisplayMode: {
+            player: true,
+            optimal: false,
+            suggested: false,
+            ai: false,
+          },
           startTime: Date.now(),
         };
 
         await StorageAdapter.saveTempGame(gameState);
 
-        expect(mockUnifiedDataStore.saveCurrentGame).toHaveBeenCalledWith(gameState, "temp");
+        expect(mockUnifiedDataStore.saveCurrentGame).toHaveBeenCalledWith(
+          gameState,
+          "temp",
+        );
       });
     });
 
@@ -652,7 +749,12 @@ describe("StorageAdapter", () => {
           gameStatus: "playing",
           optimalChoices: [],
           backtrackHistory: [],
-          pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+          pathDisplayMode: {
+            player: true,
+            optimal: false,
+            suggested: false,
+            ai: false,
+          },
           startTime: Date.now(),
         };
 
@@ -660,7 +762,9 @@ describe("StorageAdapter", () => {
 
         const result = await StorageAdapter.hasTempSavedGame();
 
-        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith("temp");
+        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith(
+          "temp",
+        );
         expect(result).toBe(true);
       });
 
@@ -669,7 +773,9 @@ describe("StorageAdapter", () => {
 
         const result = await StorageAdapter.hasTempSavedGame();
 
-        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith("temp");
+        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith(
+          "temp",
+        );
         expect(result).toBe(false);
       });
     });
@@ -686,7 +792,12 @@ describe("StorageAdapter", () => {
           gameStatus: "playing",
           optimalChoices: [],
           backtrackHistory: [],
-          pathDisplayMode: { player: true, optimal: false, suggested: false, ai: false },
+          pathDisplayMode: {
+            player: true,
+            optimal: false,
+            suggested: false,
+            ai: false,
+          },
           startTime: Date.now(),
         };
 
@@ -694,8 +805,12 @@ describe("StorageAdapter", () => {
 
         const result = await StorageAdapter.restoreTempGame();
 
-        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith("temp");
-        expect(mockUnifiedDataStore.clearCurrentGame).toHaveBeenCalledWith("temp");
+        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith(
+          "temp",
+        );
+        expect(mockUnifiedDataStore.clearCurrentGame).toHaveBeenCalledWith(
+          "temp",
+        );
         expect(result).toEqual(mockGameState);
       });
 
@@ -704,7 +819,9 @@ describe("StorageAdapter", () => {
 
         const result = await StorageAdapter.restoreTempGame();
 
-        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith("temp");
+        expect(mockUnifiedDataStore.loadCurrentGame).toHaveBeenCalledWith(
+          "temp",
+        );
         expect(mockUnifiedDataStore.clearCurrentGame).not.toHaveBeenCalled();
         expect(result).toBeNull();
       });
@@ -743,15 +860,23 @@ describe("StorageAdapter", () => {
         pathEfficiency: 1.0,
       };
 
-      mockUnifiedDataStore.addGameToHistory.mockRejectedValue(new Error("Storage error"));
+      mockUnifiedDataStore.addGameToHistory.mockRejectedValue(
+        new Error("Storage error"),
+      );
 
       // Should not throw
-      await expect(StorageAdapter.recordEndedGame(gameReport)).resolves.not.toThrow();
+      await expect(
+        StorageAdapter.recordEndedGame(gameReport),
+      ).resolves.not.toThrow();
     });
 
     it("should handle progressive achievements errors gracefully", async () => {
-      const { handleProgressiveAchievements } = require("../../features/achievements/logic");
-      handleProgressiveAchievements.mockRejectedValue(new Error("Progressive achievements error"));
+      const {
+        handleProgressiveAchievements,
+      } = require("../../features/achievements/logic");
+      handleProgressiveAchievements.mockRejectedValue(
+        new Error("Progressive achievements error"),
+      );
 
       // Make sure the main storage operations succeed so we reach the progressive achievements section
       mockUnifiedDataStore.addGameToHistory.mockResolvedValue(undefined);
@@ -778,8 +903,13 @@ describe("StorageAdapter", () => {
       };
 
       // Should not throw
-      await expect(StorageAdapter.recordEndedGame(gameReport)).resolves.not.toThrow();
-      expect(console.error).toHaveBeenCalledWith("Error handling progressive achievements:", expect.any(Error));
+      await expect(
+        StorageAdapter.recordEndedGame(gameReport),
+      ).resolves.not.toThrow();
+      expect(console.error).toHaveBeenCalledWith(
+        "Error handling progressive achievements:",
+        expect.any(Error),
+      );
     });
   });
-}); 
+});

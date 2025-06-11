@@ -333,7 +333,10 @@ export class UnifiedDataStore {
    * @param immediate - If true, saves immediately without debouncing (default: false)
    * @param debounceMs - Debounce delay in milliseconds (default: 500)
    */
-  public async saveDataDebounced(immediate: boolean = false, debounceMs: number = 500): Promise<void> {
+  public async saveDataDebounced(
+    immediate = false,
+    debounceMs = 500,
+  ): Promise<void> {
     this.hasPendingChanges = true;
 
     // Clear existing timeout
@@ -380,7 +383,7 @@ export class UnifiedDataStore {
       clearTimeout(this.saveTimeout);
       this.saveTimeout = null;
     }
-    
+
     if (this.hasPendingChanges) {
       await this.saveData();
     }

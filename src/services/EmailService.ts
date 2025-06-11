@@ -26,19 +26,21 @@ export class EmailService {
     news: string;
     support: string;
   };
-  private isConfigured: boolean = false;
+  private isConfigured = false;
 
   private constructor() {
     // Custom emails are now handled via Supabase Edge Function
-    this.apiKey = 'edge-function'; // Placeholder - not used
+    this.apiKey = "edge-function"; // Placeholder - not used
     this.fromEmails = {
-      noreply: 'noreply@synapsegame.ai',
-      news: 'news@synapsegame.ai',
-      support: 'support@synapsegame.ai',
+      noreply: "noreply@synapsegame.ai",
+      news: "news@synapsegame.ai",
+      support: "support@synapsegame.ai",
     };
     this.isConfigured = true; // Always configured now via edge function
 
-    console.log('📧 EmailService: Using Supabase Edge Function for custom emails');
+    console.log(
+      "📧 EmailService: Using Supabase Edge Function for custom emails",
+    );
   }
 
   public static getInstance(): EmailService {
@@ -53,45 +55,53 @@ export class EmailService {
    */
   public async sendWelcomeEmail(email: string, data: WelcomeEmailData) {
     if (!this.isConfigured) {
-      console.log('📧 Would send welcome email to:', email);
+      console.log("📧 Would send welcome email to:", email);
       return { success: true }; // Return success for development
     }
 
     const template: EmailTemplate = {
       to: [email],
-      subject: 'Welcome to Synapse! 🧠',
+      subject: "Welcome to Synapse! 🧠",
       html: this.generateWelcomeHtml(data),
       text: this.generateWelcomeText(data),
     };
 
-    return this.sendEmail(template, 'news');
+    return this.sendEmail(template, "news");
   }
 
   /**
    * Send a premium welcome email to new premium users
    */
-  public async sendPremiumWelcomeEmail(email: string, data: PremiumWelcomeEmailData) {
+  public async sendPremiumWelcomeEmail(
+    email: string,
+    data: PremiumWelcomeEmailData,
+  ) {
     if (!this.isConfigured) {
-      console.log('📧 Would send premium welcome email to:', email);
+      console.log("📧 Would send premium welcome email to:", email);
       return { success: true };
     }
 
     const template: EmailTemplate = {
       to: [email],
-      subject: 'Welcome to Synapse Premium! ⭐',
+      subject: "Welcome to Synapse Premium! ⭐",
       html: this.generatePremiumWelcomeHtml(data),
       text: this.generatePremiumWelcomeText(data),
     };
 
-    return this.sendEmail(template, 'news');
+    return this.sendEmail(template, "news");
   }
 
   /**
    * Send a support-related email from support@synapsegame.ai
    */
-  public async sendSupportEmail(email: string, subject: string, html: string, text?: string) {
+  public async sendSupportEmail(
+    email: string,
+    subject: string,
+    html: string,
+    text?: string,
+  ) {
     if (!this.isConfigured) {
-      console.log('📧 Would send support email to:', email);
+      console.log("📧 Would send support email to:", email);
       return { success: true };
     }
 
@@ -102,26 +112,29 @@ export class EmailService {
       text,
     };
 
-    return this.sendEmail(template, 'support');
+    return this.sendEmail(template, "support");
   }
 
   /**
    * Send email using Supabase Edge Function
    */
-  private async sendEmail(template: EmailTemplate, fromType: 'noreply' | 'news' | 'support' = 'noreply') {
+  private async sendEmail(
+    template: EmailTemplate,
+    fromType: "noreply" | "news" | "support" = "noreply",
+  ) {
     try {
       // Import SupabaseService to get the client
-      const { SupabaseService } = await import('./SupabaseService');
+      const { SupabaseService } = await import("./SupabaseService");
       const supabaseService = SupabaseService.getInstance();
       const supabase = (supabaseService as any).supabase;
 
-      const response = await supabase.functions.invoke('send-custom-email', {
+      const response = await supabase.functions.invoke("send-custom-email", {
         body: {
           template: {
             ...template,
-            from_type: fromType
-          }
-        }
+            from_type: fromType,
+          },
+        },
       });
 
       if (response.error) {
@@ -130,15 +143,17 @@ export class EmailService {
 
       const result = response.data;
       if (!result.success) {
-        throw new Error(result.error || 'Unknown error from edge function');
+        throw new Error(result.error || "Unknown error from edge function");
       }
 
-      console.log('📧 Email sent successfully via edge function:', result.id);
+      console.log("📧 Email sent successfully via edge function:", result.id);
       return { success: true, id: result.id };
-
     } catch (error) {
-      console.error('📧 Failed to send email:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      console.error("📧 Failed to send email:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   }
 
@@ -284,4 +299,4 @@ You received this email because you purchased Synapse Premium. You can manage yo
   }
 }
 
-export default EmailService; 
+export default EmailService;

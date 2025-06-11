@@ -9,6 +9,8 @@ import {
   Pressable,
 } from "react-native";
 
+import HCaptcha from "@hcaptcha/react-hcaptcha";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Text,
   TextInput,
@@ -23,7 +25,6 @@ import {
   Dialog,
   useTheme,
 } from "react-native-paper";
-import CustomIcon from "../components/CustomIcon";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -31,9 +32,8 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import HCaptcha from "@hcaptcha/react-hcaptcha";
 
+import CustomIcon from "../components/CustomIcon";
 import StripeService from "../services/StripeService";
 import SupabaseService from "../services/SupabaseService";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -75,7 +75,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
   // Promo code state
   const [showPromoField, setShowPromoField] = useState(false);
-  const [promoCode, setPromoCode] = useState('');
+  const [promoCode, setPromoCode] = useState("");
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
   const captchaRef = useRef<HCaptcha>(null);
@@ -267,7 +267,9 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     if (mode === "signup") {
       // Check if user entered a promo code
       if (promoCode.trim()) {
-        console.log("🎫 Promo code detected, proceeding with promo signup flow");
+        console.log(
+          "🎫 Promo code detected, proceeding with promo signup flow",
+        );
         proceedWithPromoSignUp(token);
       } else {
         console.log("🔐 Proceeding with traditional payment sign-up flow");
@@ -286,7 +288,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       email,
       password,
       confirmPassword,
-      promoCode: promoCode.toUpperCase().trim()
+      promoCode: promoCode.toUpperCase().trim(),
     });
     setErrorMessage(null); // Clear any previous errors
 
@@ -310,14 +312,18 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
     if (!termsAccepted || !privacyAccepted) {
       console.log("Validation failed: legal consent not given");
-      setErrorMessage("Please accept the Terms of Service and Privacy Policy to continue");
+      setErrorMessage(
+        "Please accept the Terms of Service and Privacy Policy to continue",
+      );
       return;
     }
 
     // Validate promo code if the promo field section is shown
     if (showPromoField && !promoCode.trim()) {
       console.log("Validation failed: promo code field is empty but visible");
-      setErrorMessage("Please enter your beta code or close the beta code section");
+      setErrorMessage(
+        "Please enter your beta code or close the beta code section",
+      );
       return;
     }
 
@@ -394,7 +400,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
   const proceedWithPromoSignUp = async (token: string) => {
     setIsApplyingPromo(true);
-    
+
     try {
       const code = promoCode.toUpperCase().trim();
       console.log("🎫 Starting promo signup with captcha token");
@@ -404,9 +410,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       const { data: anonSessionData, error: anonError } =
         await supabaseService.signInAnonymously(token);
 
-      if (anonError || !anonSessionData?.session?.access_token || !anonSessionData?.user?.id) {
+      if (
+        anonError ||
+        !anonSessionData?.session?.access_token ||
+        !anonSessionData?.user?.id
+      ) {
         console.error("🎫 Anonymous sign-in failed:", anonError);
-        setErrorMessage('Failed to create temporary session');
+        setErrorMessage("Failed to create temporary session");
         return;
       }
 
@@ -415,16 +425,23 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       console.log("🎫 Anonymous session created, validating promo code...");
 
       // STEP 2: Validate promo code using anonymous JWT
-      const { data: validationResult, error: validationError } = 
-        await supabaseService.invokeFunction('validate-promo-code', {
-          code,
-          userEmail: email,
-          userAgent: navigator.userAgent
-        }, anonymousUserJwt);
+      const { data: validationResult, error: validationError } =
+        await supabaseService.invokeFunction(
+          "validate-promo-code",
+          {
+            code,
+            userEmail: email,
+            userAgent: navigator.userAgent,
+          },
+          anonymousUserJwt,
+        );
 
       if (validationError || !validationResult?.valid) {
-        const errorMessage = validationResult?.error || 
-          (validationError instanceof Error ? validationError.message : 'Invalid promo code');
+        const errorMessage =
+          validationResult?.error ||
+          (validationError instanceof Error
+            ? validationError.message
+            : "Invalid promo code");
         setErrorMessage(errorMessage);
         return;
       }
@@ -444,26 +461,36 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
       // STEP 4: Create premium profile in database (required for finalize-premium-account)
       console.log("🎫 Creating premium profile in database...");
-      const profileResult = await supabaseService.createPremiumProfile(anonymousUserId, email);
+      const profileResult = await supabaseService.createPremiumProfile(
+        anonymousUserId,
+        email,
+      );
       if (profileResult.error) {
-        console.error("🎫 Failed to create premium profile:", profileResult.error);
-        setErrorMessage('Failed to create premium account');
+        console.error(
+          "🎫 Failed to create premium profile:",
+          profileResult.error,
+        );
+        setErrorMessage("Failed to create premium account");
         return;
       }
 
       console.log("🎫 Premium profile created, finalizing account...");
 
       // STEP 5: Convert the anonymous user to a real account
-      const { data: conversionResult, error: conversionError } = 
-        await supabaseService.invokeFunction('finalize-premium-account', {
-          temporaryUserId: anonymousUserId,
-          email,
-          password,
-        }, anonymousUserJwt);
+      const { data: conversionResult, error: conversionError } =
+        await supabaseService.invokeFunction(
+          "finalize-premium-account",
+          {
+            temporaryUserId: anonymousUserId,
+            email,
+            password,
+          },
+          anonymousUserJwt,
+        );
 
       if (conversionError || !conversionResult?.message) {
         console.error("🎫 Account conversion failed:", conversionError);
-        setErrorMessage('Failed to finalize premium account');
+        setErrorMessage("Failed to finalize premium account");
         return;
       }
 
@@ -476,11 +503,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       await unifiedStore.clearPendingConversionDetails(anonymousUserId);
       setIsWaitingForAuth(true);
       // The auth state change will trigger onAuthComplete
-
     } catch (error) {
       console.error("🎫 Error during promo signup:", error);
       setErrorMessage(
-        error instanceof Error ? error.message : 'Failed to create account with promo code'
+        error instanceof Error
+          ? error.message
+          : "Failed to create account with promo code",
       );
     } finally {
       setIsLoading(false);
@@ -491,7 +519,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   const handlePromoCodeSignup = async () => {
     setIsLoading(true);
     setIsApplyingPromo(true);
-    
+
     try {
       const code = promoCode.toUpperCase().trim();
       console.log("🎫 Validating promo code:", code);
@@ -499,16 +527,19 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       // STEP 1: Validate promo code WITHOUT authentication
       // The edge function uses service role internally and doesn't need user auth
       console.log("🎫 Calling promo validation edge function...");
-      const { data: validationResult, error: validationError } = 
-        await supabaseService.invokeFunction('validate-promo-code', {
+      const { data: validationResult, error: validationError } =
+        await supabaseService.invokeFunction("validate-promo-code", {
           code,
           userEmail: email,
-          userAgent: navigator.userAgent
+          userAgent: navigator.userAgent,
         }); // No JWT token passed - function works without auth
 
       if (validationError || !validationResult?.valid) {
-        const errorMessage = validationResult?.error || 
-          (validationError instanceof Error ? validationError.message : 'Invalid promo code');
+        const errorMessage =
+          validationResult?.error ||
+          (validationError instanceof Error
+            ? validationError.message
+            : "Invalid promo code");
         setErrorMessage(errorMessage);
         return;
       }
@@ -519,18 +550,20 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       const { user, error: signUpError } = await supabaseService.signUp(
         email,
         password,
-        emailUpdatesOptIn
+        emailUpdatesOptIn,
       );
 
       if (signUpError) {
         setErrorMessage(
-          signUpError instanceof Error ? signUpError.message : 'Failed to create account'
+          signUpError instanceof Error
+            ? signUpError.message
+            : "Failed to create account",
         );
         return;
       }
 
       if (!user) {
-        setErrorMessage('Account created but user data missing');
+        setErrorMessage("Account created but user data missing");
         return;
       }
 
@@ -544,11 +577,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       // Wait for auth state to complete (similar to traditional signup)
       setIsWaitingForAuth(true);
       // The auth state change will trigger onAuthComplete
-
     } catch (error) {
       console.error("🎫 Error during promo signup:", error);
       setErrorMessage(
-        error instanceof Error ? error.message : 'Failed to create account with promo code'
+        error instanceof Error
+          ? error.message
+          : "Failed to create account with promo code",
       );
     } finally {
       setIsLoading(false);
@@ -1067,12 +1101,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                 />
               }
             />
-            <Text style={{ 
-              fontSize: 12, 
-              color: colors.onSurfaceVariant,
-              textAlign: "center",
-              fontStyle: "italic"
-            }}>
+            <Text
+              style={{
+                fontSize: 12,
+                color: colors.onSurfaceVariant,
+                textAlign: "center",
+                fontStyle: "italic",
+              }}
+            >
               Beta codes expire June 30, 2025 but grant permanent premium access
             </Text>
           </View>
@@ -1098,18 +1134,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             height: 24,
             borderWidth: 2,
             borderColor: emailUpdatesOptIn ? colors.primary : colors.outline,
-            backgroundColor: emailUpdatesOptIn ? colors.primary : 'transparent',
+            backgroundColor: emailUpdatesOptIn ? colors.primary : "transparent",
             borderRadius: 4,
-            alignItems: 'center',
-            justifyContent: 'center',
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           {emailUpdatesOptIn && (
-            <CustomIcon
-              source="check"
-              size={16}
-              color={colors.onPrimary}
-            />
+            <CustomIcon source="check" size={16} color={colors.onPrimary} />
           )}
         </Pressable>
         <Text
@@ -1144,19 +1176,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             height: 24,
             borderWidth: 2,
             borderColor: termsAccepted ? colors.primary : colors.error,
-            backgroundColor: termsAccepted ? colors.primary : 'transparent',
+            backgroundColor: termsAccepted ? colors.primary : "transparent",
             borderRadius: 4,
-            alignItems: 'center',
-            justifyContent: 'center',
+            alignItems: "center",
+            justifyContent: "center",
             marginTop: 2,
           }}
         >
           {termsAccepted && (
-            <CustomIcon
-              source="check"
-              size={16}
-              color={colors.onPrimary}
-            />
+            <CustomIcon source="check" size={16} color={colors.onPrimary} />
           )}
         </Pressable>
         <View style={{ flex: 1, marginLeft: 8 }}>
@@ -1175,11 +1203,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               }}
               onPress={() => {
                 // Open Terms of Service
-                if (Platform.OS === 'web') {
-                  window.open('/terms', '_blank');
+                if (Platform.OS === "web") {
+                  window.open("/terms", "_blank");
                 } else {
                   // For native, you might want to open in a modal or WebView
-                  Alert.alert("Terms of Service", "Terms of Service will be available at synapsegame.ai/terms");
+                  Alert.alert(
+                    "Terms of Service",
+                    "Terms of Service will be available at synapsegame.ai/terms",
+                  );
                 }
               }}
             >
@@ -1209,19 +1240,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             height: 24,
             borderWidth: 2,
             borderColor: privacyAccepted ? colors.primary : colors.error,
-            backgroundColor: privacyAccepted ? colors.primary : 'transparent',
+            backgroundColor: privacyAccepted ? colors.primary : "transparent",
             borderRadius: 4,
-            alignItems: 'center',
-            justifyContent: 'center',
+            alignItems: "center",
+            justifyContent: "center",
             marginTop: 2,
           }}
         >
           {privacyAccepted && (
-            <CustomIcon
-              source="check"
-              size={16}
-              color={colors.onPrimary}
-            />
+            <CustomIcon source="check" size={16} color={colors.onPrimary} />
           )}
         </Pressable>
         <View style={{ flex: 1, marginLeft: 8 }}>
@@ -1240,11 +1267,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               }}
               onPress={() => {
                 // Open Privacy Policy
-                if (Platform.OS === 'web') {
-                  window.open('/privacy', '_blank');
+                if (Platform.OS === "web") {
+                  window.open("/privacy", "_blank");
                 } else {
                   // For native, you might want to open in a modal or WebView
-                  Alert.alert("Privacy Policy", "Privacy Policy will be available at synapsegame.ai/privacy");
+                  Alert.alert(
+                    "Privacy Policy",
+                    "Privacy Policy will be available at synapsegame.ai/privacy",
+                  );
                 }
               }}
             >
@@ -1262,17 +1292,18 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         style={{ marginBottom: 16 }}
         buttonColor={customColors.startNode}
         icon={() => (
-          <CustomIcon 
-            source={promoCode.trim() ? "ticket" : "credit-card"} 
-            size={20} 
-            color={colors.onPrimary} 
+          <CustomIcon
+            source={promoCode.trim() ? "ticket" : "credit-card"}
+            size={20}
+            color={colors.onPrimary}
           />
         )}
       >
-        {promoCode.trim() 
-          ? (isApplyingPromo ? "Validating Beta Code..." : "Activate Beta Code")
-          : "Continue to Payment - $5"
-        }
+        {promoCode.trim()
+          ? isApplyingPromo
+            ? "Validating Beta Code..."
+            : "Activate Beta Code"
+          : "Continue to Payment - $5"}
       </Button>
     </>
   );
