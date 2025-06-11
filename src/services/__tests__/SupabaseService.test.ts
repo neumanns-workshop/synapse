@@ -1,3 +1,11 @@
+// Mock environment variables FIRST, before any imports
+const originalEnv = process.env;
+process.env = {
+  ...originalEnv,
+  EXPO_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
+  EXPO_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
+};
+
 import { createClient } from "@supabase/supabase-js";
 
 import { useGameStore } from "../../stores/useGameStore";
@@ -18,16 +26,6 @@ const MockedUnifiedDataStore = UnifiedDataStore as jest.Mocked<
 const mockUseGameStore = useGameStore as jest.MockedFunction<
   typeof useGameStore
 >;
-
-// Mock environment variables at the module level
-const originalEnv = process.env;
-
-// Set up mock environment variables before anything else
-process.env = {
-  ...originalEnv,
-  EXPO_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
-  EXPO_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
-};
 
 describe("SupabaseService", () => {
   let service: SupabaseService;
