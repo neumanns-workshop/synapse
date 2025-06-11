@@ -3,8 +3,8 @@
 // Use these in your app to test and verify compression is working
 // ============================================================================
 
-import { StorageSizeEstimator, DataCompressor } from "./dataCompression";
 import { unifiedDataStore } from "../services/UnifiedDataStore";
+import { StorageSizeEstimator, DataCompressor } from "./dataCompression";
 
 export class CompressionDebug {
   /**

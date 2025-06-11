@@ -4,13 +4,7 @@
     "startWord": "breathtaking",
     "endWord": "admit",
     "optimalPathLength": 4,
-    "llmPath": [
-      "breathtaking",
-      "admire",
-      "regard",
-      "respect",
-      "acknowledge"
-    ],
+    "llmPath": ["breathtaking", "admire", "regard", "respect", "acknowledge"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -22,13 +16,7 @@
     "startWord": "bombastic",
     "endWord": "kill",
     "optimalPathLength": 4,
-    "llmPath": [
-      "bombastic",
-      "bomb",
-      "explode",
-      "detonate",
-      "destroy"
-    ],
+    "llmPath": ["bombastic", "bomb", "explode", "detonate", "destroy"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -40,14 +28,7 @@
     "startWord": "proximate",
     "endWord": "rest",
     "optimalPathLength": 4,
-    "llmPath": [
-      "proximate",
-      "prostrate",
-      "situate",
-      "spot",
-      "seat",
-      "sit"
-    ],
+    "llmPath": ["proximate", "prostrate", "situate", "spot", "seat", "sit"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -143,12 +124,7 @@
     "startWord": "strategically",
     "endWord": "counterproductive",
     "optimalPathLength": 4,
-    "llmPath": [
-      "strategically",
-      "prioritize",
-      "preponderance",
-      "preposterous"
-    ],
+    "llmPath": ["strategically", "prioritize", "preponderance", "preposterous"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -180,13 +156,7 @@
     "startWord": "course",
     "endWord": "accomplish",
     "optimalPathLength": 4,
-    "llmPath": [
-      "course",
-      "class",
-      "grade",
-      "score",
-      "goal"
-    ],
+    "llmPath": ["course", "class", "grade", "score", "goal"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -221,12 +191,7 @@
     "startWord": "aloft",
     "endWord": "blur",
     "optimalPathLength": 4,
-    "llmPath": [
-      "aloft",
-      "sky",
-      "cloudy",
-      "hazy"
-    ],
+    "llmPath": ["aloft", "sky", "cloudy", "hazy"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -238,14 +203,7 @@
     "startWord": "hear",
     "endWord": "check",
     "optimalPathLength": 4,
-    "llmPath": [
-      "hear",
-      "perceive",
-      "observe",
-      "inspect",
-      "examine",
-      "inspect"
-    ],
+    "llmPath": ["hear", "perceive", "observe", "inspect", "examine", "inspect"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -257,12 +215,7 @@
     "startWord": "haul",
     "endWord": "persuade",
     "optimalPathLength": 4,
-    "llmPath": [
-      "haul",
-      "pull",
-      "urge",
-      "encourage"
-    ],
+    "llmPath": ["haul", "pull", "urge", "encourage"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -274,13 +227,7 @@
     "startWord": "gat",
     "endWord": "viewpoint",
     "optimalPathLength": 4,
-    "llmPath": [
-      "gat",
-      "gawk",
-      "watch",
-      "video",
-      "view"
-    ],
+    "llmPath": ["gat", "gawk", "watch", "video", "view"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -398,12 +345,7 @@
     "startWord": "unfair",
     "endWord": "confide",
     "optimalPathLength": 4,
-    "llmPath": [
-      "unfair",
-      "complain",
-      "accuse",
-      "confess"
-    ],
+    "llmPath": ["unfair", "complain", "accuse", "confess"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -436,14 +378,7 @@
     "startWord": "guideline",
     "endWord": "uncontrolled",
     "optimalPathLength": 4,
-    "llmPath": [
-      "guideline",
-      "rule",
-      "policy",
-      "mandate",
-      "govern",
-      "control"
-    ],
+    "llmPath": ["guideline", "rule", "policy", "mandate", "govern", "control"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -522,13 +457,7 @@
     "startWord": "essence",
     "endWord": "guitar",
     "optimalPathLength": 4,
-    "llmPath": [
-      "essence",
-      "substance",
-      "object",
-      "apparatus",
-      "instrument"
-    ],
+    "llmPath": ["essence", "substance", "object", "apparatus", "instrument"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -540,12 +469,7 @@
     "startWord": "conclude",
     "endWord": "medicine",
     "optimalPathLength": 4,
-    "llmPath": [
-      "conclude",
-      "resolve",
-      "fix",
-      "cure"
-    ],
+    "llmPath": ["conclude", "resolve", "fix", "cure"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -557,12 +481,7 @@
     "startWord": "convalescent",
     "endWord": "vomit",
     "optimalPathLength": 4,
-    "llmPath": [
-      "convalescent",
-      "contagious",
-      "infection",
-      "sick"
-    ],
+    "llmPath": ["convalescent", "contagious", "infection", "sick"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -574,12 +493,7 @@
     "startWord": "camp",
     "endWord": "comfort",
     "optimalPathLength": 4,
-    "llmPath": [
-      "camp",
-      "shelter",
-      "refuge",
-      "relief"
-    ],
+    "llmPath": ["camp", "shelter", "refuge", "relief"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -739,13 +653,7 @@
     "startWord": "paradise",
     "endWord": "revelation",
     "optimalPathLength": 4,
-    "llmPath": [
-      "paradise",
-      "heaven",
-      "divine",
-      "god",
-      "biblical"
-    ],
+    "llmPath": ["paradise", "heaven", "divine", "god", "biblical"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -757,12 +665,7 @@
     "startWord": "treasure",
     "endWord": "encourage",
     "optimalPathLength": 4,
-    "llmPath": [
-      "treasure",
-      "covet",
-      "desire",
-      "urge"
-    ],
+    "llmPath": ["treasure", "covet", "desire", "urge"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -774,14 +677,7 @@
     "startWord": "mushroom",
     "endWord": "nerve",
     "optimalPathLength": 4,
-    "llmPath": [
-      "mushroom",
-      "skull",
-      "head",
-      "brain",
-      "cortex",
-      "neural"
-    ],
+    "llmPath": ["mushroom", "skull", "head", "brain", "cortex", "neural"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -793,12 +689,7 @@
     "startWord": "blinker",
     "endWord": "pump",
     "optimalPathLength": 4,
-    "llmPath": [
-      "blinker",
-      "car",
-      "engine",
-      "piston"
-    ],
+    "llmPath": ["blinker", "car", "engine", "piston"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -837,14 +728,7 @@
     "startWord": "shady",
     "endWord": "noon",
     "optimalPathLength": 4,
-    "llmPath": [
-      "shady",
-      "shadow",
-      "shade",
-      "sunshine",
-      "sun",
-      "dawn"
-    ],
+    "llmPath": ["shady", "shadow", "shade", "sunshine", "sun", "dawn"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -856,12 +740,7 @@
     "startWord": "await",
     "endWord": "ardent",
     "optimalPathLength": 4,
-    "llmPath": [
-      "await",
-      "ready",
-      "eager",
-      "earnest"
-    ],
+    "llmPath": ["await", "ready", "eager", "earnest"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -873,12 +752,7 @@
     "startWord": "biweekly",
     "endWord": "myriad",
     "optimalPathLength": 4,
-    "llmPath": [
-      "biweekly",
-      "frequent",
-      "prolific",
-      "countless"
-    ],
+    "llmPath": ["biweekly", "frequent", "prolific", "countless"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -890,14 +764,7 @@
     "startWord": "veneer",
     "endWord": "job",
     "optimalPathLength": 4,
-    "llmPath": [
-      "veneer",
-      "furniture",
-      "desk",
-      "chair",
-      "chairman",
-      "boss"
-    ],
+    "llmPath": ["veneer", "furniture", "desk", "chair", "chairman", "boss"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -909,12 +776,7 @@
     "startWord": "surmise",
     "endWord": "picture",
     "optimalPathLength": 4,
-    "llmPath": [
-      "surmise",
-      "assume",
-      "imagine",
-      "depict"
-    ],
+    "llmPath": ["surmise", "assume", "imagine", "depict"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -926,12 +788,7 @@
     "startWord": "roomy",
     "endWord": "clash",
     "optimalPathLength": 4,
-    "llmPath": [
-      "roomy",
-      "indoor",
-      "arena",
-      "brawl"
-    ],
+    "llmPath": ["roomy", "indoor", "arena", "brawl"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -979,12 +836,7 @@
     "startWord": "trail",
     "endWord": "license",
     "optimalPathLength": 4,
-    "llmPath": [
-      "trail",
-      "path",
-      "road",
-      "drive"
-    ],
+    "llmPath": ["trail", "path", "road", "drive"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",
@@ -1050,14 +902,7 @@
     "startWord": "loss",
     "endWord": "threat",
     "optimalPathLength": 5,
-    "llmPath": [
-      "loss",
-      "tragedy",
-      "disaster",
-      "hazard",
-      "risk",
-      "danger"
-    ],
+    "llmPath": ["loss", "tragedy", "disaster", "hazard", "risk", "danger"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -1218,13 +1063,7 @@
     "startWord": "opium",
     "endWord": "capture",
     "optimalPathLength": 5,
-    "llmPath": [
-      "opium",
-      "illicit",
-      "illegal",
-      "criminal",
-      "arrest"
-    ],
+    "llmPath": ["opium", "illicit", "illegal", "criminal", "arrest"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -1456,14 +1295,7 @@
     "startWord": "tail",
     "endWord": "depreciate",
     "optimalPathLength": 5,
-    "llmPath": [
-      "tail",
-      "rear",
-      "reverse",
-      "revert",
-      "retrograde",
-      "degrade"
-    ],
+    "llmPath": ["tail", "rear", "reverse", "revert", "retrograde", "degrade"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -1501,13 +1333,7 @@
     "startWord": "breathtaking",
     "endWord": "admit",
     "optimalPathLength": 4,
-    "llmPath": [
-      "breathtaking",
-      "admire",
-      "regard",
-      "respect",
-      "acknowledge"
-    ],
+    "llmPath": ["breathtaking", "admire", "regard", "respect", "acknowledge"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -1621,13 +1447,7 @@
     "startWord": "breathtaking",
     "endWord": "admit",
     "optimalPathLength": 4,
-    "llmPath": [
-      "breathtaking",
-      "admire",
-      "regard",
-      "respect",
-      "acknowledge"
-    ],
+    "llmPath": ["breathtaking", "admire", "regard", "respect", "acknowledge"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -1664,12 +1484,7 @@
     "startWord": "slip",
     "endWord": "equine",
     "optimalPathLength": 4,
-    "llmPath": [
-      "slip",
-      "foot",
-      "hoof",
-      "horse"
-    ],
+    "llmPath": ["slip", "foot", "hoof", "horse"],
     "stepsTaken": 3,
     "status": "solved",
     "reason": "Found path in 3 moves",

@@ -1,3 +1,4 @@
+import type { Achievement } from "../achievement.types";
 import { comebackKidAchievement } from "./comebackKid.definition";
 import { dancingToADifferentBeatAchievement } from "./dancingToADifferentBeat.definition";
 import { dejaVuAchievement } from "./dejaVu.definition";
@@ -16,7 +17,6 @@ import { sorryWrongRoomAchievement } from "./sorryWrongRoom.definition";
 import { stealingSecondAchievement } from "./stealingSecond.definition";
 import { straightAndNarrowAchievement } from "./straightAndNarrow.definition";
 import { thoseWhoKnowAchievement } from "./thoseWhoKnow.definition";
-import type { Achievement } from "../achievement.types";
 import { seasonalExplorerAchievement } from "./seasonalExplorer.achievement";
 import { uRobotAchievement } from "./uRobot.achievement";
 import { wordCollectorAchievement } from "./wordCollector.achievement";

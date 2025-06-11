@@ -1,17 +1,18 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Image, StyleSheet, Pressable, View, Text } from "react-native";
 
 import { Appbar, useTheme, Badge, Button, Menu } from "react-native-paper";
 
-import CustomIcon from "./CustomIcon";
 // Removed react-native-reanimated imports - using simple buttons instead
 
 import { useAuth } from "../context/AuthContext";
 import { getUnreadArticles } from "../data/news";
 import { dailyChallengesService } from "../services/DailyChallengesService";
+import SupabaseService from "../services/SupabaseService";
 import { unifiedDataStore } from "../services/UnifiedDataStore";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import CustomIcon from "./CustomIcon";
 
 interface AppHeaderProps {
   onNewGame: () => void;
@@ -49,7 +50,8 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   giveUpDisabled = false,
   gameInProgress = false,
 }) => {
-  const { customColors, colors } = useTheme() as ExtendedTheme;
+  const { customColors, colors, roundness } = useTheme() as ExtendedTheme;
+  const supabaseService = SupabaseService.getInstance();
   const auth = useAuth();
 
   // Updated store selectors for new modal states
@@ -391,6 +393,121 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     setContactModalVisible(true);
   };
 
+  // Stable component definitions to avoid re-renders
+  const AccountIcon = useCallback(
+    () => <CustomIcon source="brain" size={18} color={colors.onPrimary} />,
+    [colors.onPrimary],
+  );
+
+  const MenuTitleWithBadge = useCallback(
+    ({
+      title,
+      badgeCount,
+      badgeColor,
+    }: {
+      title: string;
+      badgeCount?: number;
+      badgeColor?: string;
+    }) => (
+      <View style={styles.menuTitleWithBadge}>
+        <Text style={{ color: colors.onSurface }}>{title}</Text>
+        {badgeCount !== undefined && badgeColor && (
+          <View
+            style={[styles.menuBadgeSticker, { backgroundColor: badgeColor }]}
+          >
+            <Text style={styles.menuBadgeText}>{badgeCount}</Text>
+          </View>
+        )}
+      </View>
+    ),
+    [colors.onSurface],
+  );
+
+  const DailyChallengeTitle = useCallback(
+    () =>
+      hasIncompleteDailyChallenge ? (
+        <View style={styles.menuTitleWithBadge}>
+          <Text style={{ color: colors.onSurface }}>Daily Challenges</Text>
+          <CustomIcon
+            source="circle-outline"
+            size={16}
+            color={colors.primary}
+          />
+        </View>
+      ) : (
+        "Daily Challenges"
+      ),
+    [hasIncompleteDailyChallenge, colors.onSurface, colors.primary],
+  );
+
+  const StatsTitle = useCallback(
+    () =>
+      unviewedAchievementCount > 0 || unviewedWordCollectionCount > 0 ? (
+        <MenuTitleWithBadge
+          title="Stats"
+          badgeCount={unviewedAchievementCount + unviewedWordCollectionCount}
+          badgeColor={customColors.achievementIcon}
+        />
+      ) : (
+        "Stats"
+      ),
+    [
+      unviewedAchievementCount,
+      unviewedWordCollectionCount,
+      customColors.achievementIcon,
+      MenuTitleWithBadge,
+    ],
+  );
+
+  const NewsTitle = useCallback(
+    () =>
+      unreadCount > 0 ? (
+        <MenuTitleWithBadge
+          title="News"
+          badgeCount={unreadCount}
+          badgeColor={getNewsPriorityColor()}
+        />
+      ) : (
+        "News"
+      ),
+    [unreadCount, getNewsPriorityColor, MenuTitleWithBadge],
+  );
+
+  // Icon components
+  const CalendarIcon = useCallback(
+    () => (
+      <CustomIcon source="calendar-today" size={24} color={colors.onSurface} />
+    ),
+    [colors.onSurface],
+  );
+
+  const TrophyIcon = useCallback(
+    () => <CustomIcon source="trophy" size={24} color={colors.onSurface} />,
+    [colors.onSurface],
+  );
+
+  const RocketIcon = useCallback(
+    () => (
+      <CustomIcon source="rocket-launch" size={24} color={colors.onSurface} />
+    ),
+    [colors.onSurface],
+  );
+
+  const FlaskIcon = useCallback(
+    () => <CustomIcon source="flask" size={24} color={colors.onSurface} />,
+    [colors.onSurface],
+  );
+
+  const NewsIcon = useCallback(
+    () => <CustomIcon source="newspaper" size={24} color={colors.onSurface} />,
+    [colors.onSurface],
+  );
+
+  const EmailIcon = useCallback(
+    () => <CustomIcon source="email" size={24} color={colors.onSurface} />,
+    [colors.onSurface],
+  );
+
   return (
     <Appbar.Header>
       <Image source={require("../../assets/favicon.svg")} style={styles.logo} />
@@ -421,9 +538,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
           }
           compact
           buttonColor={auth.user ? customColors.currentNode : colors.primary}
-          icon={() => (
-            <CustomIcon source="brain" size={18} color={colors.onPrimary} />
-          )}
+          icon={AccountIcon}
           style={{ marginRight: 8 }}
           labelStyle={{
             color: colors.onPrimary,
@@ -448,112 +563,38 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         >
           <Menu.Item
             onPress={handleDailies}
-            title={
-              hasIncompleteDailyChallenge ? (
-                <View style={styles.menuTitleWithBadge}>
-                  <Text style={{ color: colors.onSurface }}>
-                    Daily Challenges
-                  </Text>
-                  <CustomIcon
-                    source="circle-outline"
-                    size={16}
-                    color={colors.primary}
-                  />
-                </View>
-              ) : (
-                "Daily Challenges"
-              )
-            }
-            leadingIcon={() => (
-              <CustomIcon
-                source="calendar-today"
-                size={24}
-                color={colors.onSurface}
-              />
-            )}
+            title={DailyChallengeTitle()}
+            leadingIcon={CalendarIcon}
             titleStyle={{ color: colors.onSurface }}
           />
           <Menu.Item
             onPress={handleStats}
-            title={
-              unviewedAchievementCount > 0 ||
-              unviewedWordCollectionCount > 0 ? (
-                <View style={styles.menuTitleWithBadge}>
-                  <Text style={{ color: colors.onSurface }}>Stats</Text>
-                  <View
-                    style={[
-                      styles.menuBadgeSticker,
-                      { backgroundColor: customColors.achievementIcon },
-                    ]}
-                  >
-                    <Text style={styles.menuBadgeText}>
-                      {unviewedAchievementCount + unviewedWordCollectionCount}
-                    </Text>
-                  </View>
-                </View>
-              ) : (
-                "Stats"
-              )
-            }
-            leadingIcon={() => (
-              <CustomIcon source="trophy" size={24} color={colors.onSurface} />
-            )}
+            title={StatsTitle()}
+            leadingIcon={TrophyIcon}
             titleStyle={{ color: colors.onSurface }}
           />
           <Menu.Item
             onPress={handleQuickstart}
             title="How to Play"
-            leadingIcon={() => (
-              <CustomIcon
-                source="rocket-launch"
-                size={24}
-                color={colors.onSurface}
-              />
-            )}
+            leadingIcon={RocketIcon}
             titleStyle={{ color: colors.onSurface }}
           />
           <Menu.Item
             onPress={handleLab}
             title="Lab"
-            leadingIcon={() => (
-              <CustomIcon source="flask" size={24} color={colors.onSurface} />
-            )}
+            leadingIcon={FlaskIcon}
             titleStyle={{ color: colors.onSurface }}
           />
           <Menu.Item
             onPress={handleNews}
-            title={
-              unreadCount > 0 ? (
-                <View style={styles.menuTitleWithBadge}>
-                  <Text style={{ color: colors.onSurface }}>News</Text>
-                  <View
-                    style={[
-                      styles.menuBadgeSticker,
-                      { backgroundColor: getNewsPriorityColor() },
-                    ]}
-                  >
-                    <Text style={styles.menuBadgeText}>{unreadCount}</Text>
-                  </View>
-                </View>
-              ) : (
-                "News"
-              )
-            }
-            leadingIcon={() => (
-              <CustomIcon
-                source="newspaper"
-                size={24}
-                color={colors.onSurface}
-              />
-            )}
+            title={NewsTitle()}
+            leadingIcon={NewsIcon}
             titleStyle={{ color: colors.onSurface }}
           />
           <Menu.Item
             onPress={handleContact}
             title="Contact"
-            leadingIcon={() => (
-              <CustomIcon source="email" size={24} color={colors.onSurface} />
-            )}
+            leadingIcon={EmailIcon}
             titleStyle={{ color: colors.onSurface }}
           />
         </Menu>

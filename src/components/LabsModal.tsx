@@ -11,13 +11,13 @@ import {
   Button,
   useTheme,
   Dialog,
+  Portal,
 } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
 
-import CustomIcon from "./CustomIcon";
 import { dailyChallengesService } from "../services/DailyChallengesService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import CustomIcon from "./CustomIcon";
 
 interface LabsModalProps {
   visible: boolean;
@@ -131,155 +131,141 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
   const enabledCount = 0; // All features are coming soon, none enabled
 
   return (
-    <Modal
-      visible={visible}
-      onDismiss={onDismiss}
-      contentContainerStyle={[
-        styles.container,
-        { backgroundColor: colors.surface },
-      ]}
-    >
-      <SafeAreaView style={styles.safeArea}>
-        <Card style={[styles.card, { backgroundColor: colors.surface }]}>
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={styles.headerContent}>
-              <View style={styles.headerText}>
-                <Dialog.Title style={{ color: colors.primary }}>
-                  Lab
-                </Dialog.Title>
-                <Text
-                  variant="bodyMedium"
-                  style={[styles.subtitle, { color: colors.onSurfaceVariant }]}
-                >
-                  Experiments coming to Galaxy Brain users first
-                </Text>
-              </View>
-            </View>
-            <Button mode="text" onPress={onDismiss}>
-              <CustomIcon source="close" size={20} />
-            </Button>
-          </View>
-
-          <Divider style={{ marginVertical: 16 }} />
-
-          {/* Status */}
-          <View
-            style={[
-              styles.statusCard,
-              { backgroundColor: colors.surfaceVariant },
-            ]}
-          >
-            <Text
-              variant="bodyMedium"
-              style={{ color: colors.onSurfaceVariant }}
-            >
+    <Portal>
+      <Modal
+        visible={visible}
+        onDismiss={onDismiss}
+        contentContainerStyle={[
+          styles.container,
+          { backgroundColor: colors.surface },
+        ]}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerContent}>
+            <View style={styles.headerText}>
+              <Dialog.Title style={{ color: colors.primary }}>Lab</Dialog.Title>
               <Text
-                style={{ fontWeight: "bold", color: customColors.currentNode }}
+                variant="bodyMedium"
+                style={[styles.subtitle, { color: colors.onSurfaceVariant }]}
               >
-                {features.length}
-              </Text>{" "}
-              experiments in development
-            </Text>
+                Experiments coming to Galaxy Brain users first
+              </Text>
+            </View>
           </View>
+          <Button mode="text" onPress={onDismiss}>
+            <CustomIcon source="close" size={20} />
+          </Button>
+        </View>
 
-          {/* Features List */}
-          <ScrollView
-            style={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-          >
-            {features.map((feature, index) => (
-              <View key={feature.id}>
-                <List.Item
-                  title={feature.name}
-                  description={feature.description}
-                  left={() => (
-                    <View style={styles.featureIcon}>
-                      <CustomIcon
-                        source="clock-outline"
-                        size={24}
-                        color={colors.outline}
-                      />
-                    </View>
-                  )}
-                  right={() => (
-                    <View
-                      style={[
-                        styles.comingSoonBadge,
-                        { backgroundColor: colors.outline },
-                      ]}
+        <Divider style={{ marginVertical: 16 }} />
+
+        {/* Status */}
+        <View
+          style={[
+            styles.statusCard,
+            { backgroundColor: colors.surfaceVariant },
+          ]}
+        >
+          <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant }}>
+            <Text
+              style={{ fontWeight: "bold", color: customColors.currentNode }}
+            >
+              {features.length}
+            </Text>{" "}
+            experiments in development
+          </Text>
+        </View>
+
+        {/* Features List */}
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+        >
+          {features.map((feature, index) => (
+            <View key={feature.id}>
+              <List.Item
+                title={feature.name}
+                description={feature.description}
+                left={() => (
+                  <View style={styles.featureIcon}>
+                    <CustomIcon
+                      source="clock-outline"
+                      size={24}
+                      color={colors.outline}
+                    />
+                  </View>
+                )}
+                right={() => (
+                  <View
+                    style={[
+                      styles.comingSoonBadge,
+                      { backgroundColor: colors.outline },
+                    ]}
+                  >
+                    <Text
+                      style={[styles.comingSoonText, { color: colors.surface }]}
                     >
-                      <Text
-                        style={[
-                          styles.comingSoonText,
-                          { color: colors.surface },
-                        ]}
-                      >
-                        Soon
-                      </Text>
-                    </View>
-                  )}
-                  titleStyle={{ color: colors.onSurface }}
-                  descriptionStyle={{ color: colors.onSurfaceVariant }}
-                  style={{ paddingVertical: 8 }}
-                />
-
-                {index < features.length - 1 && (
-                  <Divider style={{ marginLeft: 60 }} />
+                      Soon
+                    </Text>
+                  </View>
                 )}
-              </View>
-            ))}
-          </ScrollView>
+                titleStyle={{ color: colors.onSurface }}
+                descriptionStyle={{ color: colors.onSurfaceVariant }}
+                style={{ paddingVertical: 8 }}
+              />
 
-          {/* Upgrade Button for Non-Premium Users */}
-          {!isPremium && (
-            <>
-              <Divider style={{ marginVertical: 16 }} />
-              <Button
-                mode="contained"
-                onPress={() => {
-                  onDismiss();
-                  showUpgradePrompt("", "experimentalFeatures");
-                }}
-                style={{
-                  backgroundColor: colors.primary,
-                  marginBottom: 8,
-                }}
-                labelStyle={{ color: colors.onPrimary, fontWeight: "bold" }}
-                icon={() => (
-                  <CustomIcon
-                    source="brain"
-                    size={20}
-                    color={colors.onPrimary}
-                  />
-                )}
-              >
-                Sign In/Up
-              </Button>
-            </>
-          )}
-        </Card>
-      </SafeAreaView>
-    </Modal>
+              {index < features.length - 1 && (
+                <Divider style={{ marginLeft: 60 }} />
+              )}
+            </View>
+          ))}
+        </ScrollView>
+
+        {/* Upgrade Button for Non-Premium Users */}
+        {!isPremium && (
+          <>
+            <Divider style={{ marginVertical: 16 }} />
+            <Button
+              mode="contained"
+              onPress={() => {
+                onDismiss();
+                showUpgradePrompt("", "experimentalFeatures");
+              }}
+              style={{
+                backgroundColor: colors.primary,
+                marginBottom: 8,
+              }}
+              labelStyle={{ color: colors.onPrimary, fontWeight: "bold" }}
+              icon={() => (
+                <CustomIcon source="brain" size={20} color={colors.onPrimary} />
+              )}
+            >
+              Sign In/Up
+            </Button>
+          </>
+        )}
+      </Modal>
+    </Portal>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: "center",
     margin: 20,
+    padding: 15,
+    borderRadius: 12,
+    maxHeight: "80%",
+    maxWidth: 500,
+    width: "100%",
+    alignSelf: "center",
   },
-  safeArea: {
-    flex: 1,
-  },
-  card: {
-    flex: 1,
+  dialog: {
     padding: 20,
     borderRadius: 12,
     maxWidth: 500,
     width: "100%",
-    alignSelf: "center",
+    maxHeight: "80%",
   },
   header: {
     flexDirection: "row",

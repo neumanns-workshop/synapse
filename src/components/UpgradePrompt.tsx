@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Modal as RNModal } from "react-native";
 
 import {
   Modal,
@@ -8,11 +8,13 @@ import {
   Card,
   useTheme,
   ActivityIndicator,
+  Portal,
 } from "react-native-paper";
 
-import CustomIcon from "./CustomIcon";
 import StripeService from "../services/StripeService";
+import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import CustomIcon from "./CustomIcon";
 
 // Define different upgrade contexts for targeted messaging
 export type UpgradeContext =
@@ -130,6 +132,9 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
   customMessage,
 }) => {
   const { colors, customColors } = useTheme() as ExtendedTheme;
+  const setDailiesModalVisible = useGameStore(
+    (state) => state.setDailiesModalVisible,
+  );
   const [stripeService] = useState(() => StripeService.getInstance());
   const [pricing, setPricing] = useState(stripeService.getPricingInfo());
   const [isLoading, setIsLoading] = useState(false);
@@ -148,6 +153,8 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
   );
 
   const handleUpgrade = async () => {
+    // Close the dailies modal if it's open
+    setDailiesModalVisible(false);
     // Go to AuthScreen where payment will be handled
     onUpgrade();
   };
@@ -163,121 +170,137 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
   );
 
   return (
-    <Modal
+    <RNModal
       visible={visible}
-      onDismiss={onDismiss}
-      contentContainerStyle={[
-        styles.modal,
-        { backgroundColor: "transparent" }, // Make modal background transparent
-      ]}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onDismiss}
     >
-      {visible && (
-        <View style={styles.modalContent}>
-          <Card style={[styles.card, { backgroundColor: colors.surface }]}>
-            <View style={styles.header}>
-              <CustomIcon
-                source="brain"
-                size={48}
-                color={customColors.localOptimalNode}
-              />
-              <Text
-                variant="headlineSmall"
-                style={[styles.title, { color: colors.onSurface }]}
-              >
-                {contextContent.title}
-              </Text>
-            </View>
-
-            <View style={styles.content}>
-              <Text
-                variant="bodyLarge"
-                style={[styles.description, { color: colors.onSurfaceVariant }]}
-              >
-                {customMessage || contextContent.description}
-              </Text>
-
-              <View style={styles.featuresList}>
-                {contextContent.primaryFeatures.map((feature, index) => (
-                  <View key={index} style={styles.featureItem}>
-                    <CustomIcon
-                      source={feature.icon}
-                      size={20}
-                      color={colors.primary}
-                    />
-                    <Text
-                      style={[styles.featureText, { color: colors.onSurface }]}
-                    >
-                      {feature.text}
-                    </Text>
-                  </View>
-                ))}
+      <View style={styles.overlay}>
+        {visible && (
+          <View style={styles.modalContent}>
+            <Card style={[styles.card, { backgroundColor: colors.surface }]}>
+              <View style={styles.header}>
+                <CustomIcon
+                  source="brain"
+                  size={48}
+                  color={customColors.localOptimalNode}
+                />
+                <Text
+                  variant="headlineSmall"
+                  style={[styles.title, { color: colors.onSurface }]}
+                >
+                  {contextContent.title}
+                </Text>
               </View>
 
-              <Text
-                variant="bodyMedium"
-                style={[
-                  styles.reminder,
-                  {
-                    color:
-                      context === "freeGamesLimited" && remainingFreeGames === 0
-                        ? colors.error
-                        : colors.onSurfaceVariant,
-                    fontStyle:
-                      context === "freeGamesLimited" && remainingFreeGames === 0
-                        ? "italic"
-                        : "normal",
-                  },
-                ]}
-              >
-                {contextContent.reminder}
-              </Text>
-            </View>
+              <View style={styles.content}>
+                <Text
+                  variant="bodyLarge"
+                  style={[
+                    styles.description,
+                    { color: colors.onSurfaceVariant },
+                  ]}
+                >
+                  {customMessage || contextContent.description}
+                </Text>
 
-            <View style={styles.actions}>
-              <Button
-                mode="outlined"
-                onPress={onDismiss}
-                style={styles.dismissButton}
-                disabled={isLoading}
-              >
-                Maybe Later
-              </Button>
-              <Button
-                mode="contained"
-                onPress={handleUpgrade}
-                style={styles.upgradeButton}
-                icon={
-                  isLoading
-                    ? undefined
-                    : () => (
-                        <CustomIcon
-                          source="brain"
-                          size={20}
-                          color={colors.onPrimary}
-                        />
-                      )
-                }
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <ActivityIndicator size="small" color={colors.onPrimary} />
-                ) : (
-                  contextContent.ctaText
-                )}
-              </Button>
-            </View>
-          </Card>
-        </View>
-      )}
-    </Modal>
+                <View style={styles.featuresList}>
+                  {contextContent.primaryFeatures.map((feature, index) => (
+                    <View key={index} style={styles.featureItem}>
+                      <CustomIcon
+                        source={feature.icon}
+                        size={20}
+                        color={colors.primary}
+                      />
+                      <Text
+                        style={[
+                          styles.featureText,
+                          { color: colors.onSurface },
+                        ]}
+                      >
+                        {feature.text}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+
+                <Text
+                  variant="bodyMedium"
+                  style={[
+                    styles.reminder,
+                    {
+                      color:
+                        context === "freeGamesLimited" &&
+                        remainingFreeGames === 0
+                          ? colors.error
+                          : colors.onSurfaceVariant,
+                      fontStyle:
+                        context === "freeGamesLimited" &&
+                        remainingFreeGames === 0
+                          ? "italic"
+                          : "normal",
+                    },
+                  ]}
+                >
+                  {contextContent.reminder}
+                </Text>
+              </View>
+
+              <View style={styles.actions}>
+                <Button
+                  mode="outlined"
+                  onPress={onDismiss}
+                  style={styles.dismissButton}
+                  disabled={isLoading}
+                >
+                  Maybe Later
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={handleUpgrade}
+                  style={styles.upgradeButton}
+                  icon={
+                    isLoading
+                      ? undefined
+                      : () => (
+                          <CustomIcon
+                            source="brain"
+                            size={20}
+                            color={colors.onPrimary}
+                          />
+                        )
+                  }
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator size="small" color={colors.onPrimary} />
+                  ) : (
+                    contextContent.ctaText
+                  )}
+                </Button>
+              </View>
+            </Card>
+          </View>
+        )}
+      </View>
+    </RNModal>
   );
 };
 
 const styles = StyleSheet.create({
-  modal: {
-    margin: 20,
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  modal: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999, // Very high z-index
+    elevation: 9999, // Very high elevation for Android
   },
   modalContent: {
     justifyContent: "center",

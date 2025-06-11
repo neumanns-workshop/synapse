@@ -25,13 +25,6 @@ import {
   Snackbar,
 } from "react-native-paper";
 
-import AchievementDetailDialog from "./AchievementDetailDialog";
-import CustomIcon from "./CustomIcon";
-import GameReportDisplay from "./GameReportDisplay";
-import GraphVisualization from "./GraphVisualization";
-import PlayerPathDisplay from "./PlayerPathDisplay";
-import { QRCodeDisplay } from "./QRCodeDisplay";
-import WordDefinitionDialog from "./WordDefinitionDialog";
 import { useAuth } from "../context/AuthContext";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
 import { allAchievements, Achievement } from "../features/achievements";
@@ -59,6 +52,13 @@ import { unifiedDataStore } from "../services/UnifiedDataStore";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type { GameReport } from "../utils/gameReportUtils";
+import WordDefinitionDialog from "./WordDefinitionDialog";
+import { QRCodeDisplay } from "./QRCodeDisplay";
+import PlayerPathDisplay from "./PlayerPathDisplay";
+import GraphVisualization from "./GraphVisualization";
+import GameReportDisplay from "./GameReportDisplay";
+import CustomIcon from "./CustomIcon";
+import AchievementDetailDialog from "./AchievementDetailDialog";
 
 // GameHistoryCard component for displaying game history entries
 const GameHistoryCard = React.memo(

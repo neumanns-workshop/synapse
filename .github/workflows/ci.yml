@@ -2,9 +2,9 @@ name: Client CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build_and_lint:
@@ -15,21 +15,21 @@ jobs:
         node-version: [20.x] # Use a recent LTS version
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: client/package-lock.json # Cache based on client lock file
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: client/package-lock.json # Cache based on client lock file
 
-    - name: Install Client Dependencies
-      run: cd client && npm ci # Use npm ci for faster, deterministic installs in CI
+      - name: Install Client Dependencies
+        run: cd client && npm ci # Use npm ci for faster, deterministic installs in CI
 
-    - name: Lint Client Code
-      run: cd client && npm run lint
+      - name: Lint Client Code
+        run: cd client && npm run lint
 
-    - name: Build Client
-      run: cd client && npm run build 
+      - name: Build Client
+        run: cd client && npm run build

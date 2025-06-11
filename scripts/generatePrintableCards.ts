@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,27 +37,33 @@ function getQRCodeImageUrl(data: string, size: number = 200): string {
   return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedData}&format=png&margin=10`;
 }
 
-import { execSync } from 'child_process';
+import { execSync } from "child_process";
 
 // Generate AI challenge using heuristic solver
-function getAIChallenge(startWord: string, targetWord: string, optimalLength: number): string {
+function getAIChallenge(
+  startWord: string,
+  targetWord: string,
+  optimalLength: number,
+): string {
   try {
     // Call the heuristic solver with new CLI command
     const result = execSync(
       `python3 heuristic_solver.py --solve-pair "${startWord}" "${targetWord}"`,
-      { encoding: 'utf8', cwd: __dirname }
+      { encoding: "utf8", cwd: __dirname },
     );
-    
+
     const solverResult = JSON.parse(result.trim());
-    if (solverResult.status === 'solved' && solverResult.steps > 0) {
+    if (solverResult.status === "solved" && solverResult.steps > 0) {
       // Add 2-3 extra moves to make it more beatable
       const aiMoves = solverResult.steps + Math.floor(Math.random() * 2) + 2;
       return `The AI got it in ${aiMoves} moves,<br>can you do better?`;
     }
   } catch (error) {
-    console.warn(`Heuristic solver failed for ${startWord} → ${targetWord}: ${error}, using fallback`);
+    console.warn(
+      `Heuristic solver failed for ${startWord} → ${targetWord}: ${error}, using fallback`,
+    );
   }
-  
+
   // Fallback to adding 2-4 moves to optimal
   const aiMoves = optimalLength + Math.floor(Math.random() * 3) + 2;
   return `The AI got it in ${aiMoves} moves,<br>can you do better?`;
@@ -65,29 +71,31 @@ function getAIChallenge(startWord: string, targetWord: string, optimalLength: nu
 
 // Generate HTML for printable cards with API-based QR codes
 function generatePrintableCardsHTML(challengeData: ChallengeData): string {
-    const allChallenges = challengeData.themes.flatMap(t => t.challenges);
-    
-    // Deduplicate challenges to ensure no word appears twice
-    function deduplicateChallenges(challenges: ThemedChallenge[]): ThemedChallenge[] {
-        const usedWords = new Set<string>();
-        const dedupedChallenges: ThemedChallenge[] = [];
-        
-        for (const challenge of challenges) {
-            const startWord = challenge.startWord.toLowerCase();
-            const targetWord = challenge.targetWord.toLowerCase();
-            
-            if (!usedWords.has(startWord) && !usedWords.has(targetWord)) {
-                usedWords.add(startWord);
-                usedWords.add(targetWord);
-                dedupedChallenges.push(challenge);
-            }
-        }
-        
-        return dedupedChallenges;
+  const allChallenges = challengeData.themes.flatMap((t) => t.challenges);
+
+  // Deduplicate challenges to ensure no word appears twice
+  function deduplicateChallenges(
+    challenges: ThemedChallenge[],
+  ): ThemedChallenge[] {
+    const usedWords = new Set<string>();
+    const dedupedChallenges: ThemedChallenge[] = [];
+
+    for (const challenge of challenges) {
+      const startWord = challenge.startWord.toLowerCase();
+      const targetWord = challenge.targetWord.toLowerCase();
+
+      if (!usedWords.has(startWord) && !usedWords.has(targetWord)) {
+        usedWords.add(startWord);
+        usedWords.add(targetWord);
+        dedupedChallenges.push(challenge);
+      }
     }
-    
-    const uniqueChallenges = deduplicateChallenges(allChallenges);
-  
+
+    return dedupedChallenges;
+  }
+
+  const uniqueChallenges = deduplicateChallenges(allChallenges);
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -353,13 +361,18 @@ function generatePrintableCardsHTML(challengeData: ChallengeData): string {
         </div>
         
         <div class="card-grid">
-            ${uniqueChallenges.map((challenge, index) => {
-                const themeData = challengeData.themes.find(t => t.theme === challenge.theme);
+            ${uniqueChallenges
+              .map((challenge, index) => {
+                const themeData = challengeData.themes.find(
+                  (t) => t.theme === challenge.theme,
+                );
                 const themeName = themeData?.name || challenge.theme;
-                const challengesInTheme = uniqueChallenges.filter(c => c.theme === challenge.theme);
+                const challengesInTheme = uniqueChallenges.filter(
+                  (c) => c.theme === challenge.theme,
+                );
                 const themeIndex = challengesInTheme.indexOf(challenge) + 1;
                 const themeTotal = challengesInTheme.length;
-                
+
                 return `
                 <div class="card">
                     <div class="card-header">
@@ -389,7 +402,9 @@ function generatePrintableCardsHTML(challengeData: ChallengeData): string {
                     </div>
 
                 </div>
-            `}).join('')}
+            `;
+              })
+              .join("")}
         </div>
         
         <div class="instructions">
@@ -407,50 +422,64 @@ function generatePrintableCardsHTML(challengeData: ChallengeData): string {
 async function main() {
   try {
     // Check for input file
-    const inputPath = path.join(__dirname, 'themed_challenges', 'summer-vibes-okc-santa-fe.json');
-    
+    const inputPath = path.join(
+      __dirname,
+      "themed_challenges",
+      "summer-vibes-okc-santa-fe.json",
+    );
+
     if (!fs.existsSync(inputPath)) {
-      console.log('❌ Challenge data file not found. Run the challenge generator first:');
-      console.log('   npm run generate-challenges');
+      console.log(
+        "❌ Challenge data file not found. Run the challenge generator first:",
+      );
+      console.log("   npm run generate-challenges");
       process.exit(1);
     }
-    
+
     // Load challenge data
-    const challengeData: ChallengeData = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
+    const challengeData: ChallengeData = JSON.parse(
+      fs.readFileSync(inputPath, "utf8"),
+    );
     console.log(`📚 Loaded ${challengeData.totalChallenges} challenges`);
-    
+
     // Check for duplicates before generating
-    const allChallenges = challengeData.themes.flatMap(t => t.challenges);
-    const allWords = allChallenges.flatMap(c => [c.startWord.toLowerCase(), c.targetWord.toLowerCase()]);
+    const allChallenges = challengeData.themes.flatMap((t) => t.challenges);
+    const allWords = allChallenges.flatMap((c) => [
+      c.startWord.toLowerCase(),
+      c.targetWord.toLowerCase(),
+    ]);
     const uniqueWords = new Set(allWords);
     const duplicateCount = allWords.length - uniqueWords.size;
-    
+
     if (duplicateCount > 0) {
-      console.log(`🔄 Found ${duplicateCount} duplicate word occurrences - deduplicating...`);
+      console.log(
+        `🔄 Found ${duplicateCount} duplicate word occurrences - deduplicating...`,
+      );
     }
-    
+
     // Generate HTML
     const html = generatePrintableCardsHTML(challengeData);
-    
+
     // Save HTML file
-    const outputPath = path.join(__dirname, 'printable-cards.html');
+    const outputPath = path.join(__dirname, "printable-cards.html");
     fs.writeFileSync(outputPath, html);
-    
+
     console.log(`\n🎨 Generated printable cards!`);
     console.log(`📄 File: ${outputPath}`);
     console.log(`🖨️  Open in browser and print:`);
     console.log(`   • Use Chrome/Safari for best results`);
     console.log(`   • Print on cardstock paper`);
     console.log(`   • Select "More settings" → "Graphics" for color printing`);
-    console.log(`   • QR codes use qr-server.com API (reliable image generation)`);
+    console.log(
+      `   • QR codes use qr-server.com API (reliable image generation)`,
+    );
     console.log(`📍 Ready for OKC → Santa Fe guerrilla marketing!`);
-    
   } catch (error) {
-    console.error('❌ Error generating printable cards:', error);
+    console.error("❌ Error generating printable cards:", error);
     process.exit(1);
   }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   main();
-} 
+}

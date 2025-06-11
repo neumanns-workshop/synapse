@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { Logger } from "../utils/logger";
 import SupabaseService from "./SupabaseService";
 import { UnifiedDataStore } from "./UnifiedDataStore"; // Assuming UnifiedDataStore is exported like this
-import { Logger } from "../utils/logger";
 
 // Key for AsyncStorage, needs to be consistent with AuthScreen.tsx
 // It's better to define this in a shared constants file, but for now, duplicating

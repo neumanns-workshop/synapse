@@ -3,7 +3,6 @@ import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 
 import { Text, Card, useTheme, ActivityIndicator } from "react-native-paper";
 
-import CustomIcon from "./CustomIcon";
 import { allWordCollections } from "../features/wordCollections";
 import type { WordCollection } from "../features/wordCollections/collection.types";
 import { dailyChallengesService } from "../services/DailyChallengesService";
@@ -13,6 +12,7 @@ import type {
   DailyChallenge,
   DailyChallengeProgress,
 } from "../types/dailyChallenges";
+import CustomIcon from "./CustomIcon";
 
 interface DailyChallengesCalendarProps {
   onChallengeSelect?: (challenge: DailyChallenge) => void;

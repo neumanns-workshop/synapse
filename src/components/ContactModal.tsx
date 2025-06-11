@@ -19,9 +19,9 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 
-import CustomIcon from "./CustomIcon";
 import { useAuth } from "../context/AuthContext";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import CustomIcon from "./CustomIcon";
 
 interface ContactModalProps {
   visible: boolean;

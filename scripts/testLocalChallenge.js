@@ -16,7 +16,11 @@ const generateUrlHash = (data) => {
 };
 
 // Generate localhost challenge URL
-const generateLocalhostChallengeUrl = (startWord, targetWord, theme = 'summer-vibes') => {
+const generateLocalhostChallengeUrl = (
+  startWord,
+  targetWord,
+  theme = "summer-vibes",
+) => {
   const data = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
   const hash = generateUrlHash(data);
   const origin = "http://192.168.0.14:19006";
@@ -27,7 +31,9 @@ const generateLocalhostChallengeUrl = (startWord, targetWord, theme = 'summer-vi
 const args = process.argv.slice(2);
 
 if (args.length < 2) {
-  console.log("Usage: node testLocalChallenge.js <startWord> <targetWord> [theme]");
+  console.log(
+    "Usage: node testLocalChallenge.js <startWord> <targetWord> [theme]",
+  );
   console.log("");
   console.log("Examples:");
   console.log("  node testLocalChallenge.js music memory");
@@ -42,7 +48,7 @@ if (args.length < 2) {
 
 const startWord = args[0];
 const targetWord = args[1];
-const theme = args[2] || 'summer-vibes';
+const theme = args[2] || "summer-vibes";
 
 const url = generateLocalhostChallengeUrl(startWord, targetWord, theme);
 
@@ -50,4 +56,4 @@ console.log(`🎮 Testing themed challenge: ${startWord} → ${targetWord}`);
 console.log(`🏷️ Theme: ${theme}`);
 console.log(`🔗 URL: ${url}`);
 console.log("");
-console.log("Copy this URL into your browser while the dev server is running!"); 
+console.log("Copy this URL into your browser while the dev server is running!");

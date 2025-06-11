@@ -13,6 +13,7 @@ This tool helps you filter a list of words against the game's graph data to ensu
 ### Setup
 
 1. Compile the TypeScript file:
+
    ```
    tsc wordListFilter.ts
    ```
@@ -45,16 +46,19 @@ Options:
 #### Examples
 
 Output as JavaScript array (default):
+
 ```bash
 node wordListFilter.js example-wordlist.txt
 ```
 
 Output as JSON file:
+
 ```bash
 node wordListFilter.js -f json -o filtered.json example-wordlist.txt
 ```
 
 Specify custom graph data path:
+
 ```bash
 node wordListFilter.js -g ../data/custom-graph.json example-wordlist.txt
 ```
@@ -77,6 +81,7 @@ const musicWordList = [
 #### JSON Format
 
 The JSON output includes:
+
 - Meta information (total words, valid words, percentage)
 - The list of valid words
 - The list of invalid words (useful for debugging)
@@ -90,9 +95,11 @@ After filtering your word list, you can add it to the `wordCollections.ts` file:
 const thematicWordLists = {
   // ... existing lists
   music: [
-    "music", "melody", "rhythm", 
+    "music",
+    "melody",
+    "rhythm",
     // ... other filtered words
-  ]
+  ],
 };
 
 // Then add the collection to allWordCollections
@@ -103,4 +110,4 @@ const thematicWordLists = {
 
 - **File not found errors**: Make sure the paths to your input file and graph data are correct
 - **No valid words**: Check that your words are in lowercase and exist in the game's vocabulary
-- **Low percentage of valid words**: This is normal. Many words will not be in the game's graph data. 
+- **Low percentage of valid words**: This is normal. Many words will not be in the game's graph data.

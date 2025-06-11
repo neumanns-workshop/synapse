@@ -82,13 +82,7 @@
     "startWord": "course",
     "endWord": "accomplish",
     "optimalPathLength": 4,
-    "llmPath": [
-      "course",
-      "class",
-      "grade",
-      "score",
-      "goal"
-    ],
+    "llmPath": ["course", "class", "grade", "score", "goal"],
     "stepsTaken": 4,
     "status": "solved",
     "model": "phi4-reasoning:plus"
@@ -119,14 +113,7 @@
     "startWord": "hear",
     "endWord": "check",
     "optimalPathLength": 4,
-    "llmPath": [
-      "hear",
-      "perceive",
-      "observe",
-      "inspect",
-      "examine",
-      "inspect"
-    ],
+    "llmPath": ["hear", "perceive", "observe", "inspect", "examine", "inspect"],
     "stepsTaken": 5,
     "status": "solved",
     "model": "phi4-reasoning:plus"
@@ -305,14 +292,7 @@
     "startWord": "shady",
     "endWord": "noon",
     "optimalPathLength": 4,
-    "llmPath": [
-      "shady",
-      "shadow",
-      "shade",
-      "sunshine",
-      "sun",
-      "dawn"
-    ],
+    "llmPath": ["shady", "shadow", "shade", "sunshine", "sun", "dawn"],
     "stepsTaken": 5,
     "status": "solved",
     "model": "phi4-reasoning:plus"
@@ -322,14 +302,7 @@
     "startWord": "veneer",
     "endWord": "job",
     "optimalPathLength": 4,
-    "llmPath": [
-      "veneer",
-      "furniture",
-      "desk",
-      "chair",
-      "chairman",
-      "boss"
-    ],
+    "llmPath": ["veneer", "furniture", "desk", "chair", "chairman", "boss"],
     "stepsTaken": 5,
     "status": "solved",
     "model": "phi4-reasoning:plus"
@@ -499,13 +472,7 @@
     "startWord": "momentum",
     "endWord": "jet",
     "optimalPathLength": 4,
-    "llmPath": [
-      "momentum",
-      "thrust",
-      "maneuver",
-      "trajectory",
-      "flight"
-    ],
+    "llmPath": ["momentum", "thrust", "maneuver", "trajectory", "flight"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -687,13 +654,7 @@
     "startWord": "jury",
     "endWord": "sabotage",
     "optimalPathLength": 4,
-    "llmPath": [
-      "jury",
-      "convict",
-      "guilty",
-      "accuse",
-      "undermine"
-    ],
+    "llmPath": ["jury", "convict", "guilty", "accuse", "undermine"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -724,13 +685,7 @@
     "startWord": "stem",
     "endWord": "academy",
     "optimalPathLength": 4,
-    "llmPath": [
-      "stem",
-      "scholastic",
-      "student",
-      "college",
-      "school"
-    ],
+    "llmPath": ["stem", "scholastic", "student", "college", "school"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -894,14 +849,7 @@
     "startWord": "tail",
     "endWord": "depreciate",
     "optimalPathLength": 5,
-    "llmPath": [
-      "tail",
-      "rear",
-      "reverse",
-      "revert",
-      "retrograde",
-      "degrade"
-    ],
+    "llmPath": ["tail", "rear", "reverse", "revert", "retrograde", "degrade"],
     "stepsTaken": 5,
     "status": "solved",
     "model": "granite3.3:8b"
@@ -931,14 +879,7 @@
     "startWord": "policy",
     "endWord": "conspire",
     "optimalPathLength": 5,
-    "llmPath": [
-      "policy",
-      "agenda",
-      "plan",
-      "scheme",
-      "plot",
-      "intrigue"
-    ],
+    "llmPath": ["policy", "agenda", "plan", "scheme", "plot", "intrigue"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -950,14 +891,7 @@
     "startWord": "online",
     "endWord": "wander",
     "optimalPathLength": 5,
-    "llmPath": [
-      "online",
-      "net",
-      "search",
-      "found",
-      "discover",
-      "explore"
-    ],
+    "llmPath": ["online", "net", "search", "found", "discover", "explore"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -1524,14 +1458,7 @@
     "startWord": "load",
     "endWord": "quote",
     "optimalPathLength": 5,
-    "llmPath": [
-      "load",
-      "workload",
-      "task",
-      "prompt",
-      "sentence",
-      "clause"
-    ],
+    "llmPath": ["load", "workload", "task", "prompt", "sentence", "clause"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -1569,14 +1496,7 @@
     "startWord": "curt",
     "endWord": "descent",
     "optimalPathLength": 5,
-    "llmPath": [
-      "curt",
-      "suspend",
-      "hang",
-      "climb",
-      "ascend",
-      "ascent"
-    ],
+    "llmPath": ["curt", "suspend", "hang", "climb", "ascend", "ascent"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -1675,14 +1595,7 @@
     "startWord": "presume",
     "endWord": "talk",
     "optimalPathLength": 5,
-    "llmPath": [
-      "presume",
-      "suppose",
-      "assume",
-      "imply",
-      "say",
-      "speak"
-    ],
+    "llmPath": ["presume", "suppose", "assume", "imply", "say", "speak"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -1737,14 +1650,7 @@
     "startWord": "fiber",
     "endWord": "create",
     "optimalPathLength": 5,
-    "llmPath": [
-      "fiber",
-      "cotton",
-      "cloth",
-      "clothe",
-      "fabricate",
-      "construct"
-    ],
+    "llmPath": ["fiber", "cotton", "cloth", "clothe", "fabricate", "construct"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -1842,15 +1748,7 @@
     "startWord": "toss",
     "endWord": "jail",
     "optimalPathLength": 4,
-    "llmPath": [
-      "toss",
-      "throw",
-      "catch",
-      "capture",
-      "catch",
-      "trap",
-      "arrest"
-    ],
+    "llmPath": ["toss", "throw", "catch", "capture", "catch", "trap", "arrest"],
     "stepsTaken": 6,
     "status": "solved",
     "reason": "Found path in 6 moves",
@@ -3802,13 +3700,7 @@
     "startWord": "benefactor",
     "endWord": "debt",
     "optimalPathLength": 4,
-    "llmPath": [
-      "benefactor",
-      "donate",
-      "contribute",
-      "lend",
-      "owe"
-    ],
+    "llmPath": ["benefactor", "donate", "contribute", "lend", "owe"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -3995,14 +3887,7 @@
     "startWord": "cod",
     "endWord": "flight",
     "optimalPathLength": 5,
-    "llmPath": [
-      "cod",
-      "sea",
-      "sail",
-      "voyage",
-      "journey",
-      "travel"
-    ],
+    "llmPath": ["cod", "sea", "sail", "voyage", "journey", "travel"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -6648,14 +6533,7 @@
     "startWord": "direct",
     "endWord": "wary",
     "optimalPathLength": 4,
-    "llmPath": [
-      "direct",
-      "dare",
-      "courage",
-      "bravery",
-      "fearless",
-      "cautious"
-    ],
+    "llmPath": ["direct", "dare", "courage", "bravery", "fearless", "cautious"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -6701,14 +6579,7 @@
     "startWord": "weigh",
     "endWord": "giant",
     "optimalPathLength": 4,
-    "llmPath": [
-      "weigh",
-      "weight",
-      "weigh",
-      "scale",
-      "magnitude",
-      "gigantic"
-    ],
+    "llmPath": ["weigh", "weight", "weigh", "scale", "magnitude", "gigantic"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -7024,14 +6895,7 @@
     "startWord": "satisfy",
     "endWord": "profit",
     "optimalPathLength": 5,
-    "llmPath": [
-      "satisfy",
-      "provide",
-      "give",
-      "reward",
-      "benefit",
-      "gain"
-    ],
+    "llmPath": ["satisfy", "provide", "give", "reward", "benefit", "gain"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -7043,14 +6907,7 @@
     "startWord": "immersion",
     "endWord": "fluid",
     "optimalPathLength": 5,
-    "llmPath": [
-      "immersion",
-      "plunge",
-      "dive",
-      "swim",
-      "water",
-      "liquid"
-    ],
+    "llmPath": ["immersion", "plunge", "dive", "swim", "water", "liquid"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -7365,14 +7222,7 @@
     "startWord": "plait",
     "endWord": "exist",
     "optimalPathLength": 5,
-    "llmPath": [
-      "plait",
-      "plethora",
-      "pliable",
-      "amenable",
-      "viable",
-      "extant"
-    ],
+    "llmPath": ["plait", "plethora", "pliable", "amenable", "viable", "extant"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",
@@ -7384,14 +7234,7 @@
     "startWord": "bulb",
     "endWord": "extreme",
     "optimalPathLength": 5,
-    "llmPath": [
-      "bulb",
-      "light",
-      "bright",
-      "vibrant",
-      "vividly",
-      "intense"
-    ],
+    "llmPath": ["bulb", "light", "bright", "vibrant", "vividly", "intense"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Found path in 5 moves",

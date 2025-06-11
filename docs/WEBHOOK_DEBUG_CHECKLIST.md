@@ -3,6 +3,7 @@
 Your Stripe webhook setup is not working. Here's a systematic approach to debug and fix it:
 
 ## 🔍 Current Status
+
 - ✅ Webhook endpoint is accessible (returns 401 without signature - expected)
 - ❌ No rows in Supabase tables (`user_data`, `user_profiles`)
 - ❌ No events in Stripe webhook dashboard
@@ -22,6 +23,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ... (your service role key)
 ```
 
 **How to fix:**
+
 1. Go to [Supabase Dashboard](https://supabase.com/dashboard/project/dvihvgdmmqdixmuuttve)
 2. Settings → Edge Functions → Environment variables
 3. Add each missing variable
@@ -35,6 +37,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ... (your service role key)
 - Status: Should be "Enabled"
 
 **How to fix:**
+
 1. Go to [Stripe Dashboard → Webhooks](https://dashboard.stripe.com/webhooks)
 2. Click "Add endpoint"
 3. URL: `https://dvihvgdmmqdixmuuttve.supabase.co/functions/v1/stripe-webhook`
@@ -44,6 +47,7 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ... (your service role key)
 ### 3. Database Tables Missing or Incorrect Schema
 
 **Check if tables exist in Supabase:**
+
 1. Go to Supabase Dashboard → Table Editor
 2. Verify `user_profiles` and `user_data` tables exist
 3. Check if they have the correct columns
@@ -53,8 +57,8 @@ Run this SQL in Supabase SQL Editor:
 
 ```sql
 -- Check if tables exist
-SELECT table_name FROM information_schema.tables 
-WHERE table_schema = 'public' 
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public'
 AND table_name IN ('user_profiles', 'user_data');
 
 -- If they don't exist, run the schema creation script
@@ -64,26 +68,31 @@ AND table_name IN ('user_profiles', 'user_data');
 ## 🧪 Testing Steps
 
 ### Step 1: Test Edge Functions
+
 1. Edit `debug-webhook-with-auth.js` and add your `SUPABASE_ANON_KEY`
 2. Run: `node debug-webhook-with-auth.js`
 3. Look for specific error messages
 
 ### Step 2: Check Supabase Logs
+
 1. Go to Supabase Dashboard → Edge Functions → stripe-webhook → Logs
 2. Look for any error messages when webhook is called
 
 ### Step 3: Test Webhook Manually
+
 1. Use Stripe CLI: `stripe listen --forward-to https://dvihvgdmmqdixmuuttve.supabase.co/functions/v1/stripe-webhook`
 2. Create a test payment
 3. Check if webhook receives the event
 
 ### Step 4: Verify Database Permissions
+
 1. Check if RLS (Row Level Security) is properly configured
 2. Verify service role key has admin permissions
 
 ## 🔧 Quick Fixes
 
 ### Fix 1: Redeploy Edge Functions
+
 ```bash
 supabase functions deploy stripe-webhook
 supabase functions deploy create-checkout-session
@@ -91,12 +100,15 @@ supabase functions deploy verify-payment-simple
 ```
 
 ### Fix 2: Reset Database Schema
+
 If tables are corrupted, run the schema creation script:
+
 ```sql
 -- See supabase-schema-creation.sql in your codebase
 ```
 
 ### Fix 3: Test with Fresh Stripe Session
+
 Create a new test payment to get a fresh session ID and test the flow.
 
 ## 🚨 Emergency Debugging
@@ -132,4 +144,4 @@ If nothing else works, check these:
 - [Supabase Edge Functions Docs](https://supabase.com/docs/guides/functions)
 - [Stripe Webhooks Docs](https://stripe.com/docs/webhooks)
 - [Supabase Dashboard](https://supabase.com/dashboard/project/dvihvgdmmqdixmuuttve)
-- [Stripe Dashboard](https://dashboard.stripe.com) 
+- [Stripe Dashboard](https://dashboard.stripe.com)

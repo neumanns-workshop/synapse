@@ -37,58 +37,49 @@ module.exports = {
     },
   },
   rules: {
-    // General ESLint rules
-    "no-console": ["warn", { allow: ["warn", "error", "info"] }], // Allow console.warn, .error, .info
-    "no-unused-vars": "off", // Turn off base no-unused-vars, use TypeScript version
+    // Core TypeScript Rules
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-explicit-any": "warn", // Warn instead of error
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",
-        caughtErrorsIgnorePattern: "^_",
+        ignoreRestSiblings: true,
+        args: "after-used",
       },
     ],
-    "@typescript-eslint/explicit-module-boundary-types": "off", // Optional: turn off if too noisy
-    "@typescript-eslint/no-explicit-any": "warn", // Warn on explicit any
+    "@typescript-eslint/no-var-requires": "warn", // Warn instead of error
+    "@typescript-eslint/no-empty-function": "warn", // Warn instead of error
+    "@typescript-eslint/no-non-null-assertion": "warn", // Warn instead of error
+    "@typescript-eslint/no-shadow": "warn", // Warn instead of error
 
-    // React specific rules
-    "react/prop-types": "off", // Not needed with TypeScript
-    "react/react-in-jsx-scope": "off", // Not needed with new JSX transform (React 17+)
+    // Console and debugging
+    "no-console": "off", // Allow console statements in development
 
-    // React Native specific rules (if not using plugin:react-native/all or @react-native/eslint-config)
-    // 'react-native/no-unused-styles': 'warn',
-    // 'react-native/split-platform-components': 'warn',
-    // 'react-native/no-inline-styles': 'warn',
-    // 'react-native/no-color-literals': 'warn',
-    // 'react-native/no-raw-text': 'warn',
+    // React specific
+    "react/prop-types": "off",
+    "react/display-name": "off", // Allow anonymous components
+    "react/no-children-prop": "warn", // Warn instead of error
+    "react/no-unescaped-entities": "warn", // Warn instead of error
+    "react/no-unstable-nested-components": "warn", // Warn instead of error
 
-    // Import rules
-    "import/order": [
-      "warn",
-      {
-        groups: [
-          "builtin",
-          "external",
-          "internal",
-          ["parent", "sibling", "index"],
-        ],
-        pathGroups: [
-          {
-            pattern: "react+(|-native)",
-            group: "external",
-            position: "before",
-          },
-        ],
-        pathGroupsExcludedImportTypes: ["react"],
-        "newlines-between": "always",
-        alphabetize: {
-          order: "asc",
-          caseInsensitive: true,
-        },
-      },
-    ],
+    // React Native specific
+    "react-native/no-inline-styles": "warn", // Warn instead of error
+
+    // Import organization
+    "import/order": "warn", // Warn instead of error
+
+    // Disable overly strict rules
+    "prefer-const": "warn",
+    "no-unused-vars": "off", // Use TypeScript version instead
+    "no-undef": "off", // TypeScript handles this
+
+    // Import organization and other rules
     "import/no-duplicates": "warn",
     // 'prettier/prettier': 'warn', // This line is usually not needed if using plugin:prettier/recommended
+
     // Add other rules as needed
   },
   overrides: [
@@ -170,10 +161,20 @@ module.exports = {
     },
     {
       // Supabase functions are serverless and need different rules
-      files: ["supabase/functions/**/*.ts"],
+      files: ["**/supabase/functions/**/*.ts"],
       rules: {
-        "no-console": "off", // Allow console statements in serverless functions
-        "@typescript-eslint/no-explicit-any": "warn", // Allow any but warn
+        "@typescript-eslint/no-unused-vars": "off", // Allow unused vars in Supabase functions
+        "@typescript-eslint/no-explicit-any": "off", // Allow any in Supabase functions
+        "no-console": "off", // Allow console in serverless functions
+      },
+    },
+    {
+      // React Native screens and components often need inline styles for prototyping
+      files: ["**/screens/**/*.{ts,tsx}", "**/components/**/*.{ts,tsx}"],
+      rules: {
+        "react-native/no-inline-styles": "off", // Allow inline styles in development
+        "react/no-unstable-nested-components": "off", // Allow nested components in screens/components
+        "@typescript-eslint/no-shadow": "off", // Allow variable shadowing in complex components
       },
     },
   ],

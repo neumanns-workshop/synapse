@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,8 +32,8 @@ interface ChallengeData {
 
 // Generate HTML for printable QR cards
 function generateCardsHTML(challengeData: ChallengeData): string {
-  const allChallenges = challengeData.themes.flatMap(t => t.challenges);
-  
+  const allChallenges = challengeData.themes.flatMap((t) => t.challenges);
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -187,7 +187,9 @@ function generateCardsHTML(challengeData: ChallengeData): string {
         </div>
         
         <div class="card-grid">
-            ${allChallenges.map((challenge, index) => `
+            ${allChallenges
+              .map(
+                (challenge, index) => `
                 <div class="card" data-url="${challenge.url}">
                     <div class="card-header">
                         <div class="challenge-title">
@@ -208,7 +210,9 @@ function generateCardsHTML(challengeData: ChallengeData): string {
                         <div class="branding">synapse.game</div>
                     </div>
                 </div>
-            `).join('')}
+            `,
+              )
+              .join("")}
         </div>
     </div>
 
@@ -238,36 +242,43 @@ function generateCardsHTML(challengeData: ChallengeData): string {
 async function main() {
   try {
     // Check for input file
-    const inputPath = path.join(__dirname, 'themed_challenges', 'summer-vibes-okc-santa-fe.json');
-    
+    const inputPath = path.join(
+      __dirname,
+      "themed_challenges",
+      "summer-vibes-okc-santa-fe.json",
+    );
+
     if (!fs.existsSync(inputPath)) {
-      console.log('❌ Challenge data file not found. Run the challenge generator first:');
-      console.log('   npm run generate-challenges');
+      console.log(
+        "❌ Challenge data file not found. Run the challenge generator first:",
+      );
+      console.log("   npm run generate-challenges");
       process.exit(1);
     }
-    
+
     // Load challenge data
-    const challengeData: ChallengeData = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
+    const challengeData: ChallengeData = JSON.parse(
+      fs.readFileSync(inputPath, "utf8"),
+    );
     console.log(`📚 Loaded ${challengeData.totalChallenges} challenges`);
-    
+
     // Generate HTML
     const html = generateCardsHTML(challengeData);
-    
+
     // Save HTML file
-    const outputPath = path.join(__dirname, 'summer-vibes-qr-cards.html');
+    const outputPath = path.join(__dirname, "summer-vibes-qr-cards.html");
     fs.writeFileSync(outputPath, html);
-    
+
     console.log(`\n🎨 Generated QR cards HTML!`);
     console.log(`📄 File: ${outputPath}`);
     console.log(`🖨️  Open in browser and print to create physical cards`);
     console.log(`📍 Ready for guerrilla marketing in OKC → Santa Fe!`);
-    
   } catch (error) {
-    console.error('❌ Error generating QR cards:', error);
+    console.error("❌ Error generating QR cards:", error);
     process.exit(1);
   }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   main();
-} 
+}

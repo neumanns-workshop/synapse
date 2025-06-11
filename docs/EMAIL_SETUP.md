@@ -5,16 +5,18 @@
 Synapse uses **Resend** for email delivery with **synapsegame.ai** as the primary domain. We have three distinct email addresses for different purposes:
 
 - **`noreply@synapsegame.ai`** - Transactional emails (auth, system)
-- **`news@synapsegame.ai`** - Marketing emails (newsletters, updates) 
+- **`news@synapsegame.ai`** - Marketing emails (newsletters, updates)
 - **`support@synapsegame.ai`** - Customer support emails
 
 ## 1. Resend Setup
 
 ### Create Account
+
 1. Sign up at [resend.com](https://resend.com)
 2. Verify your account
 
 ### Add Domain
+
 1. Go to **Domains** in Resend dashboard
 2. Add **synapsegame.ai** as your domain
 3. Get the DNS records to add to Cloudflare
@@ -24,17 +26,19 @@ Synapse uses **Resend** for email delivery with **synapsegame.ai** as the primar
 Add these DNS records in your **synapsegame.ai** Cloudflare account:
 
 ### MX Record
+
 - **Name**: `send`
 - **Content**: `feedback-smtp.us-east-1.amazonses.com`
 - **Priority**: `10`
 - **TTL**: Auto
 
 ### TXT Records
+
 ```
 Name: send
 Content: v=spf1 include:amazonses.com ~all
 
-Name: resend._domainkey  
+Name: resend._domainkey
 Content: p=MIGfMA0GCSqGSIb3DQEBAQUAA... (from Resend dashboard)
 
 Name: _dmarc
@@ -56,6 +60,7 @@ RESEND_SUPPORT_EMAIL=support@synapsegame.ai
 ## 4. Supabase Configuration
 
 ### SMTP Settings
+
 In your Supabase project settings → Authentication:
 
 - **Enable custom SMTP**: ✅
@@ -69,6 +74,7 @@ In your Supabase project settings → Authentication:
 ## 5. Email Types & Usage
 
 ### Transactional Emails (`noreply@synapsegame.ai`)
+
 - Sign up verification
 - Password reset
 - Email change confirmation
@@ -77,6 +83,7 @@ In your Supabase project settings → Authentication:
 **Handled by**: Supabase Auth automatically
 
 ### Marketing Emails (`news@synapsegame.ai`)
+
 - Welcome emails for new users
 - Premium welcome emails
 - Game updates and newsletters
@@ -87,6 +94,7 @@ In your Supabase project settings → Authentication:
 **Legal Requirement**: Users must opt-in to "news and updates" consent
 
 ### Support Emails (`support@synapsegame.ai`)
+
 - Customer support responses
 - Bug report acknowledgments
 - Premium subscription help
@@ -96,47 +104,53 @@ In your Supabase project settings → Authentication:
 ## 6. Testing
 
 ### Test Auth Emails
+
 ```bash
 node scripts/test-email.js
 ```
 
 ### Test Custom Emails
+
 ```javascript
-import EmailService from '../src/services/EmailService';
+import EmailService from "../src/services/EmailService";
 
 const emailService = EmailService.getInstance();
 
 // Test welcome email
-await emailService.sendWelcomeEmail('user@example.com', {
-  name: 'Test User',
-  appUrl: 'https://synapsegame.ai'
+await emailService.sendWelcomeEmail("user@example.com", {
+  name: "Test User",
+  appUrl: "https://synapsegame.ai",
 });
 
-// Test support email  
+// Test support email
 await emailService.sendSupportEmail(
-  'user@example.com',
-  'Thanks for contacting support',
-  '<h1>We received your message</h1>',
-  'We received your message'
+  "user@example.com",
+  "Thanks for contacting support",
+  "<h1>We received your message</h1>",
+  "We received your message",
 );
 ```
 
 ## 7. Legal Compliance
 
 ### Email Consent Tracking
+
 - Users must consent to receive marketing emails (`news@synapsegame.ai`)
 - Transactional emails (`noreply@synapsegame.ai`) don't require consent
 - Support emails (`support@synapsegame.ai`) are contextual responses
 
 ### Unsubscribe Requirements
+
 - Marketing emails must include unsubscribe links
 - Update `EmailService` templates to include unsubscribe URLs
 - Implement unsubscribe endpoint in your app
 
 ### Email Templates
+
 All email templates include:
+
 - Professional branding
-- Clear sender identification  
+- Clear sender identification
 - Unsubscribe information
 - Contact information
 - Legal disclaimers
@@ -144,11 +158,13 @@ All email templates include:
 ## 8. Monitoring
 
 ### Resend Dashboard
+
 - Monitor delivery rates
 - Track bounces and complaints
 - View sending statistics
 
 ### Supabase Auth Logs
+
 - Check authentication email logs
 - Monitor failed deliveries
 - Debug SMTP connection issues
@@ -156,11 +172,13 @@ All email templates include:
 ## 9. Free Tier Limits
 
 **Resend Free Tier**:
+
 - 100 emails per day
 - 3,000 emails per month
 - Perfect for early-stage app
 
 **Upgrade triggers**:
+
 - Upgrade to Pro ($20/month) when hitting limits
 - Monitor usage in Resend dashboard
 
@@ -169,20 +187,24 @@ All email templates include:
 ### Common Issues
 
 **"SMTP connection failed"**
+
 - Check Supabase SMTP settings
 - Verify Resend API key is correct
 - Ensure DNS records are propagated
 
-**"Domain not verified"**  
+**"Domain not verified"**
+
 - Check Cloudflare DNS records
 - Wait up to 48 hours for propagation
 - Use DNS propagation checker tools
 
 **"Emails not being sent"**
+
 - Check Resend dashboard for errors
 - Verify API key in environment variables
 - Test with `scripts/test-email.js`
 
 ### Support
+
 - **Resend**: [resend.com/docs](https://resend.com/docs)
-- **Supabase Auth**: [supabase.com/docs/guides/auth](https://supabase.com/docs/guides/auth) 
+- **Supabase Auth**: [supabase.com/docs/guides/auth](https://supabase.com/docs/guides/auth)

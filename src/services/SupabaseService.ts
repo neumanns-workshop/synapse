@@ -5,9 +5,9 @@ import {
   Session,
 } from "@supabase/supabase-js";
 
-import { UnifiedDataStore, UnifiedAppData } from "./UnifiedDataStore";
 import { useGameStore } from "../stores/useGameStore";
 import { Logger } from "../utils/logger";
+import { UnifiedDataStore, UnifiedAppData } from "./UnifiedDataStore";
 
 // Environment variables (set in your .env file)
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;

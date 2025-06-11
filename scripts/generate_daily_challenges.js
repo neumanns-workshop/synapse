@@ -1,16 +1,18 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 // Get the input file from command line argument
 const inputFile = process.argv[2];
 if (!inputFile) {
-  console.error('Please provide the path to the sampled results file as an argument');
+  console.error(
+    "Please provide the path to the sampled results file as an argument",
+  );
   process.exit(1);
 }
 
 // Load the sampled puzzles
 const solvedPuzzlesPath = path.join(__dirname, inputFile);
-const solvedPuzzles = JSON.parse(fs.readFileSync(solvedPuzzlesPath, 'utf8'));
+const solvedPuzzles = JSON.parse(fs.readFileSync(solvedPuzzlesPath, "utf8"));
 
 console.log(`Loaded ${solvedPuzzles.length} sampled puzzles`);
 
@@ -26,19 +28,19 @@ startDate.setHours(0, 0, 0, 0);
 
 const dailyChallenges = {
   version: "2.0",
-  lastUpdated: new Date().toISOString().split('T')[0],
+  lastUpdated: new Date().toISOString().split("T")[0],
   description: "Daily challenges generated from heuristic solver puzzles",
-  challenges: []
+  challenges: [],
 };
 
 // Create daily challenges for the next year (365 days)
 for (let i = 0; i < Math.min(365, solvedPuzzles.length); i++) {
   const challengeDate = new Date(startDate);
   challengeDate.setDate(startDate.getDate() + i);
-  
-  const dateString = challengeDate.toISOString().split('T')[0];
+
+  const dateString = challengeDate.toISOString().split("T")[0];
   const puzzle = solvedPuzzles[i];
-  
+
   const challenge = {
     id: dateString,
     date: dateString,
@@ -50,17 +52,25 @@ for (let i = 0; i < Math.min(365, solvedPuzzles.length); i++) {
       path: puzzle.llmPath,
       stepsTaken: puzzle.stepsTaken,
       model: puzzle.model,
-      heuristicScore: puzzle.heuristic_score
-    }
+      heuristicScore: puzzle.heuristic_score,
+    },
   };
-  
+
   dailyChallenges.challenges.push(challenge);
 }
 
 // Write the new daily challenges file
-const outputPath = path.join(__dirname, '..', 'src', 'data', 'daily_challenges_v2.json');
+const outputPath = path.join(
+  __dirname,
+  "..",
+  "src",
+  "data",
+  "daily_challenges_v2.json",
+);
 fs.writeFileSync(outputPath, JSON.stringify(dailyChallenges, null, 2));
 
 console.log(`Generated ${dailyChallenges.challenges.length} daily challenges`);
 console.log(`Saved to: ${outputPath}`);
-console.log(`Date range: ${dailyChallenges.challenges[0].date} to ${dailyChallenges.challenges[dailyChallenges.challenges.length - 1].date}`); 
+console.log(
+  `Date range: ${dailyChallenges.challenges[0].date} to ${dailyChallenges.challenges[dailyChallenges.challenges.length - 1].date}`,
+);

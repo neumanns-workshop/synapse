@@ -9,11 +9,13 @@ Create a promo code system that grants **permanent premium access** - just like 
 ## 🏗️ **ARCHITECTURE OVERVIEW**
 
 ### **Current Flow:**
+
 ```
 User → Stripe Payment → Webhook → Premium Account Created
 ```
 
 ### **New Promo Flow:**
+
 ```
 User → Promo Code → Direct Account Creation → Premium Account Created
 ```
@@ -27,42 +29,43 @@ User → Promo Code → Direct Account Creation → Premium Account Created
 ### **Quick Implementation for Soft Launch**
 
 #### **1. Add Promo Code Field to Upgrade Prompt**
+
 ```typescript
 // In UpgradePrompt.tsx
 const [showPromoField, setShowPromoField] = useState(false);
-const [promoCode, setPromoCode] = useState('');
+const [promoCode, setPromoCode] = useState("");
 const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
 // Hardcoded beta codes for immediate testing
 // These codes expire June 30, 2025 but grant PERMANENT premium access
 const BETA_CODES = [
-  'SYNAPSE2024',    // General beta access
-  'BETATESTER',     // Core beta testers
-  'EARLYBIRD',      // Early supporters
-  'FOUNDER001',     // Individual founder codes
-  'FOUNDER002',
-  'FOUNDER003',
+  "SYNAPSE2024", // General beta access
+  "BETATESTER", // Core beta testers
+  "EARLYBIRD", // Early supporters
+  "FOUNDER001", // Individual founder codes
+  "FOUNDER002",
+  "FOUNDER003",
   // ... up to FOUNDER050
 ];
 
 // Beta expiration check
-const BETA_EXPIRY = new Date('2025-06-30T23:59:59Z');
+const BETA_EXPIRY = new Date("2025-06-30T23:59:59Z");
 const isBetaExpired = () => new Date() > BETA_EXPIRY;
 
 const handlePromoCode = async () => {
   const code = promoCode.toUpperCase().trim();
-  
+
   // Check if beta period has expired (codes no longer work after June 30, 2025)
   if (isBetaExpired()) {
     Alert.alert(
-      'Beta Period Ended', 
-      'The beta testing period has ended. Please purchase premium access to continue.'
+      "Beta Period Ended",
+      "The beta testing period has ended. Please purchase premium access to continue.",
     );
     return;
   }
-  
+
   if (!BETA_CODES.includes(code)) {
-    Alert.alert('Invalid Code', 'Please check your promo code and try again.');
+    Alert.alert("Invalid Code", "Please check your promo code and try again.");
     return;
   }
 
@@ -73,20 +76,20 @@ const handlePromoCode = async () => {
       email,
       password,
       emailUpdatesOptIn,
-      promoCode: promoCode.toUpperCase()
+      promoCode: promoCode.toUpperCase(),
     });
 
     if (result.success) {
       Alert.alert(
-        'Welcome to Premium!', 
-        'Your promo code has been applied. You now have permanent premium access!'
+        "Welcome to Premium!",
+        "Your promo code has been applied. You now have permanent premium access!",
       );
       onDismiss();
     } else {
-      Alert.alert('Error', result.error || 'Failed to apply promo code');
+      Alert.alert("Error", result.error || "Failed to apply promo code");
     }
   } catch (error) {
-    Alert.alert('Error', 'Something went wrong. Please try again.');
+    Alert.alert("Error", "Something went wrong. Please try again.");
   } finally {
     setIsApplyingPromo(false);
   }
@@ -94,10 +97,11 @@ const handlePromoCode = async () => {
 ```
 
 #### **2. Add UI to Upgrade Prompt**
+
 ```typescript
 // Add this to the UpgradePrompt render method
 <View style={styles.promoSection}>
-  <TouchableOpacity 
+  <TouchableOpacity
     onPress={() => setShowPromoField(!showPromoField)}
     style={styles.promoToggle}
   >
@@ -112,9 +116,9 @@ const handlePromoCode = async () => {
         value={promoCode}
         onChangeText={setPromoCode}
         placeholder="Enter promo code"
-        style={[styles.promoInput, { 
+        style={[styles.promoInput, {
           borderColor: colors.outline,
-          backgroundColor: colors.surface 
+          backgroundColor: colors.surface
         }]}
         autoCapitalize="characters"
         autoCorrect={false}
@@ -134,6 +138,7 @@ const handlePromoCode = async () => {
 ```
 
 #### **3. Extend StripeService for Promo Accounts**
+
 ```typescript
 // In StripeService.ts
 public async createPromoAccount(signupData: {
@@ -181,9 +186,9 @@ public async createPromoAccount(signupData: {
     const { data: finalizeResult, error: finalizeError } =
       await this.supabaseService.invokeFunction(
         "finalize-promo-account", // New edge function
-        { 
-          temporaryUserId: anonymousUserId, 
-          email: signupData.email, 
+        {
+          temporaryUserId: anonymousUserId,
+          email: signupData.email,
           password: signupData.password,
           promoCode: signupData.promoCode
         },
@@ -200,9 +205,9 @@ public async createPromoAccount(signupData: {
     return { success: true };
   } catch (error) {
     console.error('Error creating promo account:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
 }
@@ -213,9 +218,10 @@ public async createPromoAccount(signupData: {
 ## 📋 **PHASE 2: FULL PROMO CODE SYSTEM (Next Week)**
 
 ### **Database Schema**
+
 ```sql
 -- Add promo tracking to user_profiles
-ALTER TABLE user_profiles 
+ALTER TABLE user_profiles
 ADD COLUMN promo_code_used TEXT,
 ADD COLUMN promo_activated_at TIMESTAMP WITH TIME ZONE,
 ADD COLUMN is_grandfathered BOOLEAN DEFAULT FALSE; -- Permanent flag for beta testers
@@ -231,7 +237,7 @@ CREATE TABLE promo_codes (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   is_active BOOLEAN DEFAULT TRUE,
-  
+
   -- Metadata for tracking
   created_by TEXT, -- Who created this code
   campaign_name TEXT, -- Marketing campaign tracking
@@ -255,66 +261,78 @@ CREATE POLICY "Allow promo code validation" ON promo_codes
 ### **Edge Functions**
 
 #### **1. Validate Promo Code Function**
+
 ```typescript
 // supabase/functions/validate-promo-code/index.ts
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 serve(async (req) => {
   try {
     const { code } = await req.json();
-    
+
     const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
     // Check if code exists and is valid
     const { data: promoCode, error } = await supabaseAdmin
-      .from('promo_codes')
-      .select('*')
-      .eq('code', code.toUpperCase())
-      .eq('is_active', true)
+      .from("promo_codes")
+      .select("*")
+      .eq("code", code.toUpperCase())
+      .eq("is_active", true)
       .single();
 
     if (error || !promoCode) {
-      return new Response(JSON.stringify({ 
-        valid: false, 
-        error: 'Invalid promo code' 
-      }));
+      return new Response(
+        JSON.stringify({
+          valid: false,
+          error: "Invalid promo code",
+        }),
+      );
     }
 
     // Check expiration
     if (promoCode.expires_at && new Date(promoCode.expires_at) < new Date()) {
-      return new Response(JSON.stringify({ 
-        valid: false, 
-        error: 'Promo code has expired' 
-      }));
+      return new Response(
+        JSON.stringify({
+          valid: false,
+          error: "Promo code has expired",
+        }),
+      );
     }
 
     // Check usage limits
     if (promoCode.max_uses && promoCode.current_uses >= promoCode.max_uses) {
-      return new Response(JSON.stringify({ 
-        valid: false, 
-        error: 'Promo code has reached its usage limit' 
-      }));
+      return new Response(
+        JSON.stringify({
+          valid: false,
+          error: "Promo code has reached its usage limit",
+        }),
+      );
     }
 
-    return new Response(JSON.stringify({ 
-      valid: true, 
-      description: promoCode.description 
-    }));
-
+    return new Response(
+      JSON.stringify({
+        valid: true,
+        description: promoCode.description,
+      }),
+    );
   } catch (error) {
-    return new Response(JSON.stringify({ 
-      valid: false, 
-      error: 'Failed to validate promo code' 
-    }), { status: 500 });
+    return new Response(
+      JSON.stringify({
+        valid: false,
+        error: "Failed to validate promo code",
+      }),
+      { status: 500 },
+    );
   }
 });
 ```
 
 #### **2. Finalize Promo Account Function**
+
 ```typescript
 // supabase/functions/finalize-promo-account/index.ts
 // Similar to finalize-premium-account but with promo tracking
@@ -322,50 +340,55 @@ serve(async (req) => {
 serve(async (req) => {
   try {
     const { temporaryUserId, email, password, promoCode } = await req.json();
-    
+
     // 1. Validate promo code again (security)
     const validation = await validatePromoCode(promoCode);
     if (!validation.valid) {
-      throw new Error('Invalid promo code');
+      throw new Error("Invalid promo code");
     }
 
     // 2. Convert anonymous user to permanent user
-    const { data: updateResult, error: updateError } = 
+    const { data: updateResult, error: updateError } =
       await supabaseAdmin.auth.admin.updateUserById(temporaryUserId, {
         email: email,
         password: password,
-        email_confirm: true
+        email_confirm: true,
       });
 
     if (updateError) throw updateError;
 
     // 3. Update user profile with promo metadata
-    await supabaseAdmin.from('user_profiles').update({
-      email: email,
-      is_premium: true,
-      is_grandfathered: true, // Mark as grandfathered beta tester
-      promo_code_used: promoCode,
-      promo_activated_at: new Date().toISOString(),
-      platform_purchase_data: {
-        platform: "promo",
-        transactionId: `promo_${promoCode}_${Date.now()}`,
-        purchaseDate: Date.now(),
-        validated: true,
-        lastValidated: Date.now(),
-      }
-    }).eq('id', temporaryUserId);
+    await supabaseAdmin
+      .from("user_profiles")
+      .update({
+        email: email,
+        is_premium: true,
+        is_grandfathered: true, // Mark as grandfathered beta tester
+        promo_code_used: promoCode,
+        promo_activated_at: new Date().toISOString(),
+        platform_purchase_data: {
+          platform: "promo",
+          transactionId: `promo_${promoCode}_${Date.now()}`,
+          purchaseDate: Date.now(),
+          validated: true,
+          lastValidated: Date.now(),
+        },
+      })
+      .eq("id", temporaryUserId);
 
     // 4. Increment promo code usage
-    await supabaseAdmin.rpc('increment_promo_usage', { 
-      promo_code: promoCode 
+    await supabaseAdmin.rpc("increment_promo_usage", {
+      promo_code: promoCode,
     });
 
     return new Response(JSON.stringify({ success: true }));
-
   } catch (error) {
-    return new Response(JSON.stringify({ 
-      error: error.message 
-    }), { status: 400 });
+    return new Response(
+      JSON.stringify({
+        error: error.message,
+      }),
+      { status: 400 },
+    );
   }
 });
 ```
@@ -373,6 +396,7 @@ serve(async (req) => {
 ### **Promo Code Management**
 
 #### **Beta Tester Codes (Permanent Grandfathering)**
+
 ```sql
 -- Insert beta tester codes with June 30, 2025 expiration
 -- BUT users who activate these codes get PERMANENT premium access
@@ -388,6 +412,7 @@ INSERT INTO promo_codes (code, description, max_uses, expires_at, campaign_name,
 ```
 
 #### **Marketing Campaign Codes**
+
 ```sql
 -- Time-limited marketing codes
 INSERT INTO promo_codes (code, description, expires_at, campaign_name) VALUES
@@ -402,6 +427,7 @@ INSERT INTO promo_codes (code, description, expires_at, campaign_name) VALUES
 ## 🎯 **BETA TESTER GRANDFATHERING STRATEGY**
 
 ### **Why This Approach is Perfect:**
+
 1. **Permanent Premium Access** - Beta testers get the same permanent premium as paying customers
 2. **Full Feature Access** - Cloud sync, unlimited games, all collections, etc.
 3. **Trackable** - We know exactly who used promo codes vs. who paid
@@ -409,6 +435,7 @@ INSERT INTO promo_codes (code, description, expires_at, campaign_name) VALUES
 5. **Professional** - Clean UI, proper account creation flow
 
 ### **Beta Tester Instructions:**
+
 ```
 🎮 Welcome to Synapse Beta!
 
@@ -424,7 +451,7 @@ You're getting PERMANENT premium access as a thank you for testing!
 
 🎁 Grandfathered Features (FOREVER):
 ✅ Unlimited daily games
-✅ Access to all past daily challenges  
+✅ Access to all past daily challenges
 ✅ Cloud sync across devices
 ✅ All word collections
 ✅ Priority support
@@ -440,18 +467,21 @@ Let me know what you think! 🧠✨
 ## 🚀 **IMPLEMENTATION TIMELINE**
 
 ### **This Weekend (Phase 1):**
+
 - [ ] Add promo code field to UpgradePrompt
 - [ ] Implement hardcoded beta code validation
 - [ ] Extend StripeService for promo accounts
 - [ ] Test with 3-5 close friends
 
 ### **Next Week (Phase 2):**
+
 - [ ] Create database schema for promo codes
 - [ ] Build edge functions for validation
 - [ ] Create promo code management interface
 - [ ] Expand beta to 20-50 people
 
 ### **Future Enhancements:**
+
 - [ ] Admin dashboard for code management
 - [ ] Usage analytics and reporting
 - [ ] Bulk code generation
@@ -462,6 +492,7 @@ Let me know what you think! 🧠✨
 ## ✅ **SUCCESS CRITERIA**
 
 ### **For Beta Testers:**
+
 - ✅ Permanent premium account created
 - ✅ Full access to all premium features
 - ✅ Cloud sync working across devices
@@ -469,10 +500,11 @@ Let me know what you think! 🧠✨
 - ✅ Same experience as paying customers
 
 ### **For Future Marketing:**
+
 - ✅ Scalable code generation system
 - ✅ Usage tracking and limits
 - ✅ Expiration date support
 - ✅ Campaign attribution
 - ✅ Easy management interface
 
-**This system gives your beta testers the VIP treatment they deserve while building infrastructure you'll use for years!** 🎯 
+**This system gives your beta testers the VIP treatment they deserve while building infrastructure you'll use for years!** 🎯

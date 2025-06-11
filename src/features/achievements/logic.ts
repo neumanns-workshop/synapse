@@ -1,8 +1,8 @@
-import type { Achievement } from "./achievement.types"; // Adjusted path
-import { allAchievements } from "./definitions"; // Adjusted path
 import { unifiedDataStore } from "../../services/UnifiedDataStore";
 import type { GameState } from "../../stores/useGameStore";
 import type { GameReport } from "../../utils/gameReportUtils";
+import { allAchievements } from "./definitions"; // Adjusted path
+import type { Achievement } from "./achievement.types"; // Adjusted path
 
 // Function to evaluate all achievements for a given game report and status
 export const evaluateAchievements = (

@@ -3,14 +3,14 @@
 // Phase 1: Easy wins for 70% storage reduction
 // ============================================================================
 
+import type { Achievement } from "../features/achievements";
+import { allAchievements } from "../features/achievements/definitions";
 import type {
   GameReport,
   OptimalChoice,
   BacktrackReportEntry,
   PotentialRarestMove,
 } from "./gameReportUtils";
-import type { Achievement } from "../features/achievements";
-import { allAchievements } from "../features/achievements/definitions";
 
 // ============================================================================
 // ACHIEVEMENT COMPRESSION

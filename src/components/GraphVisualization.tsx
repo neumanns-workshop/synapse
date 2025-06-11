@@ -5,7 +5,6 @@ import { useTheme } from "react-native-paper";
 import type { MD3Theme } from "react-native-paper/lib/typescript/types";
 import Svg, { Line, Text } from "react-native-svg";
 
-import TouchableCircle from "./TouchableCircle";
 import { useGameStore } from "../stores/useGameStore";
 import type { GameReport } from "../utils/gameReportUtils";
 import {
@@ -15,6 +14,7 @@ import {
   PerformanceMeasures,
   startFrameRateMonitoring,
 } from "../utils/performanceMonitor";
+import TouchableCircle from "./TouchableCircle";
 
 interface CustomTheme extends MD3Theme {
   customColors: {

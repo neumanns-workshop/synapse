@@ -12,7 +12,6 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import ReportScreen from "./ReportScreen";
 import AppHeader from "../components/AppHeader";
 import AvailableWordsDisplay from "../components/AvailableWordsDisplay";
 import { Footer } from "../components/Footer";
@@ -24,6 +23,7 @@ import WordDefinitionDialog from "../components/WordDefinitionDialog";
 import { useTutorial } from "../context/TutorialContext";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import ReportScreen from "./ReportScreen";
 
 interface GameScreenProps {
   onShowAuth?: () => void;
@@ -452,17 +452,15 @@ const GameScreen: React.FC<GameScreenProps> = ({
           </>
         )}
 
-        {/* Global Portals - Available in all states */}
-        <Portal>
-          <UpgradePrompt
-            visible={upgradePromptVisible}
-            onDismiss={handleUpgradeDismiss}
-            onUpgrade={handleUpgrade}
-            remainingFreeGames={remainingFreeGames}
-            context={upgradePromptContext}
-            customMessage={upgradePromptMessage}
-          />
-        </Portal>
+        {/* Global Modals - Available in all states */}
+        <UpgradePrompt
+          visible={upgradePromptVisible}
+          onDismiss={handleUpgradeDismiss}
+          onUpgrade={handleUpgrade}
+          remainingFreeGames={remainingFreeGames}
+          context={upgradePromptContext}
+          customMessage={upgradePromptMessage}
+        />
       </View>
 
       {/* Footer only for web platform */}

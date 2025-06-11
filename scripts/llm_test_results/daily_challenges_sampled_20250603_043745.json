@@ -11155,14 +11155,7 @@
     "startWord": "henceforth",
     "endWord": "stop",
     "optimalPathLength": 4,
-    "llmPath": [
-      "henceforth",
-      "onward",
-      "continue",
-      "cease",
-      "halt",
-      "stop"
-    ],
+    "llmPath": ["henceforth", "onward", "continue", "cease", "halt", "stop"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Reached target in 5 steps",
@@ -11221,15 +11214,7 @@
     "startWord": "quack",
     "endWord": "tumble",
     "optimalPathLength": 5,
-    "llmPath": [
-      "quack",
-      "quail",
-      "fowl",
-      "fallow",
-      "fall",
-      "clumsy",
-      "tumble"
-    ],
+    "llmPath": ["quack", "quail", "fowl", "fallow", "fall", "clumsy", "tumble"],
     "stepsTaken": 6,
     "status": "solved",
     "reason": "Reached target in 6 steps",
@@ -14630,14 +14615,7 @@
     "startWord": "rug",
     "endWord": "slip",
     "optimalPathLength": 4,
-    "llmPath": [
-      "rug",
-      "weave",
-      "spin",
-      "twist",
-      "trick",
-      "slip"
-    ],
+    "llmPath": ["rug", "weave", "spin", "twist", "trick", "slip"],
     "stepsTaken": 5,
     "status": "solved",
     "reason": "Reached target in 5 steps",

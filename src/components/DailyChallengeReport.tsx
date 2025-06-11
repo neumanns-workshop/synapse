@@ -18,11 +18,6 @@ import {
   Surface,
 } from "react-native-paper";
 
-import CustomIcon from "./CustomIcon";
-import GameReportDisplay from "./GameReportDisplay";
-import GraphVisualization from "./GraphVisualization";
-import PlayerPathDisplay from "./PlayerPathDisplay";
-import { QRCodeDisplay } from "./QRCodeDisplay";
 import {
   shareDailyChallenge,
   generateSecureDailyChallengeDeepLink,
@@ -34,6 +29,11 @@ import type {
   DailyChallengeProgress,
 } from "../types/dailyChallenges";
 import type { GameReport } from "../utils/gameReportUtils";
+import CustomIcon from "./CustomIcon";
+import GameReportDisplay from "./GameReportDisplay";
+import GraphVisualization from "./GraphVisualization";
+import PlayerPathDisplay from "./PlayerPathDisplay";
+import { QRCodeDisplay } from "./QRCodeDisplay";
 
 interface DailyChallengeReportProps {
   challenge: DailyChallenge;

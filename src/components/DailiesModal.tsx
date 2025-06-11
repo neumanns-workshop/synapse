@@ -9,10 +9,6 @@ import {
   ActivityIndicator,
 } from "react-native-paper";
 
-import AchievementDetailDialog from "./AchievementDetailDialog";
-import DailyChallengeReport from "./DailyChallengeReport";
-import DailyChallengesCalendar from "./DailyChallengesCalendar";
-import WordDefinitionDialog from "./WordDefinitionDialog";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
 import { allAchievements, Achievement } from "../features/achievements";
 import { dailyChallengesService } from "../services/DailyChallengesService";
@@ -21,6 +17,10 @@ import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type { DailyChallenge } from "../types/dailyChallenges";
 import type { GameReport } from "../utils/gameReportUtils";
+import WordDefinitionDialog from "./WordDefinitionDialog";
+import DailyChallengesCalendar from "./DailyChallengesCalendar";
+import DailyChallengeReport from "./DailyChallengeReport";
+import AchievementDetailDialog from "./AchievementDetailDialog";
 
 const DailiesModal = () => {
   const { dailiesModalVisible, setDailiesModalVisible } = useGameStore(

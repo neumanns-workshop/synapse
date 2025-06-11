@@ -1,5 +1,5 @@
-import type { WordCollection } from "./collection.types.ts";
 import type { GraphData } from "../../services/dataLoader";
+import type { WordCollection } from "./collection.types.ts";
 
 // Helper function to ensure no duplicate words in collections
 export const deduplicateArray = <T>(array: T[]): T[] => {

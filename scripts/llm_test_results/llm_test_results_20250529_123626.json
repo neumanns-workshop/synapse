@@ -4,13 +4,7 @@
     "startWord": "breathtaking",
     "endWord": "admit",
     "optimalPathLength": 4,
-    "llmPath": [
-      "breathtaking",
-      "admire",
-      "regard",
-      "respect",
-      "acknowledge"
-    ],
+    "llmPath": ["breathtaking", "admire", "regard", "respect", "acknowledge"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",
@@ -22,13 +16,7 @@
     "startWord": "bombastic",
     "endWord": "kill",
     "optimalPathLength": 4,
-    "llmPath": [
-      "bombastic",
-      "bomb",
-      "explode",
-      "detonate",
-      "destroy"
-    ],
+    "llmPath": ["bombastic", "bomb", "explode", "detonate", "destroy"],
     "stepsTaken": 4,
     "status": "solved",
     "reason": "Found path in 4 moves",

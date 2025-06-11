@@ -77,11 +77,13 @@ stripe listen --forward-to https://dvihvgdmmqdixmuuttve.supabase.co/functions/v1
 ### Common Issues
 
 1. **Webhook not receiving events**
+
    - Check webhook URL is correct
    - Verify webhook secret is set in environment variables
    - Check Stripe webhook logs for delivery attempts
 
 2. **Account creation failing**
+
    - Check Edge Function logs in Supabase dashboard
    - Verify SUPABASE_SERVICE_ROLE_KEY is set correctly
    - Ensure user_profiles and user_data tables exist
@@ -129,4 +131,4 @@ curl -X POST https://dvihvgdmmqdixmuuttve.supabase.co/functions/v1/verify-paymen
 1. Test the complete flow with a test payment
 2. Monitor webhook delivery in Stripe dashboard
 3. Check account creation in Supabase dashboard
-4. Set up production webhook with live keys 
+4. Set up production webhook with live keys

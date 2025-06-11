@@ -11,9 +11,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.yourcompany.synapse",
@@ -34,10 +32,7 @@
       },
       "package": "com.yourcompany.synapse",
       "versionCode": 1,
-      "permissions": [
-        "INTERNET",
-        "WRITE_EXTERNAL_STORAGE"
-      ]
+      "permissions": ["INTERNET", "WRITE_EXTERNAL_STORAGE"]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -61,6 +56,5 @@
         "projectId": "your-project-id"
       }
     }
-
   }
-} 
+}

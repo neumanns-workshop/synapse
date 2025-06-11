@@ -6,11 +6,11 @@ import React, {
   ReactNode,
 } from "react";
 
-import ProgressiveSyncIndicator from "./ProgressiveSyncIndicator";
 import {
   ProgressiveSyncService,
   SyncProgress,
 } from "../services/ProgressiveSyncService";
+import ProgressiveSyncIndicator from "./ProgressiveSyncIndicator";
 
 interface SyncProgressContextType {
   isSyncing: boolean;

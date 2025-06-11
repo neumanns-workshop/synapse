@@ -10,9 +10,9 @@ import {
   useTheme,
 } from "react-native-paper";
 
-import CustomIcon from "./CustomIcon";
 import { useTutorial } from "../context/TutorialContext";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import CustomIcon from "./CustomIcon";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const MODAL_WIDTH = Math.min(SCREEN_WIDTH - 40, 500); // Max width of 500, or screen width - 40px padding

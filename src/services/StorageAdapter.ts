@@ -1,8 +1,8 @@
-import { unifiedDataStore } from "./UnifiedDataStore";
 import { handleProgressiveAchievements } from "../features/achievements/logic";
 import type { WordCollection } from "../features/wordCollections";
 import type { GameState } from "../stores/useGameStore";
 import type { GameReport } from "../utils/gameReportUtils";
+import { unifiedDataStore } from "./UnifiedDataStore";
 
 // ============================================================================
 // STORAGE ADAPTER - Provides same API as old StorageService

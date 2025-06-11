@@ -56,10 +56,10 @@ A word navigation puzzle game built with React Native/Expo, featuring semantic w
 
 ### Installation
 
-   ```bash
+```bash
 # Clone the repository
 git clone https://github.com/your-username/synapse.git
-   cd synapse
+cd synapse
 
 # Install dependencies
 npm install
@@ -74,7 +74,7 @@ npm start
 
 ### Development Commands
 
-   ```bash
+```bash
 # Platform-specific development
 npm run web        # Start web development
 npm run ios        # Start iOS simulator
@@ -89,7 +89,7 @@ npm run analyze-bundle          # Analyze bundle size
 npm run analyze-performance     # Performance analysis
 npm run generate-challenges     # Generate themed challenges
 npm run generate-qr-cards      # Generate QR code cards
-   ```
+```
 
 ## 📁 Project Structure
 
@@ -113,16 +113,19 @@ synapse/
 ## 🎮 Core Game Systems
 
 ### Word Graph Navigation
+
 - **Semantic Similarity**: Words connected by vector similarity from Nomic Embed Text model
 - **Path Finding**: Players navigate through semantic relationships to reach target words
 - **Difficulty Scaling**: Challenges adapt based on player performance and word rarity
 
 ### Daily Challenge System
+
 - **Dynamic Generation**: New puzzles created daily with themes and difficulty curves
 - **Progress Tracking**: Per-challenge statistics and personal bests
 - **Leaderboards**: Anonymous competition with privacy controls
 
 ### Achievement Engine
+
 - **Progressive Unlocks**: Achievements unlock as players demonstrate mastery
 - **Word Collections**: Themed word sets to discover and complete
 - **Statistical Milestones**: Recognition for consistent play and improvement
@@ -130,11 +133,13 @@ synapse/
 ## 🔐 Authentication & Data Management
 
 ### Authentication Flow
+
 - **Supabase Auth**: Email/password with CAPTCHA verification
 - **Progressive Enhancement**: Works offline, syncs when connected
 - **Anonymous Accounts**: Guest play with optional account creation
 
 ### Data Synchronization
+
 - **Progressive Sync**: Prioritized upload/download (profile → challenges → history)
 - **Conflict Resolution**: Smart merging of local and cloud data
 - **Compression**: Efficient data storage using compression algorithms
@@ -143,17 +148,20 @@ synapse/
 ## 🔧 Performance & Optimization
 
 ### Bundle Optimization
+
 - **Data Chunks**: Large JSON files separated into dedicated chunks
 - **Component Chunks**: Heavy modals loaded on-demand
 - **Vendor Chunks**: Third-party libraries in separate bundles
 - **Progressive Loading**: Critical path loaded first, everything else asynchronously
 
 ### Memory Management
+
 - **Service Cleanup**: Proper cleanup of timeouts and subscriptions
 - **Data Caching**: Intelligent caching with memory pressure handling
 - **Subscription Management**: Automatic unsubscription from auth and data listeners
 
 ### Web-Specific Features
+
 - **SEO Optimization**: Meta tags and structured data for search engines
 - **PWA Support**: Service worker and manifest for app-like experience
 - **Performance Monitoring**: Built-in performance observers for optimization
@@ -173,6 +181,7 @@ npm test -- GameScreen
 ```
 
 ### Test Coverage
+
 - **Unit Tests**: Core business logic and utilities
 - **Integration Tests**: Authentication and data sync flows
 - **Component Tests**: UI component rendering and interactions
@@ -181,6 +190,7 @@ npm test -- GameScreen
 ## 🚀 Deployment
 
 ### Web Deployment (Primary)
+
 Ready for web-first beta testing and soft launch:
 
 ```bash
@@ -192,13 +202,15 @@ npm run deploy:vercel
 ```
 
 The web version is fully optimized with:
+
 - Bundle splitting for faster loading
-- Lazy component loading  
+- Lazy component loading
 - Mobile-responsive design
 - SEO optimization
 - Performance monitoring
 
 ### Mobile Apps (Future)
+
 EAS Build configuration ready for iOS/Android:
 
 ```bash
@@ -212,6 +224,7 @@ npm run submit:production
 ## 🔧 Configuration
 
 ### Environment Variables
+
 ```env
 # Supabase Configuration
 EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
@@ -271,4 +284,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Built with 🧠 and ❤️ for word game enthusiasts**
 
-*Synapse: Where language meets logic, and puzzles spark connections.*
+_Synapse: Where language meets logic, and puzzles spark connections._

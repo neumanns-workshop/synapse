@@ -350,15 +350,7 @@
       "targetWord": "drown",
       "optimalPathLength": 4,
       "aiSolution": {
-        "path": [
-          "persist",
-          "stay",
-          "survive",
-          "die",
-          "kill",
-          "die",
-          "drown"
-        ],
+        "path": ["persist", "stay", "survive", "die", "kill", "die", "drown"],
         "stepsTaken": 6,
         "model": "heuristic_solver",
         "heuristicScore": 1.5
@@ -1759,15 +1751,7 @@
       "targetWord": "agriculture",
       "optimalPathLength": 4,
       "aiSolution": {
-        "path": [
-          "dot",
-          "cod",
-          "ocean",
-          "beach",
-          "sand",
-          "soil",
-          "agriculture"
-        ],
+        "path": ["dot", "cod", "ocean", "beach", "sand", "soil", "agriculture"],
         "stepsTaken": 6,
         "model": "heuristic_solver",
         "heuristicScore": 1.5
@@ -1988,15 +1972,7 @@
       "targetWord": "sting",
       "optimalPathLength": 4,
       "aiSolution": {
-        "path": [
-          "breezy",
-          "balmy",
-          "bale",
-          "mite",
-          "tinge",
-          "prick",
-          "sting"
-        ],
+        "path": ["breezy", "balmy", "bale", "mite", "tinge", "prick", "sting"],
         "stepsTaken": 6,
         "model": "heuristic_solver",
         "heuristicScore": 1.5
@@ -3001,15 +2977,7 @@
       "targetWord": "surprise",
       "optimalPathLength": 4,
       "aiSolution": {
-        "path": [
-          "atlas",
-          "globe",
-          "world",
-          "wow",
-          "wonder",
-          "wow",
-          "surprise"
-        ],
+        "path": ["atlas", "globe", "world", "wow", "wonder", "wow", "surprise"],
         "stepsTaken": 6,
         "model": "heuristic_solver",
         "heuristicScore": 1.5
@@ -9462,15 +9430,7 @@
       "targetWord": "wound",
       "optimalPathLength": 4,
       "aiSolution": {
-        "path": [
-          "border",
-          "fence",
-          "rope",
-          "knot",
-          "bind",
-          "knot",
-          "wound"
-        ],
+        "path": ["border", "fence", "rope", "knot", "bind", "knot", "wound"],
         "stepsTaken": 6,
         "model": "heuristic_solver",
         "heuristicScore": 1.5

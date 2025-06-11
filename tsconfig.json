@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -25,55 +21,20 @@
     "noImplicitAny": false,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@components/*": [
-        "src/components/*"
-      ],
-      "@screens/*": [
-        "src/screens/*"
-      ],
-      "@context/*": [
-        "src/context/*"
-      ],
-      "@utils/*": [
-        "src/utils/*"
-      ],
-      "@assets/*": [
-        "src/assets/*"
-      ],
-      "@hooks/*": [
-        "src/hooks/*"
-      ],
-      "@services/*": [
-        "src/services/*"
-      ],
-      "@types/*": [
-        "src/types/*"
-      ],
-      "@data/*": [
-        "src/data/*"
-      ]
+      "@/*": ["src/*"],
+      "@components/*": ["src/components/*"],
+      "@screens/*": ["src/screens/*"],
+      "@context/*": ["src/context/*"],
+      "@utils/*": ["src/utils/*"],
+      "@assets/*": ["src/assets/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@services/*": ["src/services/*"],
+      "@types/*": ["src/types/*"],
+      "@data/*": ["src/data/*"]
     },
-    "types": [
-      "jest",
-      "node",
-      "react",
-      "react-native"
-    ]
+    "types": ["jest", "node", "react", "react-native"]
   },
-  "include": [
-    "src/**/*",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "index.js"
-  ],
-  "exclude": [
-    "node_modules",
-    "web-build",
-    "database",
-    "scripts"
-  ],
+  "include": ["src/**/*", "**/*.test.ts", "**/*.test.tsx", "index.js"],
+  "exclude": ["node_modules", "web-build", "database", "scripts"],
   "extends": "expo/tsconfig.base"
 }

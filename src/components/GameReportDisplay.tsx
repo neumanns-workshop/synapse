@@ -3,11 +3,11 @@ import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 
 import { Text, Card, useTheme, Button } from "react-native-paper";
 
-import CustomIcon from "./CustomIcon";
 import type { Achievement } from "../features/achievements";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type { GameReport } from "../utils/gameReportUtils";
+import CustomIcon from "./CustomIcon";
 
 interface GameReportDisplayProps {
   report: GameReport;

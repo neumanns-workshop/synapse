@@ -17,10 +17,10 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 
-import AnimatedPaperButton from "./AnimatedButton";
-import CustomIcon from "./CustomIcon";
 import { useTutorial } from "../context/TutorialContext";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import AnimatedPaperButton from "./AnimatedButton";
+import CustomIcon from "./CustomIcon";
 
 interface QuickstartModalProps {
   visible: boolean;

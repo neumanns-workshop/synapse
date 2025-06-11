@@ -12,20 +12,16 @@ interface GraphData {
 }
 
 // List of words to filter out
-const FILTERED_WORDS = new Set([
-  "retard",
-  "african",
-  "gay",
-]);
+const FILTERED_WORDS = new Set(["retard", "african", "gay"]);
 
 /**
  * Filters out specific words from a list
- * 
+ *
  * @param words - Array of words to filter
  * @returns Array of words with filtered words removed
  */
 function filterOutWords(words: string[]): string[] {
-  return words.filter(word => !FILTERED_WORDS.has(word.toLowerCase()));
+  return words.filter((word) => !FILTERED_WORDS.has(word.toLowerCase()));
 }
 
 /**
@@ -51,7 +47,7 @@ async function filterWordList(
   try {
     // First filter out specific words
     const filteredWords = filterOutWords(words);
-    
+
     // Load graph data
     console.log(`Loading graph data from ${graphPath}...`);
     const graphRawData = JSON.parse(fs.readFileSync(graphPath, "utf-8"));

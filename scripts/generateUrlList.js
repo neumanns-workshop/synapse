@@ -16,7 +16,7 @@ function generateUrlHash(data) {
 }
 
 // Generate challenge URL
-function generateChallengeUrl(startWord, targetWord, theme = 'summer-vibes') {
+function generateChallengeUrl(startWord, targetWord, theme = "summer-vibes") {
   const data = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
   const hash = generateUrlHash(data);
   return `https://synapse.game/challenge?start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&theme=${encodeURIComponent(theme)}&hash=${hash}`;
@@ -24,15 +24,15 @@ function generateChallengeUrl(startWord, targetWord, theme = 'summer-vibes') {
 
 // Sample challenges for testing
 const testChallenges = [
-  ['music', 'memory'],
-  ['star', 'infinite'],
-  ['guitar', 'story'],
-  ['bird', 'calm'],
-  ['sun', 'eternal']
+  ["music", "memory"],
+  ["star", "infinite"],
+  ["guitar", "story"],
+  ["bird", "calm"],
+  ["sun", "eternal"],
 ];
 
-console.log('🎮 Synapse Challenge URLs for QR Code Generation');
-console.log('='.repeat(60));
+console.log("🎮 Synapse Challenge URLs for QR Code Generation");
+console.log("=".repeat(60));
 console.log();
 
 testChallenges.forEach(([start, target], index) => {
@@ -42,10 +42,14 @@ testChallenges.forEach(([start, target], index) => {
   console.log();
 });
 
-console.log('📋 How to use:');
-console.log('1. Copy any URL above');
-console.log('2. Paste into any QR code generator (qr-code-generator.com, etc.)');
-console.log('3. Download/print the QR code');
-console.log('4. Test by scanning with your phone camera!');
+console.log("📋 How to use:");
+console.log("1. Copy any URL above");
+console.log(
+  "2. Paste into any QR code generator (qr-code-generator.com, etc.)",
+);
+console.log("3. Download/print the QR code");
+console.log("4. Test by scanning with your phone camera!");
 console.log();
-console.log('✅ These URLs use the exact same hash algorithm as your in-game QR codes.'); 
+console.log(
+  "✅ These URLs use the exact same hash algorithm as your in-game QR codes.",
+);

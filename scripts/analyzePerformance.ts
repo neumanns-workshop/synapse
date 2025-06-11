@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
 interface PerformanceEntry {
   name: string;
@@ -19,26 +19,26 @@ interface PerformanceSummary {
 function analyzePerformanceData(logFile: string): void {
   try {
     // Read the log file
-    const logContent = fs.readFileSync(logFile, 'utf-8');
-    
+    const logContent = fs.readFileSync(logFile, "utf-8");
+
     // Parse performance entries
     const entries: PerformanceEntry[] = [];
     const performanceRegex = /Performance: (.*?) - (\d+)ms/;
-    
-    logContent.split('\n').forEach(line => {
+
+    logContent.split("\n").forEach((line) => {
       const match = line.match(performanceRegex);
       if (match) {
         entries.push({
           name: match[1],
           duration: parseInt(match[2], 10),
-          timestamp: Date.now() // Using current timestamp as we don't have it in logs
+          timestamp: Date.now(), // Using current timestamp as we don't have it in logs
         });
       }
     });
 
     // Group entries by operation
     const operationGroups = new Map<string, PerformanceEntry[]>();
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       const group = operationGroups.get(entry.name) || [];
       group.push(entry);
       operationGroups.set(entry.name, group);
@@ -47,14 +47,14 @@ function analyzePerformanceData(logFile: string): void {
     // Calculate statistics for each operation
     const summaries: PerformanceSummary[] = [];
     operationGroups.forEach((group, operation) => {
-      const durations = group.map(entry => entry.duration);
+      const durations = group.map((entry) => entry.duration);
       const summary: PerformanceSummary = {
         operation,
         count: group.length,
         totalDuration: durations.reduce((sum, duration) => sum + duration, 0),
         averageDuration: 0,
         minDuration: Math.min(...durations),
-        maxDuration: Math.max(...durations)
+        maxDuration: Math.max(...durations),
       };
       summary.averageDuration = summary.totalDuration / summary.count;
       summaries.push(summary);
@@ -65,27 +65,31 @@ function analyzePerformanceData(logFile: string): void {
 
     // Generate report
     const report = [
-      'Performance Analysis Report',
-      '=======================',
-      '',
-      ...summaries.map(summary => [
-        `Operation: ${summary.operation}`,
-        `  Count: ${summary.count}`,
-        `  Average Duration: ${summary.averageDuration.toFixed(2)}ms`,
-        `  Min Duration: ${summary.minDuration}ms`,
-        `  Max Duration: ${summary.maxDuration}ms`,
-        `  Total Duration: ${summary.totalDuration}ms`,
-        ''
-      ]).flat()
-    ].join('\n');
+      "Performance Analysis Report",
+      "=======================",
+      "",
+      ...summaries
+        .map((summary) => [
+          `Operation: ${summary.operation}`,
+          `  Count: ${summary.count}`,
+          `  Average Duration: ${summary.averageDuration.toFixed(2)}ms`,
+          `  Min Duration: ${summary.minDuration}ms`,
+          `  Max Duration: ${summary.maxDuration}ms`,
+          `  Total Duration: ${summary.totalDuration}ms`,
+          "",
+        ])
+        .flat(),
+    ].join("\n");
 
     // Write report to file
-    const reportPath = path.join(path.dirname(logFile), 'performance-report.txt');
+    const reportPath = path.join(
+      path.dirname(logFile),
+      "performance-report.txt",
+    );
     fs.writeFileSync(reportPath, report);
     console.log(`Performance report written to: ${reportPath}`);
-
   } catch (error) {
-    console.error('Error analyzing performance data:', error);
+    console.error("Error analyzing performance data:", error);
   }
 }
 
@@ -93,10 +97,10 @@ function analyzePerformanceData(logFile: string): void {
 if (require.main === module) {
   const logFile = process.argv[2];
   if (!logFile) {
-    console.error('Please provide a log file path');
+    console.error("Please provide a log file path");
     process.exit(1);
   }
   analyzePerformanceData(logFile);
 }
 
-export { analyzePerformanceData }; 
+export { analyzePerformanceData };

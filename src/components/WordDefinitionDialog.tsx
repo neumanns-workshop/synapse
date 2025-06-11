@@ -17,10 +17,10 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 
-import AnimatedPaperButton from "./AnimatedButton";
-import CustomIcon from "./CustomIcon";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import AnimatedPaperButton from "./AnimatedButton";
+import CustomIcon from "./CustomIcon";
 
 interface WordDefinitionDialogProps {
   word: string;

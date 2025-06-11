@@ -1,799 +1,1007 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Synapse Summer Vibes Cards - Print Ready</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: "Inter", sans-serif;
+        background: #f8f9fa;
+      }
+
+      .print-container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .instructions {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        margin-bottom: 40px;
+      }
+
+      .card {
+        width: 350px;
+        height: 200px;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        color: #e8e8e8;
+        border-radius: 0;
+        padding: 20px;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        page-break-inside: avoid;
+        margin: 0 auto;
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .challenge-title {
+        flex: 1;
+      }
+
+      .word-pair {
+        font-size: 24px;
+        font-weight: 800;
+        margin: 0 0 6px 0;
+        line-height: 1.2;
+        letter-spacing: 0.5px;
+      }
+
+      .word-pair .arrow-line {
+        display: block;
+      }
+
+      .start-word {
+        color: #90eebb;
+        text-shadow: 0 0 3px rgba(144, 238, 187, 0.4);
+      }
+
+      .target-word {
+        color: #ff8787;
+        text-shadow: 0 0 3px rgba(255, 135, 135, 0.4);
+      }
+
+      .arrow {
+        color: #888;
+        margin: 0 8px;
+      }
+
+      .puzzle-number {
+        font-size: 11px;
+        font-weight: 500;
+        color: #bbb;
+        margin: 0 0 2px 0;
+        letter-spacing: 0.3px;
+      }
+
+      .theme-name {
+        font-size: 12px;
+        font-weight: 600;
+        background: linear-gradient(
+          135deg,
+          #c16c55 0%,
+          #d4834a 50%,
+          #c16c55 100%
+        );
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 0 4px 0;
+        letter-spacing: 1px;
+      }
+
+      .game-description {
+        font-size: 11px;
+        color: #aaa;
+        margin: 0 0 4px 0;
+        line-height: 1.4;
+        max-width: 180px;
+      }
+
+      .ai-challenge {
+        font-size: 10px;
+        font-weight: 500;
+        color: #ffd3b6;
+        font-style: italic;
+        margin: 0;
+        line-height: 1.3;
+        max-width: 180px;
+      }
+
+      .qr-container {
+        width: 120px;
+        margin-left: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .scan-prompt {
+        font-size: 9px;
+        font-weight: 600;
+        color: #bbb;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+      }
+
+      .qr-image {
+        width: 108px;
+        height: 108px;
+        border-radius: 4px;
+        background: white;
+        padding: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .qr-text {
+        font-size: 10px;
+        font-weight: 600;
+        color: #aaa;
+        text-align: center;
+        line-height: 1.2;
+      }
+
+      .qr-logo {
+        width: 20px;
+        height: 20px;
+      }
+
+      .brand-section {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      .card-footer {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        right: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+
+      .footer-left {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .difficulty {
+        font-size: 11px;
+        font-weight: 600;
+        color: #aaa;
+      }
+
+      .ai-taunt {
+        font-size: 10px;
+        font-weight: 500;
+        color: #ffd3b6;
+        font-style: italic;
+      }
+
+      .branding {
+        font-size: 11px;
+        font-weight: 600;
+        color: #aaa;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 4px;
+      }
+
+      @media print {
         body {
-            margin: 0;
-            padding: 20px;
-            font-family: 'Inter', sans-serif;
-            background: #f8f9fa;
+          background: white;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
-        
-        .print-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
         .instructions {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          display: none;
         }
-        
         .card-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 40px;
+          grid-template-columns: repeat(2, 1fr);
+          page-break-inside: avoid;
         }
-        
         .card {
-            width: 350px;
-            height: 200px;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            color: #e8e8e8;
-            border-radius: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-            page-break-inside: avoid;
-            margin: 0 auto;
+          box-shadow: none;
+          border: 1px solid #ddd;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
-        
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        
-        .challenge-title {
-            flex: 1;
-        }
-        
-        .word-pair {
-            font-size: 24px;
-            font-weight: 800;
-            margin: 0 0 6px 0;
-            line-height: 1.2;
-            letter-spacing: 0.5px;
-        }
-        
-        .word-pair .arrow-line {
-            display: block;
-        }
-        
-        .start-word {
-            color: #90EEBB;
-            text-shadow: 0 0 3px rgba(144, 238, 187, 0.4);
-        }
-        
-        .target-word {
-            color: #FF8787;
-            text-shadow: 0 0 3px rgba(255, 135, 135, 0.4);
-        }
-        
-        .arrow {
-            color: #888;
-            margin: 0 8px;
-        }
-        
-        .puzzle-number {
-            font-size: 11px;
-            font-weight: 500;
-            color: #bbb;
-            margin: 0 0 2px 0;
-            letter-spacing: 0.3px;
-        }
-        
-        .theme-name {
-            font-size: 12px;
-            font-weight: 600;
-            background: linear-gradient(135deg, #C16C55 0%, #D4834A 50%, #C16C55 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0 0 4px 0;
-            letter-spacing: 1px;
-        }
-        
-        .game-description {
-            font-size: 11px;
-            color: #aaa;
-            margin: 0 0 4px 0;
-            line-height: 1.4;
-            max-width: 180px;
-        }
-        
-        .ai-challenge {
-            font-size: 10px;
-            font-weight: 500;
-            color: #FFD3B6;
-            font-style: italic;
-            margin: 0;
-            line-height: 1.3;
-            max-width: 180px;
-        }
-        
-        .qr-container {
-            width: 120px;
-            margin-left: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .scan-prompt {
-            font-size: 9px;
-            font-weight: 600;
-            color: #bbb;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 2px;
-        }
-        
-        .qr-image {
-            width: 108px;
-            height: 108px;
-            border-radius: 4px;
-            background: white;
-            padding: 6px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .qr-text {
-            font-size: 10px;
-            font-weight: 600;
-            color: #aaa;
-            text-align: center;
-            line-height: 1.2;
-        }
-        
-        .qr-logo {
-            width: 20px;
-            height: 20px;
-        }
-        
-        .brand-section {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        
-        .card-footer {
-            position: absolute;
-            bottom: 16px;
-            left: 16px;
-            right: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-        
-        .footer-left {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        
-        .difficulty {
-            font-size: 11px;
-            font-weight: 600;
-            color: #aaa;
-        }
-        
-        .ai-taunt {
-            font-size: 10px;
-            font-weight: 500;
-            color: #FFD3B6;
-            font-style: italic;
-        }
-        
-        .branding {
-            font-size: 11px;
-            font-weight: 600;
-            color: #aaa;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .logo {
-            width: 28px;
-            height: 28px;
-            border-radius: 4px;
-        }
-        
-        @media print {
-            body { 
-                background: white; 
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .instructions { display: none; }
-            .card-grid { 
-                grid-template-columns: repeat(2, 1fr);
-                page-break-inside: avoid;
-            }
-            .card { 
-                box-shadow: none;
-                border: 1px solid #ddd;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-        }
-        
-        .print-hint {
-            background: #e3f2fd;
-            border: 1px solid #2196f3;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 20px 0;
-        }
+      }
+
+      .print-hint {
+        background: #e3f2fd;
+        border: 1px solid #2196f3;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 20px 0;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="print-container">
-        <div class="instructions">
-            <h1>🌞 Synapse Summer Vibes Cards</h1>
-            <p><strong>Generated:</strong> 2025-06-09T14:30:09.728Z</p>
-            <p><strong>Total Cards:</strong> 50</p>
-            <p><strong>Theme:</strong> Themed challenges for guerrilla marketing QR codes - OKC to Santa Fe summer road trip</p>
-            
-            <div class="print-hint">
-                <strong>📖 Printing Instructions:</strong><br>
-                1. Print on cardstock paper (recommended: 110-150gsm)<br>
-                2. Use "Actual size" or "100%" scaling (no "fit to page")<br>
-                3. Cut along card borders to create individual cards<br>
-                4. Each card is 350×200px (business card size)<br>
-                5. QR codes link directly to synapse.game challenges
+      <div class="instructions">
+        <h1>🌞 Synapse Summer Vibes Cards</h1>
+        <p><strong>Generated:</strong> 2025-06-09T14:30:09.728Z</p>
+        <p><strong>Total Cards:</strong> 50</p>
+        <p>
+          <strong>Theme:</strong> Themed challenges for guerrilla marketing QR
+          codes - OKC to Santa Fe summer road trip
+        </p>
+
+        <div class="print-hint">
+          <strong>📖 Printing Instructions:</strong><br />
+          1. Print on cardstock paper (recommended: 110-150gsm)<br />
+          2. Use "Actual size" or "100%" scaling (no "fit to page")<br />
+          3. Cut along card borders to create individual cards<br />
+          4. Each card is 350×200px (business card size)<br />
+          5. QR codes link directly to synapse.game challenges
+        </div>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >star <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">peace</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 1 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 14 moves,<br />can you do better?
+              </div>
             </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dstar%26target%3Dpeace%26theme%3Dsummer-vibes%26hash%3D2xvkpl&format=png&margin=10"
+                alt="QR Code for star to peace"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <div class="card-grid">
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">star <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">peace</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 1 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 14 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dstar%26target%3Dpeace%26theme%3Dsummer-vibes%26hash%3D2xvkpl&format=png&margin=10" 
-                                alt="QR Code for star to peace" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
 
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">guitar <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">story</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 2 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 12 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dguitar%26target%3Dstory%26theme%3Dsummer-vibes%26hash%3Dseowm0&format=png&margin=10" 
-                                alt="QR Code for guitar to story" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">home <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">relief</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 3 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 8 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dhome%26target%3Drelief%26theme%3Dsummer-vibes%26hash%3D6q5wm7&format=png&margin=10" 
-                                alt="QR Code for home to relief" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">road <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">freedom</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 4 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 13 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Droad%26target%3Dfreedom%26theme%3Dsummer-vibes%26hash%3De85x69&format=png&margin=10" 
-                                alt="QR Code for road to freedom" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">melody <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">soul</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 5 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 22 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dmelody%26target%3Dsoul%26theme%3Dsummer-vibes%26hash%3Dvx7lps&format=png&margin=10" 
-                                alt="QR Code for melody to soul" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">rest <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">oasis</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 6 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 28 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Drest%26target%3Doasis%26theme%3Dsummer-vibes%26hash%3Do5bolk&format=png&margin=10" 
-                                alt="QR Code for rest to oasis" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">rhythm <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">memory</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 7 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 14 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Drhythm%26target%3Dmemory%26theme%3Dsummer-vibes%26hash%3D4aaet4&format=png&margin=10" 
-                                alt="QR Code for rhythm to memory" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">safe <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">comfort</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 8 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 27 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dsafe%26target%3Dcomfort%26theme%3Dsummer-vibes%26hash%3D3pcinm&format=png&margin=10" 
-                                alt="QR Code for safe to comfort" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">tree <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">wisdom</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 9 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 21 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dtree%26target%3Dwisdom%26theme%3Dsummer-vibes%26hash%3D8rilsg&format=png&margin=10" 
-                                alt="QR Code for tree to wisdom" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">smile <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">sunshine</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 10 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 12 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dsmile%26target%3Dsunshine%26theme%3Dsummer-vibes%26hash%3D918c84&format=png&margin=10" 
-                                alt="QR Code for smile to sunshine" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">sky <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">calm</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 11 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 12 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dsky%26target%3Dcalm%26theme%3Dsummer-vibes%26hash%3Dpcgzkl&format=png&margin=10" 
-                                alt="QR Code for sky to calm" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">bird <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">guide</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 12 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 14 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dbird%26target%3Dguide%26theme%3Dsummer-vibes%26hash%3D753ixa&format=png&margin=10" 
-                                alt="QR Code for bird to guide" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">wind <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">infinite</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 13 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 18 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dwind%26target%3Dinfinite%26theme%3Dsummer-vibes%26hash%3Dsr36ah&format=png&margin=10" 
-                                alt="QR Code for wind to infinite" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">sun <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">treasure</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 14 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 21 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dsun%26target%3Dtreasure%26theme%3Dsummer-vibes%26hash%3D3eraa8&format=png&margin=10" 
-                                alt="QR Code for sun to treasure" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">adobe <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">gold</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 15 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 15 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dadobe%26target%3Dgold%26theme%3Dsummer-vibes%26hash%3Df671pe&format=png&margin=10" 
-                                alt="QR Code for adobe to gold" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">desert <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">mystery</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 16 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 19 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Ddesert%26target%3Dmystery%26theme%3Dsummer-vibes%26hash%3Dpssnxp&format=png&margin=10" 
-                                alt="QR Code for desert to mystery" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">voice <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">heart</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 17 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 10 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dvoice%26target%3Dheart%26theme%3Dsummer-vibes%26hash%3Dhro8y9&format=png&margin=10" 
-                                alt="QR Code for voice to heart" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
-                <div class="card">
-                    <div class="card-header">
-                        <div class="challenge-title">
-                            <div class="word-pair">
-                                <span class="start-word">cloud <span class="arrow">→</span></span>
-                                <span class="arrow-line"><span class="target-word">perspective</span></span>
-                            </div>
-                            <div class="theme-name">Summer Vibes</div>
-                            <div class="puzzle-number">Puzzle 18 of 18</div>
-                            <div class="game-description">Build the shortest path using word connections</div>
-                            <div class="ai-challenge">The AI got it in 9 moves,<br>can you do better?</div>
-                        </div>
-                        <div class="qr-container">
-                            <div class="scan-prompt">Scan to Play</div>
-                            <img 
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dcloud%26target%3Dperspective%26theme%3Dsummer-vibes%26hash%3Db50sne&format=png&margin=10" 
-                                alt="QR Code for cloud to perspective" 
-                                class="qr-image"
-                                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
-                            />
-                            <div class="brand-section">
-                                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+" alt="Synapse logo" class="qr-logo">
-                                <div class="qr-text">synapsegame.ai</div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >guitar <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">story</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 2 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 12 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dguitar%26target%3Dstory%26theme%3Dsummer-vibes%26hash%3Dseowm0&format=png&margin=10"
+                alt="QR Code for guitar to story"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <div class="instructions">
-            <h2>🎯 Guerrilla Marketing Strategy</h2>
-            <p><strong>Target Locations:</strong> Coffee shops, bookstores, coworking spaces, university bulletin boards</p>
-            <p><strong>Route:</strong> Oklahoma City → Santa Fe summer road trip</p>
-            <p><strong>Placement Tips:</strong> Ask permission, choose high-traffic areas, include a few business cards per location</p>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >home <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">relief</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 3 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 8 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dhome%26target%3Drelief%26theme%3Dsummer-vibes%26hash%3D6q5wm7&format=png&margin=10"
+                alt="QR Code for home to relief"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >road <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">freedom</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 4 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 13 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Droad%26target%3Dfreedom%26theme%3Dsummer-vibes%26hash%3De85x69&format=png&margin=10"
+                alt="QR Code for road to freedom"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >melody <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">soul</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 5 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 22 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dmelody%26target%3Dsoul%26theme%3Dsummer-vibes%26hash%3Dvx7lps&format=png&margin=10"
+                alt="QR Code for melody to soul"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >rest <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">oasis</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 6 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 28 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Drest%26target%3Doasis%26theme%3Dsummer-vibes%26hash%3Do5bolk&format=png&margin=10"
+                alt="QR Code for rest to oasis"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >rhythm <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">memory</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 7 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 14 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Drhythm%26target%3Dmemory%26theme%3Dsummer-vibes%26hash%3D4aaet4&format=png&margin=10"
+                alt="QR Code for rhythm to memory"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >safe <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">comfort</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 8 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 27 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dsafe%26target%3Dcomfort%26theme%3Dsummer-vibes%26hash%3D3pcinm&format=png&margin=10"
+                alt="QR Code for safe to comfort"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >tree <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">wisdom</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 9 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 21 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dtree%26target%3Dwisdom%26theme%3Dsummer-vibes%26hash%3D8rilsg&format=png&margin=10"
+                alt="QR Code for tree to wisdom"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >smile <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">sunshine</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 10 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 12 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dsmile%26target%3Dsunshine%26theme%3Dsummer-vibes%26hash%3D918c84&format=png&margin=10"
+                alt="QR Code for smile to sunshine"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word">sky <span class="arrow">→</span></span>
+                <span class="arrow-line"
+                  ><span class="target-word">calm</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 11 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 12 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dsky%26target%3Dcalm%26theme%3Dsummer-vibes%26hash%3Dpcgzkl&format=png&margin=10"
+                alt="QR Code for sky to calm"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >bird <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">guide</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 12 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 14 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dbird%26target%3Dguide%26theme%3Dsummer-vibes%26hash%3D753ixa&format=png&margin=10"
+                alt="QR Code for bird to guide"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >wind <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">infinite</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 13 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 18 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dwind%26target%3Dinfinite%26theme%3Dsummer-vibes%26hash%3Dsr36ah&format=png&margin=10"
+                alt="QR Code for wind to infinite"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word">sun <span class="arrow">→</span></span>
+                <span class="arrow-line"
+                  ><span class="target-word">treasure</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 14 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 21 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dsun%26target%3Dtreasure%26theme%3Dsummer-vibes%26hash%3D3eraa8&format=png&margin=10"
+                alt="QR Code for sun to treasure"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >adobe <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">gold</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 15 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 15 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dadobe%26target%3Dgold%26theme%3Dsummer-vibes%26hash%3Df671pe&format=png&margin=10"
+                alt="QR Code for adobe to gold"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >desert <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">mystery</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 16 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 19 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Ddesert%26target%3Dmystery%26theme%3Dsummer-vibes%26hash%3Dpssnxp&format=png&margin=10"
+                alt="QR Code for desert to mystery"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >voice <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">heart</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 17 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 10 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dvoice%26target%3Dheart%26theme%3Dsummer-vibes%26hash%3Dhro8y9&format=png&margin=10"
+                alt="QR Code for voice to heart"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="challenge-title">
+              <div class="word-pair">
+                <span class="start-word"
+                  >cloud <span class="arrow">→</span></span
+                >
+                <span class="arrow-line"
+                  ><span class="target-word">perspective</span></span
+                >
+              </div>
+              <div class="theme-name">Summer Vibes</div>
+              <div class="puzzle-number">Puzzle 18 of 18</div>
+              <div class="game-description">
+                Build the shortest path using word connections
+              </div>
+              <div class="ai-challenge">
+                The AI got it in 9 moves,<br />can you do better?
+              </div>
+            </div>
+            <div class="qr-container">
+              <div class="scan-prompt">Scan to Play</div>
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=108x108&data=https%3A%2F%2Fsynapse.game%2Fchallenge%3Fstart%3Dcloud%26target%3Dperspective%26theme%3Dsummer-vibes%26hash%3Db50sne&format=png&margin=10"
+                alt="QR Code for cloud to perspective"
+                class="qr-image"
+                onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=&quot;font-size:12px;text-align:center;line-height:108px;&quot;>QR</div>'"
+              />
+              <div class="brand-section">
+                <img
+                  src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjYiIGN5PSI3IiByPSI0IiBmaWxsPSIjOTBFRUJCIi8+CjxjaXJjbGUgY3g9IjE1IiBjeT0iMTYiIHI9IjQiIGZpbGw9IiM4N0NFRUIiLz4KPGNpcmNsZSBjeD0iMTEiIGN5PSIyNyIgcj0iNCIgZmlsbD0iI0ZGODc4NyIvPgo8Y2lyY2xlIGN4PSI3IiBjeT0iNSIgcj0iNCIgZmlsbD0iI0ZGRUU3NyIvPgo8bGluZSB4MT0iMjIiIHkxPSI5IiB4Mj0iMTgiIHkyPSIxNCIgc3Ryb2tlPSIjRkZEM0I2IiBzdHJva2Utd2lkdGg9IjIuNSIvPgo8bGluZSB4MT0iMTQiIHkxPSIxOSIgeDI9IjEyIiB5Mj0iMjQiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPGxpbmUgeDE9IjEwIiB5MT0iOCIgeDI9IjEzIiB5Mj0iMTMiIHN0cm9rZT0iI0ZGRDNCNiIgc3Ryb2tlLXdpZHRoPSIyLjUiLz4KPC9zdmc+"
+                  alt="Synapse logo"
+                  class="qr-logo"
+                />
+                <div class="qr-text">synapsegame.ai</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="instructions">
+        <h2>🎯 Guerrilla Marketing Strategy</h2>
+        <p>
+          <strong>Target Locations:</strong> Coffee shops, bookstores, coworking
+          spaces, university bulletin boards
+        </p>
+        <p><strong>Route:</strong> Oklahoma City → Santa Fe summer road trip</p>
+        <p>
+          <strong>Placement Tips:</strong> Ask permission, choose high-traffic
+          areas, include a few business cards per location
+        </p>
+      </div>
     </div>
-</body>
+  </body>
 </html>
