@@ -19,7 +19,7 @@
   "bugs": {
     "url": "https://github.com/your-username/synapse/issues"
   },
-  "license": "MIT",
+  "license": "UNLICENSED",
   "engines": {
     "node": ">=22.16.0",
     "npm": ">=10.0.0"
