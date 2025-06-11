@@ -48,13 +48,13 @@ beforeEach(() => {
 
 afterEach(async () => {
   process.env = originalEnv;
-  
+
   // Clear any Stripe-related singletons
   const StripeServiceModule = require("../StripeService");
   if (StripeServiceModule.StripeService) {
     (StripeServiceModule.StripeService as any).instance = undefined;
   }
-  
+
   // Clear any remaining timers or promises
   jest.clearAllTimers();
   await new Promise(setImmediate); // Flush promise queue
@@ -285,7 +285,7 @@ describe("StripeService", () => {
 
   describe("Environment Variables", () => {
     it("should handle missing Stripe publishable key gracefully", () => {
-      // Clean environment for test isolation  
+      // Clean environment for test isolation
       // Temporarily remove the environment variable
       delete process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 

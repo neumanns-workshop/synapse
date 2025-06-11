@@ -47,11 +47,11 @@ describe("SupabaseService", () => {
       if (currentState && currentState.subscription) {
         currentState.subscription.unsubscribe();
       }
-      
+
       // Reset the singleton to prevent state leakage
       (SupabaseService as any).instance = undefined;
     }
-    
+
     // Clear any remaining timers or promises
     jest.clearAllTimers();
     await new Promise(setImmediate); // Flush promise queue
