@@ -99,6 +99,14 @@ module.exports = {
       },
     },
     {
+      // All TypeScript and JavaScript files can use require in certain contexts
+      files: ["*.ts", "*.tsx", "*.js", "*.jsx"],
+      rules: {
+        "@typescript-eslint/no-var-requires": "warn", // Warn instead of error for require statements
+        "@typescript-eslint/no-empty-function": "warn", // Warn instead of error for empty functions
+      },
+    },
+    {
       // Test files can be more relaxed with certain rules
       files: ["**/*.test.{ts,tsx,js,jsx}", "**/__tests__/**/*.{ts,tsx,js,jsx}"],
       env: {
@@ -156,6 +164,8 @@ module.exports = {
         "react-native/no-inline-styles": "warn", // Warn instead of error for inline styles
         "react/no-unstable-nested-components": "warn", // Warn instead of error
         "react/no-unescaped-entities": "off", // Allow unescaped entities in UI
+        "react/display-name": "off", // Allow anonymous components in screens/components
+        "react/no-children-prop": "off", // Allow children as props in React Native
       },
     },
     {
