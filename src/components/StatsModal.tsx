@@ -788,9 +788,23 @@ const StatsModal = () => {
             startWord,
             targetWord,
           );
-          // For daily challenges, we'd need the AI steps and other data
-          // For now, use a simple message since we don't have all the data
-          message = `Daily challenge: "${startWord}" → "${targetWord}"`;
+          
+          // Generate proper daily challenge taunt
+          const aiSteps = selectedReport.aiPath ? selectedReport.aiPath.length - 1 : selectedReport.optimalPath.length - 1;
+          const userSteps = selectedReport.totalMoves;
+          const userCompleted = selectedReport.status === "won";
+          const userGaveUp = selectedReport.status === "given_up";
+          const challengeDate = selectedReport.dailyChallengeId; // Use challenge ID as date for now
+          
+          message = generateDailyChallengeTaunt({
+            startWord,
+            targetWord,
+            aiSteps,
+            userSteps,
+            userCompleted,
+            userGaveUp,
+            challengeDate,
+          });
         } else {
           link = generateSecureGameDeepLink(startWord, targetWord);
           message = generateChallengeMessage({

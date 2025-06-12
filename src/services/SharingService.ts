@@ -437,10 +437,15 @@ export const generateDailyChallengeTaunt = (
   }
 
   // If user gave up, acknowledge that but still challenge them
-  if (userGaveUp && userSteps) {
-    const moveText = userSteps === 1 ? "move" : "moves";
+  if (userGaveUp) {
     const aiMoveText = aiSteps === 1 ? "move" : "moves";
-    return `I gave up on ${formattedDate}'s challenge after ${userSteps} ${moveText} ("${startWord}" → "${targetWord}"), but the AI got it in ${aiSteps} ${aiMoveText}. Think you can beat the AI?`;
+    
+    if (userSteps && userSteps > 0) {
+      const moveText = userSteps === 1 ? "move" : "moves";
+      return `I couldn't get ${formattedDate}'s challenge ("${startWord}" → "${targetWord}") and gave up after ${userSteps} ${moveText}, but the AI got it in ${aiSteps} ${aiMoveText}. Can you beat the AI in less than ${aiSteps} moves?`;
+    } else {
+      return `I couldn't get ${formattedDate}'s challenge ("${startWord}" → "${targetWord}") and had to give up, but the AI got it in ${aiSteps} ${aiMoveText}. Can you beat the AI in less than ${aiSteps} moves?`;
+    }
   }
 
   // If user hasn't attempted it or no steps recorded, just taunt with AI score

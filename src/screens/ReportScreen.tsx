@@ -29,6 +29,7 @@ import {
   generateSecureGameDeepLink,
   generateSecureDailyChallengeDeepLink,
   generateChallengeMessage,
+  generateDailyChallengeTaunt,
 } from "../services/SharingService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -129,9 +130,23 @@ const ReportScreen = () => {
             startWord,
             targetWord,
           );
-          // For daily challenges, we'd need the taunt message here
-          // But this should be handled by DailyChallengeReport component
-          message = `Daily challenge: "${startWord}" → "${targetWord}"`;
+          
+          // Generate proper daily challenge taunt
+          const aiSteps = gameReport.aiPath ? gameReport.aiPath.length - 1 : gameReport.optimalPath.length - 1;
+          const userSteps = gameReport.totalMoves;
+          const userCompleted = gameReport.status === "won";
+          const userGaveUp = gameReport.status === "given_up";
+          const challengeDate = gameReport.dailyChallengeId; // Use challenge ID as date for now
+          
+          message = generateDailyChallengeTaunt({
+            startWord,
+            targetWord,
+            aiSteps,
+            userSteps,
+            userCompleted,
+            userGaveUp,
+            challengeDate,
+          });
         } else {
           link = generateSecureGameDeepLink(startWord, targetWord);
           message = generateChallengeMessage({
