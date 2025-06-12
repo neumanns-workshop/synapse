@@ -713,3 +713,149 @@ export const parseDailyChallengeDeepLink = (
     return null;
   }
 };
+
+/**
+ * Generate a secure deep link with share ID for rich previews
+ */
+export const generateSecureGameDeepLinkWithShare = (
+  startWord: string,
+  targetWord: string,
+  shareId: string,
+  theme?: string,
+): string => {
+  const data = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+  const hash = generateUrlHash(data);
+
+  // Build base URL parameters with share ID
+  const params = `start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}&share=${shareId}`;
+  const themeParam = theme ? `&theme=${encodeURIComponent(theme)}` : "";
+  const fullParams = `${params}${themeParam}`;
+
+  // Use the app's scheme for deep linking
+  // For web, use the web URL format with preview support for sharing
+  if (Platform.OS === "web") {
+    // Use current origin or a fixed URL for the web version
+    const origin =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "https://synapsegame.ai";
+    // Return preview URL for better link previews in social media
+    return `${origin}/challenge?${fullParams}`;
+  }
+
+  // For native apps, use the custom scheme
+  return `synapse://challenge?${fullParams}`;
+};
+
+/**
+ * Upload rich preview data to Netlify Blob for social media
+ */
+const uploadPreviewToNetlify = async (previewData: {
+  shareId: string;
+  challengeUrl: string;
+  title: string;
+  description: string;
+  graphImageBase64?: string;
+  qrCodeData: string;
+}) => {
+  try {
+    // Use share ID as the unique key for this preview
+    const blobKey = `preview-${previewData.shareId}`;
+
+    // Upload to Netlify Blob (via edge function)
+    const response = await fetch(`${origin}/api/upload-preview`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        key: blobKey,
+        data: previewData,
+      }),
+    });
+
+    if (response.ok) {
+      console.log("Preview uploaded successfully");
+      return blobKey;
+    }
+  } catch (error) {
+    console.error("Failed to upload preview:", error);
+  }
+  return null;
+};
+
+/**
+ * Enhanced sharing that includes rich preview upload
+ */
+export const shareWithRichPreview = async ({
+  startWord,
+  targetWord,
+  playerPath,
+  screenshotRef,
+  steps,
+  theme,
+  gameStatus,
+}: ShareChallengeOptions & {
+  gameStatus?: "won" | "given_up";
+}): Promise<boolean> => {
+  try {
+    // Generate unique share ID
+    const shareId = crypto.randomUUID();
+
+    // Generate the challenge URL with share ID
+    const challengeUrl = generateSecureGameDeepLinkWithShare(
+      startWord,
+      targetWord,
+      shareId,
+      theme,
+    );
+
+    // Generate taunt message
+    const tauntMessage = generateChallengeMessage({
+      startWord,
+      targetWord,
+      playerPath,
+      steps,
+      deepLink: challengeUrl,
+      gameStatus,
+    });
+
+    // Capture graph visualization if available
+    let graphImageBase64: string | undefined;
+    if (screenshotRef && screenshotRef.current) {
+      try {
+        const uri = await captureGameScreen(screenshotRef);
+        if (uri) {
+          // Convert to base64 for blob storage
+          graphImageBase64 = uri;
+        }
+      } catch (error) {
+        console.warn("Failed to capture graph image:", error);
+      }
+    }
+
+    // Upload rich preview data using share ID
+    const blobKey = await uploadPreviewToNetlify({
+      shareId,
+      challengeUrl,
+      title: `Synapse Challenge: "${startWord}" → "${targetWord}"`,
+      description: tauntMessage,
+      graphImageBase64,
+      qrCodeData: challengeUrl, // QR code will be generated from this
+    });
+
+    // Continue with normal sharing flow using rich URL
+    return await shareChallenge({
+      startWord,
+      targetWord,
+      playerPath,
+      screenshotRef,
+      includeScreenshot: true,
+      steps,
+      theme,
+    });
+  } catch (error) {
+    console.error("Enhanced sharing failed:", error);
+    return false;
+  }
+};

@@ -1,292 +1,226 @@
-// Netlify Edge Function for generating social media previews
+// Netlify Edge Function for social media previews
+// Simple logic: Bots get HTML with meta tags, humans get redirected
+
 interface Context {
   site?: {
     id: string;
     name: string;
     url: string;
   };
-  deploy?: {
-    id: string;
-    url: string;
-  };
 }
 
-// Interface for daily challenge taunt generation
-interface DailyChallengeTauntOptions {
-  startWord: string;
-  targetWord: string;
-  aiSteps: number;
-  userSteps?: number;
-  userCompleted?: boolean;
-  userGaveUp?: boolean;
-  challengeDate: string;
-}
-
-// Generate taunting message for daily challenges
-const generateDailyChallengeTaunt = (
-  options: DailyChallengeTauntOptions,
-): string => {
-  const {
-    startWord,
-    targetWord,
-    aiSteps,
-    userSteps,
-    userCompleted,
-    userGaveUp,
-    challengeDate,
-  } = options;
-
-  // If user hasn't attempted yet, show AI challenge
-  if (!userSteps) {
-    return `🤖 AI solved "${startWord}" → "${targetWord}" in just ${aiSteps} steps on ${challengeDate}. Think you can beat that? 🧠⚡`;
-  }
-
-  // If user completed it
-  if (userCompleted) {
-    if (userSteps <= aiSteps) {
-      return `🏆 Incredible! You beat the AI by solving "${startWord}" → "${targetWord}" in ${userSteps} steps vs AI's ${aiSteps} on ${challengeDate}! 🎯`;
-    } else {
-      return `✅ Well done! You solved "${startWord}" → "${targetWord}" in ${userSteps} steps on ${challengeDate}. AI did it in ${aiSteps} - can you improve? 🎯`;
-    }
-  }
-
-  // If user gave up
-  if (userGaveUp) {
-    return `😅 Gave up on "${startWord}" → "${targetWord}"? The AI cracked it in ${aiSteps} steps on ${challengeDate}. Ready for redemption? 💪`;
-  }
-
-  // If user attempted but didn't finish
-  return `🔥 You're ${userSteps} steps into "${startWord}" → "${targetWord}" from ${challengeDate}. AI finished in ${aiSteps} - keep going! 🚀`;
-};
-
-// Simple hash function for URL validation
+// Hash generation (matches client-side)
 const generateUrlHash = (data: string): string => {
   let hash = 0;
-  for (let i = 0; i < data.length; i++) {
-    const char = data.charCodeAt(i);
+  const secret = "synapse_challenge_2025";
+  const combined = data + secret;
+
+  for (let i = 0; i < combined.length; i++) {
+    const char = combined.charCodeAt(i);
     hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
+    hash = hash & hash;
   }
-  return Math.abs(hash).toString(36);
+
+  return Math.abs(hash).toString(36).substring(0, 8);
 };
 
-// Validate challenge hash to prevent URL manipulation
-const validateChallengeHash = (
-  startWord: string,
-  targetWord: string,
-  providedHash: string,
-): boolean => {
-  const expectedHash = generateUrlHash(`${startWord}-${targetWord}-challenge`);
-  return expectedHash === providedHash;
-};
-
-// Validate daily challenge hash
-const validateDailyChallengeHash = (
-  challengeId: string,
-  startWord: string,
-  targetWord: string,
-  providedHash: string,
-): boolean => {
-  const expectedHash = generateUrlHash(
-    `${challengeId}-${startWord}-${targetWord}-daily`,
+// Parse challenge URL
+const parseChallenge = (url: string) => {
+  // Regular challenge with share ID: /challenge?start=X&target=Y&hash=Z&share=W
+  const challengeMatchWithShare = url.match(
+    /\/challenge\?start=([^&]+)&target=([^&]+)&hash=([^&]+)&share=([^&]+)/,
   );
-  return expectedHash === providedHash;
-};
+  if (challengeMatchWithShare) {
+    const startWord = decodeURIComponent(challengeMatchWithShare[1]);
+    const targetWord = decodeURIComponent(challengeMatchWithShare[2]);
+    const providedHash = challengeMatchWithShare[3];
+    const shareId = challengeMatchWithShare[4];
 
-// Parse challenge URLs
-const parseGameChallenge = (url: string) => {
-  const secureRegex =
-    /\/challenge\?start=([^&]+)&target=([^&]+)&(?:hash=([^&]+)&theme=([^&]+)|theme=([^&]+)&hash=([^&]+)|hash=([^&]+))/;
-  const match = url.match(secureRegex);
+    const expectedHash = generateUrlHash(
+      `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`,
+    );
+    const isValid = expectedHash === providedHash;
 
-  if (match && match.length >= 4) {
-    const startWord = decodeURIComponent(match[1]);
-    const targetWord = decodeURIComponent(match[2]);
-
-    let providedHash: string;
-    let theme: string | undefined;
-
-    if (match[3] && match[4]) {
-      providedHash = match[3];
-      theme = decodeURIComponent(match[4]);
-    } else if (match[5] && match[6]) {
-      theme = decodeURIComponent(match[5]);
-      providedHash = match[6];
-    } else if (match[7]) {
-      providedHash = match[7];
-    } else {
-      return null;
-    }
-
-    const isValid = validateChallengeHash(startWord, targetWord, providedHash);
-    return { startWord, targetWord, theme, isValid };
+    return {
+      type: "challenge",
+      startWord,
+      targetWord,
+      shareId,
+      isValid,
+    };
   }
-  return null;
-};
 
-const parseDailyChallenge = (url: string) => {
-  const secureRegex =
-    /\/dailychallenge\?id=([^&]+)&start=([^&]+)&target=([^&]+)&hash=([^&]+)/;
-  const match = url.match(secureRegex);
+  // Regular challenge without share ID: /challenge?start=X&target=Y&hash=Z
+  const challengeMatch = url.match(
+    /\/challenge\?start=([^&]+)&target=([^&]+)&hash=([^&]+)/,
+  );
+  if (challengeMatch) {
+    const startWord = decodeURIComponent(challengeMatch[1]);
+    const targetWord = decodeURIComponent(challengeMatch[2]);
+    const providedHash = challengeMatch[3];
 
-  if (match && match.length >= 5) {
-    const challengeId = decodeURIComponent(match[1]);
-    const startWord = decodeURIComponent(match[2]);
-    const targetWord = decodeURIComponent(match[3]);
-    const providedHash = match[4];
+    const expectedHash = generateUrlHash(
+      `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`,
+    );
+    const isValid = expectedHash === providedHash;
 
-    const isValid = validateDailyChallengeHash(
+    return {
+      type: "challenge",
+      startWord,
+      targetWord,
+      isValid,
+    };
+  }
+
+  // Daily challenge: /dailychallenge?id=X&start=Y&target=Z&hash=W
+  const dailyMatch = url.match(
+    /\/dailychallenge\?id=([^&]+)&start=([^&]+)&target=([^&]+)&hash=([^&]+)/,
+  );
+  if (dailyMatch) {
+    const challengeId = decodeURIComponent(dailyMatch[1]);
+    const startWord = decodeURIComponent(dailyMatch[2]);
+    const targetWord = decodeURIComponent(dailyMatch[3]);
+    const providedHash = dailyMatch[4];
+
+    const expectedHash = generateUrlHash(
+      `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`,
+    );
+    const isValid = expectedHash === providedHash;
+
+    return {
+      type: "daily",
       challengeId,
       startWord,
       targetWord,
-      providedHash,
-    );
-    return { challengeId, startWord, targetWord, isValid };
+      isValid,
+    };
   }
+
   return null;
 };
 
-// Generate meta tags HTML
-const generateMetaTags = (
-  title: string,
-  description: string,
-  imageUrl: string,
-  url: string,
-): string => {
-  return `
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="${title}" />
-    <meta property="og:description" content="${description}" />
-    <meta property="og:image" content="${imageUrl}" />
-    <meta property="og:url" content="${url}" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Synapse Game" />
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${title}" />
-    <meta name="twitter:description" content="${description}" />
-    <meta name="twitter:image" content="${imageUrl}" />
-    
-    <!-- Additional Meta Tags -->
-    <meta name="description" content="${description}" />
-    <title>${title}</title>
-  `;
+// Generate preview HTML for bots using rich data if available
+const generatePreviewHTML = async (
+  challenge: any,
+  fullUrl: string,
+  origin: string,
+): Promise<string> => {
+  // Try to get rich preview data from blob storage using share ID
+  let richData = null;
+
+  if (challenge.shareId) {
+    try {
+      const blobKey = `preview-${challenge.shareId}`;
+      const blobUrl = `${origin}/.netlify/blobs/${blobKey}`;
+      const blobResponse = await fetch(blobUrl);
+      if (blobResponse.ok) {
+        richData = await blobResponse.json();
+
+        // Check if data is expired
+        if (richData.expiresAt && Date.now() > richData.expiresAt) {
+          richData = null;
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to fetch rich preview data:", error);
+    }
+  }
+
+  // Use rich data if available, otherwise fallback to basic data
+  let title: string;
+  let description: string;
+  let imageUrl: string;
+
+  if (richData) {
+    title = richData.title;
+    description = richData.description;
+
+    // Use actual game graph image if available
+    if (richData.graphImageBase64) {
+      imageUrl = `data:image/png;base64,${richData.graphImageBase64}`;
+    } else {
+      // Fallback to dynamic image generation
+      imageUrl = `${origin}/api/image?start=${encodeURIComponent(challenge.startWord)}&target=${encodeURIComponent(challenge.targetWord)}&url=${encodeURIComponent(fullUrl)}`;
+    }
+  } else {
+    // Fallback for URLs without rich preview data
+    if (challenge.type === "daily") {
+      title = `Daily Synapse Challenge`;
+      description = `🤖 Can you connect "${challenge.startWord}" to "${challenge.targetWord}" in today's daily challenge? Test your word navigation skills!`;
+    } else {
+      title = `Synapse Challenge: "${challenge.startWord}" → "${challenge.targetWord}"`;
+      description = `Can you connect "${challenge.startWord}" to "${challenge.targetWord}" using semantic pathways? Join this word navigation puzzle!`;
+    }
+    imageUrl = `${origin}/api/image?start=${encodeURIComponent(challenge.startWord)}&target=${encodeURIComponent(challenge.targetWord)}&url=${encodeURIComponent(fullUrl)}`;
+  }
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${title}</title>
+  <meta name="description" content="${description}">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="${title}">
+  <meta property="og:description" content="${description}">
+  <meta property="og:image" content="${imageUrl}">
+  <meta property="og:url" content="${fullUrl}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Synapse Game">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${title}">
+  <meta name="twitter:description" content="${description}">
+  <meta name="twitter:image" content="${imageUrl}">
+</head>
+<body>
+  <h1>${title}</h1>
+  <p>${description}</p>
+  <p><a href="${origin}">Play on Synapse Game</a></p>
+</body>
+</html>`;
 };
 
-// Main Edge Function
+// Main edge function
 export default async (request: Request, _context: Context) => {
   const url = new URL(request.url);
-  const pathname = url.pathname;
   const fullUrl = request.url;
-
-  // Check if this is a bot/crawler request
   const userAgent = request.headers.get("user-agent") || "";
+
+  // Detect bots/crawlers
   const isBot =
-    /bot|crawler|spider|facebook|twitter|linkedin|whatsapp|telegram|discord/i.test(
+    /bot|crawler|spider|facebook|twitter|linkedin|whatsapp|telegram|discord|facebookexternalhit/i.test(
       userAgent,
     );
 
-  // If not a bot and not a preview request, redirect to the actual app
-  if (!isBot && !url.searchParams.has("preview")) {
-    // For regular users, serve the normal app (convert back to hash-based routing)
-    const challengeUrl = url.toString().replace(/^https?:\/\/[^/]+\//, "/#/");
-    return Response.redirect(url.origin + challengeUrl, 302);
+  // Parse the challenge from URL
+  const challenge = parseChallenge(url.pathname + url.search);
+
+  if (!challenge || !challenge.isValid) {
+    // Invalid/unrecognized URL - redirect to home
+    return Response.redirect(url.origin + "/#/", 302);
   }
 
-  // Try to parse as game challenge
-  const gameChallenge = parseGameChallenge(pathname + url.search);
-  if (gameChallenge && gameChallenge.isValid) {
-    const { startWord, targetWord } = gameChallenge;
-
-    const title = `Synapse Challenge: "${startWord}" → "${targetWord}"`;
-    const description = `Can you connect "${startWord}" to "${targetWord}" using semantic pathways? Join this word navigation puzzle!`;
-    const imageUrl = `${url.origin}/api/image?start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&url=${encodeURIComponent(fullUrl)}`;
-
-    const metaTags = generateMetaTags(title, description, imageUrl, fullUrl);
-
-    // Convert back to hash-based routing for the redirect
-    const challengeUrl = url.toString().replace(/^https?:\/\/[^/]+\//, "/#/");
-    const redirectUrl = url.origin + challengeUrl;
-
-    return new Response(
-      `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        ${metaTags}
-        <script>
-          // Redirect after meta tags are parsed
-          setTimeout(() => {
-            window.location.href = '${redirectUrl}';
-          }, 100);
-        </script>
-      </head>
-      <body>
-        <h1>Loading Synapse Challenge...</h1>
-        <p>Redirecting to the game...</p>
-      </body>
-      </html>
-    `,
-      {
-        headers: { "Content-Type": "text/html" },
-      },
-    );
-  }
-
-  // Try to parse as daily challenge
-  const dailyChallenge = parseDailyChallenge(pathname + url.search);
-  if (dailyChallenge && dailyChallenge.isValid) {
-    const { startWord, targetWord } = dailyChallenge;
-
-    // For daily challenges, we need to generate a taunt
-    // Since we don't have user data in the edge function, we'll use a generic AI challenge
-    const today = new Date().toISOString().split("T")[0];
-    const aiSteps = Math.floor(Math.random() * 5) + 3; // Simulate AI steps (3-7)
-
-    const taunt = generateDailyChallengeTaunt({
-      startWord,
-      targetWord,
-      aiSteps,
-      challengeDate: today,
+  // For bots: serve preview HTML
+  if (isBot) {
+    const html = await generatePreviewHTML(challenge, fullUrl, url.origin);
+    return new Response(html, {
+      headers: { "Content-Type": "text/html" },
     });
-
-    const title = `Daily Synapse Challenge`;
-    const description = taunt;
-    const imageUrl = `${url.origin}/api/image?start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&url=${encodeURIComponent(fullUrl)}`;
-
-    const metaTags = generateMetaTags(title, description, imageUrl, fullUrl);
-
-    // Convert back to hash-based routing for the redirect
-    const challengeUrl = url.toString().replace(/^https?:\/\/[^/]+\//, "/#/");
-    const redirectUrl = url.origin + challengeUrl;
-
-    return new Response(
-      `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        ${metaTags}
-        <script>
-          // Redirect after meta tags are parsed
-          setTimeout(() => {
-            window.location.href = '${redirectUrl}';
-          }, 100);
-        </script>
-      </head>
-      <body>
-        <h1>Loading Daily Synapse Challenge...</h1>
-        <p>Redirecting to the game...</p>
-      </body>
-      </html>
-    `,
-      {
-        headers: { "Content-Type": "text/html" },
-      },
-    );
   }
 
-  // Fallback for unrecognized URLs - convert to hash-based routing
-  const challengeUrl = url.toString().replace(/^https?:\/\/[^/]+\//, "/#/");
-  return Response.redirect(url.origin + challengeUrl, 302);
+  // For humans: redirect to app
+  if (challenge.type === "daily") {
+    return Response.redirect(
+      `${url.origin}/#/dailychallenge?id=${encodeURIComponent(challenge.challengeId!)}&start=${encodeURIComponent(challenge.startWord)}&target=${encodeURIComponent(challenge.targetWord)}&hash=${generateUrlHash(`${challenge.challengeId!}:${challenge.startWord.toLowerCase()}:${challenge.targetWord.toLowerCase()}`)}`,
+      302,
+    );
+  } else {
+    return Response.redirect(
+      `${url.origin}/#/challenge?start=${encodeURIComponent(challenge.startWord)}&target=${encodeURIComponent(challenge.targetWord)}&hash=${generateUrlHash(`${challenge.startWord.toLowerCase()}:${challenge.targetWord.toLowerCase()}`)}`,
+      302,
+    );
+  }
 };
