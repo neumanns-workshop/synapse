@@ -56,34 +56,14 @@ const generateWordPath = (startWord: string, targetWord: string): { nodes: Node[
   return { nodes, edges };
 };
 
-// Generate QR code as data URL
-const generateQRCode = async (url: string): Promise<string> => {
-  // Simple QR code generation - in production you'd use a proper QR library
-  // For now, return a placeholder or use external service
-  const size = 100;
-  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&format=png&margin=0`;
-  
-  try {
-    const response = await fetch(qrApiUrl);
-    const arrayBuffer = await response.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-    return `data:image/png;base64,${base64}`;
-  } catch (error) {
-    console.error('QR generation failed:', error);
-    return '';
-  }
-};
-
-// Generate SVG visualization
-const generateChallengeSVG = async (
+// Simple approach: return SVG with better compatibility headers
+const generateCompatibleSVG = async (
   startWord: string,
   targetWord: string,
-  challengeUrl: string,
-  width: number = 600,
-  height: number = 400
+  challengeUrl: string
 ): Promise<string> => {
   const { nodes, edges } = generateWordPath(startWord, targetWord);
-
+  
   // Generate edges SVG
   const edgesSvg = edges.map(edge => {
     const fromNode = nodes.find(n => n.word === edge.from);
@@ -99,46 +79,29 @@ const generateChallengeSVG = async (
     const color = node.isStart ? '#90EEBB' : node.isTarget ? '#FF8787' : '#87CEEB';
     return `
       <circle cx="${node.x}" cy="${node.y}" r="25" fill="${color}" stroke="#FFFFFF" stroke-width="2"/>
-      <text x="${node.x}" y="${node.y}" text-anchor="middle" dominant-baseline="central" fill="#000000" font-family="Arial" font-size="12" font-weight="bold">${node.word}</text>
+      <text x="${node.x}" y="${node.y + 4}" text-anchor="middle" fill="#000000" font-family="Arial, sans-serif" font-size="12" font-weight="bold">${node.word}</text>
     `;
   }).join('');
 
-  // QR code placeholder (we'll embed it as an external image)
+  // QR code (external reference)
   const qrSize = 80;
-  const qrX = width - qrSize - 20;
-  const qrY = height - qrSize - 20;
+  const qrX = 600 - qrSize - 20;
+  const qrY = 400 - qrSize - 20;
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${encodeURIComponent(challengeUrl)}&format=png&margin=1`;
 
-  const svg = `
-    <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-      <!-- Background -->
-      <rect width="${width}" height="${height}" fill="#1a1a1a"/>
-      
-      <!-- Title -->
-      <text x="${width/2}" y="40" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="24" font-weight="bold">"${startWord}" → "${targetWord}"</text>
-      
-      <!-- Subtitle -->
-      <text x="${width/2}" y="70" text-anchor="middle" fill="#CCCCCC" font-family="Arial" font-size="16">Synapse - Semantic Pathways</text>
-      
-      <!-- Edges -->
-      ${edgesSvg}
-      
-      <!-- Nodes -->
-      ${nodesSvg}
-      
-      <!-- QR Code Background -->
-      <rect x="${qrX - 5}" y="${qrY - 5}" width="${qrSize + 10}" height="${qrSize + 10}" fill="#FFFFFF" rx="5"/>
-      
-      <!-- QR Code -->
-      <image x="${qrX}" y="${qrY}" width="${qrSize}" height="${qrSize}" href="${qrImageUrl}"/>
-      
-      <!-- QR Code Label -->
-      <text x="${qrX + qrSize/2}" y="${qrY - 10}" text-anchor="middle" fill="#FFFFFF" font-family="Arial" font-size="12">Scan to Play</text>
-    </svg>
-  `;
-
-  return svg;
+  return `<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <rect width="600" height="400" fill="#1a1a1a"/>
+    <text x="300" y="40" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="24" font-weight="bold">"${startWord}" → "${targetWord}"</text>
+    <text x="300" y="70" text-anchor="middle" fill="#CCCCCC" font-family="Arial, sans-serif" font-size="16">Synapse - Semantic Pathways</text>
+    ${edgesSvg}
+    ${nodesSvg}
+    <rect x="${qrX - 5}" y="${qrY - 5}" width="${qrSize + 10}" height="${qrSize + 10}" fill="#FFFFFF" rx="5"/>
+    <image x="${qrX}" y="${qrY}" width="${qrSize}" height="${qrSize}" xlink:href="${qrImageUrl}"/>
+    <text x="${qrX + qrSize/2}" y="${qrY - 10}" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="12">Scan to Play</text>
+  </svg>`;
 };
+
+
 
 // Main image generation function
 export default async (request: Request, context: Context) => {
@@ -148,13 +111,16 @@ export default async (request: Request, context: Context) => {
     const targetWord = url.searchParams.get('target') || 'end';
     const challengeUrl = url.searchParams.get('url') || `${url.origin}/challenge?start=${startWord}&target=${targetWord}`;
 
-    // Generate SVG visualization
-    const svg = await generateChallengeSVG(startWord, targetWord, challengeUrl);
+    // Generate compatible SVG visualization
+    const svg = await generateCompatibleSVG(startWord, targetWord, challengeUrl);
 
     return new Response(svg, {
       headers: {
         'Content-Type': 'image/svg+xml',
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Cache-Control': 'public, max-age=3600, immutable',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET',
+        'Access-Control-Allow-Headers': 'Content-Type',
       },
     });
 
