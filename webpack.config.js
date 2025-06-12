@@ -111,28 +111,43 @@ module.exports = async function (env, argv) {
     }),
   );
 
-  // Instead of using Dotenv plugin, let's manually load environment variables
-  // to avoid conflicts with Expo's DefinePlugin
+  // Load environment variables from both .env files and process.env
   const dotenv = require("dotenv");
   const fs = require("fs");
 
-  // Load .env file if it exists
+  // Collect all EXPO_PUBLIC_ environment variables
+  const envVars = {};
+
+  // First, load from .env file if it exists (for local development)
   if (fs.existsSync("./.env")) {
     const envConfig = dotenv.parse(fs.readFileSync("./.env"));
+    Object.keys(envConfig).forEach((key) => {
+      if (key.startsWith("EXPO_PUBLIC_")) {
+        envVars[key] = envConfig[key];
+      }
+    });
+  }
 
-    // Find existing DefinePlugin and merge our env vars
-    const definePlugin = config.plugins.find(
-      (plugin) => plugin.constructor.name === "DefinePlugin",
-    );
-
-    if (definePlugin) {
-      // Merge environment variables into existing DefinePlugin
-      Object.keys(envConfig).forEach((key) => {
-        definePlugin.definitions[`process.env.${key}`] = JSON.stringify(
-          envConfig[key],
-        );
-      });
+  // Then, load from process.env (for Netlify and other CI environments)
+  // This will override .env file values if both exist
+  Object.keys(process.env).forEach((key) => {
+    if (key.startsWith("EXPO_PUBLIC_")) {
+      envVars[key] = process.env[key];
     }
+  });
+
+  // Find existing DefinePlugin and merge our env vars
+  const definePlugin = config.plugins.find(
+    (plugin) => plugin.constructor.name === "DefinePlugin",
+  );
+
+  if (definePlugin) {
+    // Merge environment variables into existing DefinePlugin
+    Object.keys(envVars).forEach((key) => {
+      definePlugin.definitions[`process.env.${key}`] = JSON.stringify(
+        envVars[key],
+      );
+    });
   }
 
   // Add performance hints for production
