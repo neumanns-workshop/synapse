@@ -348,11 +348,20 @@ export class SupabaseService {
 
   public async signInAnonymously(captchaToken?: string) {
     try {
+      console.log("🔐 SupabaseService.signInAnonymously called with captcha:", !!captchaToken);
       const { data, error } = await this.supabase.auth.signInAnonymously({
         options: {
           captchaToken,
         },
       });
+      
+      console.log("🔐 Supabase anonymous auth response:", {
+        hasUser: !!data?.user,
+        hasSession: !!data?.session,
+        hasAccessToken: !!data?.session?.access_token,
+        errorCode: error?.message || 'none'
+      });
+      
       if (error) throw error;
 
       // Important: Update auth state after anonymous sign-in

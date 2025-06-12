@@ -412,6 +412,8 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
       // STEP 1: Create anonymous user with captcha token (same as traditional signup)
       console.log("🎫 Creating anonymous session with captcha...");
+      console.log("🎫 CAPTCHA token length:", token?.length || 0);
+      console.log("🎫 CAPTCHA token starts with:", token?.substring(0, 10) || 'undefined');
       const { data: anonSessionData, error: anonError } =
         await supabaseService.signInAnonymously(token);
 
@@ -421,7 +423,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         !anonSessionData?.user?.id
       ) {
         console.error("🎫 Anonymous sign-in failed:", anonError);
-        setErrorMessage("Failed to create temporary session");
+        console.error("🎫 Session data:", anonSessionData);
+        console.error("🎫 Has session:", !!anonSessionData?.session);
+        console.error("🎫 Has user:", !!anonSessionData?.user);
+        console.error("🎫 Has access token:", !!anonSessionData?.session?.access_token);
+        
+        // More specific error message based on the actual error
+        const errorMsg = anonError instanceof Error ? anonError.message : "Failed to create temporary session";
+        setErrorMessage(`Authentication error: ${errorMsg}`);
         return;
       }
 
