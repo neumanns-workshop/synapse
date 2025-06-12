@@ -1,6 +1,4 @@
 // Test file for src/utils/StyleUtils.ts
-import { getPointerEventStyles, getShadowStyles } from "../StyleUtils";
-
 // Mock the Platform module directly
 jest.mock("react-native", () => ({
   Platform: {
@@ -11,6 +9,7 @@ jest.mock("react-native", () => ({
 
 // Import Platform after mocking
 import { Platform } from "react-native";
+import { getPointerEventStyles, getShadowStyles } from "../StyleUtils";
 
 describe("StyleUtils", () => {
   describe("getPointerEventStyles", () => {

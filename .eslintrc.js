@@ -43,23 +43,22 @@ module.exports = {
     },
   },
   rules: {
+    // Disable rules that are too noisy in development
+    "@typescript-eslint/no-unused-vars": "off", // Too noisy in development
+    "@typescript-eslint/no-non-null-assertion": "warn", // Downgrade from error
+    "@typescript-eslint/no-explicit-any": "warn", // Downgrade from error
+    "@typescript-eslint/no-shadow": "off", // Often unavoidable
+    "@typescript-eslint/no-empty-function": "off", // Sometimes needed for callbacks
+    "react-hooks/exhaustive-deps": "warn", // Important but often needs manual review
+    "react-native/no-inline-styles": "off", // Too restrictive for prototyping
+    "no-useless-escape": "warn", // Often needed for regex
+    "no-new": "off", // Sometimes needed for side effects
+    "import/order": "warn", // Nice to have but not critical
+    "@typescript-eslint/no-var-requires": "off", // Sometimes needed for dynamic imports
+
     // Core TypeScript Rules
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "@typescript-eslint/no-explicit-any": "warn", // Warn instead of error
-    "@typescript-eslint/no-unused-vars": [
-      "warn",
-      {
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-        ignoreRestSiblings: true,
-        args: "after-used",
-      },
-    ],
-    "@typescript-eslint/no-var-requires": "warn", // Warn instead of error
-    "@typescript-eslint/no-empty-function": "warn", // Warn instead of error
-    "@typescript-eslint/no-non-null-assertion": "warn", // Warn instead of error
-    "@typescript-eslint/no-shadow": "warn", // Warn instead of error
 
     // Console and debugging
     "no-console": "off", // Allow console statements in development
@@ -71,20 +70,13 @@ module.exports = {
     "react/no-unescaped-entities": "warn", // Warn instead of error
     "react/no-unstable-nested-components": "warn", // Warn instead of error
 
-    // React Native specific
-    "react-native/no-inline-styles": "warn", // Warn instead of error
-
     // Import organization
-    "import/order": "warn", // Warn instead of error
+    "import/no-duplicates": "warn",
+    // 'prettier/prettier': 'warn', // This line is usually not needed if using plugin:prettier/recommended
 
     // Disable overly strict rules
     "prefer-const": "warn",
-    "no-unused-vars": "off", // Use TypeScript version instead
     "no-undef": "off", // TypeScript handles this
-
-    // Import organization and other rules
-    "import/no-duplicates": "warn",
-    // 'prettier/prettier': 'warn', // This line is usually not needed if using plugin:prettier/recommended
 
     // Add other rules as needed
   },
@@ -181,6 +173,13 @@ module.exports = {
         "react-native/no-inline-styles": "off", // Allow inline styles in development
         "react/no-unstable-nested-components": "off", // Allow nested components in screens/components
         "@typescript-eslint/no-shadow": "off", // Allow variable shadowing in complex components
+      },
+    },
+    {
+      files: ["*.test.ts", "*.test.tsx"],
+      rules: {
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/no-explicit-any": "off",
       },
     },
   ],

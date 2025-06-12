@@ -26,22 +26,25 @@ interface Edge {
 }
 
 // Generate a simple word path for visualization
-const generateWordPath = (startWord: string, targetWord: string): { nodes: Node[], edges: Edge[] } => {
+const generateWordPath = (
+  startWord: string,
+  targetWord: string,
+): { nodes: Node[]; edges: Edge[] } => {
   // For now, create a simple 3-step path
   // In a real implementation, this would use your word embedding logic
   const intermediateWords = [
     "step1", // Placeholder - in real app this would be semantic
-    "step2"
+    "step2",
   ];
-  
+
   const allWords = [startWord, ...intermediateWords, targetWord];
   const nodes: Node[] = allWords.map((word, index) => ({
     word,
-    x: 50 + (index * 150), // Horizontal layout
+    x: 50 + index * 150, // Horizontal layout
     y: 150 + Math.sin(index * 0.5) * 50, // Slight curve
     isPath: true,
     isStart: index === 0,
-    isTarget: index === allWords.length - 1
+    isTarget: index === allWords.length - 1,
   }));
 
   const edges: Edge[] = [];
@@ -49,7 +52,7 @@ const generateWordPath = (startWord: string, targetWord: string): { nodes: Node[
     edges.push({
       from: allWords[i],
       to: allWords[i + 1],
-      isPath: true
+      isPath: true,
     });
   }
 
@@ -60,28 +63,36 @@ const generateWordPath = (startWord: string, targetWord: string): { nodes: Node[
 const generateCompatibleSVG = async (
   startWord: string,
   targetWord: string,
-  challengeUrl: string
+  challengeUrl: string,
 ): Promise<string> => {
   const { nodes, edges } = generateWordPath(startWord, targetWord);
-  
+
   // Generate edges SVG
-  const edgesSvg = edges.map(edge => {
-    const fromNode = nodes.find(n => n.word === edge.from);
-    const toNode = nodes.find(n => n.word === edge.to);
-    if (fromNode && toNode) {
-      return `<line x1="${fromNode.x}" y1="${fromNode.y}" x2="${toNode.x}" y2="${toNode.y}" stroke="#FFD3B6" stroke-width="3"/>`;
-    }
-    return '';
-  }).join('');
+  const edgesSvg = edges
+    .map((edge) => {
+      const fromNode = nodes.find((n) => n.word === edge.from);
+      const toNode = nodes.find((n) => n.word === edge.to);
+      if (fromNode && toNode) {
+        return `<line x1="${fromNode.x}" y1="${fromNode.y}" x2="${toNode.x}" y2="${toNode.y}" stroke="#FFD3B6" stroke-width="3"/>`;
+      }
+      return "";
+    })
+    .join("");
 
   // Generate nodes SVG
-  const nodesSvg = nodes.map(node => {
-    const color = node.isStart ? '#90EEBB' : node.isTarget ? '#FF8787' : '#87CEEB';
-    return `
+  const nodesSvg = nodes
+    .map((node) => {
+      const color = node.isStart
+        ? "#90EEBB"
+        : node.isTarget
+          ? "#FF8787"
+          : "#87CEEB";
+      return `
       <circle cx="${node.x}" cy="${node.y}" r="25" fill="${color}" stroke="#FFFFFF" stroke-width="2"/>
       <text x="${node.x}" y="${node.y + 4}" text-anchor="middle" fill="#000000" font-family="Arial, sans-serif" font-size="12" font-weight="bold">${node.word}</text>
     `;
-  }).join('');
+    })
+    .join("");
 
   // QR code (external reference)
   const qrSize = 80;
@@ -97,36 +108,39 @@ const generateCompatibleSVG = async (
     ${nodesSvg}
     <rect x="${qrX - 5}" y="${qrY - 5}" width="${qrSize + 10}" height="${qrSize + 10}" fill="#FFFFFF" rx="5"/>
     <image x="${qrX}" y="${qrY}" width="${qrSize}" height="${qrSize}" xlink:href="${qrImageUrl}"/>
-    <text x="${qrX + qrSize/2}" y="${qrY - 10}" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="12">Scan to Play</text>
+    <text x="${qrX + qrSize / 2}" y="${qrY - 10}" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="12">Scan to Play</text>
   </svg>`;
 };
 
-
-
 // Main image generation function
-export default async (request: Request, context: Context) => {
+export default async (request: Request, _context: Context) => {
   try {
     const url = new URL(request.url);
-    const startWord = url.searchParams.get('start') || 'start';
-    const targetWord = url.searchParams.get('target') || 'end';
-    const challengeUrl = url.searchParams.get('url') || `${url.origin}/challenge?start=${startWord}&target=${targetWord}`;
+    const startWord = url.searchParams.get("start") || "start";
+    const targetWord = url.searchParams.get("target") || "end";
+    const challengeUrl =
+      url.searchParams.get("url") ||
+      `${url.origin}/challenge?start=${startWord}&target=${targetWord}`;
 
     // Generate compatible SVG visualization
-    const svg = await generateCompatibleSVG(startWord, targetWord, challengeUrl);
+    const svg = await generateCompatibleSVG(
+      startWord,
+      targetWord,
+      challengeUrl,
+    );
 
     return new Response(svg, {
       headers: {
-        'Content-Type': 'image/svg+xml',
-        'Cache-Control': 'public, max-age=3600, immutable',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
-        'Access-Control-Allow-Headers': 'Content-Type',
+        "Content-Type": "image/svg+xml",
+        "Cache-Control": "public, max-age=3600, immutable",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET",
+        "Access-Control-Allow-Headers": "Content-Type",
       },
     });
-
   } catch (error) {
-    console.error('Image generation error:', error);
-    
+    console.error("Image generation error:", error);
+
     // Fallback: Return a simple text-based SVG
     const requestUrl = new URL(request.url);
     const fallbackSvg = `
@@ -136,7 +150,7 @@ export default async (request: Request, context: Context) => {
           Synapse Challenge
         </text>
         <text x="300" y="200" text-anchor="middle" fill="#cccccc" font-size="18" font-family="Arial">
-          ${requestUrl.searchParams.get('start') || 'start'} → ${requestUrl.searchParams.get('target') || 'end'}
+          ${requestUrl.searchParams.get("start") || "start"} → ${requestUrl.searchParams.get("target") || "end"}
         </text>
         <text x="300" y="250" text-anchor="middle" fill="#87CEEB" font-size="16" font-family="Arial">
           Semantic Pathways
@@ -146,9 +160,9 @@ export default async (request: Request, context: Context) => {
 
     return new Response(fallbackSvg, {
       headers: {
-        'Content-Type': 'image/svg+xml',
-        'Cache-Control': 'public, max-age=3600',
+        "Content-Type": "image/svg+xml",
+        "Cache-Control": "public, max-age=3600",
       },
     });
   }
-}; 
+};

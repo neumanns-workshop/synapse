@@ -1,4 +1,4 @@
-// Netlify Edge Function types
+// Netlify Edge Function for generating social media previews
 interface Context {
   site?: {
     id: string;
@@ -11,7 +11,7 @@ interface Context {
   };
 }
 
-// Copied taunt generation logic from SharingService.ts
+// Interface for daily challenge taunt generation
 interface DailyChallengeTauntOptions {
   startWord: string;
   targetWord: string;
@@ -22,6 +22,7 @@ interface DailyChallengeTauntOptions {
   challengeDate: string;
 }
 
+// Generate taunting message for daily challenges
 const generateDailyChallengeTaunt = (
   options: DailyChallengeTauntOptions,
 ): string => {
@@ -35,75 +36,60 @@ const generateDailyChallengeTaunt = (
     challengeDate,
   } = options;
 
-  const dateObj = new Date(challengeDate);
-  const formattedDate = dateObj.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-  });
+  // If user hasn't attempted yet, show AI challenge
+  if (!userSteps) {
+    return `🤖 AI solved "${startWord}" → "${targetWord}" in just ${aiSteps} steps on ${challengeDate}. Think you can beat that? 🧠⚡`;
+  }
 
-  if (userCompleted && userSteps) {
-    const userMoveText = userSteps === 1 ? "move" : "moves";
-    const aiMoveText = aiSteps === 1 ? "move" : "moves";
-
-    if (userSteps < aiSteps) {
-      return `I crushed the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (AI took ${aiSteps} ${aiMoveText}). Think you can beat me?`;
-    } else if (userSteps === aiSteps) {
-      return `I matched the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText}. Can you do better?`;
+  // If user completed it
+  if (userCompleted) {
+    if (userSteps <= aiSteps) {
+      return `🏆 Incredible! You beat the AI by solving "${startWord}" → "${targetWord}" in ${userSteps} steps vs AI's ${aiSteps} on ${challengeDate}! 🎯`;
     } else {
-      return `I got ${formattedDate}'s challenge in ${userSteps} ${userMoveText} ("${startWord}" → "${targetWord}"). The AI did it in ${aiSteps} ${aiMoveText}... can you beat us both?`;
+      return `✅ Well done! You solved "${startWord}" → "${targetWord}" in ${userSteps} steps on ${challengeDate}. AI did it in ${aiSteps} - can you improve? 🎯`;
     }
   }
 
+  // If user gave up
   if (userGaveUp) {
-    const aiMoveText = aiSteps === 1 ? "move" : "moves";
-
-    if (userSteps && userSteps > 0) {
-      const moveText = userSteps === 1 ? "move" : "moves";
-      return `I couldn't get ${formattedDate}'s challenge ("${startWord}" → "${targetWord}") and gave up after ${userSteps} ${moveText}, but the AI got it in ${aiSteps} ${aiMoveText}. Can you beat the AI in less than ${aiSteps} moves?`;
-    } else {
-      return `I couldn't get ${formattedDate}'s challenge ("${startWord}" → "${targetWord}") and had to give up, but the AI got it in ${aiSteps} ${aiMoveText}. Can you beat the AI in less than ${aiSteps} moves?`;
-    }
+    return `😅 Gave up on "${startWord}" → "${targetWord}"? The AI cracked it in ${aiSteps} steps on ${challengeDate}. Ready for redemption? 💪`;
   }
 
-  const aiMoveText = aiSteps === 1 ? "move" : "moves";
-  return `I beat the AI in ${aiSteps} ${aiMoveText} on ${formattedDate}'s challenge ("${startWord}" → "${targetWord}"). Can you do better?`;
+  // If user attempted but didn't finish
+  return `🔥 You're ${userSteps} steps into "${startWord}" → "${targetWord}" from ${challengeDate}. AI finished in ${aiSteps} - keep going! 🚀`;
 };
 
-// Hash validation logic copied from SharingService.ts
+// Simple hash function for URL validation
 const generateUrlHash = (data: string): string => {
   let hash = 0;
-  const secret = "synapse_challenge_2025";
-  const combined = data + secret;
-
-  /* eslint-disable no-bitwise */
-  for (let i = 0; i < combined.length; i++) {
-    const char = combined.charCodeAt(i);
+  for (let i = 0; i < data.length; i++) {
+    const char = data.charCodeAt(i);
     hash = (hash << 5) - hash + char;
-    hash = hash & hash;
+    hash = hash & hash; // Convert to 32-bit integer
   }
-  /* eslint-enable no-bitwise */
-
-  return Math.abs(hash).toString(36).substring(0, 8);
+  return Math.abs(hash).toString(36);
 };
 
+// Validate challenge hash to prevent URL manipulation
 const validateChallengeHash = (
   startWord: string,
   targetWord: string,
   providedHash: string,
 ): boolean => {
-  const data = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
-  const expectedHash = generateUrlHash(data);
+  const expectedHash = generateUrlHash(`${startWord}-${targetWord}-challenge`);
   return expectedHash === providedHash;
 };
 
+// Validate daily challenge hash
 const validateDailyChallengeHash = (
   challengeId: string,
   startWord: string,
   targetWord: string,
   providedHash: string,
 ): boolean => {
-  const data = `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
-  const expectedHash = generateUrlHash(data);
+  const expectedHash = generateUrlHash(
+    `${challengeId}-${startWord}-${targetWord}-daily`,
+  );
   return expectedHash === providedHash;
 };
 
@@ -204,7 +190,7 @@ export default async (request: Request, _context: Context) => {
   // If not a bot and not a preview request, redirect to the actual app
   if (!isBot && !url.searchParams.has("preview")) {
     // For regular users, serve the normal app (convert back to hash-based routing)
-    const challengeUrl = url.toString().replace(/^https?:\/\/[^\/]+\//, "/#/");
+    const challengeUrl = url.toString().replace(/^https?:\/\/[^/]+\//, "/#/");
     return Response.redirect(url.origin + challengeUrl, 302);
   }
 
@@ -220,7 +206,7 @@ export default async (request: Request, _context: Context) => {
     const metaTags = generateMetaTags(title, description, imageUrl, fullUrl);
 
     // Convert back to hash-based routing for the redirect
-    const challengeUrl = url.toString().replace(/^https?:\/\/[^\/]+\//, "/#/");
+    const challengeUrl = url.toString().replace(/^https?:\/\/[^/]+\//, "/#/");
     const redirectUrl = url.origin + challengeUrl;
 
     return new Response(
@@ -272,7 +258,7 @@ export default async (request: Request, _context: Context) => {
     const metaTags = generateMetaTags(title, description, imageUrl, fullUrl);
 
     // Convert back to hash-based routing for the redirect
-    const challengeUrl = url.toString().replace(/^https?:\/\/[^\/]+\//, "/#/");
+    const challengeUrl = url.toString().replace(/^https?:\/\/[^/]+\//, "/#/");
     const redirectUrl = url.origin + challengeUrl;
 
     return new Response(
@@ -301,6 +287,6 @@ export default async (request: Request, _context: Context) => {
   }
 
   // Fallback for unrecognized URLs - convert to hash-based routing
-  const challengeUrl = url.toString().replace(/^https?:\/\/[^\/]+\//, "/#/");
+  const challengeUrl = url.toString().replace(/^https?:\/\/[^/]+\//, "/#/");
   return Response.redirect(url.origin + challengeUrl, 302);
 };

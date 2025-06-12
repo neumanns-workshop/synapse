@@ -172,7 +172,12 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
           playerPath={gameReport.playerPath}
           optimalChoices={gameReport.optimalChoices}
           suggestedPath={gameReport.suggestedPath}
-          onWordDefinition={onWordDefinition || (() => {})}
+          onWordDefinition={
+            onWordDefinition ||
+            (() => {
+              // No-op fallback for word definition handler
+            })
+          }
           targetWord={gameReport.targetWord}
         />
 
