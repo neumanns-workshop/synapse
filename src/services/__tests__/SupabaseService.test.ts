@@ -1,3 +1,11 @@
+// Mock environment variables FIRST, before any imports
+const originalEnv = process.env;
+process.env = {
+  ...originalEnv,
+  EXPO_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
+  EXPO_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
+};
+
 import { createClient } from "@supabase/supabase-js";
 
 import { useGameStore } from "../../stores/useGameStore";
@@ -24,15 +32,8 @@ describe("SupabaseService", () => {
   let mockSupabaseClient: any;
   let mockUnifiedStore: any;
 
-  // Mock environment variables
-  const originalEnv = process.env;
-
   beforeAll(() => {
-    process.env = {
-      ...originalEnv,
-      EXPO_PUBLIC_SUPABASE_URL: "https://test.supabase.co",
-      EXPO_PUBLIC_SUPABASE_ANON_KEY: "test-anon-key",
-    };
+    // Environment variables already set at top of file
   });
 
   afterAll(() => {

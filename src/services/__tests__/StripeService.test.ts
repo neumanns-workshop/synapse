@@ -1,3 +1,10 @@
+// Mock environment variables FIRST, before any imports
+const originalEnv = process.env;
+process.env = {
+  ...originalEnv,
+  EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_mock_key",
+};
+
 import {
   describe,
   it,
@@ -35,16 +42,6 @@ jest.mock("../UnifiedDataStore", () => ({
     setPremiumStatus = jest.fn();
   },
 }));
-
-// Mock environment variables
-const originalEnv = process.env;
-beforeEach(() => {
-  jest.resetModules();
-  process.env = {
-    ...originalEnv,
-    EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY: "pk_test_mock_key",
-  };
-});
 
 afterEach(() => {
   process.env = originalEnv;
