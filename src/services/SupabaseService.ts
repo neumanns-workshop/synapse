@@ -129,15 +129,6 @@ export class SupabaseService {
     const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
     const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
-    // Debug logging - show what we actually got
-    console.log("🔍 Environment Variables Debug:");
-    console.log("- EXPO_PUBLIC_SUPABASE_URL type:", typeof supabaseUrl);
-    console.log("- EXPO_PUBLIC_SUPABASE_URL length:", supabaseUrl?.length || 0);
-    console.log("- EXPO_PUBLIC_SUPABASE_URL starts with https:", supabaseUrl?.startsWith('https://'));
-    console.log("- EXPO_PUBLIC_SUPABASE_ANON_KEY present:", !!supabaseAnonKey);
-    console.log("- EXPO_PUBLIC_SUPABASE_ANON_KEY length:", supabaseAnonKey?.length || 0);
-    console.log("- All process.env keys starting with EXPO_PUBLIC_:", Object.keys(process.env).filter(k => k.startsWith('EXPO_PUBLIC_')));
-
     // Only throw error in non-test environments
     if (!supabaseUrl || !supabaseAnonKey || supabaseUrl === "" || supabaseAnonKey === "") {
       // Skip error in test environments (Jest sets NODE_ENV to 'test')
@@ -158,7 +149,6 @@ export class SupabaseService {
       // Validate URL format before creating client
       try {
         new URL(supabaseUrl);
-        console.log("✅ Supabase URL validation passed");
         this.supabase = createClient(supabaseUrl, supabaseAnonKey);
       } catch (urlError) {
         console.error("❌ Invalid Supabase URL format - check environment variables");
