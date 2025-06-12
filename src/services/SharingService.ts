@@ -439,7 +439,7 @@ export const generateDailyChallengeTaunt = (
   // If user gave up, acknowledge that but still challenge them
   if (userGaveUp) {
     const aiMoveText = aiSteps === 1 ? "move" : "moves";
-    
+
     if (userSteps && userSteps > 0) {
       const moveText = userSteps === 1 ? "move" : "moves";
       return `I couldn't get ${formattedDate}'s challenge ("${startWord}" → "${targetWord}") and gave up after ${userSteps} ${moveText}, but the AI got it in ${aiSteps} ${aiMoveText}. Can you beat the AI in less than ${aiSteps} moves?`;
@@ -500,13 +500,14 @@ export const generateSecureGameDeepLink = (
   const fullParams = `${params}${themeParam}`;
 
   // Use the app's scheme for deep linking
-  // For web, use the web URL format
+  // For web, use the web URL format with preview support for sharing
   if (Platform.OS === "web") {
     // Use current origin or a fixed URL for the web version
     const origin =
       typeof window !== "undefined"
         ? window.location.origin
-        : "https://synapse-game.example.com";
+        : "https://synapsegame.ai";
+    // Return preview URL for better link previews in social media
     return `${origin}/challenge?${fullParams}`;
   }
 
@@ -540,13 +541,14 @@ export const generateSecureDailyChallengeDeepLink = (
   const hash = generateUrlHash(data);
 
   // Use the app's scheme for deep linking
-  // For web, use the web URL format
+  // For web, use the web URL format with preview support for sharing
   if (Platform.OS === "web") {
     // Use current origin or a fixed URL for the web version
     const origin =
       typeof window !== "undefined"
         ? window.location.origin
-        : "https://synapse-game.example.com";
+        : "https://synapsegame.ai";
+    // Return preview URL for better link previews in social media
     return `${origin}/dailychallenge?id=${encodeURIComponent(challengeId)}&start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
   }
 

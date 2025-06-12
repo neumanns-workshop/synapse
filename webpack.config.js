@@ -9,6 +9,32 @@ module.exports = async function (env, argv) {
   // Get the default Expo webpack config
   const config = await createExpoWebpackConfigAsync(env, argv);
 
+  // Use our custom HTML template for better meta tags
+  const htmlPluginIndex = config.plugins.findIndex(plugin => plugin.constructor.name === 'HtmlWebpackPlugin');
+  if (htmlPluginIndex !== -1) {
+    // Remove the existing HtmlWebpackPlugin
+    config.plugins.splice(htmlPluginIndex, 1);
+    
+    // Add our custom HtmlWebpackPlugin
+    const HtmlWebpackPlugin = require('html-webpack-plugin');
+    config.plugins.push(new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, 'src/templates/index.html'),
+      inject: true,
+      minify: mode === 'production' ? {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeRedundantAttributes: true,
+        useShortDoctype: true,
+        removeEmptyAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        keepClosingSlash: true,
+        minifyJS: true,
+        minifyCSS: true,
+        minifyURLs: true,
+      } : false,
+    }));
+  }
+
   // Add optimization for better bundle splitting
   config.optimization = {
     ...config.optimization,

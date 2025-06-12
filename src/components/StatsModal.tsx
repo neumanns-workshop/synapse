@@ -788,14 +788,16 @@ const StatsModal = () => {
             startWord,
             targetWord,
           );
-          
+
           // Generate proper daily challenge taunt
-          const aiSteps = selectedReport.aiPath ? selectedReport.aiPath.length - 1 : selectedReport.optimalPath.length - 1;
+          const aiSteps = selectedReport.aiPath
+            ? selectedReport.aiPath.length - 1
+            : selectedReport.optimalPath.length - 1;
           const userSteps = selectedReport.totalMoves;
           const userCompleted = selectedReport.status === "won";
           const userGaveUp = selectedReport.status === "given_up";
           const challengeDate = selectedReport.dailyChallengeId; // Use challenge ID as date for now
-          
+
           message = generateDailyChallengeTaunt({
             startWord,
             targetWord,

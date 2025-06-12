@@ -130,7 +130,12 @@ export class SupabaseService {
     const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
     // Only throw error in non-test environments
-    if (!supabaseUrl || !supabaseAnonKey || supabaseUrl === "" || supabaseAnonKey === "") {
+    if (
+      !supabaseUrl ||
+      !supabaseAnonKey ||
+      supabaseUrl === "" ||
+      supabaseAnonKey === ""
+    ) {
       // Skip error in test environments (Jest sets NODE_ENV to 'test')
       if (process.env.NODE_ENV !== "test") {
         console.error("❌ Missing Supabase environment variables");
@@ -151,9 +156,13 @@ export class SupabaseService {
         new URL(supabaseUrl);
         this.supabase = createClient(supabaseUrl, supabaseAnonKey);
       } catch (urlError) {
-        console.error("❌ Invalid Supabase URL format - check environment variables");
+        console.error(
+          "❌ Invalid Supabase URL format - check environment variables",
+        );
         console.error("URL that failed validation:", supabaseUrl);
-        throw new Error(`Invalid Supabase URL format. Please check your environment variables.`);
+        throw new Error(
+          `Invalid Supabase URL format. Please check your environment variables.`,
+        );
       }
     }
     this.unifiedStore = UnifiedDataStore.getInstance();
@@ -348,20 +357,23 @@ export class SupabaseService {
 
   public async signInAnonymously(captchaToken?: string) {
     try {
-      console.log("🔐 SupabaseService.signInAnonymously called with captcha:", !!captchaToken);
+      console.log(
+        "🔐 SupabaseService.signInAnonymously called with captcha:",
+        !!captchaToken,
+      );
       const { data, error } = await this.supabase.auth.signInAnonymously({
         options: {
           captchaToken,
         },
       });
-      
+
       console.log("🔐 Supabase anonymous auth response:", {
         hasUser: !!data?.user,
         hasSession: !!data?.session,
         hasAccessToken: !!data?.session?.access_token,
-        errorCode: error?.message || 'none'
+        errorCode: error?.message || "none",
       });
-      
+
       if (error) throw error;
 
       // Important: Update auth state after anonymous sign-in

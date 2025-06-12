@@ -130,14 +130,16 @@ const ReportScreen = () => {
             startWord,
             targetWord,
           );
-          
+
           // Generate proper daily challenge taunt
-          const aiSteps = gameReport.aiPath ? gameReport.aiPath.length - 1 : gameReport.optimalPath.length - 1;
+          const aiSteps = gameReport.aiPath
+            ? gameReport.aiPath.length - 1
+            : gameReport.optimalPath.length - 1;
           const userSteps = gameReport.totalMoves;
           const userCompleted = gameReport.status === "won";
           const userGaveUp = gameReport.status === "given_up";
           const challengeDate = gameReport.dailyChallengeId; // Use challenge ID as date for now
-          
+
           message = generateDailyChallengeTaunt({
             startWord,
             targetWord,

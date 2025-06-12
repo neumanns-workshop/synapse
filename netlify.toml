@@ -6,6 +6,15 @@
   NODE_VERSION = "22"
   NPM_VERSION = "10"
 
+# Edge Functions for link previews
+[[edge_functions]]
+  function = "preview"
+  path = "/challenge/*"
+  
+[[edge_functions]]
+  function = "preview"
+  path = "/dailychallenge/*"
+
 # SPA redirect - handle client-side routing
 [[redirects]]
   from = "/*"
