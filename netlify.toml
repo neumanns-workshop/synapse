@@ -20,6 +20,11 @@
   function = "image"
   path = "/api/image"
 
+# Edge Function for uploading preview data
+[[edge_functions]]
+  function = "upload-preview"
+  path = "/api/upload-preview"
+
 # SPA redirect - handle client-side routing
 [[redirects]]
   from = "/*"
