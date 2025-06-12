@@ -686,39 +686,45 @@ export const useGameStore = create<GameState>((set, get) => ({
       pendingChallengeWords: get().pendingChallengeWords,
     });
 
+    // Check persistent storage FIRST to get the authoritative completion status
+    // This fixes the bug where users are taken back to completed daily challenges after sign-in
+    const hasCompletedPersistent = freshCurrentDailyChallenge
+      ? await dailyChallengesService.hasCompletedTodaysChallenge()
+      : true; // If no challenge exists, consider it "completed" to skip auto-start
+
+    console.log("🎮 startGame: Daily challenge completion check:", {
+      freshHasPlayedTodaysChallenge,
+      hasCompletedPersistent,
+      willAutoStart: !hasCompletedPersistent && freshCurrentDailyChallenge,
+    });
+
+    // If persistent storage shows completion but store doesn't, sync the store state
+    if (hasCompletedPersistent && !freshHasPlayedTodaysChallenge) {
+      console.log(
+        "🎮 startGame: Syncing completion state from persistent storage",
+      );
+      set({ hasPlayedTodaysChallenge: true });
+    }
+
     // Only auto-start daily challenge if:
     // 1. Game status is idle, won, given_up, or lost (not currently playing)
-    // 2. User hasn't played today's challenge according to persistent storage
+    // 2. Challenge has NOT been completed according to persistent storage (authoritative)
     // 3. There is a daily challenge available
-    // 4. The previous game wasn't a daily challenge that was just completed
-    // 5. Upgrade prompt wasn't dismissed this session (respect user's intent to not auto-start)
+    // 4. Upgrade prompt wasn't dismissed this session (respect user's intent to not auto-start)
     if (
       (currentGameStatus === "idle" ||
         currentGameStatus === "won" ||
         currentGameStatus === "given_up" ||
         currentGameStatus === "lost") &&
-      !freshHasPlayedTodaysChallenge &&
+      !hasCompletedPersistent &&
       freshCurrentDailyChallenge &&
       !upgradePromptDismissedThisSession
     ) {
-      // Check persistent storage to see if the challenge was actually completed
-      const hasCompletedPersistent =
-        await dailyChallengesService.hasCompletedTodaysChallenge();
-
-      // If persistent storage shows completion but store doesn't, sync the store state
-      if (hasCompletedPersistent) {
-        console.log(
-          "🎮 startGame: Syncing completion state from persistent storage",
-        );
-        set({ hasPlayedTodaysChallenge: true });
-      } else {
-        // Only start daily challenge if not completed in persistent storage
-        console.log(
-          "🎮 startGame: Starting daily challenge instead of random game",
-        );
-        await get().startDailyChallengeGame();
-        return;
-      }
+      console.log(
+        "🎮 startGame: Starting daily challenge instead of random game",
+      );
+      await get().startDailyChallengeGame();
+      return;
     } else if (currentGameStatus === "playing") {
       console.log(
         "🎮 startGame: Already in a game, not overriding with daily challenge",

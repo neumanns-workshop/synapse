@@ -65,7 +65,7 @@ export class DailyChallengesService {
    */
   public async hasCompletedTodaysChallenge(): Promise<boolean> {
     const todaysChallenge = this.getTodaysChallenge();
-    Logger.debug(
+    console.log(
       "🔍 DailyChallengesService: hasCompletedTodaysChallenge called:",
       {
         todaysChallengeExists: !!todaysChallenge,
@@ -74,7 +74,7 @@ export class DailyChallengesService {
     );
 
     if (!todaysChallenge) {
-      Logger.debug(
+      console.log(
         "🔍 DailyChallengesService: No challenge for today, returning false",
       );
       return false; // No challenge available for today
@@ -90,7 +90,11 @@ export class DailyChallengesService {
 
     // Use the challenge ID as the key, not the date
     const isCompleted = progress[todaysChallenge.id]?.completed || false;
-    Logger.debug(" DailyChallengesService: Final result:", isCompleted);
+    console.log("🔍 DailyChallengesService: Final completion result:", {
+      challengeId: todaysChallenge.id,
+      isCompleted,
+      progressExists: !!progress[todaysChallenge.id],
+    });
     return isCompleted;
   }
 
