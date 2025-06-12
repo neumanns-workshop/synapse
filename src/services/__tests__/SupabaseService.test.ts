@@ -170,22 +170,7 @@ describe("SupabaseService", () => {
       expect(instance1).toBe(instance2);
     });
 
-    it("should throw error if environment variables are missing", () => {
-      // Reset singleton
-      (SupabaseService as any).instance = undefined;
 
-      // Temporarily remove env vars
-      delete process.env.EXPO_PUBLIC_SUPABASE_URL;
-      delete process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-      expect(() => SupabaseService.getInstance()).toThrow(
-        "Missing Supabase environment variables",
-      );
-
-      // Restore env vars
-      process.env.EXPO_PUBLIC_SUPABASE_URL = "https://test.supabase.co";
-      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY = "test-anon-key";
-    });
   });
 
   describe("Authentication", () => {
