@@ -3,6 +3,9 @@ const path = require("path");
 const webpack = require("webpack");
 
 module.exports = async function (env, argv) {
+  // Determine the mode early
+  const mode = argv?.mode || env?.mode || process.env.NODE_ENV || "development";
+  
   // Get the default Expo webpack config
   const config = await createExpoWebpackConfigAsync(env, argv);
 
@@ -174,7 +177,6 @@ module.exports = async function (env, argv) {
   }
 
   // Add performance hints for production
-  const mode = argv?.mode || env?.mode || process.env.NODE_ENV || "development";
   if (mode === "production") {
     config.performance = {
       hints: "warning",
