@@ -197,7 +197,7 @@ export default async (request: Request, _context: Context) => {
   // Check if this is a bot/crawler request
   const userAgent = request.headers.get("user-agent") || "";
   const isBot =
-    /bot|crawler|spider|facebook|twitter|linkedin|whatsapp|telegram/i.test(
+    /bot|crawler|spider|facebook|twitter|linkedin|whatsapp|telegram|discord/i.test(
       userAgent,
     );
 

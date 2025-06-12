@@ -128,3 +128,6 @@ ios/Pods/
 
 # If you keep the configuration files not checked in (optional)
 # *.xcconfig
+
+# Local Netlify folder
+.netlify
