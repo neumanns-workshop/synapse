@@ -1494,11 +1494,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           {/* CAPTCHA component - shared for both sign-in and sign-up */}
           <HCaptcha
             ref={captchaRef}
-            sitekey={
-              __DEV__
-                ? "10000000-ffff-ffff-ffff-000000000001" // Test key for development
-                : process.env.EXPO_PUBLIC_HCAPTCHA_SITE_KEY!
-            }
+            sitekey={__DEV__ ? "10000000-ffff-ffff-ffff-000000000001" : process.env.EXPO_PUBLIC_HCAPTCHA_SITE_KEY!}
             onVerify={onCaptchaVerify}
             size="invisible"
             onError={(error) => {
