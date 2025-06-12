@@ -126,13 +126,16 @@ export class SupabaseService {
 
   private constructor() {
     // ACCESS ENV VARS AND CHECK HERE:
-    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-    const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
+    const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
     // Only throw error in non-test environments
-    if (!supabaseUrl || !supabaseAnonKey) {
+    if (!supabaseUrl || !supabaseAnonKey || supabaseUrl === "" || supabaseAnonKey === "") {
       // Skip error in test environments (Jest sets NODE_ENV to 'test')
       if (process.env.NODE_ENV !== "test") {
+        console.error("❌ Missing Supabase environment variables");
+        console.error("URL present:", !!supabaseUrl);
+        console.error("Key present:", !!supabaseAnonKey);
         throw new Error(
           "Missing Supabase environment variables. Check .env file and restart server.",
         );
@@ -143,7 +146,14 @@ export class SupabaseService {
       const testKey = supabaseAnonKey || "test-anon-key";
       this.supabase = createClient(testUrl, testKey);
     } else {
-      this.supabase = createClient(supabaseUrl, supabaseAnonKey);
+      // Validate URL format before creating client
+      try {
+        new URL(supabaseUrl);
+        this.supabase = createClient(supabaseUrl, supabaseAnonKey);
+      } catch (urlError) {
+        console.error("❌ Invalid Supabase URL format - check environment variables");
+        throw new Error(`Invalid Supabase URL format. Please check your environment variables.`);
+      }
     }
     this.unifiedStore = UnifiedDataStore.getInstance();
     this.initializeAuth();

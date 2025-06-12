@@ -132,7 +132,11 @@ module.exports = async function (env, argv) {
   // This will override .env file values if both exist
   Object.keys(process.env).forEach((key) => {
     if (key.startsWith("EXPO_PUBLIC_")) {
-      envVars[key] = process.env[key];
+      const value = process.env[key];
+      // Only include non-empty, trimmed values
+      if (value && typeof value === "string" && value.trim().length > 0) {
+        envVars[key] = value.trim();
+      }
     }
   });
 
