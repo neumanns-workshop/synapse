@@ -140,7 +140,7 @@ module.exports = async function (env, argv) {
     }
   });
 
-  // Find existing DefinePlugin and merge our env vars
+  // Find existing DefinePlugin and merge our env vars, or create a new one
   const definePlugin = config.plugins.find(
     (plugin) => plugin.constructor.name === "DefinePlugin",
   );
@@ -152,6 +152,25 @@ module.exports = async function (env, argv) {
         envVars[key],
       );
     });
+  } else {
+    // Create a new DefinePlugin if none exists
+    const envDefinitions = {};
+    Object.keys(envVars).forEach((key) => {
+      envDefinitions[`process.env.${key}`] = JSON.stringify(envVars[key]);
+    });
+    
+    if (Object.keys(envDefinitions).length > 0) {
+      config.plugins.push(new webpack.DefinePlugin(envDefinitions));
+    }
+  }
+
+  // Debug: Log what environment variables we're injecting
+  console.log("🔧 Webpack mode:", mode);
+  console.log("🔧 Webpack: Found environment variables:", Object.keys(envVars));
+  if (Object.keys(envVars).length > 0) {
+    console.log("🔧 Webpack: Injecting environment variables into DefinePlugin");
+  } else {
+    console.log("⚠️ Webpack: No EXPO_PUBLIC_ environment variables found!");
   }
 
   // Add performance hints for production
