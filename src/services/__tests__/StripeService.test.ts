@@ -270,8 +270,6 @@ describe("StripeService", () => {
     });
   });
 
-
-
   describe("Error Handling", () => {
     it("should not throw during module initialization", () => {
       expect(() => {

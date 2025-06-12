@@ -169,8 +169,6 @@ describe("SupabaseService", () => {
       const instance2 = SupabaseService.getInstance();
       expect(instance1).toBe(instance2);
     });
-
-
   });
 
   describe("Authentication", () => {
