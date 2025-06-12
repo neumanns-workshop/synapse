@@ -203,7 +203,9 @@ export default async (request: Request, _context: Context) => {
 
   // If not a bot and not a preview request, redirect to the actual app
   if (!isBot && !url.searchParams.has("preview")) {
-    return Response.redirect(url.toString().replace("/preview/", "/"), 302);
+    // For regular users, serve the normal app (convert back to hash-based routing)
+    const challengeUrl = url.toString().replace(/^https?:\/\/[^\/]+\//, "/#/");
+    return Response.redirect(url.origin + challengeUrl, 302);
   }
 
   // Try to parse as game challenge
@@ -217,6 +219,10 @@ export default async (request: Request, _context: Context) => {
 
     const metaTags = generateMetaTags(title, description, imageUrl, fullUrl);
 
+    // Convert back to hash-based routing for the redirect
+    const challengeUrl = url.toString().replace(/^https?:\/\/[^\/]+\//, "/#/");
+    const redirectUrl = url.origin + challengeUrl;
+
     return new Response(
       `
       <!DOCTYPE html>
@@ -226,7 +232,7 @@ export default async (request: Request, _context: Context) => {
         <script>
           // Redirect after meta tags are parsed
           setTimeout(() => {
-            window.location.href = '${url.toString().replace("/preview/", "/")}';
+            window.location.href = '${redirectUrl}';
           }, 100);
         </script>
       </head>
@@ -265,6 +271,10 @@ export default async (request: Request, _context: Context) => {
 
     const metaTags = generateMetaTags(title, description, imageUrl, fullUrl);
 
+    // Convert back to hash-based routing for the redirect
+    const challengeUrl = url.toString().replace(/^https?:\/\/[^\/]+\//, "/#/");
+    const redirectUrl = url.origin + challengeUrl;
+
     return new Response(
       `
       <!DOCTYPE html>
@@ -274,7 +284,7 @@ export default async (request: Request, _context: Context) => {
         <script>
           // Redirect after meta tags are parsed
           setTimeout(() => {
-            window.location.href = '${url.toString().replace("/preview/", "/")}';
+            window.location.href = '${redirectUrl}';
           }, 100);
         </script>
       </head>
@@ -290,6 +300,7 @@ export default async (request: Request, _context: Context) => {
     );
   }
 
-  // Fallback for unrecognized URLs
-  return Response.redirect(url.toString().replace("/preview/", "/"), 302);
+  // Fallback for unrecognized URLs - convert to hash-based routing
+  const challengeUrl = url.toString().replace(/^https?:\/\/[^\/]+\//, "/#/");
+  return Response.redirect(url.origin + challengeUrl, 302);
 };
