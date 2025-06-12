@@ -20,6 +20,10 @@
     "url": "https://github.com/your-username/synapse/issues"
   },
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.16.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -28,6 +32,7 @@
     "eject": "expo eject",
     "lint": "eslint .",
     "test": "jest",
+    "test:ci": "jest --coverage --watchAll=false --ci --testTimeout=30000 --forceExit",
     "build:web": "npx expo export:web && ./scripts/post-build.sh",
     "build:web-analyze": "EXPO_PUBLIC_ANALYZE_BUNDLE=true npx expo export:web && ./scripts/post-build.sh",
     "serve": "npx serve web-build -p 3000 -s",

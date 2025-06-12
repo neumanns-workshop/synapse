@@ -5,17 +5,18 @@ import type {
   ImageResult,
   SaveFormat as ImageManipulatorSaveFormat,
   SaveOptions,
-  // ImageManipulationAction, // Keeping as any[] as direct export not found, actions can be various object types (CropAction, ResizeAction etc.)
+  Action,
 } from "expo-image-manipulator";
 import { captureRef } from "react-native-view-shot";
 
 import { Logger } from "../utils/logger";
 
 // Import image manipulator conditionally to avoid web errors
+
 let manipulateAsync:
   | ((
       uri: string,
-      actions: any[], // Using any[] as actions can be diverse (e.g., CropAction, ResizeAction) and a single union type isn't directly exported.
+      actions: Action[], // Using Action[] from expo-image-manipulator
       saveOptions?: SaveOptions,
     ) => Promise<ImageResult>)
   | null = null;

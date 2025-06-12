@@ -318,7 +318,7 @@ export interface CompressedWordCollections {
 
 // Compressed daily challenges
 export interface CompressedDailyChallenges {
-  progress: Record<string, any>; // Keep progress as-is for now (complex nested structure)
+  progress: Record<string, unknown>; // Keep progress as-is for now (complex nested structure)
   freeGamesRemaining: number;
   lastResetDate: string; // Keep as string date
 }
@@ -347,8 +347,8 @@ export interface CompressedUnifiedAppData {
     hasPlayedBefore: boolean;
     createdAt: number; // Keep full timestamp for user creation
     lastActiveAt: number; // Keep full timestamp for recent activity
-    purchase?: any; // Keep as-is (complex validation data)
-    privacy?: any; // Keep as-is (simple boolean flags)
+    purchase?: unknown; // Keep as-is (complex validation data)
+    privacy?: unknown; // Keep as-is (simple boolean flags)
   };
   stats: {
     totalGamesPlayed: number;
@@ -376,6 +376,7 @@ export interface CompressedUnifiedAppData {
 // ============================================================================
 
 export class PersistentGameStateCompressor {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static compress(gameState: any): CompressedPersistentGameState {
     return {
       startWord: gameState.startWord,
@@ -404,6 +405,7 @@ export class PersistentGameStateCompressor {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static decompress(compressed: CompressedPersistentGameState): any {
     return {
       startWord: compressed.startWord,
@@ -432,9 +434,11 @@ export class PersistentGameStateCompressor {
 }
 
 export class CollectionsCompressor {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static compress(collections: any): CompressedCollections {
     const compressed: CompressedCollections = {};
     for (const [collectionId, data] of Object.entries(collections || {})) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const collectionData = data as any;
       compressed[collectionId] = {
         collectedWords: collectionData.collectedWords || [],
@@ -446,7 +450,9 @@ export class CollectionsCompressor {
     return compressed;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static decompress(compressed: CompressedCollections): any {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const decompressed: any = {};
     for (const [collectionId, data] of Object.entries(compressed || {})) {
       decompressed[collectionId] = {
@@ -459,6 +465,7 @@ export class CollectionsCompressor {
 }
 
 export class WordCollectionsCompressor {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static compress(wordCollections: any): CompressedWordCollections {
     const completionTimestampsCompressed: Record<string, number> = {};
     for (const [collectionId, timestamp] of Object.entries(
@@ -476,6 +483,7 @@ export class WordCollectionsCompressor {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static decompress(compressed: CompressedWordCollections): any {
     const completionTimestamps: Record<string, number> = {};
     for (const [collectionId, days] of Object.entries(
@@ -495,6 +503,7 @@ export class WordCollectionsCompressor {
 }
 
 export class NewsCompressor {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static compress(news: any): CompressedNews {
     return {
       readArticleIds: news?.readArticleIds || [],
@@ -504,6 +513,7 @@ export class NewsCompressor {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static decompress(compressed: CompressedNews): any {
     return {
       readArticleIds: compressed?.readArticleIds || [],
@@ -515,6 +525,7 @@ export class NewsCompressor {
 }
 
 export class MetaCompressor {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static compress(meta: any): CompressedMeta {
     return {
       version: meta?.version || "1.0.0",
@@ -529,6 +540,7 @@ export class MetaCompressor {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static decompress(compressed: CompressedMeta): any {
     return {
       version: compressed?.version || "1.0.0",
@@ -549,6 +561,7 @@ export class MetaCompressor {
 // ============================================================================
 
 export class DataCompressor {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static compress(data: any): CompressedUnifiedAppData {
     return {
       ...data,
@@ -589,6 +602,7 @@ export class DataCompressor {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static decompress(compressed: CompressedUnifiedAppData): any {
     return {
       ...compressed,
@@ -645,6 +659,7 @@ export class DataCompressor {
 // ============================================================================
 
 export class StorageSizeEstimator {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static estimateSize(data: any): {
     original: number;
     compressed: number;

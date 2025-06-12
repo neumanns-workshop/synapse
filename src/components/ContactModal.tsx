@@ -139,7 +139,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
       // Import SupabaseService to call the contact form edge function
       const { SupabaseService } = await import("../services/SupabaseService");
       const supabaseService = SupabaseService.getInstance();
-      const supabase = (supabaseService as any).supabase;
+      const supabase = supabaseService.getSupabaseClient();
 
       const response = await supabase.functions.invoke("submit-contact-form", {
         body: {

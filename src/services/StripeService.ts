@@ -48,6 +48,10 @@ export class StripeService {
     return StripeService.instance;
   }
 
+  public getUnifiedStore(): UnifiedDataStore {
+    return this.unifiedStore;
+  }
+
   /**
    * Purchase premium using Stripe Checkout (hosted payment page)
    * TRANSACTIONAL APPROACH: Create account first, then payment
@@ -80,7 +84,10 @@ export class StripeService {
         !anonSessionData?.session?.access_token
       ) {
         console.error("Anonymous sign-in failed:", anonError);
-        const errorMessage = (anonError as any)?.message || "";
+        const errorMessage =
+          anonError && typeof anonError === "object" && "message" in anonError
+            ? String((anonError as { message: unknown }).message)
+            : "";
         if (errorMessage.includes("Anonymous sign-ins are disabled")) {
           throw new Error(
             "Anonymous sign-ins are disabled in your Supabase project. Please enable it in your Supabase dashboard under Authentication -> Providers to proceed with this sign-up flow.",

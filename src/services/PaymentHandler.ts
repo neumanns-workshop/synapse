@@ -146,11 +146,28 @@ export class PaymentHandler {
             anonymousUserJwt, // Pass the JWT of the (temporary) anonymous user
           );
 
-        if (finalizeError || !finalizeResult || (finalizeResult as any).error) {
+        if (
+          finalizeError ||
+          !finalizeResult ||
+          (finalizeResult &&
+            typeof finalizeResult === "object" &&
+            "error" in finalizeResult)
+        ) {
           // Premium is set, but account conversion via Edge Function failed.
+          const getErrorMessage = (error: unknown): string => {
+            if (error && typeof error === "object" && "message" in error) {
+              return String((error as { message: unknown }).message);
+            }
+            return String(error);
+          };
+
           const errorMessage =
-            (finalizeError as any)?.message ||
-            (finalizeResult as any)?.error ||
+            getErrorMessage(finalizeError) ||
+            (finalizeResult &&
+            typeof finalizeResult === "object" &&
+            "error" in finalizeResult
+              ? String((finalizeResult as { error: unknown }).error)
+              : "") ||
             "Unknown error during account finalization.";
           console.error(
             `finalize-premium-account Edge Function failed for ${temporaryUserId}:`,

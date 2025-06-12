@@ -249,13 +249,14 @@ export default Logger;
 if (
   typeof window !== "undefined" &&
   typeof window.setInterval === "function" &&
-  process.env.NODE_ENV !== "development"
+  process.env.NODE_ENV !== "development" &&
+  process.env.NODE_ENV !== "test"
 ) {
   // Detect console manipulation attempts
   let devtools = false;
   const threshold = 160;
 
-  setInterval(() => {
+  const devtoolsInterval = setInterval(() => {
     if (
       window.outerHeight - window.innerHeight > threshold ||
       window.outerWidth - window.innerWidth > threshold
@@ -270,4 +271,13 @@ if (
       }
     }
   }, 1000);
+
+  // Clean up interval on page unload
+  if (typeof window !== "undefined" && window.addEventListener) {
+    window.addEventListener("beforeunload", () => {
+      if (devtoolsInterval) {
+        clearInterval(devtoolsInterval);
+      }
+    });
+  }
 }

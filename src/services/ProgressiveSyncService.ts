@@ -7,14 +7,14 @@ export interface SyncProgress {
   totalSteps: number;
   message: string;
   completed: boolean;
-  error?: any;
+  error?: Error | unknown;
 }
 
 export interface ProgressiveSyncResult {
   success: boolean;
   steps: SyncProgress[];
   totalTime: number;
-  error?: any;
+  error?: Error | unknown;
 }
 
 export class ProgressiveSyncService {

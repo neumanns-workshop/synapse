@@ -15,7 +15,10 @@ import { dailyChallengesService } from "../services/DailyChallengesService";
 import { loadGameHistory } from "../services/StorageAdapter";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
-import type { DailyChallenge } from "../types/dailyChallenges";
+import type {
+  DailyChallenge,
+  DailyChallengeProgress,
+} from "../types/dailyChallenges";
 import type { GameReport } from "../utils/gameReportUtils";
 import WordDefinitionDialog from "./WordDefinitionDialog";
 import DailyChallengesCalendar from "./DailyChallengesCalendar";
@@ -50,7 +53,7 @@ const DailiesModal = () => {
   const [selectedDailyChallenge, setSelectedDailyChallenge] =
     useState<DailyChallenge | null>(null);
   const [dailyChallengeProgress, setDailyChallengeProgress] = useState<
-    Record<string, any>
+    Record<string, DailyChallengeProgress>
   >({});
 
   // Load data when modal opens

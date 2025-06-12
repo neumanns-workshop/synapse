@@ -880,7 +880,8 @@ describe("SupabaseService", () => {
       });
 
       expect(result.data).toBeNull();
-      expect(result.error).toBe("Function failed");
+      expect(result.error).toBeInstanceOf(Error);
+      expect(result.error?.message).toBe("Function failed");
     });
 
     it("should handle network errors", async () => {

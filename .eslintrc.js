@@ -1,6 +1,12 @@
 module.exports = {
   root: true,
-  ignorePatterns: ["scripts/", "check-duplicates.js", "test-*.js"],
+  ignorePatterns: [
+    "scripts/",
+    "check-duplicates.js",
+    "test-*.js",
+    "web-build/",
+    "node_modules/",
+  ],
   parser: "@typescript-eslint/parser",
   plugins: [
     "@typescript-eslint",

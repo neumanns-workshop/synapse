@@ -2,7 +2,7 @@
 
 // Define interfaces for the data structures
 export interface GraphData {
-  [word: string]: any;
+  [word: string]: string[] | number[] | unknown;
 }
 
 export interface DefinitionsData {
@@ -37,10 +37,10 @@ export const loadGraphData = async (): Promise<GraphData> => {
       if (
         keys.length === 1 &&
         keys[0] === "nodes" &&
-        typeof (graphDataJson as any).nodes === "object" &&
-        (graphDataJson as any).nodes !== null
+        typeof (graphDataJson as { nodes?: unknown }).nodes === "object" &&
+        (graphDataJson as { nodes?: unknown }).nodes !== null
       ) {
-        graphDataCache = (graphDataJson as any).nodes as GraphData;
+        graphDataCache = (graphDataJson as { nodes: GraphData }).nodes;
         return graphDataCache;
       } else if (keys.length > 1) {
         graphDataCache = graphDataJson as GraphData;

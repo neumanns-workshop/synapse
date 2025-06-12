@@ -3,9 +3,24 @@ import { View, StyleSheet, Text, Platform } from "react-native";
 
 import { useTheme } from "react-native-paper";
 
+// Type definitions for QR code components
+interface QRCodeWebProps {
+  value: string;
+  size: number;
+  bgColor: string;
+  fgColor: string;
+}
+
+interface QRCodeNativeProps {
+  value: string;
+  size: number;
+  backgroundColor: string;
+  color: string;
+}
+
 // Platform-specific QR code imports
-let QRCode: any;
-let QRCodeSVG: any;
+let QRCode: React.ComponentType<QRCodeWebProps> | null = null;
+let QRCodeSVG: React.ComponentType<QRCodeNativeProps> | null = null;
 
 if (Platform.OS === "web") {
   try {

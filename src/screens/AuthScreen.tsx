@@ -16,9 +16,6 @@ import {
   TextInput,
   Button,
   Card,
-  Checkbox,
-  Divider,
-  ActivityIndicator,
   SegmentedButtons,
   Portal,
   Modal,
@@ -31,7 +28,6 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import CustomIcon from "../components/CustomIcon";
 import StripeService from "../services/StripeService";
@@ -39,6 +35,14 @@ import SupabaseService from "../services/SupabaseService";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 
 const PENDING_CONVERSION_USER_ID = "synapse_pending_conversion_user_id";
+
+// Type guard for error objects
+const getErrorMessage = (error: unknown): string => {
+  if (error && typeof error === "object" && "message" in error) {
+    return (error as { message: string }).message;
+  }
+  return "An unknown error occurred";
+};
 
 type AuthMode = "signin" | "signup" | "reset" | "signin_after_purchase";
 
@@ -117,7 +121,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     });
 
     return unsubscribe;
-  }, [isWaitingForAuth, onAuthComplete]);
+  }, [isWaitingForAuth, onAuthComplete, supabaseService]);
 
   // Scale animation value
   const scale = useSharedValue(0.9);
@@ -219,7 +223,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         let errorMessage = "An error occurred during sign in";
 
         if (error && typeof error === "object" && "message" in error) {
-          const message = (error as any).message.toLowerCase();
+          const message = getErrorMessage(error).toLowerCase();
 
           if (
             message.includes("invalid login credentials") ||
@@ -236,7 +240,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           } else if (message.includes("captcha")) {
             errorMessage = "CAPTCHA verification failed. Please try again.";
           } else {
-            errorMessage = (error as any).message || errorMessage;
+            errorMessage = getErrorMessage(error) || errorMessage;
           }
         }
 
@@ -437,9 +441,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           anonymousUserJwt,
         );
 
-      if (validationError || !validationResult?.valid) {
+      if (
+        validationError ||
+        !(validationResult as { valid?: boolean })?.valid
+      ) {
         const errorMessage =
-          validationResult?.error ||
+          (validationResult as { error?: string })?.error ||
           (validationError instanceof Error
             ? validationError.message
             : "Invalid promo code");
@@ -450,7 +457,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       console.log("🎫 Promo code validated successfully!");
 
       // STEP 3: Store conversion details (same as traditional signup)
-      const unifiedStore = (stripeService as any).unifiedStore; // Access unifiedStore
+      const unifiedStore = stripeService.getUnifiedStore(); // Access unifiedStore
       await unifiedStore.storePendingConversionDetails(anonymousUserId, {
         email,
         password,
@@ -489,7 +496,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           anonymousUserJwt,
         );
 
-      if (conversionError || !conversionResult?.message) {
+      if (
+        conversionError ||
+        !(conversionResult as { message?: string })?.message
+      ) {
         console.error("🎫 Account conversion failed:", conversionError);
         setErrorMessage("Failed to finalize premium account");
         return;
@@ -535,9 +545,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           userAgent: navigator.userAgent,
         }); // No JWT token passed - function works without auth
 
-      if (validationError || !validationResult?.valid) {
+      if (
+        validationError ||
+        !(validationResult as { valid?: boolean })?.valid
+      ) {
         const errorMessage =
-          validationResult?.error ||
+          (validationResult as { error?: string })?.error ||
           (validationError instanceof Error
             ? validationError.message
             : "Invalid promo code");
@@ -605,7 +618,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
       if (error) {
         setErrorMessage(
-          (error as any)?.message || "An error occurred during password reset",
+          getErrorMessage(error) || "An error occurred during password reset",
         );
       } else {
         // For password reset success, we'll show a success message and switch to signin

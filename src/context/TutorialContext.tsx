@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { ImageSourcePropType } from "react-native";
 
 import SocialLeaderboardIcon from "../components/icons/SocialLeaderboardIcon";
 import { unifiedDataStore } from "../services/UnifiedDataStore";
@@ -8,8 +9,8 @@ export type TutorialStep = {
   title: string;
   content: string;
   target?: string; // Optional target element to highlight
-  image?: any; // Optional image for the step
-  iconComponent?: React.ComponentType<any>; // Optional icon component for the step
+  image?: ImageSourcePropType; // Optional image for the step
+  iconComponent?: React.ComponentType<Record<string, unknown>>; // Optional icon component for the step
 };
 
 const TUTORIAL_STEPS: TutorialStep[] = [
@@ -24,7 +25,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     id: "making-moves",
     title: "Making Your First Move",
     content:
-      "Click on any connected word to move to it. Words are connected if they share a similar meaning. The available moves are shown as buttons below your path, sorted by how similar they are to your current word.",
+      "Click on any connected word to move to it. Words are connected if they share a similar meaning. The available moves are shown as buttons below your path, ordered from most to least similar (top left to bottom right).",
     target: "available-words",
     image: require("../assets/tutorial_2.png"),
   },

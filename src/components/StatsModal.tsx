@@ -667,7 +667,7 @@ const StatsModal = () => {
   const GAME_HISTORY_ITEM_HEIGHT = 120; // Approximate height of GameHistoryCard
 
   const getItemLayout = useCallback(
-    (data: any, index: number) => ({
+    (data: ArrayLike<GameReport> | null | undefined, index: number) => ({
       length: GAME_HISTORY_ITEM_HEIGHT,
       offset: GAME_HISTORY_ITEM_HEIGHT * index,
       index,
@@ -1418,11 +1418,11 @@ const StatsModal = () => {
                 {difficultyAnalysis &&
                 Object.keys(difficultyAnalysis).length > 0 ? (
                   Object.entries(difficultyAnalysis)
-                    .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                    .sort(([a], [b]) => parseInt(a, 10) - parseInt(b, 10))
                     .map(([difficulty, stats]) => (
                       <DifficultyRow
                         key={difficulty}
-                        difficulty={parseInt(difficulty)}
+                        difficulty={parseInt(difficulty, 10)}
                         stats={stats}
                       />
                     ))

@@ -126,7 +126,7 @@ export class EmailService {
       // Import SupabaseService to get the client
       const { SupabaseService } = await import("./SupabaseService");
       const supabaseService = SupabaseService.getInstance();
-      const supabase = (supabaseService as any).supabase;
+      const supabase = supabaseService.getSupabaseClient();
 
       const response = await supabase.functions.invoke("send-custom-email", {
         body: {

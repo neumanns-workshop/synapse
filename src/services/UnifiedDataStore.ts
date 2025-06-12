@@ -415,6 +415,7 @@ export class UnifiedDataStore {
   /**
    * Ensure data structure is complete (for version updates)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private ensureDataStructure(data: any): UnifiedAppData {
     const defaultData = createDefaultData();
 
@@ -917,7 +918,7 @@ export class UnifiedDataStore {
   /**
    * Export compressed data for cloud sync (more efficient)
    */
-  public async exportCompressedData(): Promise<any> {
+  public async exportCompressedData(): Promise<unknown> {
     const data = await this.getData();
     return DataCompressor.compress(data);
   }
@@ -934,6 +935,7 @@ export class UnifiedDataStore {
   /**
    * Import compressed data from cloud sync (more efficient)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async importCompressedData(compressedData: any): Promise<void> {
     const decompressedData = DataCompressor.decompress(compressedData);
     this.data = this.ensureDataStructure(decompressedData);
@@ -944,6 +946,7 @@ export class UnifiedDataStore {
   /**
    * Decompress data without importing (for sync processing)
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public decompressData(compressedData: any): UnifiedAppData {
     const decompressedData = DataCompressor.decompress(compressedData);
     return this.ensureDataStructure(decompressedData);
@@ -1359,7 +1362,7 @@ export const unifiedDataStore = UnifiedDataStore.getInstance();
 
 // Expose debug utilities to global scope for easy console access
 if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
-  (window as any).synapseDebug = {
+  (window as { synapseDebug?: Record<string, unknown> }).synapseDebug = {
     setPremium: (isPremium = true) =>
       unifiedDataStore.debugSetPremium(isPremium),
     resetFreeGames: (count = 2) => unifiedDataStore.debugResetFreeGames(count),

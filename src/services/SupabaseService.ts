@@ -8,6 +8,7 @@ import {
 import { useGameStore } from "../stores/useGameStore";
 import { Logger } from "../utils/logger";
 import { UnifiedDataStore, UnifiedAppData } from "./UnifiedDataStore";
+import type { GameReport } from "../utils/gameReportUtils";
 
 // Environment variables (set in your .env file)
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
@@ -64,6 +65,51 @@ export interface AuthState {
   session: Session | null;
   profile: UserProfile | null;
   isLoading: boolean;
+}
+
+// ============================================================================
+// MERGE METHOD TYPE INTERFACES
+// ============================================================================
+
+interface AchievementData {
+  unlockedIds: string[];
+  viewedIds: string[];
+  unlockTimestamps: Record<string, number>;
+  progressiveCounters: Record<string, number>;
+  schemaVersion: number;
+}
+
+interface WordCollectionData {
+  [collectionId: string]: {
+    collectedWords: string[];
+    lastUpdated: number;
+  };
+}
+
+interface WordCollectionStatusData {
+  completedIds: string[];
+  viewedIds: string[];
+  completionTimestamps: Record<string, number>;
+  schemaVersion: number;
+}
+
+interface StatisticsData {
+  totalGamesPlayed: number;
+  totalWins: number;
+  totalGaveUps: number;
+  achievementsUnlocked: number;
+  cumulativeMoveAccuracySum: number;
+}
+
+interface NewsStatusData {
+  readArticleIds: string[];
+  lastChecked: number;
+}
+
+interface GameHistoryItem extends Partial<GameReport> {
+  id?: string;
+  timestamp: number;
+  [key: string]: unknown;
 }
 
 export class SupabaseService {
@@ -321,7 +367,11 @@ export class SupabaseService {
   public async signIn(email: string, password: string, captchaToken?: string) {
     Logger.debug(" SupabaseService.signIn called with email:", email);
     try {
-      const signInOptions: any = {
+      const signInOptions: {
+        email: string;
+        password: string;
+        options?: { captchaToken: string };
+      } = {
         email,
         password,
       };
@@ -435,7 +485,7 @@ export class SupabaseService {
   public async updateUserCredentials(
     email: string,
     password?: string,
-  ): Promise<{ user: User | null; error: any }> {
+  ): Promise<{ user: User | null; error: Error | null }> {
     try {
       const updateData: { email: string; password?: string } = { email };
       if (password) {
@@ -481,7 +531,10 @@ export class SupabaseService {
       return { user: data.user, error: null };
     } catch (error) {
       console.error("Error updating user credentials:", error);
-      return { user: null, error };
+      return {
+        user: null,
+        error: error instanceof Error ? error : new Error(String(error)),
+      };
     }
   }
 
@@ -843,7 +896,7 @@ export class SupabaseService {
     email: string,
     termsAccepted = true,
     privacyAccepted = true,
-  ): Promise<{ error: any }> {
+  ): Promise<{ error: Error | null }> {
     try {
       const now = new Date().toISOString();
       // Use UPSERT instead of INSERT to handle existing profiles
@@ -926,7 +979,9 @@ export class SupabaseService {
       return { error: null };
     } catch (error) {
       console.error("Error creating premium profile:", error);
-      return { error };
+      return {
+        error: error instanceof Error ? error : new Error(String(error)),
+      };
     }
   }
 
@@ -1289,28 +1344,38 @@ export class SupabaseService {
   // ============================================================================
   // DATA MERGE UTILITY METHODS
   // ============================================================================
+  // MERGE METHOD TYPE INTERFACES
+  // ============================================================================
 
+  // ============================================================================
+  // MERGE METHODS
+  // ============================================================================
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private mergeGameHistory(cloudHistory: any[], localHistory: any[]): any[] {
     // Combine both arrays and deduplicate by ID or timestamp
     const combined = [...cloudHistory, ...localHistory];
     const deduped = combined.reduce((acc, game) => {
       const key = game.id || game.timestamp;
-      if (!acc.has(key) || game.timestamp > acc.get(key).timestamp) {
+      if (!acc.has(key) || game.timestamp > acc.get(key)?.timestamp) {
         acc.set(key, game);
       }
       return acc;
     }, new Map());
 
     // Sort by timestamp (most recent first) and keep only the last 100
-    return Array.from(deduped.values())
-      .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0))
-      .slice(0, 100);
+    return (
+      Array.from(deduped.values())
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0))
+        .slice(0, 100)
+    );
   }
 
   private mergeAchievements(
-    cloudAchievements: any,
-    localAchievements: any,
-  ): any {
+    cloudAchievements: AchievementData,
+    localAchievements: AchievementData,
+  ): AchievementData {
     const defaultAchievements = {
       unlockedIds: [],
       viewedIds: [],
@@ -1352,10 +1417,10 @@ export class SupabaseService {
   }
 
   private mergeWordCollections(
-    cloudCollections: any,
-    localCollections: any,
-  ): any {
-    const merged: any = { ...cloudCollections };
+    cloudCollections: WordCollectionData,
+    localCollections: WordCollectionData,
+  ): WordCollectionData {
+    const merged: WordCollectionData = { ...cloudCollections };
 
     // Merge collected words for each collection
     for (const [collectionId, localProgress] of Object.entries(
@@ -1388,7 +1453,10 @@ export class SupabaseService {
     return merged;
   }
 
-  private mergeWordCollectionStatus(cloudStatus: any, localStatus: any): any {
+  private mergeWordCollectionStatus(
+    cloudStatus: WordCollectionStatusData,
+    localStatus: WordCollectionStatusData,
+  ): WordCollectionStatusData {
     const defaultStatus = {
       completedIds: [],
       viewedIds: [],
@@ -1412,7 +1480,10 @@ export class SupabaseService {
     };
   }
 
-  private mergeStatistics(cloudStats: any, localStats: any): any {
+  private mergeStatistics(
+    cloudStats: StatisticsData,
+    localStats: StatisticsData,
+  ): StatisticsData {
     const defaultStats = {
       totalGamesPlayed: 0,
       totalWins: 0,
@@ -1442,7 +1513,10 @@ export class SupabaseService {
     };
   }
 
-  private mergeNewsStatus(cloudNews: any, localNews: any): any {
+  private mergeNewsStatus(
+    cloudNews: NewsStatusData,
+    localNews: NewsStatusData,
+  ): NewsStatusData {
     const defaultNews = {
       readArticleIds: [],
       lastChecked: 0,
@@ -1479,11 +1553,15 @@ export class SupabaseService {
     return this.currentAuthState.profile;
   }
 
-  public async invokeFunction<T = any>(
+  public getSupabaseClient(): SupabaseClient {
+    return this.supabase;
+  }
+
+  public async invokeFunction<T = unknown>(
     functionName: string,
-    body: any,
+    body: Record<string, unknown>,
     jwtToken?: string, // Optional JWT token parameter
-  ): Promise<{ data: T | null; error: any }> {
+  ): Promise<{ data: T | null; error: Error | null }> {
     try {
       const headers: HeadersInit = {
         apikey: supabaseAnonKey!, // Keep existing apikey
@@ -1529,7 +1607,10 @@ export class SupabaseService {
       return { data: responseData, error: null };
     } catch (error) {
       console.error(`Error invoking function ${functionName}:`, error);
-      return { data: null, error };
+      return {
+        data: null,
+        error: error instanceof Error ? error : new Error(String(error)),
+      };
     }
   }
 
