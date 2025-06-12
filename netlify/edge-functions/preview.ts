@@ -214,8 +214,8 @@ export default async (request: Request, _context: Context) => {
     const { startWord, targetWord } = gameChallenge;
 
     const title = `Synapse Challenge: "${startWord}" → "${targetWord}"`;
-    const description = `Can you connect "${startWord}" to "${targetWord}" in this word transformation challenge? Join the fun!`;
-    const imageUrl = `${url.origin}/assets/icon.png`;
+    const description = `Can you connect "${startWord}" to "${targetWord}" using semantic pathways? Join this word navigation puzzle!`;
+    const imageUrl = `${url.origin}/api/image?start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&url=${encodeURIComponent(fullUrl)}`;
 
     const metaTags = generateMetaTags(title, description, imageUrl, fullUrl);
 
@@ -267,7 +267,7 @@ export default async (request: Request, _context: Context) => {
 
     const title = `Daily Synapse Challenge`;
     const description = taunt;
-    const imageUrl = `${url.origin}/assets/icon.png`;
+    const imageUrl = `${url.origin}/api/image?start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&url=${encodeURIComponent(fullUrl)}`;
 
     const metaTags = generateMetaTags(title, description, imageUrl, fullUrl);
 
