@@ -36,9 +36,25 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "title": "Synapse - Word Navigation Puzzle",
+      "title": "Synapse: Semantic Pathways",
       "bundler": "webpack",
       "webpackConfigPath": "webpack.config.js",
+      "meta": {
+        "description": "Navigate between words through semantic connections. Find the shortest path from start to target by choosing related words. Daily AI challenges and friend competitions!",
+        "keywords": "word game, puzzle, semantic relationships, AI challenge, daily puzzle, word navigation",
+        "author": "Synapse Game",
+        "og:title": "Synapse: Semantic Pathways",
+        "og:description": "Navigate between words through semantic connections. Find the shortest path from start to target by choosing related words. Daily AI challenges and friend competitions!",
+        "og:type": "website",
+        "og:image": "/og-image.png",
+        "og:url": "https://synapsegame.ai",
+        "og:site_name": "Synapse Game",
+        "twitter:card": "summary_large_image",
+        "twitter:title": "Synapse: Semantic Pathways",
+        "twitter:description": "Navigate between words through semantic connections. Find the shortest path from start to target by choosing related words. Daily AI challenges and friend competitions!",
+        "twitter:image": "/og-image.png",
+        "twitter:image:alt": "Synapse Game Logo"
+      },
       "build": {
         "babel": {
           "include": ["@supabase/supabase-js"]
