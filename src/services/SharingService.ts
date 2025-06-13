@@ -10,6 +10,10 @@ import type {
 import { captureRef } from "react-native-view-shot";
 
 import { Logger } from "../utils/logger";
+import type {
+  GameReport,
+  OptimalChoice,
+} from "../utils/gameReportUtils";
 
 // Import image manipulator conditionally to avoid web errors
 
@@ -38,6 +42,7 @@ interface ShareChallengeOptions {
   includeScreenshot?: boolean;
   steps?: number;
   theme?: string;
+  gameReport?: GameReport; // Add game report for encoding
 }
 
 interface ShareDailyChallengeOptions {
@@ -51,6 +56,7 @@ interface ShareDailyChallengeOptions {
   challengeDate: string;
   screenshotRef?: React.RefObject<View | null>;
   includeScreenshot?: boolean;
+  gameReport?: GameReport; // Add game report for encoding
 }
 
 /**
@@ -64,18 +70,23 @@ export const shareChallenge = async ({
   includeScreenshot = true,
   steps,
   theme,
+  gameReport,
 }: ShareChallengeOptions): Promise<boolean> => {
   try {
-    // Generate the deep link
-    const deepLink = generateSecureGameDeepLink(startWord, targetWord, theme);
+    // Encode game report data if available
+    const encodedPath = gameReport ? encodeGameReportForSharing(gameReport) : "";
+    
+    // Generate the deep link with encoded path
+    const deepLink = generateSecureGameDeepLink(startWord, targetWord, theme, encodedPath);
 
-    // Generate challenge message
+    // Generate challenge message with emoji path
     const challengeMessage = generateChallengeMessage({
       startWord,
       targetWord,
       playerPath,
       steps,
       deepLink,
+      encodedPath,
     });
 
     // Web-specific sharing handling
@@ -170,16 +181,21 @@ export const shareDailyChallenge = async ({
   challengeDate,
   screenshotRef,
   includeScreenshot = true,
+  gameReport,
 }: ShareDailyChallengeOptions): Promise<boolean> => {
   try {
-    // Generate the daily challenge deep link
+    // Encode game report data if available
+    const encodedPath = gameReport ? encodeGameReportForSharing(gameReport) : "";
+    
+    // Generate the daily challenge deep link with encoded path
     const deepLink = generateSecureDailyChallengeDeepLink(
       challengeId,
       startWord,
       targetWord,
+      encodedPath,
     );
 
-    // Generate taunting message
+    // Generate taunting message with emoji path
     const tauntMessage = generateDailyChallengeTaunt({
       startWord,
       targetWord,
@@ -188,6 +204,7 @@ export const shareDailyChallenge = async ({
       userCompleted,
       userGaveUp,
       challengeDate,
+      encodedPath,
     });
 
     // Web-specific sharing handling
@@ -267,6 +284,7 @@ interface ChallengeMessageOptions {
   steps?: number;
   deepLink: string;
   gameStatus?: "won" | "given_up";
+  encodedPath?: string; // Add encoded path for emoji display
 }
 
 export const generateChallengeMessage = (
@@ -279,6 +297,7 @@ export const generateChallengeMessage = (
     steps,
     deepLink: _deepLink,
     gameStatus,
+    encodedPath,
   } = options;
 
   let challengeMessage = `Can you connect "${startWord}" to "${targetWord}" in Synapse?`;
@@ -298,6 +317,12 @@ export const generateChallengeMessage = (
       const stepText = pathLength === 1 ? "step" : "steps";
       challengeMessage = `I connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText}! Can you beat my score in Synapse?`;
     }
+  }
+
+  // Add emoji path if available
+  if (encodedPath) {
+    const emojiPath = pathEncodingToEmojis(encodedPath);
+    challengeMessage += `\n\n${emojiPath}`;
   }
 
   // We won't include the deep link in the message as it will be included as URL in the share options
@@ -401,6 +426,7 @@ interface DailyChallengeTauntOptions {
   userCompleted?: boolean;
   userGaveUp?: boolean;
   challengeDate: string;
+  encodedPath?: string; // Add encoded path for emoji display
 }
 
 export const generateDailyChallengeTaunt = (
@@ -414,6 +440,7 @@ export const generateDailyChallengeTaunt = (
     userCompleted,
     userGaveUp,
     challengeDate,
+    encodedPath,
   } = options;
 
   const dateObj = new Date(challengeDate);
@@ -427,30 +454,56 @@ export const generateDailyChallengeTaunt = (
     const userMoveText = userSteps === 1 ? "move" : "moves";
     const aiMoveText = aiSteps === 1 ? "move" : "moves";
 
+    let message: string;
     if (userSteps < aiSteps) {
-      return `I crushed the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (AI took ${aiSteps} ${aiMoveText}). Think you can beat me?`;
+      message = `I crushed the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (AI took ${aiSteps} ${aiMoveText}). Think you can beat me?`;
     } else if (userSteps === aiSteps) {
-      return `I matched the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText}. Can you do better?`;
+      message = `I matched the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText}. Can you do better?`;
     } else {
-      return `I got ${formattedDate}'s challenge in ${userSteps} ${userMoveText} ("${startWord}" → "${targetWord}"). The AI did it in ${aiSteps} ${aiMoveText}... can you beat us both?`;
+      message = `I got ${formattedDate}'s challenge in ${userSteps} ${userMoveText} ("${startWord}" → "${targetWord}"). The AI did it in ${aiSteps} ${aiMoveText}... can you beat us both?`;
     }
+    
+    // Add emoji path if available
+    if (encodedPath) {
+      const emojiPath = pathEncodingToEmojis(encodedPath);
+      message += `\n\n${emojiPath}`;
+    }
+    
+    return message;
   }
 
   // If user gave up, acknowledge that but still challenge them
   if (userGaveUp) {
     const aiMoveText = aiSteps === 1 ? "move" : "moves";
     
+    let message: string;
     if (userSteps && userSteps > 0) {
       const moveText = userSteps === 1 ? "move" : "moves";
-      return `I couldn't get ${formattedDate}'s challenge ("${startWord}" → "${targetWord}") and gave up after ${userSteps} ${moveText}, but the AI got it in ${aiSteps} ${aiMoveText}. Can you beat the AI in less than ${aiSteps} moves?`;
+      message = `I couldn't get ${formattedDate}'s challenge ("${startWord}" → "${targetWord}") and gave up after ${userSteps} ${moveText}, but the AI got it in ${aiSteps} ${aiMoveText}. Can you beat the AI in less than ${aiSteps} moves?`;
     } else {
-      return `I couldn't get ${formattedDate}'s challenge ("${startWord}" → "${targetWord}") and had to give up, but the AI got it in ${aiSteps} ${aiMoveText}. Can you beat the AI in less than ${aiSteps} moves?`;
+      message = `I couldn't get ${formattedDate}'s challenge ("${startWord}" → "${targetWord}") and had to give up, but the AI got it in ${aiSteps} ${aiMoveText}. Can you beat the AI in less than ${aiSteps} moves?`;
     }
+    
+    // Add emoji path if available
+    if (encodedPath) {
+      const emojiPath = pathEncodingToEmojis(encodedPath);
+      message += `\n\n${emojiPath}`;
+    }
+    
+    return message;
   }
 
   // If user hasn't attempted it or no steps recorded, just taunt with AI score
   const aiMoveText = aiSteps === 1 ? "move" : "moves";
-  return `I beat the AI in ${aiSteps} ${aiMoveText} on ${formattedDate}'s challenge ("${startWord}" → "${targetWord}"). Can you do better?`;
+  let message = `I beat the AI in ${aiSteps} ${aiMoveText} on ${formattedDate}'s challenge ("${startWord}" → "${targetWord}"). Can you do better?`;
+  
+  // Add emoji path if available
+  if (encodedPath) {
+    const emojiPath = pathEncodingToEmojis(encodedPath);
+    message += `\n\n${emojiPath}`;
+  }
+  
+  return message;
 };
 
 /**
@@ -490,6 +543,7 @@ export const generateSecureGameDeepLink = (
   startWord: string,
   targetWord: string,
   theme?: string,
+  encodedPath?: string,
 ): string => {
   const data = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
   const hash = generateUrlHash(data);
@@ -497,7 +551,8 @@ export const generateSecureGameDeepLink = (
   // Build base URL parameters
   const params = `start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
   const themeParam = theme ? `&theme=${encodeURIComponent(theme)}` : "";
-  const fullParams = `${params}${themeParam}`;
+  const shareParam = encodedPath ? `&share=${encodeURIComponent(encodedPath)}` : "";
+  const fullParams = `${params}${themeParam}${shareParam}`;
 
   // Use the app's scheme for deep linking
   // For web, use the web URL format
@@ -535,9 +590,15 @@ export const generateSecureDailyChallengeDeepLink = (
   challengeId: string,
   startWord: string,
   targetWord: string,
+  encodedPath?: string,
 ): string => {
   const data = `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
   const hash = generateUrlHash(data);
+
+  // Build base URL parameters
+  const baseParams = `id=${encodeURIComponent(challengeId)}&start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
+  const shareParam = encodedPath ? `&share=${encodeURIComponent(encodedPath)}` : "";
+  const fullParams = `${baseParams}${shareParam}`;
 
   // Use the app's scheme for deep linking
   // For web, use the web URL format
@@ -547,11 +608,11 @@ export const generateSecureDailyChallengeDeepLink = (
       typeof window !== "undefined"
         ? window.location.origin
         : "https://synapse-game.example.com";
-    return `${origin}/dailychallenge?id=${encodeURIComponent(challengeId)}&start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
+    return `${origin}/dailychallenge?${fullParams}`;
   }
 
   // For native apps, use the custom scheme
-  return `synapse://dailychallenge?id=${encodeURIComponent(challengeId)}&start=${encodeURIComponent(startWord)}&target=${encodeURIComponent(targetWord)}&hash=${hash}`;
+  return `synapse://dailychallenge?${fullParams}`;
 };
 
 /**
@@ -710,4 +771,87 @@ export const parseDailyChallengeDeepLink = (
     console.error("🎮 parseDailyChallengeDeepLink: Error parsing URL:", error);
     return null;
   }
+};
+
+/**
+ * Encode game report data into a compact visual representation
+ * S = Start (🟩), T = Target (🟥), C = Current (🟦), N = Normal (⬜), 
+ * G = Global optimal (🟨), L = Local optimal (🟪), R = Remaining path (⚫)
+ */
+export const encodeGameReportForSharing = (report: GameReport): string => {
+  const { playerPath, optimalChoices, suggestedPath, status } = report;
+  
+  if (!playerPath || playerPath.length === 0) {
+    return "";
+  }
+
+  let encoded = "";
+  
+  // Process each word in the player's path
+  for (let i = 0; i < playerPath.length; i++) {
+    const word = playerPath[i];
+    
+    if (i === 0) {
+      // Start word
+      encoded += "S";
+    } else if (i === playerPath.length - 1) {
+      // Last word in path
+      if (status === "won") {
+        // If won, last word is the target
+        encoded += "T";
+      } else {
+        // If gave up, last word is current position
+        encoded += "C";
+      }
+    } else {
+      // Middle words - check if they were optimal moves
+      const choiceIndex = i - 1; // Choice index is one less than word index
+      const choice = optimalChoices?.[choiceIndex];
+      
+      if (choice && choice.playerChose === word) {
+        if (choice.isGlobalOptimal) {
+          encoded += "G";
+        } else if (choice.isLocalOptimal) {
+          encoded += "L";
+        } else {
+          encoded += "N";
+        }
+      } else {
+        encoded += "N";
+      }
+    }
+  }
+  
+  // If player gave up, add remaining path from suggested path
+  if (status === "given_up" && suggestedPath && suggestedPath.length > 1) {
+    // Skip the first word of suggested path (it's the current position, already encoded as C)
+    for (let i = 1; i < suggestedPath.length - 1; i++) {
+      encoded += "R";
+    }
+    // Last word of suggested path is the target
+    encoded += "T";
+  }
+  
+  return encoded;
+};
+
+/**
+ * Convert encoded path to emoji representation for display
+ */
+export const pathEncodingToEmojis = (encoded: string): string => {
+  return encoded
+    .split("")
+    .map((char) => {
+      switch (char) {
+        case "S": return "🟩"; // Start - green square
+        case "T": return "🟥"; // Target - red square  
+        case "C": return "🟦"; // Current - blue square
+        case "N": return "⬜"; // Normal - light gray square
+        case "G": return "🟨"; // Global optimal - yellow square
+        case "L": return "🟪"; // Local optimal - purple square
+        case "R": return "⚫"; // Remaining path - dark circle
+        default: return char;
+      }
+    })
+    .join("");
 };

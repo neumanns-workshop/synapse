@@ -38,6 +38,7 @@ import {
   generateSecureDailyChallengeDeepLink,
   generateChallengeMessage,
   generateDailyChallengeTaunt,
+  encodeGameReportForSharing,
 } from "../services/SharingService";
 import {
   loadGameHistory,
@@ -783,10 +784,14 @@ const StatsModal = () => {
           selectedReport.isDailyChallenge &&
           selectedReport.dailyChallengeId
         ) {
+          // Encode game report data for sharing
+          const encodedPath = selectedReport ? encodeGameReportForSharing(selectedReport) : "";
+          
           link = generateSecureDailyChallengeDeepLink(
             selectedReport.dailyChallengeId,
             startWord,
             targetWord,
+            encodedPath,
           );
           
           // Generate proper daily challenge taunt
@@ -804,9 +809,13 @@ const StatsModal = () => {
             userCompleted,
             userGaveUp,
             challengeDate,
+            encodedPath,
           });
         } else {
-          link = generateSecureGameDeepLink(startWord, targetWord);
+          // Encode game report data for sharing
+          const encodedPath = selectedReport ? encodeGameReportForSharing(selectedReport) : "";
+          
+          link = generateSecureGameDeepLink(startWord, targetWord, undefined, encodedPath);
           message = generateChallengeMessage({
             startWord,
             targetWord,
@@ -814,6 +823,7 @@ const StatsModal = () => {
             steps: pathLength,
             deepLink: link,
             gameStatus: selectedReport.status,
+            encodedPath,
           });
         }
 
@@ -827,7 +837,7 @@ const StatsModal = () => {
           playerPath,
           screenshotRef: graphPreviewRef, // Use the graph preview ref for sharing
           steps: pathLength,
-          // timeInSeconds, // Removed
+          gameReport: selectedReport, // Pass the game report for encoding
         });
 
         if (success) {

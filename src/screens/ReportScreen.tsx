@@ -30,6 +30,7 @@ import {
   generateSecureDailyChallengeDeepLink,
   generateChallengeMessage,
   generateDailyChallengeTaunt,
+  encodeGameReportForSharing,
 } from "../services/SharingService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -125,10 +126,14 @@ const ReportScreen = () => {
         let message: string;
 
         if (gameReport.isDailyChallenge && gameReport.dailyChallengeId) {
+          // Encode game report data for sharing
+          const encodedPath = gameReport ? encodeGameReportForSharing(gameReport) : "";
+          
           link = generateSecureDailyChallengeDeepLink(
             gameReport.dailyChallengeId,
             startWord,
             targetWord,
+            encodedPath,
           );
           
           // Generate proper daily challenge taunt
@@ -146,9 +151,13 @@ const ReportScreen = () => {
             userCompleted,
             userGaveUp,
             challengeDate,
+            encodedPath,
           });
         } else {
-          link = generateSecureGameDeepLink(startWord, targetWord);
+          // Encode game report data for sharing
+          const encodedPath = gameReport ? encodeGameReportForSharing(gameReport) : "";
+          
+          link = generateSecureGameDeepLink(startWord, targetWord, undefined, encodedPath);
           message = generateChallengeMessage({
             startWord,
             targetWord,
@@ -156,6 +165,7 @@ const ReportScreen = () => {
             steps: pathLength,
             deepLink: link,
             gameStatus: gameReport.status,
+            encodedPath,
           });
         }
 
@@ -172,6 +182,7 @@ const ReportScreen = () => {
         playerPath,
         screenshotRef: graphPreviewRef, // Use the graph preview ref for sharing
         steps: pathLength,
+        gameReport, // Pass the game report for encoding
       });
 
       if (success) {

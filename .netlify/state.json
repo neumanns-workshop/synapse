@@ -1,0 +1,23 @@
+{
+	"promptVSCodeSettings": true,
+	"geolocation": {
+		"data": {
+			"city": "Fargo",
+			"country": {
+				"code": "US",
+				"name": "United States"
+			},
+			"subdivision": {
+				"code": "ND",
+				"name": "North Dakota"
+			},
+			"timezone": "America/Chicago",
+			"latitude": 46.8524,
+			"longitude": -96.8121,
+			"postalCode": "58103"
+		},
+		"timestamp": 1749748570461
+	},
+	"liveTunnelSlug": "68e30b4a",
+	"siteId": "a23ffb5f-b16c-430c-9c60-9f6cd15a071b"
+}

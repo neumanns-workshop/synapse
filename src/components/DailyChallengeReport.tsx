@@ -22,6 +22,7 @@ import {
   shareDailyChallenge,
   generateSecureDailyChallengeDeepLink,
   generateDailyChallengeTaunt,
+  encodeGameReportForSharing,
 } from "../services/SharingService";
 import type { Achievement } from "../features/achievements";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -99,10 +100,14 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
 
       // For web, show the challenge link in a dialog
       if (Platform.OS === "web") {
+        // Encode game report data for sharing
+        const encodedPath = gameReport ? encodeGameReportForSharing(gameReport) : "";
+        
         const link = generateSecureDailyChallengeDeepLink(
           challenge.id,
           challenge.startWord,
           challenge.targetWord,
+          encodedPath,
         );
 
         // Generate the taunt message (same as native)
@@ -114,6 +119,7 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
           userCompleted,
           userGaveUp,
           challengeDate: challenge.date,
+          encodedPath,
         });
 
         setChallengeLink(link);
@@ -133,6 +139,7 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
         userGaveUp,
         challengeDate: challenge.date,
         screenshotRef: graphPreviewRef,
+        gameReport, // Pass the game report for encoding
       });
 
       if (success) {
