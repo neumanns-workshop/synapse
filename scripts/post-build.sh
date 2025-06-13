@@ -16,4 +16,26 @@ if [ -f "public/sitemap.xml" ]; then
     echo "✅ Copied sitemap.xml"
 fi
 
+# Copy Open Graph image
+if [ -f "public/og-image.png" ]; then
+    cp public/og-image.png web-build/
+    echo "✅ Copied og-image.png"
+fi
+
+# Copy favicon files
+if [ -f "public/favicon.ico" ]; then
+    cp public/favicon.ico web-build/
+    echo "✅ Copied favicon.ico"
+fi
+
+if [ -f "public/favicon.png" ]; then
+    cp public/favicon.png web-build/
+    echo "✅ Copied favicon.png"
+fi
+
+if [ -f "public/favicon.svg" ]; then
+    cp public/favicon.svg web-build/
+    echo "✅ Copied favicon.svg"
+fi
+
 echo "✅ Post-build script completed" 
