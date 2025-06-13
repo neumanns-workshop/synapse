@@ -91,6 +91,7 @@ export const shareChallenge = async ({
       steps,
       deepLink,
       encodedPath,
+      optimalPathLength: gameReport?.optimalPath.length,
     });
 
     // Web-specific sharing handling
@@ -292,6 +293,7 @@ interface ChallengeMessageOptions {
   deepLink: string;
   gameStatus?: "won" | "given_up";
   encodedPath?: string; // Add encoded path for emoji display
+  optimalPathLength?: number; // Add optimal path length to check for perfect games
 }
 
 export const generateChallengeMessage = (
@@ -305,6 +307,7 @@ export const generateChallengeMessage = (
     deepLink: _deepLink,
     gameStatus,
     encodedPath,
+    optimalPathLength,
   } = options;
 
   let challengeMessage = `Can you connect "${startWord}" to "${targetWord}" in Synapse?`;
@@ -315,14 +318,32 @@ export const generateChallengeMessage = (
 
     if (gameStatus === "won") {
       const stepText = pathLength === 1 ? "step" : "steps";
-      challengeMessage = `I connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText}! Can you beat my score in Synapse?`;
+
+      // Check if user achieved a perfect game (optimal path)
+      const isPerfectGame =
+        optimalPathLength && pathLength === optimalPathLength;
+
+      if (isPerfectGame) {
+        challengeMessage = `I got a PERFECT game! Connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText} (the optimal path). Can you match perfection in Synapse?`;
+      } else {
+        challengeMessage = `I connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText}! Can you beat my score in Synapse?`;
+      }
     } else if (gameStatus === "given_up") {
       const stepText = pathLength === 1 ? "step" : "steps";
       challengeMessage = `I gave up trying to connect "${startWord}" to "${targetWord}" after ${pathLength} ${stepText}. Think you can do better in Synapse?`;
     } else {
       // Fallback for when gameStatus is not provided (backwards compatibility)
       const stepText = pathLength === 1 ? "step" : "steps";
-      challengeMessage = `I connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText}! Can you beat my score in Synapse?`;
+
+      // Check if user achieved a perfect game (optimal path)
+      const isPerfectGame =
+        optimalPathLength && pathLength === optimalPathLength;
+
+      if (isPerfectGame) {
+        challengeMessage = `I got a PERFECT game! Connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText} (the optimal path). Can you match perfection in Synapse?`;
+      } else {
+        challengeMessage = `I connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText}! Can you beat my score in Synapse?`;
+      }
     }
   }
 

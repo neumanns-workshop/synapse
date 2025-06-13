@@ -178,6 +178,7 @@ const ReportScreen = () => {
             deepLink: link,
             gameStatus: gameReport.status,
             encodedPath,
+            optimalPathLength: gameReport.optimalPath.length,
           });
         }
 

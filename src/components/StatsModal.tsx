@@ -836,6 +836,7 @@ const StatsModal = () => {
             deepLink: link,
             gameStatus: selectedReport.status,
             encodedPath,
+            optimalPathLength: selectedReport.optimalPath.length,
           });
         }
 

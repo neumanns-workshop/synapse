@@ -77,7 +77,7 @@ const pathEncodingToEmojis = (encoded: string): string => {
     .join("");
 };
 
-// Copy the generateDailyChallengeTaunt function logic for testing without React Native dependencies
+// Copy the generateDailyChallengeTaunt and generateChallengeMessage function logic for testing without React Native dependencies
 const generateDailyChallengeTaunt = (options: {
   startWord: string;
   targetWord: string;
@@ -141,6 +141,68 @@ const generateDailyChallengeTaunt = (options: {
 
   // Simplified version for testing - just return a basic message for other cases
   return `Basic challenge message for ${formattedDate}`;
+};
+
+// Copy the generateChallengeMessage function logic for testing without React Native dependencies
+const generateChallengeMessage = (options: {
+  startWord: string;
+  targetWord: string;
+  playerPath?: string[];
+  steps?: number;
+  deepLink: string;
+  gameStatus?: "won" | "given_up";
+  encodedPath?: string;
+  optimalPathLength?: number;
+}): string => {
+  const {
+    startWord,
+    targetWord,
+    playerPath,
+    steps,
+    deepLink: _deepLink,
+    gameStatus,
+    encodedPath,
+    optimalPathLength,
+  } = options;
+
+  let challengeMessage = `Can you connect "${startWord}" to "${targetWord}" in Synapse?`;
+
+  // If player has a path (either completed or gave up)
+  if (playerPath && playerPath.length > 1) {
+    const pathLength = steps || playerPath.length - 1;
+
+    if (gameStatus === "won") {
+      const stepText = pathLength === 1 ? "step" : "steps";
+
+      // Check if user achieved a perfect game (optimal path)
+      const isPerfectGame =
+        optimalPathLength && pathLength === optimalPathLength;
+
+      if (isPerfectGame) {
+        challengeMessage = `I got a PERFECT game! Connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText} (the optimal path). Can you match perfection in Synapse?`;
+      } else {
+        challengeMessage = `I connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText}! Can you beat my score in Synapse?`;
+      }
+    } else if (gameStatus === "given_up") {
+      const stepText = pathLength === 1 ? "step" : "steps";
+      challengeMessage = `I gave up trying to connect "${startWord}" to "${targetWord}" after ${pathLength} ${stepText}. Think you can do better in Synapse?`;
+    } else {
+      // Fallback for when gameStatus is not provided (backwards compatibility)
+      const stepText = pathLength === 1 ? "step" : "steps";
+
+      // Check if user achieved a perfect game (optimal path)
+      const isPerfectGame =
+        optimalPathLength && pathLength === optimalPathLength;
+
+      if (isPerfectGame) {
+        challengeMessage = `I got a PERFECT game! Connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText} (the optimal path). Can you match perfection in Synapse?`;
+      } else {
+        challengeMessage = `I connected "${startWord}" to "${targetWord}" in ${pathLength} ${stepText}! Can you beat my score in Synapse?`;
+      }
+    }
+  }
+
+  return challengeMessage;
 };
 
 describe("SharingService Encoding", () => {
@@ -376,6 +438,74 @@ describe("SharingService Daily Challenge Taunts", () => {
 
       expect(taunt).not.toContain("PERFECT game");
       expect(taunt).toContain("Can you do better?");
+    });
+  });
+});
+
+describe("SharingService Regular Challenge Messages", () => {
+  describe("generateChallengeMessage", () => {
+    it("should generate perfect game message when user steps equals optimal path length", () => {
+      const message = generateChallengeMessage({
+        startWord: "start",
+        targetWord: "target",
+        playerPath: ["start", "word1", "word2", "target"],
+        steps: 3,
+        deepLink: "https://example.com",
+        gameStatus: "won",
+        optimalPathLength: 3, // User took 3 steps, optimal is also 3
+      });
+
+      expect(message).toContain("PERFECT game");
+      expect(message).toContain("the optimal path");
+      expect(message).toContain("Can you match perfection");
+      expect(message).not.toContain("Can you beat my score");
+    });
+
+    it("should generate normal message when user steps does not equal optimal path length", () => {
+      const message = generateChallengeMessage({
+        startWord: "start",
+        targetWord: "target",
+        playerPath: ["start", "word1", "word2", "word3", "target"],
+        steps: 4,
+        deepLink: "https://example.com",
+        gameStatus: "won",
+        optimalPathLength: 3, // User took 4 steps, optimal is 3
+      });
+
+      expect(message).not.toContain("PERFECT game");
+      expect(message).not.toContain("the optimal path");
+      expect(message).toContain("Can you beat my score");
+    });
+
+    it("should generate perfect game message for fallback case (no gameStatus)", () => {
+      const message = generateChallengeMessage({
+        startWord: "start",
+        targetWord: "target",
+        playerPath: ["start", "word1", "word2", "target"],
+        steps: 3,
+        deepLink: "https://example.com",
+        optimalPathLength: 3, // User took 3 steps, optimal is also 3
+      });
+
+      expect(message).toContain("PERFECT game");
+      expect(message).toContain("the optimal path");
+      expect(message).toContain("Can you match perfection");
+      expect(message).not.toContain("Can you beat my score");
+    });
+
+    it("should not affect gave up messages", () => {
+      const message = generateChallengeMessage({
+        startWord: "start",
+        targetWord: "target",
+        playerPath: ["start", "word1", "word2"],
+        steps: 2,
+        deepLink: "https://example.com",
+        gameStatus: "given_up",
+        optimalPathLength: 3,
+      });
+
+      expect(message).not.toContain("PERFECT game");
+      expect(message).toContain("Think you can do better");
     });
   });
 });
