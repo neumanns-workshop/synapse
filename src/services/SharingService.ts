@@ -91,7 +91,9 @@ export const shareChallenge = async ({
       steps,
       deepLink,
       encodedPath,
-      optimalPathLength: gameReport?.optimalPath.length,
+      optimalPathLength: gameReport?.optimalPath.length
+        ? gameReport.optimalPath.length - 1
+        : undefined,
     });
 
     // Web-specific sharing handling
@@ -212,7 +214,9 @@ export const shareDailyChallenge = async ({
       userGaveUp,
       challengeDate,
       encodedPath,
-      optimalPathLength: gameReport?.optimalPath.length,
+      optimalPathLength: gameReport?.optimalPath.length
+        ? gameReport.optimalPath.length - 1
+        : undefined,
     });
 
     // Web-specific sharing handling

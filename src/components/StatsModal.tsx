@@ -814,7 +814,7 @@ const StatsModal = () => {
             userGaveUp,
             challengeDate,
             encodedPath,
-            optimalPathLength: selectedReport.optimalPath.length,
+            optimalPathLength: selectedReport.optimalPath.length - 1,
           });
         } else {
           // Encode game report data for sharing
@@ -836,7 +836,7 @@ const StatsModal = () => {
             deepLink: link,
             gameStatus: selectedReport.status,
             encodedPath,
-            optimalPathLength: selectedReport.optimalPath.length,
+            optimalPathLength: selectedReport.optimalPath.length - 1,
           });
         }
 

@@ -156,7 +156,7 @@ const ReportScreen = () => {
             userGaveUp,
             challengeDate,
             encodedPath,
-            optimalPathLength: gameReport.optimalPath.length,
+            optimalPathLength: gameReport.optimalPath.length - 1,
           });
         } else {
           // Encode game report data for sharing
@@ -178,7 +178,7 @@ const ReportScreen = () => {
             deepLink: link,
             gameStatus: gameReport.status,
             encodedPath,
-            optimalPathLength: gameReport.optimalPath.length,
+            optimalPathLength: gameReport.optimalPath.length - 1,
           });
         }
 
