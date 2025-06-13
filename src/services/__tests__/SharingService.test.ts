@@ -111,7 +111,7 @@ const generateDailyChallengeTaunt = (options: {
   if (userCompleted && userSteps) {
     const userMoveText = userSteps === 1 ? "move" : "moves";
     const aiMoveText = aiSteps === 1 ? "move" : "moves";
-    
+
     // Check if user achieved a perfect game (optimal path)
     const isPerfectGame = optimalPathLength && userSteps === optimalPathLength;
 
@@ -312,7 +312,7 @@ describe("SharingService Daily Challenge Taunts", () => {
     it("should generate perfect game message when user steps equals optimal path length", () => {
       const taunt = generateDailyChallengeTaunt({
         startWord: "start",
-        targetWord: "target", 
+        targetWord: "target",
         aiSteps: 4,
         userSteps: 3, // User took 3 steps
         userCompleted: true,

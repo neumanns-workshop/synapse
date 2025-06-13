@@ -211,7 +211,7 @@ export const shareDailyChallenge = async ({
       userGaveUp,
       challengeDate,
       encodedPath,
-              optimalPathLength: gameReport?.optimalPath.length,
+      optimalPathLength: gameReport?.optimalPath.length,
     });
 
     // Web-specific sharing handling
@@ -462,7 +462,7 @@ export const generateDailyChallengeTaunt = (
   if (userCompleted && userSteps) {
     const userMoveText = userSteps === 1 ? "move" : "moves";
     const aiMoveText = aiSteps === 1 ? "move" : "moves";
-    
+
     // Check if user achieved a perfect game (optimal path)
     const isPerfectGame = optimalPathLength && userSteps === optimalPathLength;
 
