@@ -50,7 +50,7 @@ A word navigation puzzle game built with React Native/Expo, featuring semantic w
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 22.16.0+ (use `nvm use` to switch to the correct version)
 - Expo CLI
 - Git
 
@@ -197,8 +197,8 @@ Ready for web-first beta testing and soft launch:
 # Build for production
 npm run build:web
 
-# Deploy to Vercel (synapsegame.ai)
-npm run deploy:vercel
+# Deploy to Netlify (synapsegame.ai)
+# Follow NETLIFY_DEPLOY.md for deployment instructions
 ```
 
 The web version is fully optimized with:

@@ -122,6 +122,7 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
           userGaveUp,
           challengeDate: challenge.date,
           encodedPath,
+          optimalPathLength: challenge.optimalPathLength,
         });
 
         setChallengeLink(link);

@@ -814,6 +814,7 @@ const StatsModal = () => {
             userGaveUp,
             challengeDate,
             encodedPath,
+            optimalPathLength: selectedReport.optimalPath.length,
           });
         } else {
           // Encode game report data for sharing

@@ -211,6 +211,7 @@ export const shareDailyChallenge = async ({
       userGaveUp,
       challengeDate,
       encodedPath,
+              optimalPathLength: gameReport?.optimalPath.length,
     });
 
     // Web-specific sharing handling
@@ -433,6 +434,7 @@ interface DailyChallengeTauntOptions {
   userGaveUp?: boolean;
   challengeDate: string;
   encodedPath?: string; // Add encoded path for emoji display
+  optimalPathLength?: number; // Add optimal path length to check for perfect games
 }
 
 export const generateDailyChallengeTaunt = (
@@ -447,6 +449,7 @@ export const generateDailyChallengeTaunt = (
     userGaveUp,
     challengeDate,
     encodedPath,
+    optimalPathLength,
   } = options;
 
   const dateObj = new Date(challengeDate);
@@ -459,14 +462,29 @@ export const generateDailyChallengeTaunt = (
   if (userCompleted && userSteps) {
     const userMoveText = userSteps === 1 ? "move" : "moves";
     const aiMoveText = aiSteps === 1 ? "move" : "moves";
+    
+    // Check if user achieved a perfect game (optimal path)
+    const isPerfectGame = optimalPathLength && userSteps === optimalPathLength;
 
     let message: string;
     if (userSteps < aiSteps) {
-      message = `I crushed the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (AI took ${aiSteps} ${aiMoveText}). Think you can beat me?`;
+      if (isPerfectGame) {
+        message = `I got a PERFECT game on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (the optimal path). The AI took ${aiSteps} ${aiMoveText}. Can you match perfection?`;
+      } else {
+        message = `I crushed the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (AI took ${aiSteps} ${aiMoveText}). Think you can beat me?`;
+      }
     } else if (userSteps === aiSteps) {
-      message = `I matched the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText}. Can you do better?`;
+      if (isPerfectGame) {
+        message = `I got a PERFECT game on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (the optimal path). The AI matched me. Can you achieve perfection too?`;
+      } else {
+        message = `I matched the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText}. Can you do better?`;
+      }
     } else {
-      message = `I got ${formattedDate}'s challenge in ${userSteps} ${userMoveText} ("${startWord}" → "${targetWord}"). The AI did it in ${aiSteps} ${aiMoveText}... can you beat us both?`;
+      if (isPerfectGame) {
+        message = `I got a PERFECT game on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (the optimal path). The AI was faster with ${aiSteps} ${aiMoveText}, but can you match my perfection?`;
+      } else {
+        message = `I got ${formattedDate}'s challenge in ${userSteps} ${userMoveText} ("${startWord}" → "${targetWord}"). The AI did it in ${aiSteps} ${aiMoveText}... can you beat us both?`;
+      }
     }
 
     // Add emoji path if available

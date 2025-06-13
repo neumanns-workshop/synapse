@@ -77,6 +77,72 @@ const pathEncodingToEmojis = (encoded: string): string => {
     .join("");
 };
 
+// Copy the generateDailyChallengeTaunt function logic for testing without React Native dependencies
+const generateDailyChallengeTaunt = (options: {
+  startWord: string;
+  targetWord: string;
+  aiSteps: number;
+  userSteps?: number;
+  userCompleted?: boolean;
+  userGaveUp?: boolean;
+  challengeDate: string;
+  encodedPath?: string;
+  optimalPathLength?: number;
+}): string => {
+  const {
+    startWord,
+    targetWord,
+    aiSteps,
+    userSteps,
+    userCompleted,
+    userGaveUp,
+    challengeDate,
+    encodedPath,
+    optimalPathLength,
+  } = options;
+
+  const dateObj = new Date(challengeDate);
+  const formattedDate = dateObj.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+  });
+
+  // If user completed it, compare with AI
+  if (userCompleted && userSteps) {
+    const userMoveText = userSteps === 1 ? "move" : "moves";
+    const aiMoveText = aiSteps === 1 ? "move" : "moves";
+    
+    // Check if user achieved a perfect game (optimal path)
+    const isPerfectGame = optimalPathLength && userSteps === optimalPathLength;
+
+    let message: string;
+    if (userSteps < aiSteps) {
+      if (isPerfectGame) {
+        message = `I got a PERFECT game on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (the optimal path). The AI took ${aiSteps} ${aiMoveText}. Can you match perfection?`;
+      } else {
+        message = `I crushed the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (AI took ${aiSteps} ${aiMoveText}). Think you can beat me?`;
+      }
+    } else if (userSteps === aiSteps) {
+      if (isPerfectGame) {
+        message = `I got a PERFECT game on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (the optimal path). The AI matched me. Can you achieve perfection too?`;
+      } else {
+        message = `I matched the AI on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText}. Can you do better?`;
+      }
+    } else {
+      if (isPerfectGame) {
+        message = `I got a PERFECT game on ${formattedDate}'s challenge! Got "${startWord}" → "${targetWord}" in ${userSteps} ${userMoveText} (the optimal path). The AI was faster with ${aiSteps} ${aiMoveText}, but can you match my perfection?`;
+      } else {
+        message = `I got ${formattedDate}'s challenge in ${userSteps} ${userMoveText} ("${startWord}" → "${targetWord}"). The AI did it in ${aiSteps} ${aiMoveText}... can you beat us both?`;
+      }
+    }
+
+    return message;
+  }
+
+  // Simplified version for testing - just return a basic message for other cases
+  return `Basic challenge message for ${formattedDate}`;
+};
+
 describe("SharingService Encoding", () => {
   describe("encodeGameReportForSharing", () => {
     it("should encode a winning path correctly", () => {
@@ -237,6 +303,79 @@ describe("SharingService Encoding", () => {
       const encoded = "SNCRRT";
       const result = pathEncodingToEmojis(encoded);
       expect(result).toBe("🟢⚪🔵⚫⚫🔴"); // Start + normal + current + 2 remaining + Target
+    });
+  });
+});
+
+describe("SharingService Daily Challenge Taunts", () => {
+  describe("generateDailyChallengeTaunt", () => {
+    it("should generate perfect game message when user steps equals optimal path length", () => {
+      const taunt = generateDailyChallengeTaunt({
+        startWord: "start",
+        targetWord: "target", 
+        aiSteps: 4,
+        userSteps: 3, // User took 3 steps
+        userCompleted: true,
+        userGaveUp: false,
+        challengeDate: "2025-01-15",
+        optimalPathLength: 3, // Optimal path is also 3 steps
+      });
+
+      expect(taunt).toContain("PERFECT game");
+      expect(taunt).toContain("the optimal path");
+      expect(taunt).not.toContain("Can you do better?");
+      expect(taunt).toContain("Can you match perfection?");
+    });
+
+    it("should generate normal message when user steps does not equal optimal path length", () => {
+      const taunt = generateDailyChallengeTaunt({
+        startWord: "start",
+        targetWord: "target",
+        aiSteps: 4,
+        userSteps: 5, // User took 5 steps
+        userCompleted: true,
+        userGaveUp: false,
+        challengeDate: "2025-01-15",
+        optimalPathLength: 3, // Optimal path is 3 steps
+      });
+
+      expect(taunt).not.toContain("PERFECT game");
+      expect(taunt).not.toContain("the optimal path");
+      expect(taunt).toContain("can you beat us both?");
+    });
+
+    it("should generate perfect game message when matching AI and optimal", () => {
+      const taunt = generateDailyChallengeTaunt({
+        startWord: "start",
+        targetWord: "target",
+        aiSteps: 3,
+        userSteps: 3, // User took 3 steps, same as AI
+        userCompleted: true,
+        userGaveUp: false,
+        challengeDate: "2025-01-15",
+        optimalPathLength: 3, // Optimal path is also 3 steps
+      });
+
+      expect(taunt).toContain("PERFECT game");
+      expect(taunt).toContain("the optimal path");
+      expect(taunt).toContain("The AI matched me");
+      expect(taunt).toContain("Can you achieve perfection too?");
+    });
+
+    it("should generate normal message when matching AI but not optimal", () => {
+      const taunt = generateDailyChallengeTaunt({
+        startWord: "start",
+        targetWord: "target",
+        aiSteps: 4,
+        userSteps: 4, // User took 4 steps, same as AI
+        userCompleted: true,
+        userGaveUp: false,
+        challengeDate: "2025-01-15",
+        optimalPathLength: 3, // Optimal path is 3 steps
+      });
+
+      expect(taunt).not.toContain("PERFECT game");
+      expect(taunt).toContain("Can you do better?");
     });
   });
 });

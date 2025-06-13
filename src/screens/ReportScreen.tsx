@@ -156,6 +156,7 @@ const ReportScreen = () => {
             userGaveUp,
             challengeDate,
             encodedPath,
+            optimalPathLength: gameReport.optimalPath.length,
           });
         } else {
           // Encode game report data for sharing
