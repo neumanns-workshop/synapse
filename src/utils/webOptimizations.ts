@@ -34,11 +34,31 @@ export const addWebMetaTags = (): void => {
     return;
   }
 
+  // Add favicon links first
+  const faviconLinks = [
+    { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+    { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon.png" },
+    { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+    { rel: "apple-touch-icon", sizes: "180x180", href: "/favicon.png" },
+  ];
+
+  faviconLinks.forEach(({ rel, type, sizes, href }) => {
+    const existingLink = document.querySelector(`link[rel="${rel}"]`);
+    if (!existingLink) {
+      const link = document.createElement("link");
+      link.rel = rel;
+      if (type) link.type = type;
+      if (sizes) link.setAttribute("sizes", sizes);
+      link.href = href;
+      document.head.appendChild(link);
+    }
+  });
+
   const metaTags = [
     {
       name: "description",
       content:
-        "Word navigation puzzle game with semantic relationships. Challenge friends and compete in daily AI puzzles!",
+        "Navigate between words through semantic connections. Find the shortest path from start to target by choosing related words. Daily AI challenges and friend competitions!",
     },
     {
       name: "keywords",
@@ -57,7 +77,7 @@ export const addWebMetaTags = (): void => {
     {
       property: "og:description",
       content:
-        "Word navigation puzzle game with semantic relationships. Challenge friends and compete in daily AI puzzles!",
+        "Navigate between words through semantic connections. Find the shortest path from start to target by choosing related words. Daily AI challenges and friend competitions!",
     },
     { property: "og:type", content: "website" },
     { property: "og:image", content: "/og-image.png" },
@@ -72,7 +92,7 @@ export const addWebMetaTags = (): void => {
     {
       name: "twitter:description",
       content:
-        "Word navigation puzzle game with semantic relationships. Challenge friends and compete in daily AI puzzles!",
+        "Navigate between words through semantic connections. Find the shortest path from start to target by choosing related words. Daily AI challenges and friend competitions!",
     },
     { name: "twitter:image", content: "/og-image.png" },
     { name: "twitter:image:alt", content: "Synapse Game Logo" },
