@@ -1,22 +1,21 @@
-// Basic placeholder test for SharingService
-// TODO: Import actual exports and add meaningful tests
+// Test for SharingService encoding functions
 
 import type { GameReport, OptimalChoice } from "../../utils/gameReportUtils";
 
-// Test the encoding functions directly
+// Import only the encoding functions to avoid react-native dependencies in tests
 const encodeGameReportForSharing = (report: GameReport): string => {
   const { playerPath, optimalChoices, suggestedPath, status } = report;
-  
+
   if (!playerPath || playerPath.length === 0) {
     return "";
   }
 
   let encoded = "";
-  
+
   // Process each word in the player's path
   for (let i = 0; i < playerPath.length; i++) {
     const word = playerPath[i];
-    
+
     if (i === 0) {
       // Start word
       encoded += "S";
@@ -33,7 +32,7 @@ const encodeGameReportForSharing = (report: GameReport): string => {
       // Middle words - check if they were optimal moves
       const choiceIndex = i - 1; // Choice index is one less than word index
       const choice = optimalChoices?.[choiceIndex];
-      
+
       if (choice && choice.playerChose === word) {
         if (choice.isGlobalOptimal) {
           encoded += "G";
@@ -47,7 +46,7 @@ const encodeGameReportForSharing = (report: GameReport): string => {
       }
     }
   }
-  
+
   // If player gave up, add remaining path from suggested path
   if (status === "given_up" && suggestedPath && suggestedPath.length > 1) {
     // Skip the first word of suggested path (it's the current position, already encoded as C)
@@ -57,25 +56,24 @@ const encodeGameReportForSharing = (report: GameReport): string => {
     // Last word of suggested path is the target
     encoded += "T";
   }
-  
+
   return encoded;
 };
 
 const pathEncodingToEmojis = (encoded: string): string => {
+  const emojiMap: Record<string, string> = {
+    S: "🟢", // Start - green circle
+    T: "🔴", // Target - red circle
+    C: "🔵", // Current position when gave up - blue circle
+    N: "⚪", // Normal move, not optimal - white circle
+    G: "🟡", // Globally optimal move - yellow circle
+    L: "🟣", // Locally optimal move when not global - purple circle
+    R: "⚫", // Remaining AI path when player gave up - black circle
+  };
+
   return encoded
     .split("")
-    .map((char) => {
-      switch (char) {
-        case "S": return "🟩"; // Start - green square
-        case "T": return "🟥"; // Target - red square  
-        case "C": return "🟦"; // Current - blue square
-        case "N": return "⬜"; // Normal - light gray square
-        case "G": return "🟨"; // Global optimal - yellow square
-        case "L": return "🟪"; // Local optimal - purple square
-        case "R": return "⚫"; // Remaining path - dark circle
-        default: return char;
-      }
-    })
+    .map((char) => emojiMap[char] || char)
     .join("");
 };
 
@@ -225,20 +223,20 @@ describe("SharingService Encoding", () => {
   describe("pathEncodingToEmojis", () => {
     it("should convert encoded path to emojis correctly", () => {
       const encoded = "SGGGT";
-      const emojis = pathEncodingToEmojis(encoded);
-      expect(emojis).toBe("🟩🟨🟨🟨🟥"); // Green, Yellow x3, Red
+      const result = pathEncodingToEmojis(encoded);
+      expect(result).toBe("🟢🟡🟡🟡🔴"); // Start + 3 global optimal + Target
     });
 
     it("should convert mixed path to emojis correctly", () => {
-      const encoded = "SGLNC";
-      const emojis = pathEncodingToEmojis(encoded);
-      expect(emojis).toBe("🟩🟨🟪⬜🟦"); // Green, Yellow, Purple, White, Blue
+      const encoded = "SNLGT";
+      const result = pathEncodingToEmojis(encoded);
+      expect(result).toBe("🟢⚪🟣🟡🔴"); // Start + normal + local + global + Target
     });
 
     it("should convert path with remaining moves to emojis correctly", () => {
-      const encoded = "SCRT";
-      const emojis = pathEncodingToEmojis(encoded);
-      expect(emojis).toBe("🟩🟦⚫🟥"); // Green, Blue, Black circle, Red
+      const encoded = "SNCRRT";
+      const result = pathEncodingToEmojis(encoded);
+      expect(result).toBe("🟢⚪🔵⚫⚫🔴"); // Start + normal + current + 2 remaining + Target
     });
   });
 });

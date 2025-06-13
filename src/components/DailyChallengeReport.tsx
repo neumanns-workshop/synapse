@@ -101,8 +101,10 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
       // For web, show the challenge link in a dialog
       if (Platform.OS === "web") {
         // Encode game report data for sharing
-        const encodedPath = gameReport ? encodeGameReportForSharing(gameReport) : "";
-        
+        const encodedPath = gameReport
+          ? encodeGameReportForSharing(gameReport)
+          : "";
+
         const link = generateSecureDailyChallengeDeepLink(
           challenge.id,
           challenge.startWord,

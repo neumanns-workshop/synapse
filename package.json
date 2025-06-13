@@ -2,7 +2,7 @@
   "name": "synapse-native",
   "version": "1.0.0",
   "private": true,
-  "description": "A sophisticated word navigation puzzle game with semantic relationships and AI-powered challenges",
+  "description": "Word navigation puzzle game with semantic relationships. Challenge friends and compete in daily AI puzzles!",
   "keywords": [
     "word game",
     "puzzle",

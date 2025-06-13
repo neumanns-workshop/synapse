@@ -5,7 +5,7 @@ const webpack = require("webpack");
 module.exports = async function (env, argv) {
   // Determine the mode early
   const mode = argv?.mode || env?.mode || process.env.NODE_ENV || "development";
-  
+
   // Get the default Expo webpack config
   const config = await createExpoWebpackConfigAsync(env, argv);
 
@@ -161,7 +161,7 @@ module.exports = async function (env, argv) {
     Object.keys(envVars).forEach((key) => {
       envDefinitions[`process.env.${key}`] = JSON.stringify(envVars[key]);
     });
-    
+
     if (Object.keys(envDefinitions).length > 0) {
       config.plugins.push(new webpack.DefinePlugin(envDefinitions));
     }
@@ -171,7 +171,9 @@ module.exports = async function (env, argv) {
   console.log("🔧 Webpack mode:", mode);
   console.log("🔧 Webpack: Found environment variables:", Object.keys(envVars));
   if (Object.keys(envVars).length > 0) {
-    console.log("🔧 Webpack: Injecting environment variables into DefinePlugin");
+    console.log(
+      "🔧 Webpack: Injecting environment variables into DefinePlugin",
+    );
   } else {
     console.log("⚠️ Webpack: No EXPO_PUBLIC_ environment variables found!");
   }

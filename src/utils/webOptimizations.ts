@@ -38,12 +38,12 @@ export const addWebMetaTags = (): void => {
     {
       name: "description",
       content:
-        "Synapse - A word navigation puzzle game where you find paths between words using semantic similarity.",
+        "Word navigation puzzle game with semantic relationships. Challenge friends and compete in daily AI puzzles!",
     },
     {
       name: "keywords",
       content:
-        "word game, puzzle, semantic, vocabulary, brain training, word association",
+        "word game, puzzle, semantic relationships, AI challenge, daily puzzle, word navigation",
     },
     { name: "author", content: "Synapse Game" },
     {
@@ -52,21 +52,30 @@ export const addWebMetaTags = (): void => {
         "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",
     },
     { name: "theme-color", content: "#6750A4" },
-    { property: "og:title", content: "Synapse - Word Navigation Game" },
+    // Open Graph tags (Facebook, Discord, LinkedIn, etc.)
+    { property: "og:title", content: "Synapse: Semantic Pathways" },
     {
       property: "og:description",
       content:
-        "Find paths between words using semantic similarity in this engaging puzzle game.",
+        "Word navigation puzzle game with semantic relationships. Challenge friends and compete in daily AI puzzles!",
     },
     { property: "og:type", content: "website" },
-    { property: "og:image", content: "/assets/icon.png" },
+    { property: "og:image", content: "/og-image.png" },
+    { property: "og:image:width", content: "512" },
+    { property: "og:image:height", content: "512" },
+    { property: "og:image:alt", content: "Synapse Game Logo" },
+    { property: "og:url", content: "https://synapsegame.ai" },
+    { property: "og:site_name", content: "Synapse Game" },
+    // Twitter Card tags
     { name: "twitter:card", content: "summary_large_image" },
-    { name: "twitter:title", content: "Synapse - Word Navigation Game" },
+    { name: "twitter:title", content: "Synapse: Semantic Pathways" },
     {
       name: "twitter:description",
       content:
-        "Find paths between words using semantic similarity in this engaging puzzle game.",
+        "Word navigation puzzle game with semantic relationships. Challenge friends and compete in daily AI puzzles!",
     },
+    { name: "twitter:image", content: "/og-image.png" },
+    { name: "twitter:image:alt", content: "Synapse Game Logo" },
   ];
 
   metaTags.forEach(({ name, property, content }) => {

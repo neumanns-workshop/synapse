@@ -413,7 +413,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
       // STEP 1: Create anonymous user with captcha token (same as traditional signup)
       console.log("🎫 Creating anonymous session with captcha...");
       console.log("🎫 CAPTCHA token length:", token?.length || 0);
-      console.log("🎫 CAPTCHA token starts with:", token?.substring(0, 10) || 'undefined');
+      console.log(
+        "🎫 CAPTCHA token starts with:",
+        token?.substring(0, 10) || "undefined",
+      );
       const { data: anonSessionData, error: anonError } =
         await supabaseService.signInAnonymously(token);
 
@@ -426,10 +429,16 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
         console.error("🎫 Session data:", anonSessionData);
         console.error("🎫 Has session:", !!anonSessionData?.session);
         console.error("🎫 Has user:", !!anonSessionData?.user);
-        console.error("🎫 Has access token:", !!anonSessionData?.session?.access_token);
-        
+        console.error(
+          "🎫 Has access token:",
+          !!anonSessionData?.session?.access_token,
+        );
+
         // More specific error message based on the actual error
-        const errorMsg = anonError instanceof Error ? anonError.message : "Failed to create temporary session";
+        const errorMsg =
+          anonError instanceof Error
+            ? anonError.message
+            : "Failed to create temporary session";
         setErrorMessage(`Authentication error: ${errorMsg}`);
         return;
       }
@@ -1494,7 +1503,11 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
           {/* CAPTCHA component - shared for both sign-in and sign-up */}
           <HCaptcha
             ref={captchaRef}
-            sitekey={__DEV__ ? "10000000-ffff-ffff-ffff-000000000001" : process.env.EXPO_PUBLIC_HCAPTCHA_SITE_KEY!}
+            sitekey={
+              __DEV__
+                ? "10000000-ffff-ffff-ffff-000000000001"
+                : process.env.EXPO_PUBLIC_HCAPTCHA_SITE_KEY!
+            }
             onVerify={onCaptchaVerify}
             size="invisible"
             onError={(error) => {
