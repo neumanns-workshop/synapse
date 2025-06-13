@@ -38,4 +38,15 @@ if [ -f "public/favicon.svg" ]; then
     echo "✅ Copied favicon.svg"
 fi
 
+# Inject Open Graph and Twitter Card meta tags into index.html
+if [ -f "web-build/index.html" ]; then
+    # Create the meta tags to inject
+    META_TAGS='<meta property="og:title" content="Synapse: Semantic Pathways"/><meta property="og:description" content="Navigate between words through semantic connections. Find the shortest path from start to target by choosing related words. Daily AI challenges and friend competitions!"/><meta property="og:type" content="website"/><meta property="og:image" content="https://synapsegame.ai/og-image.png"/><meta property="og:image:width" content="512"/><meta property="og:image:height" content="512"/><meta property="og:image:alt" content="Synapse Game Logo"/><meta property="og:url" content="https://synapsegame.ai"/><meta property="og:site_name" content="Synapse Game"/><meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content="Synapse: Semantic Pathways"/><meta name="twitter:description" content="Navigate between words through semantic connections. Find the shortest path from start to target by choosing related words. Daily AI challenges and friend competitions!"/><meta name="twitter:image" content="https://synapsegame.ai/og-image.png"/><meta name="twitter:image:alt" content="Synapse Game Logo"/>'
+    
+    # Insert meta tags before the closing </head> tag
+    sed -i.bak "s|</head>|$META_TAGS</head>|" web-build/index.html
+    rm web-build/index.html.bak
+    echo "✅ Injected Open Graph and Twitter Card meta tags"
+fi
+
 echo "✅ Post-build script completed" 
