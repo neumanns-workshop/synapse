@@ -1,5 +1,8 @@
 # 🚀 Synapse Production Deployment Checklist
 
+> **⚠️ DEPRECATED**: This checklist was written for Vercel deployment. The project now uses **Netlify** for deployment.  
+> **Please refer to `NETLIFY_DEPLOY.md` for current deployment instructions.**
+
 ## Overview
 
 Complete checklist for deploying Synapse word navigation game to production at `synapsegame.ai` using Vercel.
