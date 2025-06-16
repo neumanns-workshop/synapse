@@ -155,23 +155,12 @@ const GameHistoryCard = React.memo(
                     { color: theme.colors.onSurfaceVariant },
                   ]}
                 >
-                  Moves
-                </Text>
-                <Text style={{ color: theme.colors.onSurface }}>
-                  {report.totalMoves}
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text
-                  style={[
-                    styles.historyCardInfoText,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
                   Accuracy
                 </Text>
                 <Text style={{ color: theme.colors.onSurface }}>
-                  {report.moveAccuracy.toFixed(1)}%
+                  {`${report.moveAccuracy.toFixed(1)}% (${
+                    report.totalMoves
+                  } ${report.totalMoves === 1 ? "move" : "moves"})`}
                 </Text>
               </View>
             </View>
