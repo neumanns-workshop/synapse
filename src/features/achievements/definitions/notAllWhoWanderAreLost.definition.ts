@@ -5,6 +5,7 @@ export const notAllWhoWanderAreLostAchievement: Achievement = {
   name: "Not All Who Wander Are Lost",
   description:
     "Reached the end (or gave up) having made no optimal or suggested moves, except possibly the final winning one.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (
       !gameReport ||

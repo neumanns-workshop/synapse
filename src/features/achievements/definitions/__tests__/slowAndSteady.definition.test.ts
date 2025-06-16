@@ -43,7 +43,7 @@ describe("Slow and Steady Achievement", () => {
     ).toBe(true);
   });
 
-  it("should return true if won and chose most similar neighbor exactly 50% of moves", () => {
+  it("should return false if won and chose most similar neighbor exactly 50% of moves", () => {
     mockGameReport.optimalChoices = [
       createOptimalChoice(true),
       createOptimalChoice(false),
@@ -55,10 +55,24 @@ describe("Slow and Steady Achievement", () => {
         mockGameReport as GameReport,
         mockGameStatus,
       ),
+    ).toBe(false);
+  });
+
+  it("should return true if won and chose most similar neighbor >= 66% of moves", () => {
+    mockGameReport.optimalChoices = [
+      createOptimalChoice(true),
+      createOptimalChoice(false),
+      createOptimalChoice(true),
+    ]; // 2 out of 3 = 66.6%
+    expect(
+      slowAndSteadyAchievement.check(
+        mockGameReport as GameReport,
+        mockGameStatus,
+      ),
     ).toBe(true);
   });
 
-  it("should return false if won but chose most similar neighbor < 50% of moves", () => {
+  it("should return false if won but chose most similar neighbor < 66% of moves", () => {
     mockGameReport.optimalChoices = [
       createOptimalChoice(true),
       createOptimalChoice(false),

@@ -3,7 +3,7 @@ import type { Achievement } from "../achievement.types";
 // Note: This achievement will need special handling since it's based on
 // word collection completion rather than game reports
 export const seasonalExplorerAchievement: Achievement = {
-  id: "seasonal-explorer",
+  id: "seasonalExplorer",
   name: "Seasonal Explorer",
   description: "Complete seasonal word collections throughout the year",
   icon: "calendar-star",

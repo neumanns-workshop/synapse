@@ -4,31 +4,32 @@ export const sellingSeashellsAchievement: Achievement = {
   id: "sellingSeashells",
   name: "Selling Seashells",
   description:
-    "Chose three words in a row that start with the same letter and won.",
+    "Chose five words in a row that start with the same letter and won.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (
       gameStatus !== "won" ||
       !gameReport ||
       !gameReport.playerPath ||
-      gameReport.playerPath.length < 3
+      gameReport.playerPath.length < 5
     ) {
       return false;
     }
 
     const path = gameReport.playerPath;
-    // Check if there are three consecutive words starting with the same letter
-    for (let i = 0; i < path.length - 2; i++) {
-      const firstLetter1 = path[i].charAt(0).toLowerCase();
-      const firstLetter2 = path[i + 1].charAt(0).toLowerCase();
-      const firstLetter3 = path[i + 2].charAt(0).toLowerCase();
+    // Check if there are five consecutive words starting with the same letter
+    for (let i = 0; i < path.length - 4; i++) {
+      const firstLetter = path[i].charAt(0).toLowerCase();
+      if (!firstLetter) continue;
 
-      if (
-        firstLetter1 && // Ensure not an empty string
-        firstLetter1 === firstLetter2 &&
-        firstLetter2 === firstLetter3
-      ) {
-        return true;
+      let alliterative = true;
+      for (let j = 1; j < 5; j++) {
+        if (path[i + j].charAt(0).toLowerCase() !== firstLetter) {
+          alliterative = false;
+          break;
+        }
       }
+      if (alliterative) return true;
     }
 
     return false;

@@ -7,19 +7,20 @@ _Provisional release notes indicating what is to be done, based on user feedback
 
 ### ✨ Major Additions
 
-- [ ]
+- [ ] Most achievements are now progressive and can be earned multiple times across games.
 
 ---
 
 ### 🧠 Gameplay Changes
 
-- [ ] Made some achievements more difficult to get. Minor tweaks.
+- [x] Made some achievements more difficult to get. Minor tweaks.
   - PROSPECTIVE FIX: Make the achievements more difficult to get.
 
 ---
 
 ### 🧩 UX / Interface Improvements
 
+- [x] Added user-facing descriptions to all achievements, explaining how to earn them.
 - [x] Added number of moves to the game report.
   - PROSPECTIVE FIX: Add the number of moves to the game report.
 

@@ -13,20 +13,33 @@ describe("Déjà Vu Achievement", () => {
     };
   });
 
-  it("should return true if a word is revisited in playerPath (game won)", () => {
-    mockGameReport.playerPath = ["apple", "banana", "cherry", "banana", "date"];
+  it("should return true if at least two words are revisited (game won)", () => {
+    mockGameReport.playerPath = [
+      "apple",
+      "banana",
+      "apple",
+      "cherry",
+      "banana",
+    ];
     mockGameStatus = "won";
     expect(
       dejaVuAchievement.check(mockGameReport as GameReport, mockGameStatus),
     ).toBe(true);
   });
 
-  it("should return true if a word is revisited in playerPath (game given_up)", () => {
-    mockGameReport.playerPath = ["one", "two", "one", "three"];
+  it("should return true if at least two words are revisited (game given_up)", () => {
+    mockGameReport.playerPath = ["one", "two", "one", "three", "two"];
     mockGameStatus = "given_up";
     expect(
       dejaVuAchievement.check(mockGameReport as GameReport, mockGameStatus),
     ).toBe(true);
+  });
+
+  it("should return false if only one word is revisited", () => {
+    mockGameReport.playerPath = ["alpha", "beta", "alpha", "gamma"];
+    expect(
+      dejaVuAchievement.check(mockGameReport as GameReport, mockGameStatus),
+    ).toBe(false);
   });
 
   it("should return false if no word is revisited", () => {
@@ -36,12 +49,12 @@ describe("Déjà Vu Achievement", () => {
     ).toBe(false);
   });
 
-  it("should return false if playerPath is too short (less than 3 words)", () => {
-    mockGameReport.playerPath = ["a", "b"];
+  it("should return false if playerPath is too short (less than 4 words)", () => {
+    mockGameReport.playerPath = ["a", "b", "a"];
     expect(
       dejaVuAchievement.check(mockGameReport as GameReport, mockGameStatus),
     ).toBe(false);
-    mockGameReport.playerPath = ["single"];
+    mockGameReport.playerPath = ["a", "b"];
     expect(
       dejaVuAchievement.check(mockGameReport as GameReport, mockGameStatus),
     ).toBe(false);

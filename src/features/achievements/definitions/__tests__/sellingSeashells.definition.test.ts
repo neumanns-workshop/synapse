@@ -13,8 +13,15 @@ describe("Selling Seashells Achievement", () => {
     };
   });
 
-  it("should return true if game won and three consecutive words start with the same letter (lowercase)", () => {
-    mockGameReport.playerPath = ["apple", "apricot", "avocado", "banana"];
+  it("should return true if game won and five consecutive words start with the same letter (lowercase)", () => {
+    mockGameReport.playerPath = [
+      "apple",
+      "apricot",
+      "avocado",
+      "almond",
+      "alligator",
+      "banana",
+    ];
     expect(
       sellingSeashellsAchievement.check(
         mockGameReport as GameReport,
@@ -23,8 +30,15 @@ describe("Selling Seashells Achievement", () => {
     ).toBe(true);
   });
 
-  it("should return true if game won and three consecutive words start with the same letter (mixed case)", () => {
-    mockGameReport.playerPath = ["Pear", "peach", "PLUM", "grape"];
+  it("should return true if game won and five consecutive words start with the same letter (mixed case)", () => {
+    mockGameReport.playerPath = [
+      "Pear",
+      "peach",
+      "PLUM",
+      "passionfruit",
+      "papaya",
+      "grape",
+    ];
     expect(
       sellingSeashellsAchievement.check(
         mockGameReport as GameReport,
@@ -34,7 +48,14 @@ describe("Selling Seashells Achievement", () => {
   });
 
   it("should return true if sequence is at the end of the path", () => {
-    mockGameReport.playerPath = ["banana", "kiwi", "kumquat", "keylime"];
+    mockGameReport.playerPath = [
+      "banana",
+      "kiwi",
+      "kumquat",
+      "keylime",
+      "kale",
+      "kohlrabi",
+    ];
     expect(
       sellingSeashellsAchievement.check(
         mockGameReport as GameReport,
@@ -43,8 +64,8 @@ describe("Selling Seashells Achievement", () => {
     ).toBe(true);
   });
 
-  it("should return false if fewer than three consecutive words start with the same letter", () => {
-    mockGameReport.playerPath = ["salt", "sugar", "pepper", "spice"];
+  it("should return false if fewer than five consecutive words start with the same letter", () => {
+    mockGameReport.playerPath = ["salt", "sugar", "pepper", "spice", "sage"];
     expect(
       sellingSeashellsAchievement.check(
         mockGameReport as GameReport,
@@ -53,8 +74,8 @@ describe("Selling Seashells Achievement", () => {
     ).toBe(false);
   });
 
-  it("should return false if two consecutive, then a different one, then the same letter again", () => {
-    mockGameReport.playerPath = ["cat", "car", "dog", "cup"];
+  it("should return false if four consecutive, then a different one, then the same letter again", () => {
+    mockGameReport.playerPath = ["cat", "car", "cup", "cart", "dog", "cab"];
     expect(
       sellingSeashellsAchievement.check(
         mockGameReport as GameReport,
@@ -63,8 +84,8 @@ describe("Selling Seashells Achievement", () => {
     ).toBe(false);
   });
 
-  it("should return false if playerPath is too short (less than 3 words)", () => {
-    mockGameReport.playerPath = ["a", "b"];
+  it("should return false if playerPath is too short (less than 5 words)", () => {
+    mockGameReport.playerPath = ["a", "a", "a", "a"];
     expect(
       sellingSeashellsAchievement.check(
         mockGameReport as GameReport,

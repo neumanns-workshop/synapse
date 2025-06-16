@@ -4,7 +4,8 @@ export const comebackKidAchievement: Achievement = {
   id: "comebackKid",
   name: "Comeback Kid",
   description:
-    "Won the game after, at some point, being further (in path length) from the target than when you started.",
+    "Won the game after, at some point, being at least two steps further (in path length) from the target than when you started.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (
       gameStatus !== "won" ||
@@ -20,7 +21,7 @@ export const comebackKidAchievement: Achievement = {
     for (const choice of gameReport.optimalChoices) {
       if (
         choice.hopsFromPlayerPositionToEnd !== undefined &&
-        choice.hopsFromPlayerPositionToEnd > initialHopsToEnd
+        choice.hopsFromPlayerPositionToEnd > initialHopsToEnd + 1
       ) {
         return true;
       }

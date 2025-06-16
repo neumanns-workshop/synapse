@@ -13,8 +13,8 @@ describe("Epicycles Upon Epicycles Achievement", () => {
     };
   });
 
-  it("should return true if at least two different words are revisited (game won)", () => {
-    mockGameReport.playerPath = ["a", "b", "c", "a", "d", "b", "e"]; // 'a' and 'b' revisited
+  it("should return true if at least four different words are revisited (game won)", () => {
+    mockGameReport.playerPath = ["a", "b", "c", "d", "a", "b", "c", "d", "e"]; // 'a', 'b', 'c', 'd' revisited
     mockGameStatus = "won";
     expect(
       epicyclesUponEpicyclesAchievement.check(
@@ -24,8 +24,8 @@ describe("Epicycles Upon Epicycles Achievement", () => {
     ).toBe(true);
   });
 
-  it("should return true if at least two different words are revisited (game given_up)", () => {
-    mockGameReport.playerPath = ["x", "y", "z", "y", "x", "w"]; // 'x' and 'y' revisited
+  it("should return true if at least four different words are revisited (game given_up)", () => {
+    mockGameReport.playerPath = ["x", "y", "z", "w", "x", "y", "z", "w", "v"]; // 'x', 'y', 'z', 'w' revisited
     mockGameStatus = "given_up";
     expect(
       epicyclesUponEpicyclesAchievement.check(
@@ -33,6 +33,16 @@ describe("Epicycles Upon Epicycles Achievement", () => {
         mockGameStatus,
       ),
     ).toBe(true);
+  });
+
+  it("should return false if only three distinct words are revisited", () => {
+    mockGameReport.playerPath = ["a", "b", "c", "a", "b", "c", "d"]; // 'a', 'b', 'c' revisited
+    expect(
+      epicyclesUponEpicyclesAchievement.check(
+        mockGameReport as GameReport,
+        mockGameStatus,
+      ),
+    ).toBe(false);
   });
 
   it("should return false if only one distinct word is revisited multiple times", () => {
@@ -65,8 +75,8 @@ describe("Epicycles Upon Epicycles Achievement", () => {
     ).toBe(false);
   });
 
-  it("should return false if playerPath is too short (less than 5 words)", () => {
-    mockGameReport.playerPath = ["a", "b", "a", "c"]; // Length 4
+  it("should return false if playerPath is too short (less than 8 words)", () => {
+    mockGameReport.playerPath = ["a", "b", "a", "c", "b", "d", "c"]; // Length 7
     expect(
       epicyclesUponEpicyclesAchievement.check(
         mockGameReport as GameReport,

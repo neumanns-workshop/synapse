@@ -1,10 +1,11 @@
 import type { Achievement } from "../achievement.types";
 
 export const slowAndSteadyAchievement: Achievement = {
-  id: "slow-and-steady",
+  id: "slowAndSteady",
   name: "Slow and Steady",
   description:
-    "Win by choosing the most semantically similar neighbor at least 50% of the time.",
+    "Win by choosing the most semantically similar neighbor at least 66% of the time.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (
       gameStatus !== "won" ||
@@ -18,6 +19,6 @@ export const slowAndSteadyAchievement: Achievement = {
       (oc) => oc.choseMostSimilarNeighbor,
     ).length;
     const totalMoves = gameReport.optimalChoices.length;
-    return totalMoves > 0 && mostSimilarChoiceMoves / totalMoves >= 0.5;
+    return totalMoves > 0 && mostSimilarChoiceMoves / totalMoves >= 0.66;
   },
 };

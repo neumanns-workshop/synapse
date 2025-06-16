@@ -2,16 +2,12 @@ import type { Achievement } from "../achievement.types";
 
 export const looseCannonWinsAchievement: Achievement = {
   id: "looseCannonWins",
-  name: "The Best We've Got",
+  name: "Loose Cannon Wins",
   description:
-    "Despite a wild course, choosing the least similar neighbor at least 50% of the time, you still managed to win!",
+    "Won by choosing the least semantically similar neighbor at least 50% of the time.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
-    if (
-      gameStatus !== "won" ||
-      !gameReport ||
-      !gameReport.optimalChoices ||
-      gameReport.optimalChoices.length === 0
-    ) {
+    if (gameStatus !== "won" || !gameReport || !gameReport.optimalChoices) {
       return false;
     }
     let leastSimilarChoices = 0;
