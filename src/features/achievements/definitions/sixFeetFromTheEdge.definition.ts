@@ -4,6 +4,7 @@ export const sixFeetFromTheEdgeAchievement: Achievement = {
   id: "sixFeetFromTheEdge",
   name: "Six Feet From the Edge",
   description: "Gave up when just a step or two away from the target word.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (
       gameStatus !== "given_up" ||

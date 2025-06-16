@@ -7,7 +7,7 @@ _Provisional release notes indicating what is to be done, based on user feedback
 
 ### ✨ Major Additions
 
-- [ ] Most achievements are now progressive and can be earned multiple times across games.
+- [x] All achievements are now progressive and can be earned multiple times across games.
 
 ---
 

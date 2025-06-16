@@ -5,6 +5,7 @@ export const hereBeDragonsAchievement: Achievement = {
   name: "Here Be Dragons",
   description:
     "Deviated from the optimal path after making at least one optimal move, and then successfully found your way back to an optimal word.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (
       !["won", "given_up"].includes(gameStatus) ||

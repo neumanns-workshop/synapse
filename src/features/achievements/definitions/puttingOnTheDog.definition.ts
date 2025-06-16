@@ -5,6 +5,7 @@ export const puttingOnTheDogAchievement: Achievement = {
   name: "Putting on the Dog",
   description:
     "Selected the rarest word that was offered as an option throughout the entire game and won.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (
       gameStatus !== "won" || // Require win

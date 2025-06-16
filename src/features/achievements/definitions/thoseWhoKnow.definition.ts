@@ -5,6 +5,7 @@ export const thoseWhoKnowAchievement: Achievement = {
   name: "Those Who Know",
   description:
     "Selected a word that was both the rarest available option and an optimal move.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (
       !["won", "given_up"].includes(gameStatus) ||

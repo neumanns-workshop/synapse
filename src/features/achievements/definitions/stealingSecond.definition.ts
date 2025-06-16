@@ -5,6 +5,7 @@ export const stealingSecondAchievement: Achievement = {
   name: "Stealing Second with a Foot on First",
   description:
     "Gave up, having chosen the most semantically similar neighbor at least 50% of the time.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (
       gameStatus !== "given_up" || // Ensure game was given up

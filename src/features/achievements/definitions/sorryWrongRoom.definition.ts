@@ -5,6 +5,7 @@ export const sorryWrongRoomAchievement: Achievement = {
   name: "Sorry, Wrong Room",
   description:
     "Won or gave up the game after using the backtrack feature more than 3 times. A true journey of second (and third, and fourth...) guesses!",
+  isProgressive: true,
   // icon: '↪️', // Placeholder icon
   check: (gameReport, gameStatus) => {
     if (
