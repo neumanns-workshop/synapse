@@ -171,7 +171,9 @@ const GameHistoryCard = React.memo(
                   Accuracy
                 </Text>
                 <Text style={{ color: theme.colors.onSurface }}>
-                  {report.moveAccuracy.toFixed(1)}%
+                  {`${report.moveAccuracy.toFixed(1)}% (${
+                    report.totalMoves
+                  } ${report.totalMoves === 1 ? "move" : "moves"})`}
                 </Text>
               </View>
             </View>

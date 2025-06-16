@@ -152,7 +152,9 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
               Move Accuracy
             </Text>
             <Text variant="bodyLarge" style={{ color: colors.primary }}>
-              {report.moveAccuracy.toFixed(1)}%
+              {`${report.moveAccuracy.toFixed(1)}% (${
+                report.totalMoves
+              } ${report.totalMoves === 1 ? "move" : "moves"})`}
             </Text>
           </View>
 
