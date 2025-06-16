@@ -399,7 +399,7 @@ To incrementally build a robust, user-friendly, and cross-platform word navigati
 
 1.  **Deployment Preparation:**
     - Build release versions for iOS and Android (App Store / Play Store submission).
-    - Build and deploy the final web version to the chosen hosting provider (Vercel, Netlify, etc.).
+    - Build and deploy the final web version to Netlify with optimized configuration.
 2.  **Payment Integration:** - 📋 PLANNED
     - Integrate React Native IAP for mobile app purchases
     - OR implement Supabase-based subscription system for cross-platform consistency
