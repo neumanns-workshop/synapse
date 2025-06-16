@@ -155,6 +155,19 @@ const GameHistoryCard = React.memo(
                     { color: theme.colors.onSurfaceVariant },
                   ]}
                 >
+                  Moves
+                </Text>
+                <Text style={{ color: theme.colors.onSurface }}>
+                  {report.totalMoves}
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text
+                  style={[
+                    styles.historyCardInfoText,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
                   Accuracy
                 </Text>
                 <Text style={{ color: theme.colors.onSurface }}>
@@ -983,7 +996,7 @@ const StatsModal = () => {
   const renderHistoryTab = () => {
     if (selectedReport) {
       return (
-        <View style={styles.reportContainer} ref={historicalReportRef}>
+        <ScrollView style={styles.reportContainer} ref={historicalReportRef}>
           <View style={styles.reportHeader}>
             <Button
               icon={() => (
@@ -1001,6 +1014,13 @@ const StatsModal = () => {
             </Button>
           </View>
 
+          <View style={styles.graphContainer}>
+            <GraphVisualization
+              gameReport={selectedReport}
+              height={300} // Set a fixed height for the graph in the modal
+            />
+          </View>
+
           <PlayerPathDisplay
             playerPath={selectedReport.playerPath}
             optimalChoices={selectedReport.optimalChoices}
@@ -1014,7 +1034,7 @@ const StatsModal = () => {
             onAchievementPress={showAchievementDetail}
             onChallengePress={handleChallengeShareInHistory}
           />
-        </View>
+        </ScrollView>
       );
     }
 
@@ -1854,9 +1874,17 @@ const styles = StyleSheet.create({
   },
   reportContainer: {
     flex: 1,
+    padding: 5,
   },
   reportHeader: {
     marginBottom: 10,
+  },
+  graphContainer: {
+    height: 300,
+    width: "100%",
+    borderRadius: 8,
+    overflow: "hidden",
+    marginVertical: 8,
   },
   statsSummaryCard: {
     marginBottom: 15,
