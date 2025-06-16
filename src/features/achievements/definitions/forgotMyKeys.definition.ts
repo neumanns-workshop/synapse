@@ -5,6 +5,7 @@ export const forgotMyKeysAchievement: Achievement = {
   name: "Forgot My Keys",
   description:
     "Gave up when further (in terms of path length) from the target than when you started.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (
       gameStatus !== "given_up" ||

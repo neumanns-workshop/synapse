@@ -4,6 +4,7 @@ export const juggernautAchievement: Achievement = {
   id: "juggernaut",
   name: "I'm the Juggernaut!",
   description: "Completed the game without using the backtrack feature.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (gameStatus !== "won" || !gameReport) {
       return false;

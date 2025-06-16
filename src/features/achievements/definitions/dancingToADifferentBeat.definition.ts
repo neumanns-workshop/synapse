@@ -5,6 +5,7 @@ export const dancingToADifferentBeatAchievement: Achievement = {
   name: "Dancing to a Different Beat",
   description:
     "Won the game by forging your own path, never treading the optimal route until the final step.",
+  isProgressive: true,
   check: (gameReport, gameStatus) => {
     if (
       gameStatus !== "won" ||

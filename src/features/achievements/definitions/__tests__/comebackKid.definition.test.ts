@@ -14,7 +14,7 @@ describe("Comeback Kid Achievement", () => {
     };
   });
 
-  it("should return true if game is won and player was further from target than at start", () => {
+  it("should return false if game is won and player was only one step further from target than at start", () => {
     mockGameReport.optimalChoices = [
       {
         playerPosition: "s",
@@ -32,6 +32,41 @@ describe("Comeback Kid Achievement", () => {
         isLocalOptimal: false,
         hopsFromPlayerPositionToEnd: 4,
       }, // Further than initial 3 hops
+      {
+        playerPosition: "x",
+        playerChose: "e",
+        optimalChoice: "e",
+        isGlobalOptimal: true,
+        isLocalOptimal: true,
+        hopsFromPlayerPositionToEnd: 1,
+      },
+    ];
+    expect(
+      comebackKidAchievement.check(
+        mockGameReport as GameReport,
+        mockGameStatus,
+      ),
+    ).toBe(false);
+  });
+
+  it("should return true if game is won and player was at least two steps further from target", () => {
+    mockGameReport.optimalChoices = [
+      {
+        playerPosition: "s",
+        playerChose: "a",
+        optimalChoice: "b",
+        isGlobalOptimal: false,
+        isLocalOptimal: true,
+        hopsFromPlayerPositionToEnd: 2,
+      },
+      {
+        playerPosition: "a",
+        playerChose: "x",
+        optimalChoice: "y",
+        isGlobalOptimal: false,
+        isLocalOptimal: false,
+        hopsFromPlayerPositionToEnd: 5,
+      }, // 2 steps further than initial 3 hops
       {
         playerPosition: "x",
         playerChose: "e",

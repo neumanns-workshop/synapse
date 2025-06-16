@@ -1,7 +1,7 @@
 import type { Achievement } from "../achievement.types";
 
 export const wordCollectorAchievement: Achievement = {
-  id: "word-collector",
+  id: "wordCollector",
   name: "Word Collector",
   description: "Complete diverse word collections to expand your vocabulary",
   icon: "book-open-variant",

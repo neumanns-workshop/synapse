@@ -200,7 +200,7 @@ describe("Achievement Evaluation System", () => {
 
       // Should be an array (may be empty if no progressive achievements are triggered)
       expect(Array.isArray(result)).toBe(true);
-      // Progressive achievements have specific IDs like 'word-collector', 'uRobot', 'seasonal-explorer'
+      // Progressive achievements have specific IDs like 'wordCollector', 'uRobot', 'seasonalExplorer'
       result.forEach((id) => {
         expect(typeof id).toBe("string");
       });
