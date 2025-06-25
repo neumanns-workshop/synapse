@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AppHeader from "../components/AppHeader";
 import AvailableWordsDisplay from "../components/AvailableWordsDisplay";
 import { Footer } from "../components/Footer";
-import GameReportModal from "../components/GameReportModal";
+
 import GraphVisualization from "../components/GraphVisualization";
 import PathDisplayConfigurator from "../components/PathDisplayConfigurator";
 import PlayerPathDisplay from "../components/PlayerPathDisplay";
@@ -124,7 +124,6 @@ const GameScreen: React.FC<GameScreenProps> = ({
 
   const { startTutorial } = useTutorial();
 
-  // Add GameReportModal to global modals
   // Load initial data on mount and check if a game was restored.
   useEffect(() => {
     const performInitialLoad = async () => {
@@ -241,9 +240,8 @@ const GameScreen: React.FC<GameScreenProps> = ({
   ]);
 
   // Determine if we should show the path display options
-  const showPathOptions = gameStatus === "given_up" || gameStatus === "won";
-
-  // Determine if we should show the report screen
+  // Don't automatically show path options on game end - they're now in the modal
+  const showPathOptions = false;
 
   // Handle word selection for display definition
   const handleShowDefinition = (word: string, pathIndex?: number) => {
@@ -438,7 +436,6 @@ const GameScreen: React.FC<GameScreenProps> = ({
         </Portal>
 
         {/* Global Modals - Available in all states */}
-        <GameReportModal />
         <UpgradePrompt
           visible={upgradePromptVisible}
           onDismiss={handleUpgradeDismiss}

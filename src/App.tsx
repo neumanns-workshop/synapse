@@ -16,6 +16,7 @@ import { Logger } from "./utils/logger";
 // Lazy load heavy modal components for better web performance
 const ContactModal = lazy(() => import("./components/ContactModal"));
 const DailiesModal = lazy(() => import("./components/DailiesModal"));
+const GameReportModal = lazy(() => import("./components/GameReportModal"));
 const LabsModal = lazy(() => import("./components/LabsModal"));
 const NewsModal = lazy(() => import("./components/NewsModal"));
 const QuickstartModal = lazy(() => import("./components/QuickstartModal"));
@@ -421,6 +422,11 @@ function AppContent() {
             </Suspense>
             <Suspense fallback={<ModalLoadingFallback />}>
               <TutorialModal />
+            </Suspense>
+
+            {/* Game Report Modal - needs to be at top level to appear over other modals */}
+            <Suspense fallback={<ModalLoadingFallback />}>
+              <GameReportModal />
             </Suspense>
 
             {/* Auth Modal */}

@@ -30,6 +30,7 @@ import {
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import AchievementDetailDialog from "./AchievementDetailDialog";
+import CustomIcon from "./CustomIcon";
 import GameReportDisplay from "./GameReportDisplay";
 import GraphVisualization from "./GraphVisualization";
 import PlayerPathDisplay from "./PlayerPathDisplay";
@@ -242,9 +243,11 @@ const GameReportModal = () => {
               Game Report
             </Text>
             <IconButton
-              icon="close"
+              icon={() => (
+                <CustomIcon source="close" size={24} color={colors.onSurface} />
+              )}
+              size={24}
               onPress={hideGameReportModal}
-              iconColor={colors.onSurface}
             />
           </View>
 
