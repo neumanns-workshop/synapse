@@ -159,7 +159,12 @@ describe("Core Gameplay Mechanics", () => {
       expect(state.playerPath).toEqual(["start", "middle1", "target"]);
       expect(state.gameStatus).toBe("won");
       expect(state.gameReport).toBeTruthy();
-      expect(state.pathDisplayMode.optimal).toBe(true); // Should show optimal path on win
+      expect(state.pathDisplayMode.optimal).toBe(false); // Should not auto-show optimal path on win (modal system)
+      
+      // Should show game report modal
+      expect(state.gameReportModalVisible).toBe(true);
+      expect(state.gameReportModalReport).toBeTruthy();
+      expect(state.gameReportModalReport?.status).toBe("won");
 
       // Should clear saved game and record ended game
       expect(mockedStorageAdapter.clearCurrentGame).toHaveBeenCalledTimes(1);
@@ -266,7 +271,12 @@ describe("Core Gameplay Mechanics", () => {
       expect(state.gameStatus).toBe("given_up");
       expect(state.gameReport).toBeTruthy();
       expect(state.gameReport?.status).toBe("given_up");
-      expect(state.pathDisplayMode.suggested).toBe(true); // Should show suggested path on give up
+      expect(state.pathDisplayMode.suggested).toBe(false); // Should not auto-show suggested path on give up (modal system)
+      
+      // Should show game report modal
+      expect(state.gameReportModalVisible).toBe(true);
+      expect(state.gameReportModalReport).toBeTruthy();
+      expect(state.gameReportModalReport?.status).toBe("given_up");
 
       // Should clear saved game and record ended game
       expect(mockedStorageAdapter.clearCurrentGame).toHaveBeenCalledTimes(1);

@@ -730,3 +730,239 @@ describe("useGameStore - startGame", () => {
 
 // Need to import the module itself to spy on its exports if they are not part of the store instance
 import * as useGameStoreModule from "../useGameStore";
+
+// Tests for Game Report Modal System
+describe("useGameStore - Game Report Modal System", () => {
+  // Mock storage functions used by selectWord and giveUp
+  const mockedClearCurrentGameModal = storageAdapter.clearCurrentGame as jest.MockedFunction<typeof storageAdapter.clearCurrentGame>;
+  const mockedSaveCurrentGameModal = storageAdapter.saveCurrentGame as jest.MockedFunction<typeof storageAdapter.saveCurrentGame>;
+  const mockedRecordEndedGame = storageAdapter.recordEndedGame as jest.MockedFunction<typeof storageAdapter.recordEndedGame>;
+
+  beforeEach(() => {
+    // Reset store to initial state
+    useGameStore.setState({
+      gameReportModalVisible: false,
+      gameReportModalReport: null,
+    });
+    
+    // Reset mocks
+    mockedClearCurrentGameModal.mockReset();
+    mockedSaveCurrentGameModal.mockReset();
+    mockedRecordEndedGame.mockReset();
+    
+    // Set up mock implementations
+    mockedClearCurrentGameModal.mockResolvedValue(undefined);
+    mockedSaveCurrentGameModal.mockResolvedValue(undefined);
+    mockedRecordEndedGame.mockResolvedValue(undefined);
+  });
+
+  describe("showGameReportModal", () => {
+    it("should show modal with provided report", () => {
+      const mockReport = {
+        id: "test-report",
+        timestamp: Date.now(),
+        startWord: "start",
+        targetWord: "end",
+        playerPath: ["start", "middle", "end"],
+        optimalPath: ["start", "end"],
+        suggestedPath: [],
+        optimalChoices: [],
+        missedOptimalMoves: ["At start, chose middle instead of optimal end"],
+        status: "won" as const,
+        totalMoves: 2,
+        optimalMovesMade: 1,
+        moveAccuracy: 50,
+        playerSemanticDistance: 1.5,
+        optimalSemanticDistance: 1.0,
+        averageSimilarity: 0.8,
+        pathEfficiency: 0.5,
+      };
+
+      const { showGameReportModal } = useGameStore.getState();
+      showGameReportModal(mockReport);
+
+      const state = useGameStore.getState();
+      expect(state.gameReportModalVisible).toBe(true);
+      expect(state.gameReportModalReport).toEqual(mockReport);
+    });
+  });
+
+  describe("hideGameReportModal", () => {
+    it("should hide modal and clear report", () => {
+      // First show a modal
+      const mockReport = {
+        id: "test-report",
+        timestamp: Date.now(),
+        startWord: "start",
+        targetWord: "end",
+        playerPath: ["start", "end"],
+        optimalPath: ["start", "end"],
+        suggestedPath: [],
+        optimalChoices: [],
+        missedOptimalMoves: [],
+        status: "won" as const,
+        totalMoves: 1,
+        optimalMovesMade: 1,
+        moveAccuracy: 100,
+        playerSemanticDistance: 1.0,
+        optimalSemanticDistance: 1.0,
+        averageSimilarity: 0.9,
+        pathEfficiency: 1.0,
+      };
+
+      useGameStore.setState({
+        gameReportModalVisible: true,
+        gameReportModalReport: mockReport,
+      });
+
+      const { hideGameReportModal } = useGameStore.getState();
+      hideGameReportModal();
+
+      const state = useGameStore.getState();
+      expect(state.gameReportModalVisible).toBe(false);
+      expect(state.gameReportModalReport).toBeNull();
+    });
+  });
+
+  describe("Game completion integration", () => {
+    beforeEach(() => {
+      // Set up a basic game state with all required fields
+      useGameStore.setState({
+        gameStatus: "playing",
+        startWord: "start",
+        targetWord: "end",
+        currentWord: "middle",
+        playerPath: ["start", "middle"],
+        optimalPath: ["start", "end"],
+        suggestedPathFromCurrent: ["middle", "end"],
+        optimalChoices: [
+          {
+            playerPosition: "start",
+            playerChose: "middle",
+            optimalChoice: "end",
+            isGlobalOptimal: false,
+            isLocalOptimal: false,
+          },
+        ],
+        backtrackHistory: [],
+        potentialRarestMovesThisGame: [],
+        activeWordCollections: [],
+        wordFrequencies: null,
+        isChallenge: false,
+        isDailyChallenge: false,
+        currentDailyChallenge: null,
+        graphData: {
+          start: { edges: { middle: 0.5, end: 0.9 }, tsne: [0, 0] },
+          middle: { edges: { start: 0.5, end: 0.7 }, tsne: [10, 10] },
+          end: { edges: { start: 0.9, middle: 0.7 }, tsne: [20, 20] },
+        },
+      });
+    });
+
+    it("should show game report modal when player wins", async () => {
+      const { selectWord } = useGameStore.getState();
+      
+      // Simulate winning by selecting the target word from current position
+      await selectWord("end");
+
+      const state = useGameStore.getState();
+      expect(state.gameStatus).toBe("won");
+      expect(state.gameReportModalVisible).toBe(true);
+      expect(state.gameReportModalReport).not.toBeNull();
+      expect(state.gameReportModalReport?.status).toBe("won");
+      expect(state.gameReportModalReport?.startWord).toBe("start");
+      expect(state.gameReportModalReport?.targetWord).toBe("end");
+    });
+
+    it("should show game report modal when player gives up", async () => {
+      const { giveUp } = useGameStore.getState();
+      
+      // Simulate giving up
+      await giveUp();
+
+      const state = useGameStore.getState();
+      expect(state.gameStatus).toBe("given_up");
+      expect(state.gameReportModalVisible).toBe(true);
+      expect(state.gameReportModalReport).not.toBeNull();
+      expect(state.gameReportModalReport?.status).toBe("given_up");
+      expect(state.gameReportModalReport?.startWord).toBe("start");
+      expect(state.gameReportModalReport?.targetWord).toBe("end");
+    });
+
+    it("should preserve missed optimal moves in modal report", async () => {
+      const { giveUp } = useGameStore.getState();
+      
+      // Give up to generate a report
+      await giveUp();
+
+      const state = useGameStore.getState();
+      expect(state.gameReportModalReport?.missedOptimalMoves).toHaveLength(1);
+      expect(state.gameReportModalReport?.missedOptimalMoves[0]).toContain("At start, chose middle instead of optimal end");
+    });
+  });
+
+  describe("Modal state reset", () => {
+    it("should reset modal state when resetting game", () => {
+      // Set up modal state
+      useGameStore.setState({
+        gameReportModalVisible: true,
+        gameReportModalReport: {
+          id: "test",
+          timestamp: Date.now(),
+          startWord: "start",
+          targetWord: "end",
+          playerPath: ["start", "end"],
+          optimalPath: ["start", "end"],
+          suggestedPath: [],
+          optimalChoices: [],
+          missedOptimalMoves: [],
+          status: "won" as const,
+          totalMoves: 1,
+          optimalMovesMade: 1,
+          moveAccuracy: 100,
+          playerSemanticDistance: 1.0,
+          optimalSemanticDistance: 1.0,
+          averageSimilarity: 0.9,
+          pathEfficiency: 1.0,
+        },
+      });
+
+      const { reset } = useGameStore.getState();
+      reset();
+
+      const state = useGameStore.getState();
+      expect(state.gameReportModalVisible).toBe(false);
+      expect(state.gameReportModalReport).toBeNull();
+    });
+  });
+
+  describe("Path display mode integration", () => {
+    it("should not automatically show optimal paths on game end", () => {
+      // Set up game state
+      useGameStore.setState({
+        gameStatus: "playing",
+        startWord: "start",
+        targetWord: "end",
+        currentWord: "start",
+        playerPath: ["start"],
+        optimalPath: ["start", "end"],
+        pathDisplayMode: {
+          player: true,
+          optimal: false,
+          suggested: false,
+          ai: false,
+        },
+      });
+
+      const { selectWord } = useGameStore.getState();
+      selectWord("end");
+
+      const state = useGameStore.getState();
+      // Should only show player path by default
+      expect(state.pathDisplayMode.player).toBe(true);
+      expect(state.pathDisplayMode.optimal).toBe(false);
+      expect(state.pathDisplayMode.suggested).toBe(false);
+      expect(state.pathDisplayMode.ai).toBe(false);
+    });
+  });
+});
