@@ -1247,7 +1247,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         gameReport: report,
         pathDisplayMode: {
           player: true,
-          optimal: true,
+          optimal: false,
           suggested: false,
           ai: false,
         },
@@ -1359,7 +1359,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       pathDisplayMode: {
         player: true,
         optimal: false,
-        suggested: true,
+        suggested: false,
         ai: false,
       },
       gameReportModalVisible: true,

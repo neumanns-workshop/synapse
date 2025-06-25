@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 
 import { Text, Card, useTheme, Button } from "react-native-paper";
@@ -50,6 +50,13 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
   const aiPath = report.aiPath || [];
   const aiModel = report.aiModel;
 
+  // State for collapsible sections
+  const [optimalMovesExpanded, setOptimalMovesExpanded] = useState(false);
+  const [suggestedMovesExpanded, setSuggestedMovesExpanded] = useState(false);
+  const [missedMovesExpanded, setMissedMovesExpanded] = useState(false);
+  const [backtrackingExpanded, setBacktrackingExpanded] = useState(false);
+  const [achievementsExpanded, setAchievementsExpanded] = useState(true); // Default open for achievements
+
   const handleOptimalPathPress = () => {
     setPathDisplayMode({
       ...currentPathDisplayMode,
@@ -71,6 +78,40 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
     });
   };
 
+  // Collapsible section header component
+  const CollapsibleSectionHeader = ({
+    title,
+    expanded,
+    onToggle,
+    count,
+  }: {
+    title: string;
+    expanded: boolean;
+    onToggle: () => void;
+    count?: number;
+  }) => (
+    <TouchableOpacity
+      style={styles.collapsibleHeader}
+      onPress={onToggle}
+      activeOpacity={0.7}
+    >
+      <View style={styles.collapsibleHeaderContent}>
+        <Text
+          variant="titleMedium"
+          style={[styles.sectionTitle, { color: colors.primary, marginBottom: 0 }]}
+        >
+          {title}
+          {count !== undefined && ` (${count})`}
+        </Text>
+      </View>
+      <CustomIcon
+        source={expanded ? "chevron-up" : "chevron-down"}
+        size={20}
+        color={colors.primary}
+      />
+    </TouchableOpacity>
+  );
+
   return (
     <ScrollView style={styles.container}>
       <Card
@@ -83,6 +124,29 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
         ]}
       >
         <Card.Content>
+          {/* Challenge Button - Moved to top */}
+          <View style={[styles.section, styles.buttonSection]}>
+            <Button
+              mode="outlined"
+              icon={() => (
+                <CustomIcon
+                  source="share-variant"
+                  size={20}
+                  color={colors.primary}
+                />
+              )}
+              onPress={() => {
+                if (onChallengePress) {
+                  onChallengePress();
+                }
+              }}
+              style={[styles.challengeButton, { borderColor: colors.primary }]}
+              labelStyle={{ color: colors.primary }}
+            >
+              Challenge a Friend
+            </Button>
+          </View>
+
           <View style={styles.section}>
             <TouchableOpacity onPress={handleOptimalPathPress}>
               <View style={styles.pathRow}>
@@ -193,13 +257,13 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
               <>
                 {globalMoves.length > 0 && (
                   <View style={styles.section}>
-                    <Text
-                      variant="titleMedium"
-                      style={[styles.sectionTitle, { color: colors.primary }]}
-                    >
-                      Optimal Moves
-                    </Text>
-                    {globalMoves.map((choice, index) => (
+                    <CollapsibleSectionHeader
+                      title="Optimal Moves"
+                      expanded={optimalMovesExpanded}
+                      onToggle={() => setOptimalMovesExpanded(!optimalMovesExpanded)}
+                      count={globalMoves.length}
+                    />
+                    {optimalMovesExpanded && globalMoves.map((choice, index) => (
                       <Text
                         key={index}
                         variant="bodyMedium"
@@ -218,13 +282,13 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                 )}
                 {localMoves.length > 0 && (
                   <View style={styles.section}>
-                    <Text
-                      variant="titleMedium"
-                      style={[styles.sectionTitle, { color: colors.primary }]}
-                    >
-                      Suggested Moves
-                    </Text>
-                    {localMoves.map((choice, index) => (
+                    <CollapsibleSectionHeader
+                      title="Suggested Moves"
+                      expanded={suggestedMovesExpanded}
+                      onToggle={() => setSuggestedMovesExpanded(!suggestedMovesExpanded)}
+                      count={localMoves.length}
+                    />
+                    {suggestedMovesExpanded && localMoves.map((choice, index) => (
                       <Text
                         key={index}
                         variant="bodyMedium"
@@ -245,15 +309,38 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
             );
           })()}
 
+          {report.missedOptimalMoves && report.missedOptimalMoves.length > 0 && (
+            <View style={styles.section}>
+              <CollapsibleSectionHeader
+                title="Missed Optimal Moves"
+                expanded={missedMovesExpanded}
+                onToggle={() => setMissedMovesExpanded(!missedMovesExpanded)}
+                count={report.missedOptimalMoves.length}
+              />
+              {missedMovesExpanded && report.missedOptimalMoves.map((missedMove, index) => (
+                <Text
+                  key={index}
+                  variant="bodyMedium"
+                  style={[
+                    styles.missedMove,
+                    { color: colors.error }
+                  ]}
+                >
+                  {missedMove}
+                </Text>
+              ))}
+            </View>
+          )}
+
           {report.backtrackEvents && report.backtrackEvents.length > 0 && (
             <View style={styles.section}>
-              <Text
-                variant="titleMedium"
-                style={[styles.sectionTitle, { color: colors.primary }]}
-              >
-                Backtracking Moves
-              </Text>
-              {report.backtrackEvents.map((event, index) => (
+              <CollapsibleSectionHeader
+                title="Backtracking Moves"
+                expanded={backtrackingExpanded}
+                onToggle={() => setBacktrackingExpanded(!backtrackingExpanded)}
+                count={report.backtrackEvents.length}
+              />
+              {backtrackingExpanded && report.backtrackEvents.map((event, index) => (
                 <Text
                   key={index}
                   variant="bodyMedium"
@@ -268,13 +355,13 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
           {report.earnedAchievements &&
             report.earnedAchievements.length > 0 && (
               <View style={styles.section}>
-                <Text
-                  variant="titleMedium"
-                  style={[styles.sectionTitle, { color: colors.primary }]}
-                >
-                  Achievements Earned
-                </Text>
-                {report.earnedAchievements.map((achievement, index) => (
+                <CollapsibleSectionHeader
+                  title="Achievements Earned"
+                  expanded={achievementsExpanded}
+                  onToggle={() => setAchievementsExpanded(!achievementsExpanded)}
+                  count={report.earnedAchievements.length}
+                />
+                {achievementsExpanded && report.earnedAchievements.map((achievement, index) => (
                   <TouchableOpacity
                     key={index}
                     onPress={() =>
@@ -304,28 +391,6 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                 ))}
               </View>
             )}
-
-          <View style={[styles.section, styles.buttonSection]}>
-            <Button
-              mode="outlined"
-              icon={() => (
-                <CustomIcon
-                  source="share-variant"
-                  size={20}
-                  color={colors.primary}
-                />
-              )}
-              onPress={() => {
-                if (onChallengePress) {
-                  onChallengePress();
-                }
-              }}
-              style={[styles.challengeButton, { borderColor: colors.primary }]}
-              labelStyle={{ color: colors.primary }}
-            >
-              Challenge a Friend
-            </Button>
-          </View>
         </Card.Content>
       </Card>
     </ScrollView>
@@ -404,6 +469,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   achievementDescription: {},
+  collapsibleHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 8,
+    marginBottom: 8,
+  },
+  collapsibleHeaderContent: {
+    flex: 1,
+  },
 });
 
 export default GameReportDisplay;

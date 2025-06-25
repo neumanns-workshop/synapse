@@ -275,6 +275,8 @@ const GameReportModal = () => {
               />
             )}
 
+
+
             {gameReportModalReport && (
               <View
                 style={styles.reportDisplayContainer}
