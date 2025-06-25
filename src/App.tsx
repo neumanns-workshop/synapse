@@ -33,6 +33,7 @@ import { TutorialProvider } from "./context/TutorialContext";
 import AccountScreen from "./screens/AccountScreen";
 import AuthScreen from "./screens/AuthScreen";
 import GameScreen from "./screens/GameScreen";
+import ReportScreen from "./screens/ReportScreen";
 import { preloadAllData } from "./services/dataLoader";
 import { gameFlowManager } from "./services/GameFlowManager";
 import PaymentHandler from "./services/PaymentHandler";
@@ -50,6 +51,7 @@ export type RootStackParamList = {
   History: undefined;
   Auth: undefined;
   Account: undefined;
+  Report: undefined;
 };
 
 // Custom screen transition animations
@@ -386,6 +388,7 @@ function AppContent() {
                   </ErrorBoundary>
                 )}
               </Stack.Screen>
+              <Stack.Screen name="Report" component={ReportScreen} />
             </Stack.Navigator>
 
             {/* Modals */}
