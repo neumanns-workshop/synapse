@@ -13,7 +13,7 @@ export interface GraphData {
     edges: {
       [neighborWord: string]: number; // Similarity score
     };
-    tsne?: [number, number]; // 2D coordinates for visualization
+    tsne?: number[]; // 2D coordinates for visualization
   };
 }
 

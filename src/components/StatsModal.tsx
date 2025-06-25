@@ -555,8 +555,6 @@ const StatsModal = () => {
   );
   const wordCollections = useGameStore((state) => state.wordCollections);
   const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
-  const historicalReportRef = useRef(null);
-  const graphPreviewRef = useRef(null);
 
   // State
   const [activeTab, setActiveTab] = useState<"history" | "progress">("history");
@@ -571,7 +569,6 @@ const StatsModal = () => {
   const [unviewedAchievementCount, setUnviewedAchievementCount] = useState(0);
   const [collectionsProgress, setCollectionsProgress] =
     useState<WordCollectionProgress>({});
-  const [selectedReport, setSelectedReport] = useState<GameReport | null>(null);
   const [definitionDialogWord, setDefinitionDialogWord] = useState<
     string | null
   >(null);
@@ -587,15 +584,6 @@ const StatsModal = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [progressiveAchievementCounts, setProgressiveAchievementCounts] =
     useState<Record<string, number>>({});
-
-  // State for historical challenge sharing
-  const [historicalChallengeLink, setHistoricalChallengeLink] = useState("");
-  const [historicalChallengeMessage, setHistoricalChallengeMessage] =
-    useState("");
-  const [
-    historicalChallengeDialogVisible,
-    setHistoricalChallengeDialogVisible,
-  ] = useState(false);
 
   // Collapsible section state for Progress tab
   const [lifetimeStatsExpanded, setLifetimeStatsExpanded] = useState(true);
@@ -640,10 +628,16 @@ const StatsModal = () => {
     }
   }, [statsModalVisible]);
 
-  // Handle game history item press
-  const handleReportPress = useCallback((report: GameReport) => {
-    setSelectedReport(report);
-  }, []);
+  // Handle game history item press - now shows game report modal
+  const showGameReportModal = useGameStore(
+    (state) => state.showGameReportModal,
+  );
+  const handleReportPress = useCallback(
+    (report: GameReport) => {
+      showGameReportModal(report);
+    },
+    [showGameReportModal],
+  );
 
   // Show achievement detail modal
   const showAchievementDetail = useCallback((achievement: Achievement) => {
@@ -677,11 +671,6 @@ const StatsModal = () => {
     }),
     [],
   );
-
-  // Close selected report view
-  const handleBackToHistory = () => {
-    setSelectedReport(null);
-  };
 
   // Handle word definition in history view
   const showWordDefinition = (word: string, pathIndex?: number | null) => {
@@ -752,120 +741,6 @@ const StatsModal = () => {
       setSnackbarMessage("Failed to copy link.");
     }
     setSnackbarVisible(true);
-  };
-
-  // Function to prepare the challenge preview graph
-  const prepareHistoricalGraphPreview = () => {
-    setPathDisplayMode({
-      player: true,
-      optimal: false,
-      suggested: false,
-    });
-  };
-
-  // Function to handle challenge sharing from historical report
-  const handleChallengeShareInHistory = async () => {
-    if (!selectedReport) {
-      return;
-    }
-
-    try {
-      const { startWord, targetWord, playerPath } = selectedReport;
-      const pathLength = playerPath ? playerPath.length - 1 : 0;
-      // const timeInSeconds = (timestamp - (selectedReport.startTime || timestamp)) / 1000;
-
-      // Prepare graph view for preview (player path only)
-      prepareHistoricalGraphPreview();
-
-      if (Platform.OS === "web") {
-        // Check if this is a daily challenge and generate appropriate link
-        let link: string;
-        let message: string;
-
-        if (
-          selectedReport.isDailyChallenge &&
-          selectedReport.dailyChallengeId
-        ) {
-          // Encode game report data for sharing
-          const encodedPath = selectedReport
-            ? encodeGameReportForSharing(selectedReport)
-            : "";
-
-          link = generateSecureDailyChallengeDeepLink(
-            selectedReport.dailyChallengeId,
-            startWord,
-            targetWord,
-            encodedPath,
-          );
-
-          // Generate proper daily challenge taunt
-          const aiSteps = selectedReport.aiPath
-            ? selectedReport.aiPath.length - 1
-            : selectedReport.optimalPath.length - 1;
-          const userSteps = selectedReport.totalMoves;
-          const userCompleted = selectedReport.status === "won";
-          const userGaveUp = selectedReport.status === "given_up";
-          const challengeDate = selectedReport.dailyChallengeId; // Use challenge ID as date for now
-
-          message = generateDailyChallengeTaunt({
-            startWord,
-            targetWord,
-            aiSteps,
-            userSteps,
-            userCompleted,
-            userGaveUp,
-            challengeDate,
-            encodedPath,
-            optimalPathLength: selectedReport.optimalPath.length - 1,
-          });
-        } else {
-          // Encode game report data for sharing
-          const encodedPath = selectedReport
-            ? encodeGameReportForSharing(selectedReport)
-            : "";
-
-          link = generateSecureGameDeepLink(
-            startWord,
-            targetWord,
-            undefined,
-            encodedPath,
-          );
-          message = generateChallengeMessage({
-            startWord,
-            targetWord,
-            playerPath,
-            steps: pathLength,
-            deepLink: link,
-            gameStatus: selectedReport.status,
-            encodedPath,
-            optimalPathLength: selectedReport.optimalPath.length - 1,
-          });
-        }
-
-        setHistoricalChallengeLink(link);
-        setHistoricalChallengeMessage(message);
-        setHistoricalChallengeDialogVisible(true);
-      } else {
-        const success = await shareChallenge({
-          startWord,
-          targetWord,
-          playerPath,
-          screenshotRef: graphPreviewRef, // Use the graph preview ref for sharing
-          steps: pathLength,
-          gameReport: selectedReport, // Pass the game report for encoding
-        });
-
-        if (success) {
-          setSnackbarMessage("Challenge shared successfully!");
-        } else {
-          setSnackbarMessage("Sharing canceled or failed.");
-        }
-        setSnackbarVisible(true);
-      }
-    } catch (error) {
-      setSnackbarMessage("Error sharing challenge.");
-      setSnackbarVisible(true);
-    }
   };
 
   // Aggregate lifetime stats from gameHistory
@@ -994,50 +869,6 @@ const StatsModal = () => {
 
   // Tab content components
   const renderHistoryTab = () => {
-    if (selectedReport) {
-      return (
-        <ScrollView style={styles.reportContainer} ref={historicalReportRef}>
-          <View style={styles.reportHeader}>
-            <Button
-              icon={() => (
-                <CustomIcon
-                  source="arrow-left"
-                  size={20}
-                  color={appTheme.colors.primary}
-                />
-              )}
-              mode="text"
-              onPress={handleBackToHistory}
-              textColor={appTheme.colors.primary}
-            >
-              Back to History
-            </Button>
-          </View>
-
-          <View style={styles.graphContainer}>
-            <GraphVisualization
-              gameReport={selectedReport}
-              height={300} // Set a fixed height for the graph in the modal
-            />
-          </View>
-
-          <PlayerPathDisplay
-            playerPath={selectedReport.playerPath}
-            optimalChoices={selectedReport.optimalChoices}
-            suggestedPath={selectedReport.suggestedPath}
-            onWordDefinition={showWordDefinition}
-            targetWord={selectedReport.targetWord}
-          />
-
-          <GameReportDisplay
-            report={selectedReport}
-            onAchievementPress={showAchievementDetail}
-            onChallengePress={handleChallengeShareInHistory}
-          />
-        </ScrollView>
-      );
-    }
-
     return (
       <FlatList
         data={history}
@@ -1676,108 +1507,6 @@ const StatsModal = () => {
         />
 
         {/* Historical Challenge Link Dialog (for Web & Native) */}
-        <Portal>
-          <Dialog
-            visible={historicalChallengeDialogVisible}
-            onDismiss={() => setHistoricalChallengeDialogVisible(false)}
-            style={[
-              styles.dialogStyle,
-              { backgroundColor: appTheme.colors.surface },
-            ]}
-          >
-            <Dialog.Title style={{ color: appTheme.colors.primary }}>
-              Challenge a Friend
-            </Dialog.Title>
-            <Dialog.Content>
-              <Text
-                style={[
-                  styles.dialogText,
-                  { color: appTheme.colors.onSurfaceVariant },
-                ]}
-              >
-                This message will be shared with the challenge:
-              </Text>
-
-              {/* Challenge message preview */}
-              <View
-                style={[
-                  styles.messagePreviewContainer,
-                  {
-                    backgroundColor: appTheme.colors.surfaceVariant,
-                    borderColor: appTheme.colors.outline,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.messagePreviewText,
-                    { color: appTheme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  {historicalChallengeMessage}
-                </Text>
-              </View>
-
-              <View style={{ position: "relative" }}>
-                <View
-                  style={styles.graphPreviewContainer}
-                  ref={graphPreviewRef}
-                >
-                  {selectedReport && (
-                    <GraphVisualization
-                      height={180}
-                      gameReport={selectedReport}
-                      pathDisplayModeOverride={{
-                        player: true,
-                        optimal: false,
-                        suggested: false,
-                      }}
-                    />
-                  )}
-                </View>
-                <QRCodeDisplay
-                  value={historicalChallengeLink}
-                  size={60}
-                  overlay
-                />
-              </View>
-
-              <TextInput
-                value={historicalChallengeLink}
-                style={[
-                  styles.linkInput,
-                  {
-                    borderColor: appTheme.colors.outline,
-                    color: appTheme.colors.onSurface,
-                    backgroundColor: appTheme.colors.surfaceVariant,
-                  },
-                ]}
-                editable={false}
-                selectTextOnFocus
-              />
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button
-                onPress={() =>
-                  copyToClipboard(
-                    `${historicalChallengeMessage}\n\n${historicalChallengeLink}`,
-                  )
-                }
-                mode="contained"
-                textColor={appTheme.colors.onPrimary}
-              >
-                Copy Challenge
-              </Button>
-              <Button
-                onPress={() => setHistoricalChallengeDialogVisible(false)}
-                mode="outlined"
-                textColor={appTheme.colors.primary}
-              >
-                Close
-              </Button>
-            </Dialog.Actions>
-          </Dialog>
-        </Portal>
 
         <Snackbar
           visible={snackbarVisible}

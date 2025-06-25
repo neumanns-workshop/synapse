@@ -16,11 +16,11 @@ import { dailyChallengesService } from "../services/DailyChallengesService";
 import {
   loadGraphData,
   loadDefinitionsData,
-  GraphData,
   DefinitionsData,
   WordFrequencies,
   loadWordFrequencies,
 } from "../services/dataLoader";
+import type { GraphData } from "../types/gameTypes";
 import {
   recordEndedGame,
   saveCurrentGame,
@@ -93,6 +93,10 @@ export interface GameState {
   statsModalVisible: boolean; // Renamed from historyModalVisible
   dailiesModalVisible: boolean;
 
+  // Game Report Modal state
+  gameReportModalVisible: boolean;
+  gameReportModalReport: GameReport | null;
+
   // Definition Dialog State
   definitionDialogWord: string | null;
   definitionDialogPathIndex: number | null; // To pass path index to dialog for context
@@ -148,6 +152,10 @@ export interface GameState {
   setLabsModalVisible: (visible: boolean) => void;
   setStatsModalVisible: (visible: boolean) => void; // Renamed from setHistoryModalVisible
   setDailiesModalVisible: (visible: boolean) => void;
+
+  // Game Report Modal actions
+  showGameReportModal: (report: GameReport) => void;
+  hideGameReportModal: () => void;
 
   backtrackToWord: (word: string, index: number) => void; // New action for backtracking to a previous optimal word
   // Definition Dialog Actions
@@ -341,6 +349,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   labsModalVisible: false,
   statsModalVisible: false,
   dailiesModalVisible: false,
+
+  // Game Report Modal state
+  gameReportModalVisible: false,
+  gameReportModalReport: null,
 
   // Definition Dialog State
   definitionDialogWord: null,
@@ -1239,6 +1251,8 @@ export const useGameStore = create<GameState>((set, get) => ({
           suggested: false,
           ai: false,
         },
+        gameReportModalVisible: true,
+        gameReportModalReport: report,
       });
       await recordEndedGame(report, isChallenge, get().isDailyChallenge);
 
@@ -1348,6 +1362,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         suggested: true,
         ai: false,
       },
+      gameReportModalVisible: true,
+      gameReportModalReport: report,
     });
     await recordEndedGame(report, isChallenge, isDailyChallenge);
 
@@ -1391,6 +1407,18 @@ export const useGameStore = create<GameState>((set, get) => ({
   setLabsModalVisible: (visible) => set({ labsModalVisible: visible }),
   setStatsModalVisible: (visible) => set({ statsModalVisible: visible }),
   setDailiesModalVisible: (visible) => set({ dailiesModalVisible: visible }),
+
+  // Game Report Modal actions
+  showGameReportModal: (report) =>
+    set({
+      gameReportModalVisible: true,
+      gameReportModalReport: report,
+    }),
+  hideGameReportModal: () =>
+    set({
+      gameReportModalVisible: false,
+      gameReportModalReport: null,
+    }),
 
   backtrackToWord: async (word: string, index: number) => {
     const {
@@ -1735,6 +1763,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       labsModalVisible: false,
       statsModalVisible: false,
       dailiesModalVisible: false,
+      gameReportModalVisible: false,
+      gameReportModalReport: null,
       definitionDialogWord: null,
       definitionDialogPathIndex: null,
       definitionDialogVisible: false,

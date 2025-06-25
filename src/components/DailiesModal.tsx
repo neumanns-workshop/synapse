@@ -99,6 +99,11 @@ const DailiesModal = () => {
     setAchievementDialogVisible(true);
   };
 
+  // Get game report modal action from store
+  const showGameReportModal = useGameStore(
+    (state) => state.showGameReportModal,
+  );
+
   const hideAchievementDetail = () => {
     setSelectedAchievement(null);
     setAchievementDialogVisible(false);
@@ -106,7 +111,50 @@ const DailiesModal = () => {
 
   const renderDailyChallengesContent = () => {
     const handleChallengeSelect = async (challenge: DailyChallenge) => {
-      setSelectedDailyChallenge(challenge);
+      // Look up progress by challenge ID
+      const progress = dailyChallengeProgress[challenge.id];
+
+      // Try to find a game report for this daily challenge with multiple strategies
+      let challengeGameReport: GameReport | undefined;
+
+      // Strategy 1: Match by daily challenge ID (most reliable)
+      challengeGameReport = gameHistory.find(
+        (report) =>
+          report.isDailyChallenge === true &&
+          report.dailyChallengeId === challenge.id,
+      );
+
+      // Strategy 2: Match by start/target words and daily challenge flag
+      if (!challengeGameReport) {
+        challengeGameReport = gameHistory.find(
+          (report) =>
+            report.startWord === challenge.startWord &&
+            report.targetWord === challenge.targetWord &&
+            report.isDailyChallenge === true,
+        );
+      }
+
+      // Strategy 3: Match by start/target words and date (less reliable but covers older games)
+      if (!challengeGameReport) {
+        challengeGameReport = gameHistory.find(
+          (report) =>
+            report.startWord === challenge.startWord &&
+            report.targetWord === challenge.targetWord &&
+            // More flexible date matching - check multiple date formats
+            (new Date(report.timestamp).toDateString() ===
+              new Date(challenge.date).toDateString() ||
+              new Date(report.timestamp).toISOString().split("T")[0] ===
+                challenge.date),
+        );
+      }
+
+      // If we found a game report, show it in the modal
+      if (challengeGameReport) {
+        showGameReportModal(challengeGameReport);
+      } else {
+        // No game report found, just select the challenge to show details
+        setSelectedDailyChallenge(challenge);
+      }
     };
 
     const handleBackToCalendar = () => {
@@ -169,50 +217,15 @@ const DailiesModal = () => {
       }
     };
 
-    // If a challenge is selected, show the report
+    // If a challenge is selected and it doesn't have a game report, show challenge details
     if (selectedDailyChallenge) {
-      // Look up progress by challenge ID
       const progress = dailyChallengeProgress[selectedDailyChallenge.id];
-
-      // Try to find a game report for this daily challenge with multiple strategies
-      let challengeGameReport: GameReport | undefined;
-
-      // Strategy 1: Match by daily challenge ID (most reliable)
-      challengeGameReport = gameHistory.find(
-        (report) =>
-          report.isDailyChallenge === true &&
-          report.dailyChallengeId === selectedDailyChallenge.id,
-      );
-
-      // Strategy 2: Match by start/target words and daily challenge flag
-      if (!challengeGameReport) {
-        challengeGameReport = gameHistory.find(
-          (report) =>
-            report.startWord === selectedDailyChallenge.startWord &&
-            report.targetWord === selectedDailyChallenge.targetWord &&
-            report.isDailyChallenge === true,
-        );
-      }
-
-      // Strategy 3: Match by start/target words and date (less reliable but covers older games)
-      if (!challengeGameReport) {
-        challengeGameReport = gameHistory.find(
-          (report) =>
-            report.startWord === selectedDailyChallenge.startWord &&
-            report.targetWord === selectedDailyChallenge.targetWord &&
-            // More flexible date matching - check multiple date formats
-            (new Date(report.timestamp).toDateString() ===
-              new Date(selectedDailyChallenge.date).toDateString() ||
-              new Date(report.timestamp).toISOString().split("T")[0] ===
-                selectedDailyChallenge.date),
-        );
-      }
 
       return (
         <DailyChallengeReport
           challenge={selectedDailyChallenge}
           progress={progress}
-          gameReport={challengeGameReport}
+          gameReport={undefined} // Reports are now shown in modal
           onBack={handleBackToCalendar}
           onWordDefinition={showWordDefinition}
           onAchievementPress={showAchievementDetail}

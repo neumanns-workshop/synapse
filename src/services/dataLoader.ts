@@ -2,7 +2,12 @@
 
 // Define interfaces for the data structures
 export interface GraphData {
-  [word: string]: string[] | number[] | unknown;
+  [word: string]: {
+    edges: {
+      [neighborWord: string]: number; // Similarity score
+    };
+    tsne?: number[]; // 2D coordinates for visualization
+  };
 }
 
 export interface DefinitionsData {
@@ -40,10 +45,10 @@ export const loadGraphData = async (): Promise<GraphData> => {
         typeof (graphDataJson as { nodes?: unknown }).nodes === "object" &&
         (graphDataJson as { nodes?: unknown }).nodes !== null
       ) {
-        graphDataCache = (graphDataJson as { nodes: GraphData }).nodes;
+        graphDataCache = (graphDataJson as any).nodes as GraphData;
         return graphDataCache;
       } else if (keys.length > 1) {
-        graphDataCache = graphDataJson as GraphData;
+        graphDataCache = graphDataJson as any as GraphData;
         return graphDataCache;
       } else {
         throw new Error("Invalid graph data structure.");

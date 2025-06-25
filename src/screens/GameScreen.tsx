@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AppHeader from "../components/AppHeader";
 import AvailableWordsDisplay from "../components/AvailableWordsDisplay";
 import { Footer } from "../components/Footer";
+import GameReportModal from "../components/GameReportModal";
 import GraphVisualization from "../components/GraphVisualization";
 import PathDisplayConfigurator from "../components/PathDisplayConfigurator";
 import PlayerPathDisplay from "../components/PlayerPathDisplay";
@@ -23,7 +24,6 @@ import WordDefinitionDialog from "../components/WordDefinitionDialog";
 import { useTutorial } from "../context/TutorialContext";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
-import ReportScreen from "./ReportScreen";
 
 interface GameScreenProps {
   onShowAuth?: () => void;
@@ -124,6 +124,7 @@ const GameScreen: React.FC<GameScreenProps> = ({
 
   const { startTutorial } = useTutorial();
 
+  // Add GameReportModal to global modals
   // Load initial data on mount and check if a game was restored.
   useEffect(() => {
     const performInitialLoad = async () => {
@@ -243,7 +244,6 @@ const GameScreen: React.FC<GameScreenProps> = ({
   const showPathOptions = gameStatus === "given_up" || gameStatus === "won";
 
   // Determine if we should show the report screen
-  const showReport = gameStatus === "given_up" || gameStatus === "won";
 
   // Handle word selection for display definition
   const handleShowDefinition = (word: string, pathIndex?: number) => {
@@ -365,94 +365,80 @@ const GameScreen: React.FC<GameScreenProps> = ({
         gameInProgress={gameStatus === "playing"}
       />
       <View style={{ flex: 1 }}>
-        {showReport ? (
-          <View style={{ flex: 1 }} testID="report-screen">
-            <ReportScreen />
-          </View>
-        ) : (
-          <>
-            <View
-              style={styles.gameContainer}
-              testID={
-                gameStatus === "playing" ? "game-interface" : "idle-state"
-              }
-            >
-              <View
-                style={[styles.graphContainer, styles.transparentBackground]}
-              >
-                {isLoading ? (
-                  <ActivityIndicator
-                    size="large"
-                    animating={true}
-                    color={colors.onSurface}
-                  />
-                ) : (
-                  <GraphVisualization />
-                )}
-              </View>
-              {/* Player Path Container */}
-              <View style={[styles.pathCard, styles.transparentBackground]}>
-                <View style={styles.transparentContent}>
-                  <PlayerPathDisplay
-                    playerPath={playerPath}
-                    optimalChoices={optimalChoices}
-                    suggestedPath={suggestedPathFromCurrent}
-                    onWordDefinition={handleShowDefinition}
-                  />
-                </View>
-              </View>
-              {/* Optimal Path Container (only shown when game is over) */}
-              {showPathOptions && (
-                <View style={[styles.pathCard, styles.transparentBackground]}>
-                  {renderOptimalPath()}
-                </View>
-              )}
-              {/* Available Words Display (only shown when playing) */}
-              {gameStatus === "playing" && (
-                <AvailableWordsDisplay onWordSelect={handleSelectWord} />
-              )}
-              {/* Only show path display options when game is over */}
-              {showPathOptions && (
-                <Card
-                  style={[
-                    styles.optionsCard,
-                    { backgroundColor: colors.surface },
-                  ]}
-                >
-                  <Card.Content>
-                    <Text
-                      variant="labelMedium"
-                      style={[styles.optionsLabel, { color: colors.onSurface }]}
-                    >
-                      Path Display:
-                    </Text>
-                    <PathDisplayConfigurator compact={true} />
-                  </Card.Content>
-                </Card>
-              )}
-            </View>
-            {/* Dialogs and Portals */}
-            <Portal>
-              {/* Word Definition Dialog */}
-              <WordDefinitionDialog
-                visible={definitionVisible}
-                word={selectedWord || ""}
-                pathIndexInPlayerPath={selectedWordPathIndex}
-                onDismiss={handleDismissDefinition}
+        <View
+          style={styles.gameContainer}
+          testID={gameStatus === "playing" ? "game-interface" : "idle-state"}
+        >
+          <View style={[styles.graphContainer, styles.transparentBackground]}>
+            {isLoading ? (
+              <ActivityIndicator
+                size="large"
+                animating={true}
+                color={colors.onSurface}
               />
-              {/* Snackbar for messages */}
-              <Snackbar
-                visible={snackbarVisible}
-                onDismiss={onDismissSnackbar}
-                style={{ backgroundColor: colors.surface }}
-              >
-                {snackbarMessage}
-              </Snackbar>
-            </Portal>
-          </>
-        )}
+            ) : (
+              <GraphVisualization />
+            )}
+          </View>
+          {/* Player Path Container */}
+          <View style={[styles.pathCard, styles.transparentBackground]}>
+            <View style={styles.transparentContent}>
+              <PlayerPathDisplay
+                playerPath={playerPath}
+                optimalChoices={optimalChoices}
+                suggestedPath={suggestedPathFromCurrent}
+                onWordDefinition={handleShowDefinition}
+              />
+            </View>
+          </View>
+          {/* Optimal Path Container (only shown when game is over) */}
+          {showPathOptions && (
+            <View style={[styles.pathCard, styles.transparentBackground]}>
+              {renderOptimalPath()}
+            </View>
+          )}
+          {/* Available Words Display (only shown when playing) */}
+          {gameStatus === "playing" && (
+            <AvailableWordsDisplay onWordSelect={handleSelectWord} />
+          )}
+          {/* Only show path display options when game is over */}
+          {showPathOptions && (
+            <Card
+              style={[styles.optionsCard, { backgroundColor: colors.surface }]}
+            >
+              <Card.Content>
+                <Text
+                  variant="labelMedium"
+                  style={[styles.optionsLabel, { color: colors.onSurface }]}
+                >
+                  Path Display:
+                </Text>
+                <PathDisplayConfigurator compact={true} />
+              </Card.Content>
+            </Card>
+          )}
+        </View>
+        {/* Dialogs and Portals */}
+        <Portal>
+          {/* Word Definition Dialog */}
+          <WordDefinitionDialog
+            visible={definitionVisible}
+            word={selectedWord || ""}
+            pathIndexInPlayerPath={selectedWordPathIndex}
+            onDismiss={handleDismissDefinition}
+          />
+          {/* Snackbar for messages */}
+          <Snackbar
+            visible={snackbarVisible}
+            onDismiss={onDismissSnackbar}
+            style={{ backgroundColor: colors.surface }}
+          >
+            {snackbarMessage}
+          </Snackbar>
+        </Portal>
 
         {/* Global Modals - Available in all states */}
+        <GameReportModal />
         <UpgradePrompt
           visible={upgradePromptVisible}
           onDismiss={handleUpgradeDismiss}
