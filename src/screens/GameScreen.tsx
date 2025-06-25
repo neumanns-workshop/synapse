@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import {
   Text,
   Card,
@@ -11,6 +14,7 @@ import {
   Button,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
+import type { RootStackParamList } from "../App";
 
 import AppHeader from "../components/AppHeader";
 import AvailableWordsDisplay from "../components/AvailableWordsDisplay";
@@ -23,9 +27,9 @@ import WordDefinitionDialog from "../components/WordDefinitionDialog";
 import { useTutorial } from "../context/TutorialContext";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
-import ReportScreen from "./ReportScreen";
 
 interface GameScreenProps {
+  navigation?: any; // Add navigation prop
   onShowAuth?: () => void;
   onShowAuthUpgrade?: () => void;
   onShowAccount?: () => void;
@@ -34,13 +38,18 @@ interface GameScreenProps {
   ) => void;
 }
 
+type GameScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Synapse"
+>;
+
 const GameScreen: React.FC<GameScreenProps> = ({
   onShowAuth,
   onShowAuthUpgrade,
   onShowAccount,
   onLegalPageRequest,
 }) => {
-  // const navigation = useNavigation<NavigationProp>(); // Removing unused navigation variable
+  const navigation = useNavigation<GameScreenNavigationProp>();
   const { customColors, colors } = useTheme() as ExtendedTheme;
 
   // UI state
@@ -242,8 +251,15 @@ const GameScreen: React.FC<GameScreenProps> = ({
   // Determine if we should show the path display options
   const showPathOptions = gameStatus === "given_up" || gameStatus === "won";
 
-  // Determine if we should show the report screen
-  const showReport = gameStatus === "given_up" || gameStatus === "won";
+  // Effect to navigate to report screen when game ends
+  useEffect(() => {
+    if (gameStatus === "given_up" || gameStatus === "won") {
+      // Navigate to report screen with current game data
+      navigation.navigate("Report", {
+        source: "current",
+      });
+    }
+  }, [gameStatus, navigation]);
 
   // Handle word selection for display definition
   const handleShowDefinition = (word: string, pathIndex?: number) => {
@@ -365,92 +381,77 @@ const GameScreen: React.FC<GameScreenProps> = ({
         gameInProgress={gameStatus === "playing"}
       />
       <View style={{ flex: 1 }}>
-        {showReport ? (
-          <View style={{ flex: 1 }} testID="report-screen">
-            <ReportScreen />
-          </View>
-        ) : (
-          <>
-            <View
-              style={styles.gameContainer}
-              testID={
-                gameStatus === "playing" ? "game-interface" : "idle-state"
-              }
-            >
-              <View
-                style={[styles.graphContainer, styles.transparentBackground]}
-              >
-                {isLoading ? (
-                  <ActivityIndicator
-                    size="large"
-                    animating={true}
-                    color={colors.onSurface}
-                  />
-                ) : (
-                  <GraphVisualization />
-                )}
-              </View>
-              {/* Player Path Container */}
-              <View style={[styles.pathCard, styles.transparentBackground]}>
-                <View style={styles.transparentContent}>
-                  <PlayerPathDisplay
-                    playerPath={playerPath}
-                    optimalChoices={optimalChoices}
-                    suggestedPath={suggestedPathFromCurrent}
-                    onWordDefinition={handleShowDefinition}
-                  />
-                </View>
-              </View>
-              {/* Optimal Path Container (only shown when game is over) */}
-              {showPathOptions && (
-                <View style={[styles.pathCard, styles.transparentBackground]}>
-                  {renderOptimalPath()}
-                </View>
-              )}
-              {/* Available Words Display (only shown when playing) */}
-              {gameStatus === "playing" && (
-                <AvailableWordsDisplay onWordSelect={handleSelectWord} />
-              )}
-              {/* Only show path display options when game is over */}
-              {showPathOptions && (
-                <Card
-                  style={[
-                    styles.optionsCard,
-                    { backgroundColor: colors.surface },
-                  ]}
-                >
-                  <Card.Content>
-                    <Text
-                      variant="labelMedium"
-                      style={[styles.optionsLabel, { color: colors.onSurface }]}
-                    >
-                      Path Display:
-                    </Text>
-                    <PathDisplayConfigurator compact={true} />
-                  </Card.Content>
-                </Card>
-              )}
-            </View>
-            {/* Dialogs and Portals */}
-            <Portal>
-              {/* Word Definition Dialog */}
-              <WordDefinitionDialog
-                visible={definitionVisible}
-                word={selectedWord || ""}
-                pathIndexInPlayerPath={selectedWordPathIndex}
-                onDismiss={handleDismissDefinition}
+        <View
+          style={styles.gameContainer}
+          testID={gameStatus === "playing" ? "game-interface" : "idle-state"}
+        >
+          <View style={[styles.graphContainer, styles.transparentBackground]}>
+            {isLoading ? (
+              <ActivityIndicator
+                size="large"
+                animating={true}
+                color={colors.onSurface}
               />
-              {/* Snackbar for messages */}
-              <Snackbar
-                visible={snackbarVisible}
-                onDismiss={onDismissSnackbar}
-                style={{ backgroundColor: colors.surface }}
-              >
-                {snackbarMessage}
-              </Snackbar>
-            </Portal>
-          </>
-        )}
+            ) : (
+              <GraphVisualization />
+            )}
+          </View>
+          {/* Player Path Container */}
+          <View style={[styles.pathCard, styles.transparentBackground]}>
+            <View style={styles.transparentContent}>
+              <PlayerPathDisplay
+                playerPath={playerPath}
+                optimalChoices={optimalChoices}
+                suggestedPath={suggestedPathFromCurrent}
+                onWordDefinition={handleShowDefinition}
+              />
+            </View>
+          </View>
+          {/* Optimal Path Container (only shown when game is over) */}
+          {showPathOptions && (
+            <View style={[styles.pathCard, styles.transparentBackground]}>
+              {renderOptimalPath()}
+            </View>
+          )}
+          {/* Available Words Display (only shown when playing) */}
+          {gameStatus === "playing" && (
+            <AvailableWordsDisplay onWordSelect={handleSelectWord} />
+          )}
+          {/* Only show path display options when game is over */}
+          {showPathOptions && (
+            <Card
+              style={[styles.optionsCard, { backgroundColor: colors.surface }]}
+            >
+              <Card.Content>
+                <Text
+                  variant="labelMedium"
+                  style={[styles.optionsLabel, { color: colors.onSurface }]}
+                >
+                  Path Display:
+                </Text>
+                <PathDisplayConfigurator compact={true} />
+              </Card.Content>
+            </Card>
+          )}
+        </View>
+        {/* Dialogs and Portals */}
+        <Portal>
+          {/* Word Definition Dialog */}
+          <WordDefinitionDialog
+            visible={definitionVisible}
+            word={selectedWord || ""}
+            pathIndexInPlayerPath={selectedWordPathIndex}
+            onDismiss={handleDismissDefinition}
+          />
+          {/* Snackbar for messages */}
+          <Snackbar
+            visible={snackbarVisible}
+            onDismiss={onDismissSnackbar}
+            style={{ backgroundColor: colors.surface }}
+          >
+            {snackbarMessage}
+          </Snackbar>
+        </Portal>
 
         {/* Global Modals - Available in all states */}
         <UpgradePrompt

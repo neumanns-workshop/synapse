@@ -33,6 +33,7 @@ import { TutorialProvider } from "./context/TutorialContext";
 import AccountScreen from "./screens/AccountScreen";
 import AuthScreen from "./screens/AuthScreen";
 import GameScreen from "./screens/GameScreen";
+import ReportScreen from "./screens/ReportScreen";
 import { preloadAllData } from "./services/dataLoader";
 import { gameFlowManager } from "./services/GameFlowManager";
 import PaymentHandler from "./services/PaymentHandler";
@@ -50,6 +51,11 @@ export type RootStackParamList = {
   History: undefined;
   Auth: undefined;
   Account: undefined;
+  Report: {
+    reportData?: any; // GameReport from utils
+    source?: "current" | "history" | "daily"; // Source context
+    reportId?: string; // For history/daily reports
+  };
 };
 
 // Custom screen transition animations
@@ -383,6 +389,13 @@ function AppContent() {
                       onShowAccount={() => setShowAccount(true)}
                       onLegalPageRequest={(page) => setCurrentLegalPage(page)}
                     />
+                  </ErrorBoundary>
+                )}
+              </Stack.Screen>
+              <Stack.Screen name="Report">
+                {(props) => (
+                  <ErrorBoundary>
+                    <ReportScreen {...props} />
                   </ErrorBoundary>
                 )}
               </Stack.Screen>

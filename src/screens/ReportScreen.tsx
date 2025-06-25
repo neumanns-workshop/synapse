@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -8,6 +8,8 @@ import {
   TextInput,
 } from "react-native";
 
+import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   useTheme,
   Portal,
@@ -17,6 +19,8 @@ import {
   Button,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import type { RootStackParamList } from "../App";
 
 import AchievementDetailDialog from "../components/AchievementDetailDialog";
 import GameReportDisplay from "../components/GameReportDisplay";
@@ -34,8 +38,19 @@ import {
 } from "../services/SharingService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import type { GameReport } from "../utils/gameReportUtils";
+import { loadGameHistory } from "../services/StorageAdapter";
+import CustomIcon from "../components/CustomIcon";
+
+type ReportScreenRouteProp = RouteProp<RootStackParamList, "Report">;
+type ReportScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Report"
+>;
 
 const ReportScreen = () => {
+  const route = useRoute<ReportScreenRouteProp>();
+  const navigation = useNavigation<ReportScreenNavigationProp>();
   const { colors } = useTheme() as ExtendedTheme;
   const reportSectionRef = useRef(null);
   const graphPreviewRef = useRef(null);
@@ -45,8 +60,15 @@ const ReportScreen = () => {
   const [challengeDialogVisible, setChallengeDialogVisible] = useState(false);
   const [challengeMessage, setChallengeMessage] = useState("");
 
+  // State for handling different report sources
+  const [currentReport, setCurrentReport] = useState<GameReport | null>(null);
+  const [reportLoading, setReportLoading] = useState(false);
+
+  // Get navigation parameters
+  const { reportData, source, reportId } = route.params || {};
+
   const gameStatus = useGameStore((state) => state.gameStatus);
-  const gameReport = useGameStore((state) => state.gameReport);
+  const storeGameReport = useGameStore((state) => state.gameReport);
   const isLoading = useGameStore((state) => state.isLoadingData);
   const showWordDefinition = useGameStore((state) => state.showWordDefinition);
 
@@ -73,6 +95,50 @@ const ReportScreen = () => {
   const showAchievementDetail = useGameStore(
     (state) => state.showAchievementDetail,
   );
+  const startGame = useGameStore((state) => state.startGame);
+
+  // Effect to load the appropriate report based on source
+  useEffect(() => {
+    const loadReport = async () => {
+      if (reportData) {
+        // Report data was passed directly
+        setCurrentReport(reportData);
+        return;
+      }
+
+      if (source === "current") {
+        // Use current game report from store
+        setCurrentReport(storeGameReport);
+        return;
+      }
+
+      if (source === "history" && reportId) {
+        // Load from game history
+        setReportLoading(true);
+        try {
+          const gameHistory = await loadGameHistory();
+          const historicalReport = gameHistory.find(
+            (report) => report.id === reportId,
+          );
+          setCurrentReport(historicalReport || null);
+        } catch (error) {
+          console.error("Error loading historical report:", error);
+          setCurrentReport(null);
+        } finally {
+          setReportLoading(false);
+        }
+        return;
+      }
+
+      // Fallback to current game report
+      setCurrentReport(storeGameReport);
+    };
+
+    loadReport();
+  }, [reportData, source, reportId, storeGameReport]);
+
+  // Determine the actual game report to use
+  const gameReport = currentReport;
 
   // Set a special display mode for the challenge preview graph
   const setChallengeGraphMode = useGameStore(
@@ -210,12 +276,103 @@ const ReportScreen = () => {
     }
   };
 
-  if (gameStatus !== "given_up" && gameStatus !== "won") {
-    return null;
+  // Handle back navigation
+  const handleBackPress = () => {
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      // Fallback to Synapse screen if no back navigation available
+      navigation.navigate("Synapse");
+    }
+  };
+
+  // Handle new game
+  const handleNewGame = () => {
+    // Start a new game and navigate back to the main game screen
+    startGame();
+    navigation.navigate("Synapse");
+  };
+
+  // Show loading if we're still loading the report
+  if (reportLoading || isLoading) {
+    return (
+      <View
+        style={[
+          styles.container,
+          styles.centerContent,
+          { backgroundColor: colors.background },
+        ]}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ marginTop: 16, color: colors.onBackground }}>
+          Loading Report...
+        </Text>
+      </View>
+    );
+  }
+
+  // Show error if no report is available
+  if (!gameReport) {
+    return (
+      <View
+        style={[
+          styles.container,
+          styles.centerContent,
+          { backgroundColor: colors.background },
+        ]}
+      >
+        <Text
+          style={{
+            color: colors.onBackground,
+            textAlign: "center",
+            marginBottom: 16,
+          }}
+        >
+          No report available
+        </Text>
+        <Button
+          mode="outlined"
+          onPress={handleBackPress}
+          textColor={colors.primary}
+        >
+          Go Back
+        </Button>
+      </View>
+    );
   }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Navigation Header */}
+      <View style={styles.header}>
+        <Button
+          icon={() => (
+            <CustomIcon source="arrow-left" size={20} color={colors.primary} />
+          )}
+          mode="text"
+          onPress={handleBackPress}
+          textColor={colors.primary}
+        >
+          Back
+        </Button>
+        <Text
+          variant="headlineSmall"
+          style={[styles.headerTitle, { color: colors.primary }]}
+        >
+          Game Report
+        </Text>
+        <Button
+          icon={() => (
+            <CustomIcon source="plus" size={20} color={colors.primary} />
+          )}
+          mode="text"
+          onPress={handleNewGame}
+          textColor={colors.primary}
+        >
+          New Game
+        </Button>
+      </View>
+
       <ScrollView style={styles.scrollView}>
         <View style={styles.graphContainer}>
           {isLoading ? (
@@ -379,6 +536,24 @@ const ReportScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  centerContent: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    paddingTop: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.1)",
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: "center",
+    fontWeight: "600",
   },
   scrollView: {
     flex: 1,

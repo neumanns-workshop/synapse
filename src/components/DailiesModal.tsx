@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
 
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import {
   Modal,
   Portal,
@@ -8,6 +11,7 @@ import {
   Button,
   ActivityIndicator,
 } from "react-native-paper";
+import type { RootStackParamList } from "../App";
 
 import { useTheme as useAppTheme } from "../context/ThemeContext";
 import { allAchievements, Achievement } from "../features/achievements";
@@ -25,7 +29,13 @@ import DailyChallengesCalendar from "./DailyChallengesCalendar";
 import DailyChallengeReport from "./DailyChallengeReport";
 import AchievementDetailDialog from "./AchievementDetailDialog";
 
+type DailiesModalNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Synapse"
+>;
+
 const DailiesModal = () => {
+  const navigation = useNavigation<DailiesModalNavigationProp>();
   const { dailiesModalVisible, setDailiesModalVisible } = useGameStore(
     (state) => ({
       dailiesModalVisible: state.dailiesModalVisible,
@@ -106,7 +116,58 @@ const DailiesModal = () => {
 
   const renderDailyChallengesContent = () => {
     const handleChallengeSelect = async (challenge: DailyChallenge) => {
-      setSelectedDailyChallenge(challenge);
+      // Look up progress by challenge ID
+      const progress = dailyChallengeProgress[challenge.id];
+
+      // Try to find a game report for this daily challenge
+      let challengeGameReport: GameReport | undefined;
+
+      // Strategy 1: Match by daily challenge ID (most reliable)
+      challengeGameReport = gameHistory.find(
+        (report) =>
+          report.isDailyChallenge === true &&
+          report.dailyChallengeId === challenge.id,
+      );
+
+      // Strategy 2: Match by start/target words and daily challenge flag
+      if (!challengeGameReport) {
+        challengeGameReport = gameHistory.find(
+          (report) =>
+            report.startWord === challenge.startWord &&
+            report.targetWord === challenge.targetWord &&
+            report.isDailyChallenge === true,
+        );
+      }
+
+      // Strategy 3: Match by start/target words and date (less reliable but covers older games)
+      if (!challengeGameReport) {
+        challengeGameReport = gameHistory.find(
+          (report) =>
+            report.startWord === challenge.startWord &&
+            report.targetWord === challenge.targetWord &&
+            // More flexible date matching - check multiple date formats
+            (new Date(report.timestamp).toDateString() ===
+              new Date(challenge.date).toDateString() ||
+              new Date(report.timestamp).toISOString().split("T")[0] ===
+                challenge.date),
+        );
+      }
+
+      // Close the dailies modal
+      setDailiesModalVisible(false);
+
+      // Navigate to report screen if we have a completed challenge
+      if (challengeGameReport) {
+        navigation.navigate("Report", {
+          reportData: challengeGameReport,
+          source: "daily",
+          reportId: challengeGameReport.id,
+        });
+      } else {
+        // If no report exists, show the challenge detail (this could be a separate screen or modal in the future)
+        // For now, we'll temporarily set the selected challenge to show the detail
+        setSelectedDailyChallenge(challenge);
+      }
     };
 
     const handleBackToCalendar = () => {

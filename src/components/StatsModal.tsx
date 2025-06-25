@@ -8,6 +8,9 @@ import {
   Platform,
 } from "react-native";
 
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import * as ExpoClipboard from "expo-clipboard";
 import {
   Modal,
@@ -24,6 +27,7 @@ import {
   TextInput,
   Snackbar,
 } from "react-native-paper";
+import type { RootStackParamList } from "../App";
 
 import { useAuth } from "../context/AuthContext";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
@@ -546,7 +550,13 @@ const WLRatioDisplay = ({
 };
 
 // --- Main StatsModal ---
+type StatsModalNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "Synapse"
+>;
+
 const StatsModal = () => {
+  const navigation = useNavigation<StatsModalNavigationProp>();
   const { theme: appTheme } = useAppTheme();
   const auth = useAuth();
   const statsModalVisible = useGameStore((state) => state.statsModalVisible);
@@ -571,7 +581,6 @@ const StatsModal = () => {
   const [unviewedAchievementCount, setUnviewedAchievementCount] = useState(0);
   const [collectionsProgress, setCollectionsProgress] =
     useState<WordCollectionProgress>({});
-  const [selectedReport, setSelectedReport] = useState<GameReport | null>(null);
   const [definitionDialogWord, setDefinitionDialogWord] = useState<
     string | null
   >(null);
@@ -641,9 +650,19 @@ const StatsModal = () => {
   }, [statsModalVisible]);
 
   // Handle game history item press
-  const handleReportPress = useCallback((report: GameReport) => {
-    setSelectedReport(report);
-  }, []);
+  const handleReportPress = useCallback(
+    (report: GameReport) => {
+      // Close the modal first
+      setStatsModalVisible(false);
+      // Then navigate to the report screen
+      navigation.navigate("Report", {
+        reportData: report,
+        source: "history",
+        reportId: report.id,
+      });
+    },
+    [navigation, setStatsModalVisible],
+  );
 
   // Show achievement detail modal
   const showAchievementDetail = useCallback((achievement: Achievement) => {
@@ -678,10 +697,7 @@ const StatsModal = () => {
     [],
   );
 
-  // Close selected report view
-  const handleBackToHistory = () => {
-    setSelectedReport(null);
-  };
+  // No longer needed - reports now navigate to separate screen
 
   // Handle word definition in history view
   const showWordDefinition = (word: string, pathIndex?: number | null) => {
@@ -763,110 +779,7 @@ const StatsModal = () => {
     });
   };
 
-  // Function to handle challenge sharing from historical report
-  const handleChallengeShareInHistory = async () => {
-    if (!selectedReport) {
-      return;
-    }
-
-    try {
-      const { startWord, targetWord, playerPath } = selectedReport;
-      const pathLength = playerPath ? playerPath.length - 1 : 0;
-      // const timeInSeconds = (timestamp - (selectedReport.startTime || timestamp)) / 1000;
-
-      // Prepare graph view for preview (player path only)
-      prepareHistoricalGraphPreview();
-
-      if (Platform.OS === "web") {
-        // Check if this is a daily challenge and generate appropriate link
-        let link: string;
-        let message: string;
-
-        if (
-          selectedReport.isDailyChallenge &&
-          selectedReport.dailyChallengeId
-        ) {
-          // Encode game report data for sharing
-          const encodedPath = selectedReport
-            ? encodeGameReportForSharing(selectedReport)
-            : "";
-
-          link = generateSecureDailyChallengeDeepLink(
-            selectedReport.dailyChallengeId,
-            startWord,
-            targetWord,
-            encodedPath,
-          );
-
-          // Generate proper daily challenge taunt
-          const aiSteps = selectedReport.aiPath
-            ? selectedReport.aiPath.length - 1
-            : selectedReport.optimalPath.length - 1;
-          const userSteps = selectedReport.totalMoves;
-          const userCompleted = selectedReport.status === "won";
-          const userGaveUp = selectedReport.status === "given_up";
-          const challengeDate = selectedReport.dailyChallengeId; // Use challenge ID as date for now
-
-          message = generateDailyChallengeTaunt({
-            startWord,
-            targetWord,
-            aiSteps,
-            userSteps,
-            userCompleted,
-            userGaveUp,
-            challengeDate,
-            encodedPath,
-            optimalPathLength: selectedReport.optimalPath.length - 1,
-          });
-        } else {
-          // Encode game report data for sharing
-          const encodedPath = selectedReport
-            ? encodeGameReportForSharing(selectedReport)
-            : "";
-
-          link = generateSecureGameDeepLink(
-            startWord,
-            targetWord,
-            undefined,
-            encodedPath,
-          );
-          message = generateChallengeMessage({
-            startWord,
-            targetWord,
-            playerPath,
-            steps: pathLength,
-            deepLink: link,
-            gameStatus: selectedReport.status,
-            encodedPath,
-            optimalPathLength: selectedReport.optimalPath.length - 1,
-          });
-        }
-
-        setHistoricalChallengeLink(link);
-        setHistoricalChallengeMessage(message);
-        setHistoricalChallengeDialogVisible(true);
-      } else {
-        const success = await shareChallenge({
-          startWord,
-          targetWord,
-          playerPath,
-          screenshotRef: graphPreviewRef, // Use the graph preview ref for sharing
-          steps: pathLength,
-          gameReport: selectedReport, // Pass the game report for encoding
-        });
-
-        if (success) {
-          setSnackbarMessage("Challenge shared successfully!");
-        } else {
-          setSnackbarMessage("Sharing canceled or failed.");
-        }
-        setSnackbarVisible(true);
-      }
-    } catch (error) {
-      setSnackbarMessage("Error sharing challenge.");
-      setSnackbarVisible(true);
-    }
-  };
+  // Challenge sharing is now handled in the dedicated ReportScreen
 
   // Aggregate lifetime stats from gameHistory
   const aggregateStats = (
@@ -994,50 +907,6 @@ const StatsModal = () => {
 
   // Tab content components
   const renderHistoryTab = () => {
-    if (selectedReport) {
-      return (
-        <ScrollView style={styles.reportContainer} ref={historicalReportRef}>
-          <View style={styles.reportHeader}>
-            <Button
-              icon={() => (
-                <CustomIcon
-                  source="arrow-left"
-                  size={20}
-                  color={appTheme.colors.primary}
-                />
-              )}
-              mode="text"
-              onPress={handleBackToHistory}
-              textColor={appTheme.colors.primary}
-            >
-              Back to History
-            </Button>
-          </View>
-
-          <View style={styles.graphContainer}>
-            <GraphVisualization
-              gameReport={selectedReport}
-              height={300} // Set a fixed height for the graph in the modal
-            />
-          </View>
-
-          <PlayerPathDisplay
-            playerPath={selectedReport.playerPath}
-            optimalChoices={selectedReport.optimalChoices}
-            suggestedPath={selectedReport.suggestedPath}
-            onWordDefinition={showWordDefinition}
-            targetWord={selectedReport.targetWord}
-          />
-
-          <GameReportDisplay
-            report={selectedReport}
-            onAchievementPress={showAchievementDetail}
-            onChallengePress={handleChallengeShareInHistory}
-          />
-        </ScrollView>
-      );
-    }
-
     return (
       <FlatList
         data={history}
@@ -1723,17 +1592,7 @@ const StatsModal = () => {
                   style={styles.graphPreviewContainer}
                   ref={graphPreviewRef}
                 >
-                  {selectedReport && (
-                    <GraphVisualization
-                      height={180}
-                      gameReport={selectedReport}
-                      pathDisplayModeOverride={{
-                        player: true,
-                        optimal: false,
-                        suggested: false,
-                      }}
-                    />
-                  )}
+                  {/* Historical challenge preview removed - handled in dedicated ReportScreen */}
                 </View>
                 <QRCodeDisplay
                   value={historicalChallengeLink}
