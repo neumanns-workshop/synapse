@@ -734,9 +734,18 @@ import * as useGameStoreModule from "../useGameStore";
 // Tests for Game Report Modal System
 describe("useGameStore - Game Report Modal System", () => {
   // Mock storage functions used by selectWord and giveUp
-  const mockedClearCurrentGameModal = storageAdapter.clearCurrentGame as jest.MockedFunction<typeof storageAdapter.clearCurrentGame>;
-  const mockedSaveCurrentGameModal = storageAdapter.saveCurrentGame as jest.MockedFunction<typeof storageAdapter.saveCurrentGame>;
-  const mockedRecordEndedGame = storageAdapter.recordEndedGame as jest.MockedFunction<typeof storageAdapter.recordEndedGame>;
+  const mockedClearCurrentGameModal =
+    storageAdapter.clearCurrentGame as jest.MockedFunction<
+      typeof storageAdapter.clearCurrentGame
+    >;
+  const mockedSaveCurrentGameModal =
+    storageAdapter.saveCurrentGame as jest.MockedFunction<
+      typeof storageAdapter.saveCurrentGame
+    >;
+  const mockedRecordEndedGame =
+    storageAdapter.recordEndedGame as jest.MockedFunction<
+      typeof storageAdapter.recordEndedGame
+    >;
 
   beforeEach(() => {
     // Reset store to initial state
@@ -744,12 +753,12 @@ describe("useGameStore - Game Report Modal System", () => {
       gameReportModalVisible: false,
       gameReportModalReport: null,
     });
-    
+
     // Reset mocks
     mockedClearCurrentGameModal.mockReset();
     mockedSaveCurrentGameModal.mockReset();
     mockedRecordEndedGame.mockReset();
-    
+
     // Set up mock implementations
     mockedClearCurrentGameModal.mockResolvedValue(undefined);
     mockedSaveCurrentGameModal.mockResolvedValue(undefined);
@@ -861,7 +870,7 @@ describe("useGameStore - Game Report Modal System", () => {
 
     it("should show game report modal when player wins", async () => {
       const { selectWord } = useGameStore.getState();
-      
+
       // Simulate winning by selecting the target word from current position
       await selectWord("end");
 
@@ -876,7 +885,7 @@ describe("useGameStore - Game Report Modal System", () => {
 
     it("should show game report modal when player gives up", async () => {
       const { giveUp } = useGameStore.getState();
-      
+
       // Simulate giving up
       await giveUp();
 
@@ -891,13 +900,15 @@ describe("useGameStore - Game Report Modal System", () => {
 
     it("should preserve missed optimal moves in modal report", async () => {
       const { giveUp } = useGameStore.getState();
-      
+
       // Give up to generate a report
       await giveUp();
 
       const state = useGameStore.getState();
       expect(state.gameReportModalReport?.missedOptimalMoves).toHaveLength(1);
-      expect(state.gameReportModalReport?.missedOptimalMoves[0]).toContain("At start, chose middle instead of optimal end");
+      expect(state.gameReportModalReport?.missedOptimalMoves[0]).toContain(
+        "At start, chose middle instead of optimal end",
+      );
     });
   });
 

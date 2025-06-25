@@ -160,7 +160,7 @@ describe("Core Gameplay Mechanics", () => {
       expect(state.gameStatus).toBe("won");
       expect(state.gameReport).toBeTruthy();
       expect(state.pathDisplayMode.optimal).toBe(false); // Should not auto-show optimal path on win (modal system)
-      
+
       // Should show game report modal
       expect(state.gameReportModalVisible).toBe(true);
       expect(state.gameReportModalReport).toBeTruthy();
@@ -272,7 +272,7 @@ describe("Core Gameplay Mechanics", () => {
       expect(state.gameReport).toBeTruthy();
       expect(state.gameReport?.status).toBe("given_up");
       expect(state.pathDisplayMode.suggested).toBe(false); // Should not auto-show suggested path on give up (modal system)
-      
+
       // Should show game report modal
       expect(state.gameReportModalVisible).toBe(true);
       expect(state.gameReportModalReport).toBeTruthy();
