@@ -98,7 +98,10 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
       <View style={styles.collapsibleHeaderContent}>
         <Text
           variant="titleMedium"
-          style={[styles.sectionTitle, { color: colors.primary, marginBottom: 0 }]}
+          style={[
+            styles.sectionTitle,
+            { color: colors.primary, marginBottom: 0 },
+          ]}
         >
           {title}
           {count !== undefined && ` (${count})`}
@@ -260,24 +263,29 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                     <CollapsibleSectionHeader
                       title="Optimal Moves"
                       expanded={optimalMovesExpanded}
-                      onToggle={() => setOptimalMovesExpanded(!optimalMovesExpanded)}
+                      onToggle={() =>
+                        setOptimalMovesExpanded(!optimalMovesExpanded)
+                      }
                       count={globalMoves.length}
                     />
-                    {optimalMovesExpanded && globalMoves.map((choice, index) => (
-                      <Text
-                        key={index}
-                        variant="bodyMedium"
-                        style={[
-                          styles.choiceText,
-                          { color: customColors.globalOptimalNode },
-                        ]}
-                      >
-                        {choice.playerPosition} → {choice.playerChose}{" "}
-                        <Text style={{ color: customColors.globalOptimalNode }}>
-                          ★
+                    {optimalMovesExpanded &&
+                      globalMoves.map((choice, index) => (
+                        <Text
+                          key={index}
+                          variant="bodyMedium"
+                          style={[
+                            styles.choiceText,
+                            { color: customColors.globalOptimalNode },
+                          ]}
+                        >
+                          {choice.playerPosition} → {choice.playerChose}{" "}
+                          <Text
+                            style={{ color: customColors.globalOptimalNode }}
+                          >
+                            ★
+                          </Text>
                         </Text>
-                      </Text>
-                    ))}
+                      ))}
                   </View>
                 )}
                 {localMoves.length > 0 && (
@@ -285,52 +293,56 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                     <CollapsibleSectionHeader
                       title="Suggested Moves"
                       expanded={suggestedMovesExpanded}
-                      onToggle={() => setSuggestedMovesExpanded(!suggestedMovesExpanded)}
+                      onToggle={() =>
+                        setSuggestedMovesExpanded(!suggestedMovesExpanded)
+                      }
                       count={localMoves.length}
                     />
-                    {suggestedMovesExpanded && localMoves.map((choice, index) => (
-                      <Text
-                        key={index}
-                        variant="bodyMedium"
-                        style={[
-                          styles.choiceText,
-                          { color: customColors.localOptimalNode },
-                        ]}
-                      >
-                        {choice.playerPosition} → {choice.playerChose}{" "}
-                        <Text style={{ color: customColors.localOptimalNode }}>
-                          ★
+                    {suggestedMovesExpanded &&
+                      localMoves.map((choice, index) => (
+                        <Text
+                          key={index}
+                          variant="bodyMedium"
+                          style={[
+                            styles.choiceText,
+                            { color: customColors.localOptimalNode },
+                          ]}
+                        >
+                          {choice.playerPosition} → {choice.playerChose}{" "}
+                          <Text
+                            style={{ color: customColors.localOptimalNode }}
+                          >
+                            ★
+                          </Text>
                         </Text>
-                      </Text>
-                    ))}
+                      ))}
                   </View>
                 )}
               </>
             );
           })()}
 
-          {report.missedOptimalMoves && report.missedOptimalMoves.length > 0 && (
-            <View style={styles.section}>
-              <CollapsibleSectionHeader
-                title="Missed Optimal Moves"
-                expanded={missedMovesExpanded}
-                onToggle={() => setMissedMovesExpanded(!missedMovesExpanded)}
-                count={report.missedOptimalMoves.length}
-              />
-              {missedMovesExpanded && report.missedOptimalMoves.map((missedMove, index) => (
-                <Text
-                  key={index}
-                  variant="bodyMedium"
-                  style={[
-                    styles.missedMove,
-                    { color: colors.error }
-                  ]}
-                >
-                  {missedMove}
-                </Text>
-              ))}
-            </View>
-          )}
+          {report.missedOptimalMoves &&
+            report.missedOptimalMoves.length > 0 && (
+              <View style={styles.section}>
+                <CollapsibleSectionHeader
+                  title="Missed Optimal Moves"
+                  expanded={missedMovesExpanded}
+                  onToggle={() => setMissedMovesExpanded(!missedMovesExpanded)}
+                  count={report.missedOptimalMoves.length}
+                />
+                {missedMovesExpanded &&
+                  report.missedOptimalMoves.map((missedMove, index) => (
+                    <Text
+                      key={index}
+                      variant="bodyMedium"
+                      style={[styles.missedMove, { color: colors.error }]}
+                    >
+                      {missedMove}
+                    </Text>
+                  ))}
+              </View>
+            )}
 
           {report.backtrackEvents && report.backtrackEvents.length > 0 && (
             <View style={styles.section}>
@@ -340,15 +352,16 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                 onToggle={() => setBacktrackingExpanded(!backtrackingExpanded)}
                 count={report.backtrackEvents.length}
               />
-              {backtrackingExpanded && report.backtrackEvents.map((event, index) => (
-                <Text
-                  key={index}
-                  variant="bodyMedium"
-                  style={{ color: colors.onSurface }}
-                >
-                  {event.landedOn} ← {event.jumpedFrom}
-                </Text>
-              ))}
+              {backtrackingExpanded &&
+                report.backtrackEvents.map((event, index) => (
+                  <Text
+                    key={index}
+                    variant="bodyMedium"
+                    style={{ color: colors.onSurface }}
+                  >
+                    {event.landedOn} ← {event.jumpedFrom}
+                  </Text>
+                ))}
             </View>
           )}
 
@@ -358,37 +371,40 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                 <CollapsibleSectionHeader
                   title="Achievements Earned"
                   expanded={achievementsExpanded}
-                  onToggle={() => setAchievementsExpanded(!achievementsExpanded)}
+                  onToggle={() =>
+                    setAchievementsExpanded(!achievementsExpanded)
+                  }
                   count={report.earnedAchievements.length}
                 />
-                {achievementsExpanded && report.earnedAchievements.map((achievement, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() =>
-                      onAchievementPress && onAchievementPress(achievement)
-                    }
-                    style={styles.achievementItem}
-                  >
-                    <View style={styles.achievementHeader}>
-                      <View style={styles.achievementIconContainer}>
-                        <CustomIcon
-                          source="trophy"
-                          size={20}
-                          color={customColors.achievementIcon}
-                        />
+                {achievementsExpanded &&
+                  report.earnedAchievements.map((achievement, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() =>
+                        onAchievementPress && onAchievementPress(achievement)
+                      }
+                      style={styles.achievementItem}
+                    >
+                      <View style={styles.achievementHeader}>
+                        <View style={styles.achievementIconContainer}>
+                          <CustomIcon
+                            source="trophy"
+                            size={20}
+                            color={customColors.achievementIcon}
+                          />
+                        </View>
+                        <Text
+                          variant="bodyMedium"
+                          style={[
+                            styles.achievementName,
+                            { color: colors.primary },
+                          ]}
+                        >
+                          {achievement.name}
+                        </Text>
                       </View>
-                      <Text
-                        variant="bodyMedium"
-                        style={[
-                          styles.achievementName,
-                          { color: colors.primary },
-                        ]}
-                      >
-                        {achievement.name}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
+                    </TouchableOpacity>
+                  ))}
               </View>
             )}
         </Card.Content>
