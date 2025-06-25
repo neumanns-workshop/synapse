@@ -373,13 +373,9 @@ const GameScreen: React.FC<GameScreenProps> = ({
         <>
           <View
             style={styles.gameContainer}
-            testID={
-              gameStatus === "playing" ? "game-interface" : "idle-state"
-            }
+            testID={gameStatus === "playing" ? "game-interface" : "idle-state"}
           >
-            <View
-              style={[styles.graphContainer, styles.transparentBackground]}
-            >
+            <View style={[styles.graphContainer, styles.transparentBackground]}>
               {isLoading ? (
                 <ActivityIndicator
                   size="large"
