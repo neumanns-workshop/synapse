@@ -36,7 +36,7 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
   pathIndexInPlayerPath,
 }) => {
   const theme = useTheme() as ExtendedTheme;
-  const { colors } = theme;
+  const { colors, customColors } = theme;
 
   const definitionsData = useGameStore((state) => state.definitionsData);
   const playerPath = useGameStore((state) => state.playerPath);
@@ -44,6 +44,11 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
   const gameStatus = useGameStore((state) => state.gameStatus);
   const backtrackToWord = useGameStore((state) => state.backtrackToWord);
   const backtrackHistory = useGameStore((state) => state.backtrackHistory);
+
+  // Get current game report for post-game optimal choice info
+  const gameReportModalReport = useGameStore(
+    (state) => state.gameReportModalReport,
+  );
 
   const scale = useSharedValue(0.9);
   const opacity = useSharedValue(0);
@@ -105,6 +110,45 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
     optimalChoices,
     gameStatus,
     backtrackHistory,
+  ]);
+
+  // Calculate optimal choice information for post-game analysis
+  const optimalChoiceInfo = React.useMemo(() => {
+    // Only show for completed games
+    if (gameStatus === "playing" || !gameReportModalReport) return null;
+
+    const wordIndex =
+      typeof pathIndexInPlayerPath === "number"
+        ? pathIndexInPlayerPath
+        : playerPath.indexOf(word);
+
+    // Only show for words that were the result of a choice (not the start word)
+    if (wordIndex <= 0) return null;
+
+    const choiceIndex = wordIndex - 1;
+    const reportOptimalChoices = gameReportModalReport.optimalChoices;
+
+    if (choiceIndex < 0 || choiceIndex >= reportOptimalChoices.length)
+      return null;
+
+    const choice = reportOptimalChoices[choiceIndex];
+
+    // Only show if this was a suboptimal choice
+    if (choice.isGlobalOptimal || choice.isLocalOptimal) return null;
+
+    return {
+      playerChoice: choice.playerChose,
+      optimalChoice: choice.optimalChoice,
+      playerPosition: choice.playerPosition,
+      isGlobalOptimal: choice.isGlobalOptimal,
+      isLocalOptimal: choice.isLocalOptimal,
+    };
+  }, [
+    gameStatus,
+    gameReportModalReport,
+    word,
+    pathIndexInPlayerPath,
+    playerPath,
   ]);
 
   const handleBacktrack = () => {
@@ -193,6 +237,79 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                     No definition available for this word.
                   </Text>
                 )}
+
+                {/* Show optimal choice information for completed games */}
+                {optimalChoiceInfo && (
+                  <>
+                    <Divider
+                      style={[
+                        styles.divider,
+                        { backgroundColor: colors.outline, marginVertical: 16 },
+                      ]}
+                    />
+                    <View style={styles.optimalChoiceSection}>
+                      <View style={styles.optimalChoiceHeader}>
+                        <CustomIcon
+                          source="lightbulb-outline"
+                          size={20}
+                          color={colors.error}
+                        />
+                        <Text
+                          variant="titleSmall"
+                          style={[
+                            styles.optimalChoiceTitle,
+                            { color: colors.error, marginLeft: 8 },
+                          ]}
+                        >
+                          Alternative Move Available
+                        </Text>
+                      </View>
+                      <Text
+                        variant="bodyMedium"
+                        style={[
+                          styles.optimalChoiceText,
+                          { color: colors.onSurface },
+                        ]}
+                      >
+                        From{" "}
+                        <Text
+                          style={{
+                            fontWeight: "bold",
+                            color: customColors.pathNode,
+                          }}
+                        >
+                          {optimalChoiceInfo.playerPosition}
+                        </Text>
+                        , you chose{" "}
+                        <Text
+                          style={{ fontWeight: "bold", color: colors.error }}
+                        >
+                          {optimalChoiceInfo.playerChoice}
+                        </Text>
+                      </Text>
+                      <Text
+                        variant="bodyMedium"
+                        style={[
+                          styles.optimalChoiceText,
+                          { color: colors.onSurface, marginTop: 4 },
+                        ]}
+                      >
+                        Optimal choice:{" "}
+                        <Text
+                          style={{
+                            fontWeight: "bold",
+                            color: customColors.globalOptimalNode,
+                          }}
+                        >
+                          {optimalChoiceInfo.optimalChoice}
+                        </Text>
+                        <Text style={{ color: customColors.globalOptimalNode }}>
+                          {" ★"}
+                        </Text>
+                      </Text>
+                    </View>
+                  </>
+                )}
               </ScrollView>
             </PaperDialog.Content>
             <PaperDialog.Actions>
@@ -230,36 +347,52 @@ const styles = StyleSheet.create({
   modalContentContainer: {
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    flex: 1,
+    paddingHorizontal: 20,
   },
   animatedDialogContainer: {
-    width: "90%",
-    maxWidth: 700,
-    maxHeight: "90%",
+    width: "100%",
+    maxWidth: 500,
   },
   dialogBase: {
-    width: "100%",
+    borderRadius: 16,
     borderWidth: 1,
-    borderRadius: 8,
+    maxHeight: "80%",
   },
   dialogTitle: {
     fontWeight: "bold",
+    fontSize: 20,
   },
   scrollView: {
-    maxHeight: 400, // Fixed height instead of percentage to prevent cutoff
-    paddingHorizontal: 4, // Add some padding for better readability
+    maxHeight: 400,
   },
   definition: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  divider: {
-    marginVertical: 8,
+    fontSize: 16,
+    lineHeight: 24,
   },
   noDefinition: {
+    fontSize: 16,
     fontStyle: "italic",
     textAlign: "center",
     marginVertical: 20,
+  },
+  divider: {
+    height: 1,
+    marginVertical: 8,
+  },
+  optimalChoiceSection: {
+    paddingVertical: 8,
+  },
+  optimalChoiceHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  optimalChoiceTitle: {
+    fontWeight: "bold",
+  },
+  optimalChoiceText: {
+    lineHeight: 20,
   },
 });
 

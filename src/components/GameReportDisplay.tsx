@@ -53,7 +53,6 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
   // State for collapsible sections
   const [optimalMovesExpanded, setOptimalMovesExpanded] = useState(false);
   const [suggestedMovesExpanded, setSuggestedMovesExpanded] = useState(false);
-  const [missedMovesExpanded, setMissedMovesExpanded] = useState(false);
   const [backtrackingExpanded, setBacktrackingExpanded] = useState(false);
   const [achievementsExpanded, setAchievementsExpanded] = useState(true); // Default open for achievements
 
@@ -322,28 +321,6 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
             );
           })()}
 
-          {report.missedOptimalMoves &&
-            report.missedOptimalMoves.length > 0 && (
-              <View style={styles.section}>
-                <CollapsibleSectionHeader
-                  title="Missed Optimal Moves"
-                  expanded={missedMovesExpanded}
-                  onToggle={() => setMissedMovesExpanded(!missedMovesExpanded)}
-                  count={report.missedOptimalMoves.length}
-                />
-                {missedMovesExpanded &&
-                  report.missedOptimalMoves.map((missedMove, index) => (
-                    <Text
-                      key={index}
-                      variant="bodyMedium"
-                      style={[styles.missedMove, { color: colors.error }]}
-                    >
-                      {missedMove}
-                    </Text>
-                  ))}
-              </View>
-            )}
-
           {report.backtrackEvents && report.backtrackEvents.length > 0 && (
             <View style={styles.section}>
               <CollapsibleSectionHeader
@@ -465,10 +442,6 @@ const styles = StyleSheet.create({
   choiceText: {
     fontWeight: "500",
     lineHeight: 22,
-  },
-  missedMove: {
-    marginVertical: 4,
-    fontWeight: "500",
   },
   achievementItem: {
     marginBottom: 10,
