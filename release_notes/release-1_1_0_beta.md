@@ -34,20 +34,20 @@ _Provisional release notes indicating what is to be done, based on user feedback
 
 ### 🪲 Bug Fixes & Technical Improvements
 
-- [ ] Fixed an issue where the Report Screen would show without the theme intact.
+- [x] Fixed an issue where the Report Screen would show without the theme intact.
   - PROSPECTIVE FIX: Properly separate the Report Screen from the Game Screen.
 - [x] Fixed an issue where the graph was not properly displaying in the History item screens.
   - PROSPECTIVE FIX: Re-add the graph the should already be there.
-- [ ] Fixed several issues where game or app state was not properly syncing or refreshing, including:
-  - [ ] The Contact form would simply hang, perpetually submitting without success.
+- [x] Fixed several issues where game or app state was not properly syncing or refreshing, including:
+  - [x] The Contact form would simply hang, perpetually submitting without success.
     - PROSPECTIVE FIX: Is the captcha token refreshing properly?
   - [x] The daily challenges would not properly redirect to a different game in the player's queue if the player has already completed the current challenge, leading the player to have to play it again or give up to continue.
     - PROSPECTIVE FIX: Re-add logic that might have broken when updating the challenge links.
   - [x] The date on the challenge link taunts was wrong.
     - PROSPECTIVE FIX: I think they might be using UTC time not CST.
-- [ ] Fixed an issue where daily challenges would not properly sync notifications.
+- [x] Fixed an issue where daily challenges would not properly sync notifications.
   - PROSPECTIVE FIX: Need to fix with the other syncing issues.
-- [ ] Fixed an issue where daily challenges would sometimes show the results in the calendar for the wrong day if you complete yesterday's challenge.
+- [x] Fixed an issue where daily challenges would sometimes show the results in the calendar for the wrong day if you complete yesterday's challenge.
   - PROSPECTIVE FIX: you should not be able to play yesterday's challenge without premium, but it should also properly parse and check the link used.
 
 ---
