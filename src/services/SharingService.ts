@@ -477,11 +477,19 @@ export const generateDailyChallengeTaunt = (
     optimalPathLength,
   } = options;
 
-  const dateObj = new Date(challengeDate);
+  // Fix for timezone issue: The challengeDate is a string like "2025-01-15".
+  // new Date("2025-01-15") creates a date at midnight UTC.
+  // toLocaleDateString() with a different timezone (e.g., "America/Chicago")
+  // would show the PREVIOUS day.
+  // By parsing the string and using Date.UTC, we treat it as that date in UTC,
+  // then format it, which correctly shows the intended date.
+  const [year, month, day] = challengeDate.split("-").map(Number);
+  const dateObj = new Date(Date.UTC(year, month - 1, day));
+
   const formattedDate = dateObj.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
-    timeZone: "America/Chicago",
+    timeZone: "UTC", // Keep this as UTC to match the Date.UTC constructor
   });
 
   // If user completed it, compare with AI
