@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 
-import { Text, Card, useTheme, Button } from "react-native-paper";
+import { Text, Card, useTheme, Button, Chip } from "react-native-paper";
 
 import type { Achievement } from "../features/achievements";
 import { useGameStore } from "../stores/useGameStore";
@@ -184,18 +184,47 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
             >
               Move Accuracy
             </Text>
-            <Text variant="bodyLarge" style={{ color: colors.primary }}>
-              {`Moves: ${report.totalMoves}`}
-            </Text>
-            <Text variant="bodyLarge" style={{ color: colors.primary }}>
-              {`Globally Optimal: ${globallyOptimalMoves}`}
-            </Text>
-            <Text variant="bodyLarge" style={{ color: colors.primary }}>
-              {`Locally Optimal: ${locallyOptimalMoves}`}
-            </Text>
-            <Text variant="bodyLarge" style={{ color: colors.primary }}>
-              {`Backtracks: ${backtracks}`}
-            </Text>
+            <View style={styles.statLine}>
+              <Text variant="bodyLarge" style={{ color: colors.primary }}>
+                {`${report.moveAccuracy.toFixed(1)}% `}
+              </Text>
+              <Text variant="bodyLarge" style={{ color: colors.primary }}>
+                (
+              </Text>
+              <Text variant="bodyLarge" style={{ color: colors.primary }}>
+                {report.totalMoves}
+              </Text>
+              <Text variant="bodyLarge" style={{ color: colors.primary }}>
+                /
+              </Text>
+              <Text
+                variant="bodyLarge"
+                style={{ color: customColors.globalOptimalNode }}
+              >
+                {globallyOptimalMoves}
+              </Text>
+              <Text variant="bodyLarge" style={{ color: colors.primary }}>
+                /
+              </Text>
+              <Text
+                variant="bodyLarge"
+                style={{ color: customColors.localOptimalNode }}
+              >
+                {locallyOptimalMoves}
+              </Text>
+              <Text variant="bodyLarge" style={{ color: colors.primary }}>
+                /
+              </Text>
+              <Text
+                variant="bodyLarge"
+                style={{ color: customColors.warningColor }}
+              >
+                {backtracks}
+              </Text>
+              <Text variant="bodyLarge" style={{ color: colors.primary }}>
+                )
+              </Text>
+            </View>
           </View>
 
           <View style={styles.section}>
@@ -205,11 +234,17 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
             >
               Distance Traveled
             </Text>
-            <Text variant="bodyLarge" style={{ color: colors.primary }}>
-              {`${report.playerSemanticDistance.toFixed(
-                2,
-              )} (Optimal: ${report.optimalSemanticDistance.toFixed(2)})`}
-            </Text>
+            <View style={styles.statLine}>
+              <Text variant="bodyLarge" style={{ color: colors.primary }}>
+                {`${report.playerSemanticDistance.toFixed(2)} `}
+              </Text>
+              <Text
+                variant="bodyLarge"
+                style={{ color: customColors.globalOptimalNode }}
+              >
+                {`(${report.optimalSemanticDistance.toFixed(2)})`}
+              </Text>
+            </View>
           </View>
 
           {/* Achievements Section */}
@@ -224,30 +259,27 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
               Achievements ({report.earnedAchievements?.length || 0})
             </Text>
 
-            <View>
+            <View style={styles.achievementsContainer}>
               {report.earnedAchievements &&
               report.earnedAchievements.length > 0 ? (
-                report.earnedAchievements.map((achievement, index) => (
+                report.earnedAchievements.map((achievement) => (
                   <TouchableOpacity
-                    key={index}
+                    key={achievement.id}
                     onPress={() => onAchievementPress?.(achievement)}
-                    style={styles.achievementItem}
                   >
-                    <View style={styles.achievementContent}>
-                      <CustomIcon
-                        source={achievement.icon || "trophy"}
-                        size={24}
-                        color={colors.primary}
-                      />
-                      <View style={styles.achievementTextContainer}>
-                        <Text style={[styles.achievementName]}>
-                          {achievement.name}
-                        </Text>
-                        <Text style={styles.achievementDescription}>
-                          {achievement.description}
-                        </Text>
-                      </View>
-                    </View>
+                    <Chip
+                      icon={() => (
+                        <CustomIcon
+                          source={achievement.icon || "trophy"}
+                          size={20}
+                          color={customColors.achievementIcon}
+                        />
+                      )}
+                      style={styles.achievementChip}
+                      textStyle={styles.achievementChipText}
+                    >
+                      {achievement.name}
+                    </Chip>
                   </TouchableOpacity>
                 ))
               ) : (
@@ -324,6 +356,22 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   achievementDescription: {
+    fontSize: 12,
+  },
+  statLine: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  achievementsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 8,
+  },
+  achievementChip: {
+    margin: 4,
+    backgroundColor: "rgba(255, 246, 163, 0.2)", // very light gold
+  },
+  achievementChipText: {
     fontSize: 12,
   },
 });
