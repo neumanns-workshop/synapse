@@ -238,25 +238,48 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                     No definition available for this word.
                   </Text>
                 )}
+
+                {/* Show optimal choice information for completed games */}
+                {optimalChoiceInfo && (
+                  <>
+                    <Divider
+                      style={[
+                        styles.divider,
+                        { backgroundColor: colors.outline, marginVertical: 16 },
+                      ]}
+                    />
+                    <View style={styles.optimalChoiceSection}>
+                      <Text
+                        variant="bodyMedium"
+                        style={[
+                          styles.optimalText,
+                          { color: customColors.globalOptimalNode },
+                        ]}
+                      >
+                        Optimal: {optimalChoiceInfo.optimalChoice}
+                      </Text>
+                      {/* Debug info - remove later */}
+                      {__DEV__ && (
+                        <Text
+                          style={{ fontSize: 12, color: "gray", marginTop: 4 }}
+                        >
+                          Debug: word={word}, wordIndex=
+                          {typeof pathIndexInPlayerPath === "number"
+                            ? pathIndexInPlayerPath
+                            : playerPath.indexOf(word)}
+                          , choiceIndex=
+                          {(typeof pathIndexInPlayerPath === "number"
+                            ? pathIndexInPlayerPath
+                            : playerPath.indexOf(word)) - 1}
+                        </Text>
+                      )}
+                    </View>
+                  </>
+                )}
               </ScrollView>
             </PaperDialog.Content>
             <PaperDialog.Actions style={styles.dialogActions}>
-              {/* Left side - Optimal choice info */}
-              <View style={styles.leftActions}>
-                {optimalChoiceInfo && (
-                  <Text
-                    variant="bodyMedium"
-                    style={[
-                      styles.optimalText,
-                      { color: customColors.globalOptimalNode },
-                    ]}
-                  >
-                    Optimal: {optimalChoiceInfo.optimalChoice}
-                  </Text>
-                )}
-              </View>
-
-              {/* Right side - Action buttons */}
+              {/* Action buttons */}
               <View style={styles.rightActions}>
                 {canBacktrackToWord && (
                   <AnimatedPaperButton
@@ -328,14 +351,10 @@ const styles = StyleSheet.create({
   },
   dialogActions: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 8,
-  },
-  leftActions: {
-    flex: 1,
-    alignItems: "flex-start",
   },
   rightActions: {
     flexDirection: "row",
@@ -343,6 +362,9 @@ const styles = StyleSheet.create({
   },
   optimalText: {
     fontWeight: "500",
+  },
+  optimalChoiceSection: {
+    paddingVertical: 8,
   },
 });
 
