@@ -199,9 +199,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
               { backgroundColor: colors.surface, borderColor: colors.outline },
             ]}
           >
-            <Dialog.Title
-              style={[styles.title, { color: colors.primary }]}
-            >
+            <Dialog.Title style={[styles.title, { color: colors.primary }]}>
               Contact Us
             </Dialog.Title>
             <Dialog.Content style={{ maxHeight: 600, paddingBottom: 0 }}>

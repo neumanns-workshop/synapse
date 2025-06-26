@@ -138,9 +138,7 @@ const NewsModal: React.FC<NewsModalProps> = ({ visible, onDismiss }) => {
               },
             ]}
           >
-            <Dialog.Title
-              style={[styles.tabTitle, { color: colors.primary }]}
-            >
+            <Dialog.Title style={[styles.tabTitle, { color: colors.primary }]}>
               News & Updates
             </Dialog.Title>
 
