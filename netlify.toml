@@ -16,8 +16,8 @@
   command = "npm run build:web"
   publish = "web-build"
 
-# Branch-deploy context for the develop branch
-[context.develop]
+# Branch-deploy context for all non-production branches
+[context.branch-deploy]
   command = "npm run build:web"
   publish = "web-build"
 
