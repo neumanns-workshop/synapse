@@ -195,11 +195,28 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
               },
             ]}
           >
-            <PaperDialog.Title
-              style={[styles.dialogTitle, { color: colors.primary }]}
-            >
-              {word}
-            </PaperDialog.Title>
+            <View style={styles.titleContainer}>
+              <PaperDialog.Title
+                style={[styles.dialogTitle, { color: colors.primary }]}
+              >
+                {word}
+              </PaperDialog.Title>
+              <AnimatedPaperButton
+                mode="text"
+                onPress={onDismiss}
+                icon={() => (
+                  <CustomIcon
+                    source="close"
+                    size={24}
+                    color={colors.onSurface}
+                  />
+                )}
+                style={styles.closeButton}
+                contentStyle={styles.closeButtonContent}
+              >
+                ""
+              </AnimatedPaperButton>
+            </View>
             <PaperDialog.Content>
               <ScrollView
                 style={styles.scrollView}
@@ -244,35 +261,26 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                     <Divider
                       style={[
                         styles.divider,
-                        { backgroundColor: colors.outline, marginVertical: 16 },
+                        { backgroundColor: colors.outline, marginVertical: 12 },
                       ]}
                     />
-                    <View style={styles.optimalChoiceSection}>
+                    <Text
+                      variant="bodyMedium"
+                      style={[
+                        styles.optimalChoiceText,
+                        { color: colors.onSurface },
+                      ]}
+                    >
+                      Optimal:{" "}
                       <Text
-                        variant="bodyMedium"
-                        style={[
-                          styles.optimalText,
-                          { color: customColors.globalOptimalNode },
-                        ]}
+                        style={{
+                          fontWeight: "bold",
+                          color: customColors.globalOptimalNode,
+                        }}
                       >
-                        Optimal: {optimalChoiceInfo.optimalChoice}
+                        {optimalChoiceInfo.optimalChoice}
                       </Text>
-                      {/* Debug info - remove later */}
-                      {__DEV__ && (
-                        <Text
-                          style={{ fontSize: 12, color: "gray", marginTop: 4 }}
-                        >
-                          Debug: word={word}, wordIndex=
-                          {typeof pathIndexInPlayerPath === "number"
-                            ? pathIndexInPlayerPath
-                            : playerPath.indexOf(word)}
-                          , choiceIndex=
-                          {(typeof pathIndexInPlayerPath === "number"
-                            ? pathIndexInPlayerPath
-                            : playerPath.indexOf(word)) - 1}
-                        </Text>
-                      )}
-                    </View>
+                    </Text>
                   </>
                 )}
               </ScrollView>
@@ -312,7 +320,8 @@ const styles = StyleSheet.create({
   modalContentContainer: {
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    flex: 1,
+    paddingHorizontal: 20,
   },
   animatedDialogContainer: {
     width: "100%",
@@ -323,9 +332,27 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     maxHeight: "80%",
   },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingRight: 8,
+  },
   dialogTitle: {
     fontWeight: "bold",
     fontSize: 20,
+    flex: 1,
+  },
+  closeButton: {
+    margin: 0,
+    minWidth: 40,
+    width: 40,
+    height: 40,
+  },
+  closeButtonContent: {
+    width: 40,
+    height: 40,
+    margin: 0,
   },
   scrollView: {
     maxHeight: 400,
@@ -344,11 +371,8 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: 8,
   },
-  optimalText: {
-    fontWeight: "500",
-  },
-  optimalChoiceSection: {
-    paddingVertical: 8,
+  optimalChoiceText: {
+    lineHeight: 20,
   },
 });
 
