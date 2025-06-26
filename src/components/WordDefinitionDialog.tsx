@@ -285,8 +285,8 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                 )}
               </ScrollView>
             </PaperDialog.Content>
-            <PaperDialog.Actions>
-              {canBacktrackToWord && (
+            {canBacktrackToWord && (
+              <View style={styles.actionsContainer}>
                 <AnimatedPaperButton
                   mode="text"
                   onPress={handleBacktrack}
@@ -301,14 +301,8 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                 >
                   Backtrack
                 </AnimatedPaperButton>
-              )}
-              <AnimatedPaperButton
-                onPress={onDismiss}
-                textColor={buttonTextColor}
-              >
-                Close
-              </AnimatedPaperButton>
-            </PaperDialog.Actions>
+              </View>
+            )}
           </View>
         </Animated.View>
       </Modal>
@@ -373,6 +367,12 @@ const styles = StyleSheet.create({
   },
   optimalChoiceText: {
     lineHeight: 20,
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
 });
 
