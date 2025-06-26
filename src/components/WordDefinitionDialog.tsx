@@ -181,7 +181,6 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
       <Modal
         visible={visible}
         onDismiss={onDismiss}
-        dismissable={true}
         contentContainerStyle={styles.modalContentContainer}
       >
         <Animated.View
