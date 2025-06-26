@@ -141,11 +141,6 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
               >
                 {activeTab === "howtoplay" && (
                   <>
-                    <Dialog.Title
-                      style={[styles.tabTitle, { color: colors.primary }]}
-                    >
-                      How to Play
-                    </Dialog.Title>
                     <Paragraph style={paragraphStyle}>
                       <Text
                         style={[
