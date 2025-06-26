@@ -107,7 +107,7 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
         </Text>
       </View>
       <CustomIcon
-        source={expanded ? "chevron-up" : "chevron-down"}
+        source={expanded ? "chevron-down" : "chevron-right"}
         size={20}
         color={colors.primary}
       />
@@ -115,7 +115,11 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
   );
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={true}
+    >
       <Card
         style={[
           styles.card,
@@ -394,6 +398,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginVertical: 8,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   card: {
     margin: 8,

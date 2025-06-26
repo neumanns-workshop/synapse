@@ -1,10 +1,12 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 
-import { Portal, Dialog, Text, Button, useTheme } from "react-native-paper";
+import { Portal, Dialog, Text, useTheme } from "react-native-paper";
 
 import type { Achievement } from "../features/achievements";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import AnimatedButton from "./AnimatedButton";
+import CustomIcon from "./CustomIcon";
 
 interface AchievementDetailDialogProps {
   achievement: Achievement | null;
@@ -31,19 +33,27 @@ const AchievementDetailDialog: React.FC<AchievementDetailDialogProps> = ({
           { backgroundColor: colors.surface, borderColor: colors.outline },
         ]}
       >
-        <Dialog.Title style={[styles.dialogTitle, { color: colors.primary }]}>
-          {achievement.name}
-        </Dialog.Title>
+        <View style={styles.titleContainer}>
+          <Dialog.Title style={[styles.dialogTitle, { color: colors.primary }]}>
+            {achievement.name}
+          </Dialog.Title>
+          <AnimatedButton
+            mode="text"
+            onPress={onDismiss}
+            icon={() => (
+              <CustomIcon source="close" size={24} color={colors.onSurface} />
+            )}
+            style={styles.closeButton}
+            contentStyle={styles.closeButtonContent}
+          >
+            ""
+          </AnimatedButton>
+        </View>
         <Dialog.Content>
           <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant }}>
             {achievement.description}
           </Text>
         </Dialog.Content>
-        <Dialog.Actions>
-          <Button onPress={onDismiss} textColor={colors.primary}>
-            Close
-          </Button>
-        </Dialog.Actions>
       </Dialog>
     </Portal>
   );
@@ -57,8 +67,26 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
   },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingRight: 8,
+  },
   dialogTitle: {
     fontWeight: "bold",
+    flex: 1,
+  },
+  closeButton: {
+    margin: 0,
+    minWidth: 40,
+    width: 40,
+    height: 40,
+  },
+  closeButtonContent: {
+    width: 40,
+    height: 40,
+    margin: 0,
   },
 });
 
