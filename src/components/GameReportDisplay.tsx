@@ -14,7 +14,6 @@ interface GameReportDisplayProps {
   onAchievementPress?: (achievement: Achievement) => void;
   onChallengePress?: () => void;
   screenshotRef?: React.RefObject<View>;
-  disableScrollView?: boolean;
 }
 
 // Utility function to render text path with arrows (similar to what was in ReportScreen)
@@ -41,7 +40,6 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
   report,
   onAchievementPress,
   onChallengePress,
-  disableScrollView = false,
 }) => {
   const { customColors, colors } = useTheme() as ExtendedTheme;
   const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
@@ -117,13 +115,8 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
     </TouchableOpacity>
   );
 
-  const ContentWrapper = disableScrollView ? View : ScrollView;
-  const wrapperStyle = disableScrollView
-    ? styles.containerView
-    : styles.container;
-
   return (
-    <ContentWrapper style={wrapperStyle}>
+    <ScrollView style={styles.container}>
       <Card
         style={[
           styles.card,
@@ -339,79 +332,15 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                   count={report.missedOptimalMoves.length}
                 />
                 {missedMovesExpanded &&
-                  report.missedOptimalMoves.map((missedMove, index) => {
-                    // Parse the missed move text to extract all words
-                    // Format: "At [position], chose [chosen] instead of [better_word]"
-                    const fullMatch = missedMove.match(
-                      /At (\w+), chose (\w+) instead of (\w+)/,
-                    );
-
-                    if (fullMatch) {
-                      const [, positionWord, chosenWord, betterWord] =
-                        fullMatch;
-
-                      // Determine colors for each word
-                      const isGlobalOptimal =
-                        report.optimalPath.includes(betterWord);
-                      const betterWordColor = isGlobalOptimal
-                        ? customColors.globalOptimalNode
-                        : customColors.localOptimalNode;
-
-                      return (
-                        <View key={index} style={styles.missedMoveContainer}>
-                          <Text
-                            variant="bodyMedium"
-                            style={[
-                              styles.missedMove,
-                              { color: colors.onSurface },
-                            ]}
-                          >
-                            At{" "}
-                            <Text
-                              style={{
-                                color: customColors.pathNode,
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {positionWord}
-                            </Text>
-                            , chose{" "}
-                            <Text
-                              style={{
-                                color: customColors.currentNode,
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {chosenWord}
-                            </Text>{" "}
-                            instead of{" "}
-                            <Text
-                              style={{
-                                color: betterWordColor,
-                                fontWeight: "bold",
-                              }}
-                            >
-                              {betterWord}
-                            </Text>
-                          </Text>
-                        </View>
-                      );
-                    } else {
-                      // Fallback for unexpected format
-                      return (
-                        <Text
-                          key={index}
-                          variant="bodyMedium"
-                          style={[
-                            styles.missedMove,
-                            { color: colors.onSurface },
-                          ]}
-                        >
-                          {missedMove}
-                        </Text>
-                      );
-                    }
-                  })}
+                  report.missedOptimalMoves.map((missedMove, index) => (
+                    <Text
+                      key={index}
+                      variant="bodyMedium"
+                      style={[styles.missedMove, { color: colors.error }]}
+                    >
+                      {missedMove}
+                    </Text>
+                  ))}
               </View>
             )}
 
@@ -480,16 +409,13 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
             )}
         </Card.Content>
       </Card>
-    </ContentWrapper>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginVertical: 8,
-  },
-  containerView: {
     marginVertical: 8,
   },
   card: {
@@ -543,9 +469,6 @@ const styles = StyleSheet.create({
   missedMove: {
     marginVertical: 4,
     fontWeight: "500",
-  },
-  missedMoveContainer: {
-    marginVertical: 4,
   },
   achievementItem: {
     marginBottom: 10,

@@ -654,7 +654,7 @@ describe("gameReportUtils", () => {
 
       expect(report.missedOptimalMoves.length).toBe(1); // Chose C instead of B at wordA
       expect(report.missedOptimalMoves[0]).toContain(
-        "At wordA, chose wordC instead of wordB",
+        "At wordA, chose wordC instead of optimal wordB",
       );
       expect(report.suggestedPath).toEqual(["wordC", "wordD"]); // Path from last player position (wordC) to targetWord (wordD)
     });
