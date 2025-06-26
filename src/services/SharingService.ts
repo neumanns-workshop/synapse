@@ -481,6 +481,7 @@ export const generateDailyChallengeTaunt = (
   const formattedDate = dateObj.toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
+    timeZone: "America/Chicago",
   });
 
   // If user completed it, compare with AI

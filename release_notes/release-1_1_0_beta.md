@@ -43,7 +43,7 @@ _Provisional release notes indicating what is to be done, based on user feedback
     - PROSPECTIVE FIX: Is the captcha token refreshing properly?
   - [ ] The daily challenges would not properly redirect to a different game in the player's queue if the player has already completed the current challenge, leading the player to have to play it again or give up to continue.
     - PROSPECTIVE FIX: Re-add logic that might have broken when updating the challenge links.
-  - [ ] The date on the challenge link taunts was wrong.
+  - [x] The date on the challenge link taunts was wrong.
     - PROSPECTIVE FIX: I think they might be using UTC time not CST.
 - [ ] Fixed an issue where daily challenges would not properly sync notifications.
   - PROSPECTIVE FIX: Need to fix with the other syncing issues.
