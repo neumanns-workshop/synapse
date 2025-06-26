@@ -181,6 +181,7 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
       <Modal
         visible={visible}
         onDismiss={onDismiss}
+        dismissable={true}
         contentContainerStyle={styles.modalContentContainer}
       >
         <Animated.View
@@ -237,104 +238,49 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                     No definition available for this word.
                   </Text>
                 )}
-
-                {/* Show optimal choice information for completed games */}
-                {optimalChoiceInfo && (
-                  <>
-                    <Divider
-                      style={[
-                        styles.divider,
-                        { backgroundColor: colors.outline, marginVertical: 16 },
-                      ]}
-                    />
-                    <View style={styles.optimalChoiceSection}>
-                      <View style={styles.optimalChoiceHeader}>
-                        <CustomIcon
-                          source="lightbulb-outline"
-                          size={20}
-                          color={colors.error}
-                        />
-                        <Text
-                          variant="titleSmall"
-                          style={[
-                            styles.optimalChoiceTitle,
-                            { color: colors.error, marginLeft: 8 },
-                          ]}
-                        >
-                          Alternative Move Available
-                        </Text>
-                      </View>
-                      <Text
-                        variant="bodyMedium"
-                        style={[
-                          styles.optimalChoiceText,
-                          { color: colors.onSurface },
-                        ]}
-                      >
-                        From{" "}
-                        <Text
-                          style={{
-                            fontWeight: "bold",
-                            color: customColors.pathNode,
-                          }}
-                        >
-                          {optimalChoiceInfo.playerPosition}
-                        </Text>
-                        , you chose{" "}
-                        <Text
-                          style={{ fontWeight: "bold", color: colors.error }}
-                        >
-                          {optimalChoiceInfo.playerChoice}
-                        </Text>
-                      </Text>
-                      <Text
-                        variant="bodyMedium"
-                        style={[
-                          styles.optimalChoiceText,
-                          { color: colors.onSurface, marginTop: 4 },
-                        ]}
-                      >
-                        Optimal choice:{" "}
-                        <Text
-                          style={{
-                            fontWeight: "bold",
-                            color: customColors.globalOptimalNode,
-                          }}
-                        >
-                          {optimalChoiceInfo.optimalChoice}
-                        </Text>
-                        <Text style={{ color: customColors.globalOptimalNode }}>
-                          {" ★"}
-                        </Text>
-                      </Text>
-                    </View>
-                  </>
-                )}
               </ScrollView>
             </PaperDialog.Content>
-            <PaperDialog.Actions>
-              {canBacktrackToWord && (
+            <PaperDialog.Actions style={styles.dialogActions}>
+              {/* Left side - Optimal choice info */}
+              <View style={styles.leftActions}>
+                {optimalChoiceInfo && (
+                  <Text
+                    variant="bodyMedium"
+                    style={[
+                      styles.optimalText,
+                      { color: customColors.globalOptimalNode },
+                    ]}
+                  >
+                    Optimal: {optimalChoiceInfo.optimalChoice}
+                  </Text>
+                )}
+              </View>
+
+              {/* Right side - Action buttons */}
+              <View style={styles.rightActions}>
+                {canBacktrackToWord && (
+                  <AnimatedPaperButton
+                    mode="text"
+                    onPress={handleBacktrack}
+                    icon={() => (
+                      <CustomIcon
+                        source="step-backward"
+                        size={20}
+                        color={buttonTextColor}
+                      />
+                    )}
+                    textColor={buttonTextColor}
+                  >
+                    Backtrack
+                  </AnimatedPaperButton>
+                )}
                 <AnimatedPaperButton
-                  mode="text"
-                  onPress={handleBacktrack}
-                  icon={() => (
-                    <CustomIcon
-                      source="step-backward"
-                      size={20}
-                      color={buttonTextColor}
-                    />
-                  )}
+                  onPress={onDismiss}
                   textColor={buttonTextColor}
                 >
-                  Backtrack
+                  Close
                 </AnimatedPaperButton>
-              )}
-              <AnimatedPaperButton
-                onPress={onDismiss}
-                textColor={buttonTextColor}
-              >
-                Close
-              </AnimatedPaperButton>
+              </View>
             </PaperDialog.Actions>
           </View>
         </Animated.View>
@@ -380,19 +326,23 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: 8,
   },
-  optimalChoiceSection: {
+  dialogActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  optimalChoiceHeader: {
+  leftActions: {
+    flex: 1,
+    alignItems: "flex-start",
+  },
+  rightActions: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
   },
-  optimalChoiceTitle: {
-    fontWeight: "bold",
-  },
-  optimalChoiceText: {
-    lineHeight: 20,
+  optimalText: {
+    fontWeight: "500",
   },
 });
 
