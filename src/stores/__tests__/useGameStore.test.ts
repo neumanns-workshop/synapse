@@ -907,7 +907,7 @@ describe("useGameStore - Game Report Modal System", () => {
       const state = useGameStore.getState();
       expect(state.gameReportModalReport?.missedOptimalMoves).toHaveLength(1);
       expect(state.gameReportModalReport?.missedOptimalMoves[0]).toContain(
-        "At start, chose middle instead of optimal end",
+        "At start, chose middle instead of end",
       );
     });
   });

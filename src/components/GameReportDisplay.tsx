@@ -118,7 +118,9 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
   );
 
   const ContentWrapper = disableScrollView ? View : ScrollView;
-  const wrapperStyle = disableScrollView ? styles.containerView : styles.container;
+  const wrapperStyle = disableScrollView
+    ? styles.containerView
+    : styles.container;
 
   return (
     <ContentWrapper style={wrapperStyle}>
@@ -343,16 +345,18 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                     const fullMatch = missedMove.match(
                       /At (\w+), chose (\w+) instead of (\w+)/,
                     );
-                    
-                                          if (fullMatch) {
-                        const [, positionWord, chosenWord, betterWord] = fullMatch;
-                        
-                        // Determine colors for each word
-                        const isGlobalOptimal = report.optimalPath.includes(betterWord);
-                        const betterWordColor = isGlobalOptimal
-                          ? customColors.globalOptimalNode
-                          : customColors.localOptimalNode;
-                      
+
+                    if (fullMatch) {
+                      const [, positionWord, chosenWord, betterWord] =
+                        fullMatch;
+
+                      // Determine colors for each word
+                      const isGlobalOptimal =
+                        report.optimalPath.includes(betterWord);
+                      const betterWordColor = isGlobalOptimal
+                        ? customColors.globalOptimalNode
+                        : customColors.localOptimalNode;
+
                       return (
                         <View key={index} style={styles.missedMoveContainer}>
                           <Text
@@ -379,16 +383,16 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                               }}
                             >
                               {chosenWord}
+                            </Text>{" "}
+                            instead of{" "}
+                            <Text
+                              style={{
+                                color: betterWordColor,
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {betterWord}
                             </Text>
-                                                         {" "}instead of{" "}
-                             <Text
-                               style={{
-                                 color: betterWordColor,
-                                 fontWeight: "bold",
-                               }}
-                             >
-                               {betterWord}
-                             </Text>
                           </Text>
                         </View>
                       );
