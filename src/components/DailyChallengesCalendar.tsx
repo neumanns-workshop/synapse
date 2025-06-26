@@ -481,7 +481,7 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
             <CustomIcon
               source="circle"
               size={16}
-              color={customColors.startNode}
+              color={colors.onSurfaceVariant}
             />
             <Text
               style={[styles.legendText, { color: colors.onSurfaceVariant }]}
