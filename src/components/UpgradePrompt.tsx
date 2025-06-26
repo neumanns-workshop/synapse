@@ -185,12 +185,9 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
                 onPress={onDismiss}
                 style={styles.closeButton}
                 labelStyle={styles.closeButtonLabel}
+                icon="close"
               >
-                <CustomIcon
-                  source="close"
-                  size={24}
-                  color={colors.onSurfaceVariant}
-                />
+                {""}
               </Button>
               <View style={styles.header}>
                 <CustomIcon

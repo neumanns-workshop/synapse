@@ -117,7 +117,7 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
             ]}
           >
             <Appbar.Header style={styles.appbarHeader}>
-              <Appbar.Content title="" />
+              <Appbar.Content title="Quickstart" />
               <Appbar.Action
                 icon="close"
                 onPress={onDismiss}

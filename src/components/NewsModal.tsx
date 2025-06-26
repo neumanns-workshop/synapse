@@ -10,6 +10,7 @@ import {
   Card,
   Button,
   Appbar,
+  Divider,
 } from "react-native-paper";
 import Animated, {
   useAnimatedStyle,
@@ -158,7 +159,7 @@ const NewsModal: React.FC<NewsModalProps> = ({ visible, onDismiss }) => {
                 color={colors.onSurface}
               />
             </Appbar.Header>
-
+            <Divider style={{ marginTop: 8 }} />
             <Dialog.Content style={{ maxHeight: 500, paddingBottom: 0 }}>
               <View style={styles.newsHeaderContainer} />
 
