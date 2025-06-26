@@ -32,18 +32,17 @@ export class DailyChallengesService {
   private getTodayString(): string {
     const now = new Date();
 
-    // Convert to EST (UTC-5) or EDT (UTC-4) depending on DST
-    // Using toLocaleDateString with EST timezone
-    const estDate = new Date(
-      now.toLocaleString("en-US", { timeZone: "America/New_York" }),
-    );
+    // The correct way to get a date string in a specific timezone is to format it
+    // directly, not to create a new Date object from a localized string, which
+    // is unreliable.
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "America/New_York",
+    });
 
-    // Format as YYYY-MM-DD
-    const year = estDate.getFullYear();
-    const month = String(estDate.getMonth() + 1).padStart(2, "0");
-    const day = String(estDate.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
+    return formatter.format(now);
   }
 
   /**
