@@ -332,15 +332,66 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                   count={report.missedOptimalMoves.length}
                 />
                 {missedMovesExpanded &&
-                  report.missedOptimalMoves.map((missedMove, index) => (
-                    <Text
-                      key={index}
-                      variant="bodyMedium"
-                      style={[styles.missedMove, { color: colors.error }]}
-                    >
-                      {missedMove}
-                    </Text>
-                  ))}
+                  report.missedOptimalMoves.map((missedMove, index) => {
+                    // Parse the missed move text to extract the optimal word
+                    // Format: "At [position], chose [chosen] instead of optimal [optimal_word]"
+                    const optimalWordMatch = missedMove.match(
+                      /instead of optimal (\w+)/,
+                    );
+                    const optimalWord = optimalWordMatch
+                      ? optimalWordMatch[1]
+                      : null;
+
+                    // Determine if this was a global optimal move
+                    const isGlobalOptimal =
+                      optimalWord && report.optimalPath.includes(optimalWord);
+
+                    // Use the appropriate color for the optimal word that was missed
+                    const optimalColor = isGlobalOptimal
+                      ? customColors.globalOptimalNode
+                      : customColors.localOptimalNode;
+
+                    // Split the text to style the optimal word differently
+                    if (optimalWord) {
+                      const parts = missedMove.split(`optimal ${optimalWord}`);
+                      return (
+                        <View key={index} style={styles.missedMoveContainer}>
+                          <Text
+                            variant="bodyMedium"
+                            style={[
+                              styles.missedMove,
+                              { color: colors.onSurface },
+                            ]}
+                          >
+                            {parts[0]}optimal{" "}
+                            <Text
+                              style={{
+                                color: optimalColor,
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {optimalWord}
+                            </Text>
+                            {parts[1]}
+                          </Text>
+                        </View>
+                      );
+                    } else {
+                      // Fallback for unexpected format
+                      return (
+                        <Text
+                          key={index}
+                          variant="bodyMedium"
+                          style={[
+                            styles.missedMove,
+                            { color: colors.onSurface },
+                          ]}
+                        >
+                          {missedMove}
+                        </Text>
+                      );
+                    }
+                  })}
               </View>
             )}
 
@@ -469,6 +520,9 @@ const styles = StyleSheet.create({
   missedMove: {
     marginVertical: 4,
     fontWeight: "500",
+  },
+  missedMoveContainer: {
+    marginVertical: 4,
   },
   achievementItem: {
     marginBottom: 10,
