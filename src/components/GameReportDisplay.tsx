@@ -192,28 +192,32 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                 report.totalMoves === 1 ? "move" : "moves"
               }`}
             </Text>
-            <Text
-              variant="bodyLarge"
-              style={{ color: customColors.globalOptimalNode }}
-            >
-              {`${globallyOptimalMoves} optimal ${
-                globallyOptimalMoves === 1 ? "move" : "moves"
-              }`}
-            </Text>
-            <Text
-              variant="bodyLarge"
-              style={{ color: customColors.localOptimalNode }}
-            >
-              {`${locallyOptimalMoves} suggested ${
-                locallyOptimalMoves === 1 ? "move" : "moves"
-              }`}
-            </Text>
-            <Text
-              variant="bodyLarge"
-              style={{ color: colors.onSurfaceVariant }}
-            >
-              {`${backtracks} ${backtracks === 1 ? "backtrack" : "backtracks"}`}
-            </Text>
+            {globallyOptimalMoves > 0 && (
+              <Text
+                variant="bodyLarge"
+                style={{ color: customColors.globalOptimalNode }}
+              >
+                {`${globallyOptimalMoves} optimal`}
+              </Text>
+            )}
+            {locallyOptimalMoves > 0 && (
+              <Text
+                variant="bodyLarge"
+                style={{ color: customColors.localOptimalNode }}
+              >
+                {`${locallyOptimalMoves} suggested`}
+              </Text>
+            )}
+            {backtracks > 0 && (
+              <Text
+                variant="bodyLarge"
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                {`${backtracks} ${
+                  backtracks === 1 ? "backtrack" : "backtracks"
+                }`}
+              </Text>
+            )}
           </View>
 
           <View style={styles.section}>
@@ -228,7 +232,7 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                 {`${report.playerSemanticDistance.toFixed(2)} `}
               </Text>
               <Text variant="bodyLarge" style={{ color: colors.primary }}>
-                (
+                (Optimal:{" "}
               </Text>
               <Text
                 variant="bodyLarge"
