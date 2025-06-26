@@ -278,7 +278,7 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
       case "beat-ai":
         return "#607D8B"; // Silver/blue for beating AI
       case "completed":
-        return customColors.startNode; // Green for basic completion
+        return colors.onSurfaceVariant; // Match available color
       case "today":
         return colors.primary;
       case "available":
@@ -481,7 +481,7 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
             <CustomIcon
               source="circle"
               size={16}
-              color={customColors.startNode}
+              color={colors.onSurfaceVariant}
             />
             <Text
               style={[styles.legendText, { color: colors.onSurfaceVariant }]}
