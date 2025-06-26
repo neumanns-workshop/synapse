@@ -11,7 +11,6 @@ import {
   Button,
   Menu,
   Snackbar,
-  Appbar,
 } from "react-native-paper";
 import Animated, {
   useAnimatedStyle,
@@ -23,6 +22,7 @@ import Animated, {
 import { useAuth } from "../context/AuthContext";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import CustomIcon from "./CustomIcon";
+import AnimatedPaperButton from "./AnimatedButton";
 
 interface ContactModalProps {
   visible: boolean;
@@ -196,24 +196,14 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
             onDismiss={onDismiss}
             style={[
               styles.dialogBase,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.outline,
-                borderRadius: roundness * 2,
-              },
+              { backgroundColor: colors.surface, borderColor: colors.outline },
             ]}
           >
-            <Appbar.Header style={styles.appbarHeader}>
-              <Appbar.Content
-                title="Contact Us"
-                titleStyle={[styles.title, { color: colors.primary }]}
-              />
-              <Appbar.Action
-                icon="close"
-                onPress={onDismiss}
-                color={colors.onSurface}
-              />
-            </Appbar.Header>
+            <Dialog.Title
+              style={[styles.title, { color: colors.primary }]}
+            >
+              Contact Us
+            </Dialog.Title>
             <Dialog.Content style={{ maxHeight: 600, paddingBottom: 0 }}>
               <ScrollView
                 style={{ flex: 1 }}
@@ -350,6 +340,19 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
                 </View>
               </ScrollView>
             </Dialog.Content>
+            <View style={styles.closeButtonContainer}>
+              <AnimatedPaperButton
+                mode="text"
+                onPress={onDismiss}
+                style={styles.closeButton}
+              >
+                <CustomIcon
+                  source="close"
+                  size={24}
+                  color={colors.onSurfaceVariant}
+                />
+              </AnimatedPaperButton>
+            </View>
           </Dialog>
         </Animated.View>
 
@@ -381,12 +384,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
-  appbarHeader: {
-    backgroundColor: "transparent",
-    height: 48,
-    elevation: 0,
-    paddingHorizontal: 0,
-  },
   animatedContainer: {
     width: "100%",
   },
@@ -397,12 +394,10 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   title: {
-    fontWeight: "bold",
     fontSize: 22,
-    marginTop: 16,
-    marginBottom: 20,
-    letterSpacing: 0.5,
-    display: "none",
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 8,
   },
   sectionLabel: {
     fontSize: 16,
@@ -432,6 +427,19 @@ const styles = StyleSheet.create({
   },
   dropdownButtonContent: {
     justifyContent: "flex-start",
+  },
+  closeButtonContainer: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    zIndex: 10,
+  },
+  closeButton: {
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

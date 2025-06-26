@@ -7,7 +7,6 @@ import {
   Text,
   Button,
   ActivityIndicator,
-  Appbar,
 } from "react-native-paper";
 
 import { useTheme as useAppTheme } from "../context/ThemeContext";
@@ -25,6 +24,8 @@ import WordDefinitionDialog from "./WordDefinitionDialog";
 import DailyChallengesCalendar from "./DailyChallengesCalendar";
 import DailyChallengeReport from "./DailyChallengeReport";
 import AchievementDetailDialog from "./AchievementDetailDialog";
+import AnimatedPaperButton from "./AnimatedButton";
+import CustomIcon from "./CustomIcon";
 
 const DailiesModal = () => {
   const { dailiesModalVisible, setDailiesModalVisible } = useGameStore(
@@ -275,18 +276,6 @@ const DailiesModal = () => {
           },
         ]}
       >
-        <Appbar.Header style={styles.appbarHeader}>
-          <Appbar.Content
-            title="Daily Challenges"
-            titleStyle={[styles.title, { color: appTheme.colors.primary }]}
-          />
-          <Appbar.Action
-            icon="close"
-            onPress={() => setDailiesModalVisible(false)}
-            color={appTheme.colors.onSurfaceVariant}
-          />
-        </Appbar.Header>
-
         <View style={styles.content}>{renderContent()}</View>
 
         {/* Word Definition Dialog */}
@@ -303,6 +292,20 @@ const DailiesModal = () => {
           visible={achievementDialogVisible}
           onDismiss={hideAchievementDetail}
         />
+
+        <View style={styles.closeButtonContainer}>
+          <AnimatedPaperButton
+            mode="text"
+            onPress={() => setDailiesModalVisible(false)}
+            style={styles.closeButton}
+          >
+            <CustomIcon
+              source="close"
+              size={24}
+              color={appTheme.colors.onSurfaceVariant}
+            />
+          </AnimatedPaperButton>
+        </View>
       </Modal>
     </Portal>
   );
@@ -310,32 +313,16 @@ const DailiesModal = () => {
 
 const styles = StyleSheet.create({
   modalContent: {
-    margin: 20,
-    padding: 15,
-    borderRadius: 12,
-    maxHeight: "90%",
-    flex: 1,
-    borderWidth: 1,
-    maxWidth: 500,
-    width: "100%",
-    alignSelf: "center",
-  },
-  appbarHeader: {
     backgroundColor: "transparent",
-    height: 40,
-    elevation: 0,
-    justifyContent: "space-between",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    margin: 0,
     alignItems: "center",
-    marginBottom: 15,
-    display: "none", // Hide the old header
+    justifyContent: "center",
   },
   title: {
     fontSize: 22,
     fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 16,
   },
   content: {
     flex: 1,
@@ -353,6 +340,19 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
+  },
+  closeButtonContainer: {
+    position: "absolute",
+    top: 24,
+    right: 24,
+    zIndex: 10,
+  },
+  closeButton: {
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

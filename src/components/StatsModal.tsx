@@ -24,6 +24,8 @@ import {
   TextInput,
   Snackbar,
   Appbar,
+  Divider,
+  List,
 } from "react-native-paper";
 
 import { useAuth } from "../context/AuthContext";
@@ -61,6 +63,7 @@ import GraphVisualization from "./GraphVisualization";
 import GameReportDisplay from "./GameReportDisplay";
 import CustomIcon from "./CustomIcon";
 import AchievementDetailDialog from "./AchievementDetailDialog";
+import AnimatedPaperButton from "./AnimatedButton";
 
 // GameHistoryCard component for displaying game history entries
 const GameHistoryCard = React.memo(
@@ -1452,14 +1455,6 @@ const StatsModal = () => {
           },
         ]}
       >
-        <Appbar.Header style={styles.appbarHeader}>
-          <Appbar.Content title="Stats" titleStyle={styles.title} />
-          <Appbar.Action
-            icon="close"
-            onPress={() => setStatsModalVisible(false)}
-            color={appTheme.colors.onSurfaceVariant}
-          />
-        </Appbar.Header>
         <SegmentedButtons
           value={activeTab}
           onValueChange={setActiveTab}
@@ -1505,6 +1500,19 @@ const StatsModal = () => {
             {snackbarMessage}
           </Text>
         </Snackbar>
+        <View style={styles.closeButtonContainer}>
+          <AnimatedPaperButton
+            mode="text"
+            onPress={() => setStatsModalVisible(false)}
+            style={styles.closeButton}
+          >
+            <CustomIcon
+              source="close"
+              size={24}
+              color={appTheme.colors.onSurfaceVariant}
+            />
+          </AnimatedPaperButton>
+        </View>
       </Modal>
     </Portal>
   );
@@ -1991,9 +1999,17 @@ const styles = StyleSheet.create({
   emptyStateText: {
     textAlign: "center",
   },
-  closeButton: {},
-  closeText: {
-    fontSize: 14,
+  closeButton: {
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeButtonContainer: {
+    position: "absolute",
+    top: 10,
+    right: 10,
   },
 });
 

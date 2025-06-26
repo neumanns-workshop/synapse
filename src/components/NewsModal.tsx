@@ -9,7 +9,6 @@ import {
   Modal,
   Card,
   Button,
-  Appbar,
   Divider,
 } from "react-native-paper";
 import Animated, {
@@ -28,6 +27,8 @@ import {
 import type { NewsArticle } from "../data/news";
 import { unifiedDataStore } from "../services/UnifiedDataStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import AnimatedPaperButton from "./AnimatedButton";
+import CustomIcon from "./CustomIcon";
 
 interface NewsModalProps {
   visible: boolean;
@@ -137,30 +138,25 @@ const NewsModal: React.FC<NewsModalProps> = ({ visible, onDismiss }) => {
               },
             ]}
           >
-            <Appbar.Header style={styles.appbarHeader}>
-              <Appbar.Content
-                title="News & Updates"
-                titleStyle={[styles.tabTitle, { color: colors.primary }]}
-              />
-              {unreadArticles.length > 0 && (
-                <Button
-                  mode="outlined"
-                  onPress={handleMarkAllRead}
-                  style={styles.markAllReadButtonSmall}
-                  labelStyle={styles.markAllReadButtonLabel}
-                  compact
-                >
-                  Mark All Read
-                </Button>
-              )}
-              <Appbar.Action
-                icon="close"
-                onPress={handleClose}
-                color={colors.onSurface}
-              />
-            </Appbar.Header>
+            <Dialog.Title
+              style={[styles.tabTitle, { color: colors.primary }]}
+            >
+              News & Updates
+            </Dialog.Title>
+
+            {unreadArticles.length > 0 && (
+              <Button
+                mode="outlined"
+                onPress={handleMarkAllRead}
+                style={styles.markAllReadButtonSmall}
+                labelStyle={styles.markAllReadButtonLabel}
+                compact
+              >
+                Mark All Read
+              </Button>
+            )}
             <Divider style={{ marginTop: 8 }} />
-            <Dialog.Content style={{ maxHeight: 500, paddingBottom: 0 }}>
+            <Dialog.Content style={{ paddingHorizontal: 0 }}>
               <View style={styles.newsHeaderContainer} />
 
               <ScrollView
@@ -262,6 +258,19 @@ const NewsModal: React.FC<NewsModalProps> = ({ visible, onDismiss }) => {
               </ScrollView>
             </Dialog.Content>
           </Dialog>
+          <View style={styles.closeButtonContainer}>
+            <AnimatedPaperButton
+              mode="text"
+              onPress={handleClose}
+              style={styles.closeButton}
+            >
+              <CustomIcon
+                source="close"
+                size={24}
+                color={colors.onSurfaceVariant}
+              />
+            </AnimatedPaperButton>
+          </View>
         </Animated.View>
       </Modal>
     </Portal>
@@ -293,7 +302,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 22,
     marginTop: 16,
-    marginBottom: 12,
+    marginBottom: 8,
+    textAlign: "center",
     letterSpacing: 0.5,
   },
   newsHeaderContainer: {
@@ -350,6 +360,19 @@ const styles = StyleSheet.create({
   },
   newsDivider: {
     height: 1,
+  },
+  closeButtonContainer: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    zIndex: 10,
+  },
+  closeButton: {
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

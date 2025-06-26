@@ -12,12 +12,12 @@ import {
   useTheme,
   Dialog,
   Portal,
-  Appbar,
 } from "react-native-paper";
 
 import { dailyChallengesService } from "../services/DailyChallengesService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import AnimatedPaperButton from "./AnimatedButton";
 import CustomIcon from "./CustomIcon";
 
 interface LabsModalProps {
@@ -131,33 +131,124 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
 
   const enabledCount = 0; // All features are coming soon, none enabled
 
+  const styles = StyleSheet.create({
+    modalContent: {
+      margin: 20,
+      padding: 20,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.outline,
+      elevation: 4,
+      maxWidth: 500,
+      width: "100%",
+      alignSelf: "center",
+      maxHeight: "80%",
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingTop: 16,
+      display: "none", // Hide old header
+    },
+    headerContent: {
+      flexDirection: "row",
+      alignItems: "center",
+      flex: 1,
+    },
+    headerText: {
+      marginLeft: 12,
+      flex: 1,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: colors.primary,
+    },
+    subtitle: {
+      fontSize: 14,
+      color: colors.onSurfaceVariant,
+      marginTop: -8, // Adjust this to bring it closer to the title
+    },
+    statusCard: {
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 16,
+      alignItems: "center",
+    },
+    statusText: {
+      marginLeft: 16,
+      fontSize: 14,
+      lineHeight: 18,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    featureIcon: {
+      width: 40,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    comingSoonBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 12,
+      alignSelf: "center",
+    },
+    comingSoonText: {
+      fontSize: 11,
+      fontWeight: "bold",
+    },
+    warningCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 8,
+      marginHorizontal: 60,
+      marginBottom: 8,
+      borderRadius: 6,
+      gap: 8,
+    },
+    warningText: {
+      fontSize: 12,
+      flex: 1,
+    },
+    footer: {
+      paddingTop: 8,
+    },
+    footerText: {
+      textAlign: "center",
+      lineHeight: 18,
+    },
+    closeButtonContainer: {
+      position: "absolute",
+      top: 8,
+      right: 8,
+      zIndex: 10,
+    },
+    closeButton: {
+      borderRadius: 20,
+      width: 40,
+      height: 40,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  });
+
   return (
     <Portal>
       <Modal
         visible={visible}
         onDismiss={onDismiss}
-        contentContainerStyle={[
-          styles.container,
-          { backgroundColor: colors.surface },
-        ]}
+        contentContainerStyle={styles.modalContent}
       >
         {/* Header */}
-        <Appbar.Header style={styles.appbarHeader}>
-          <Appbar.Content
-            title="Lab"
-            subtitle="Experiments for Premium Users"
-            titleStyle={{ color: colors.primary }}
-            subtitleStyle={[
-              styles.subtitle,
-              { color: colors.onSurfaceVariant },
-            ]}
-          />
-          <Appbar.Action
-            icon="close"
-            onPress={onDismiss}
-            color={colors.onSurface}
-          />
-        </Appbar.Header>
+        <View style={styles.header}>
+          <List.Subheader style={styles.title}>Lab</List.Subheader>
+          <List.Subheader style={styles.subtitle}>
+            Experiments for Premium Users
+          </List.Subheader>
+        </View>
 
         <Divider style={{ marginVertical: 16 }} />
 
@@ -246,100 +337,23 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
             </Button>
           </>
         )}
+
+        <View style={styles.closeButtonContainer}>
+          <AnimatedPaperButton
+            mode="text"
+            onPress={onDismiss}
+            style={styles.closeButton}
+          >
+            <CustomIcon
+              source="close"
+              size={24}
+              color={colors.onSurfaceVariant}
+            />
+          </AnimatedPaperButton>
+        </View>
       </Modal>
     </Portal>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    margin: 20,
-    padding: 15,
-    borderRadius: 12,
-    maxHeight: "80%",
-    maxWidth: 500,
-    width: "100%",
-    alignSelf: "center",
-  },
-  dialog: {
-    padding: 20,
-    borderRadius: 12,
-    maxWidth: 500,
-    width: "100%",
-    maxHeight: "80%",
-  },
-  appbarHeader: {
-    elevation: 0,
-    paddingHorizontal: 4,
-    backgroundColor: "transparent",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    display: "none", // Hide old header
-  },
-  headerContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  headerText: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  title: {
-    fontWeight: "bold",
-  },
-  subtitle: {
-    marginTop: 2,
-  },
-  statusCard: {
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-    alignItems: "center",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  featureIcon: {
-    width: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  comingSoonBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    alignSelf: "center",
-  },
-  comingSoonText: {
-    fontSize: 11,
-    fontWeight: "bold",
-  },
-  warningCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 8,
-    marginHorizontal: 60,
-    marginBottom: 8,
-    borderRadius: 6,
-    gap: 8,
-  },
-  warningText: {
-    fontSize: 12,
-    flex: 1,
-  },
-  footer: {
-    paddingTop: 8,
-  },
-  footerText: {
-    textAlign: "center",
-    lineHeight: 18,
-  },
-});
 
 export default LabsModal;

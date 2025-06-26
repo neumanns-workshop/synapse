@@ -9,7 +9,6 @@ import {
   useTheme,
   Modal,
   SegmentedButtons,
-  Appbar,
 } from "react-native-paper";
 import Animated, {
   useAnimatedStyle,
@@ -116,14 +115,6 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
               },
             ]}
           >
-            <Appbar.Header style={styles.appbarHeader}>
-              <Appbar.Content title="Quickstart" />
-              <Appbar.Action
-                icon="close"
-                onPress={onDismiss}
-                color={colors.onSurface}
-              />
-            </Appbar.Header>
             <Dialog.Content style={{ maxHeight: 500, paddingBottom: 0 }}>
               <SegmentedButtons
                 value={activeTab}
@@ -141,6 +132,11 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
               >
                 {activeTab === "howtoplay" && (
                   <>
+                    <Dialog.Title
+                      style={[styles.tabTitle, { color: colors.primary }]}
+                    >
+                      Quickstart
+                    </Dialog.Title>
                     <Paragraph style={paragraphStyle}>
                       <Text
                         style={[
@@ -517,6 +513,19 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                 )}
               </ScrollView>
             </Dialog.Content>
+            <View style={styles.closeButtonContainer}>
+              <AnimatedPaperButton
+                mode="text"
+                onPress={onDismiss}
+                style={styles.closeButton}
+              >
+                <CustomIcon
+                  source="close"
+                  size={24}
+                  color={colors.onSurfaceVariant}
+                />
+              </AnimatedPaperButton>
+            </View>
           </Dialog>
         </Animated.View>
       </Modal>
@@ -561,6 +570,19 @@ const styles = StyleSheet.create({
   },
   boldText: {
     fontWeight: "bold",
+  },
+  closeButtonContainer: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    zIndex: 10,
+  },
+  closeButton: {
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
