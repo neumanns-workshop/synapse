@@ -201,7 +201,7 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
             >
               {word}
             </PaperDialog.Title>
-            <PaperDialog.Content>
+            <PaperDialog.Content style={styles.dialogContent}>
               <ScrollView
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={true}
@@ -278,32 +278,29 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                 )}
               </ScrollView>
             </PaperDialog.Content>
-            <PaperDialog.Actions style={styles.dialogActions}>
-              {/* Action buttons */}
-              <View style={styles.rightActions}>
-                {canBacktrackToWord && (
-                  <AnimatedPaperButton
-                    mode="text"
-                    onPress={handleBacktrack}
-                    icon={() => (
-                      <CustomIcon
-                        source="step-backward"
-                        size={20}
-                        color={buttonTextColor}
-                      />
-                    )}
-                    textColor={buttonTextColor}
-                  >
-                    Backtrack
-                  </AnimatedPaperButton>
-                )}
+            <PaperDialog.Actions>
+              {canBacktrackToWord && (
                 <AnimatedPaperButton
-                  onPress={onDismiss}
+                  mode="text"
+                  onPress={handleBacktrack}
+                  icon={() => (
+                    <CustomIcon
+                      source="step-backward"
+                      size={20}
+                      color={buttonTextColor}
+                    />
+                  )}
                   textColor={buttonTextColor}
                 >
-                  Close
+                  Backtrack
                 </AnimatedPaperButton>
-              </View>
+              )}
+              <AnimatedPaperButton
+                onPress={onDismiss}
+                textColor={buttonTextColor}
+              >
+                Close
+              </AnimatedPaperButton>
             </PaperDialog.Actions>
           </View>
         </Animated.View>
@@ -327,13 +324,20 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     maxHeight: "80%",
+    overflow: "hidden",
   },
   dialogTitle: {
     fontWeight: "bold",
     fontSize: 20,
   },
+  dialogContent: {
+    flex: 1,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+  },
   scrollView: {
-    maxHeight: 400,
+    flex: 1,
+    paddingHorizontal: 16,
   },
   definition: {
     fontSize: 16,
@@ -348,17 +352,6 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     marginVertical: 8,
-  },
-  dialogActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  rightActions: {
-    flexDirection: "row",
-    alignItems: "center",
   },
   optimalText: {
     fontWeight: "500",
