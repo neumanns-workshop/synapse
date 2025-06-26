@@ -184,47 +184,36 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
             >
               Move Accuracy
             </Text>
-            <View style={styles.statLine}>
-              <Text variant="bodyLarge" style={{ color: colors.primary }}>
-                {`${report.moveAccuracy.toFixed(1)}% `}
-              </Text>
-              <Text variant="bodyLarge" style={{ color: colors.primary }}>
-                (
-              </Text>
-              <Text variant="bodyLarge" style={{ color: colors.primary }}>
-                {report.totalMoves}
-              </Text>
-              <Text variant="bodyLarge" style={{ color: colors.primary }}>
-                /
-              </Text>
-              <Text
-                variant="bodyLarge"
-                style={{ color: customColors.globalOptimalNode }}
-              >
-                {globallyOptimalMoves}
-              </Text>
-              <Text variant="bodyLarge" style={{ color: colors.primary }}>
-                /
-              </Text>
-              <Text
-                variant="bodyLarge"
-                style={{ color: customColors.localOptimalNode }}
-              >
-                {locallyOptimalMoves}
-              </Text>
-              <Text variant="bodyLarge" style={{ color: colors.primary }}>
-                /
-              </Text>
-              <Text
-                variant="bodyLarge"
-                style={{ color: customColors.warningColor }}
-              >
-                {backtracks}
-              </Text>
-              <Text variant="bodyLarge" style={{ color: colors.primary }}>
-                )
-              </Text>
-            </View>
+            <Text variant="bodyLarge" style={{ color: colors.primary }}>
+              {`${report.moveAccuracy.toFixed(1)}%`}
+            </Text>
+            <Text variant="bodyLarge" style={{ color: colors.primary }}>
+              {`${report.totalMoves} ${
+                report.totalMoves === 1 ? "move" : "moves"
+              }`}
+            </Text>
+            <Text
+              variant="bodyLarge"
+              style={{ color: customColors.globalOptimalNode }}
+            >
+              {`${globallyOptimalMoves} optimal ${
+                globallyOptimalMoves === 1 ? "move" : "moves"
+              }`}
+            </Text>
+            <Text
+              variant="bodyLarge"
+              style={{ color: customColors.localOptimalNode }}
+            >
+              {`${locallyOptimalMoves} suggested ${
+                locallyOptimalMoves === 1 ? "move" : "moves"
+              }`}
+            </Text>
+            <Text
+              variant="bodyLarge"
+              style={{ color: colors.onSurfaceVariant }}
+            >
+              {`${backtracks} ${backtracks === 1 ? "backtrack" : "backtracks"}`}
+            </Text>
           </View>
 
           <View style={styles.section}>
@@ -238,11 +227,17 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
               <Text variant="bodyLarge" style={{ color: colors.primary }}>
                 {`${report.playerSemanticDistance.toFixed(2)} `}
               </Text>
+              <Text variant="bodyLarge" style={{ color: colors.primary }}>
+                (
+              </Text>
               <Text
                 variant="bodyLarge"
                 style={{ color: customColors.globalOptimalNode }}
               >
-                {`(${report.optimalSemanticDistance.toFixed(2)})`}
+                {report.optimalSemanticDistance.toFixed(2)}
+              </Text>
+              <Text variant="bodyLarge" style={{ color: colors.primary }}>
+                )
               </Text>
             </View>
           </View>
@@ -263,24 +258,28 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
               {report.earnedAchievements &&
               report.earnedAchievements.length > 0 ? (
                 report.earnedAchievements.map((achievement) => (
-                  <TouchableOpacity
+                  <Chip
                     key={achievement.id}
-                    onPress={() => onAchievementPress?.(achievement)}
+                    onPress={() =>
+                      onAchievementPress
+                        ? onAchievementPress(achievement)
+                        : null
+                    }
+                    icon={() => (
+                      <CustomIcon
+                        source={achievement.icon || "trophy"}
+                        size={20}
+                        color={customColors.achievementIcon}
+                      />
+                    )}
+                    style={[
+                      styles.achievementChip,
+                      { backgroundColor: colors.surfaceVariant },
+                    ]}
+                    textStyle={styles.achievementChipText}
                   >
-                    <Chip
-                      icon={() => (
-                        <CustomIcon
-                          source={achievement.icon || "trophy"}
-                          size={20}
-                          color={customColors.achievementIcon}
-                        />
-                      )}
-                      style={styles.achievementChip}
-                      textStyle={styles.achievementChipText}
-                    >
-                      {achievement.name}
-                    </Chip>
-                  </TouchableOpacity>
+                    {achievement.name}
+                  </Chip>
                 ))
               ) : (
                 <Text style={{ color: colors.onSurface }}>
@@ -369,7 +368,6 @@ const styles = StyleSheet.create({
   },
   achievementChip: {
     margin: 4,
-    backgroundColor: "rgba(255, 246, 163, 0.2)", // very light gold
   },
   achievementChipText: {
     fontSize: 12,
