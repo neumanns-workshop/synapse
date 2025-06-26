@@ -313,8 +313,7 @@ const styles = StyleSheet.create({
   modalContentContainer: {
     justifyContent: "center",
     alignItems: "center",
-    flex: 1,
-    paddingHorizontal: 20,
+    padding: 16,
   },
   animatedDialogContainer: {
     width: "100%",
