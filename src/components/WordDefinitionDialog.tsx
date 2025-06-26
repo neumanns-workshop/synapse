@@ -242,7 +242,7 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                 ""
               </AnimatedPaperButton>
             </View>
-            <PaperDialog.Content>
+            <View style={styles.contentContainer}>
               <ScrollView
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={true}
@@ -309,7 +309,7 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                   </>
                 )}
               </ScrollView>
-            </PaperDialog.Content>
+            </View>
           </View>
         </Animated.View>
       </Modal>
@@ -401,6 +401,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 8,
     flex: 1,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
 });
 
