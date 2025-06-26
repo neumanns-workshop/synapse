@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 
 import { Text, Card, useTheme, Button } from "react-native-paper";
@@ -50,12 +50,6 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
   const aiPath = report.aiPath || [];
   const aiModel = report.aiModel;
 
-  // State for collapsible sections
-  const [optimalMovesExpanded, setOptimalMovesExpanded] = useState(false);
-  const [suggestedMovesExpanded, setSuggestedMovesExpanded] = useState(false);
-  const [backtrackingExpanded, setBacktrackingExpanded] = useState(false);
-  const [achievementsExpanded, setAchievementsExpanded] = useState(true); // Default open for achievements
-
   const handleOptimalPathPress = () => {
     setPathDisplayMode({
       ...currentPathDisplayMode,
@@ -77,42 +71,11 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
     });
   };
 
-  // Collapsible section header component
-  const CollapsibleSectionHeader = ({
-    title,
-    expanded,
-    onToggle,
-    count,
-  }: {
-    title: string;
-    expanded: boolean;
-    onToggle: () => void;
-    count?: number;
-  }) => (
-    <TouchableOpacity
-      style={styles.collapsibleHeader}
-      onPress={onToggle}
-      activeOpacity={0.7}
-    >
-      <View style={styles.collapsibleHeaderContent}>
-        <Text
-          variant="titleMedium"
-          style={[
-            styles.sectionTitle,
-            { color: colors.primary, marginBottom: 0 },
-          ]}
-        >
-          {title}
-          {count !== undefined && ` (${count})`}
-        </Text>
-      </View>
-      <CustomIcon
-        source={expanded ? "chevron-down" : "chevron-right"}
-        size={20}
-        color={colors.primary}
-      />
-    </TouchableOpacity>
-  );
+  const globallyOptimalMoves =
+    report.optimalChoices.filter((c) => c.isGlobalOptimal).length || 0;
+  const locallyOptimalMoves =
+    report.optimalChoices.filter((c) => c.isLocalOptimal).length || 0;
+  const backtracks = report.backtrackEvents?.length || 0;
 
   return (
     <ScrollView
@@ -222,9 +185,16 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
               Move Accuracy
             </Text>
             <Text variant="bodyLarge" style={{ color: colors.primary }}>
-              {`${report.moveAccuracy.toFixed(1)}% (${
-                report.totalMoves
-              } ${report.totalMoves === 1 ? "move" : "moves"})`}
+              {`Moves: ${report.totalMoves}`}
+            </Text>
+            <Text variant="bodyLarge" style={{ color: colors.primary }}>
+              {`Globally Optimal: ${globallyOptimalMoves}`}
+            </Text>
+            <Text variant="bodyLarge" style={{ color: colors.primary }}>
+              {`Locally Optimal: ${locallyOptimalMoves}`}
+            </Text>
+            <Text variant="bodyLarge" style={{ color: colors.primary }}>
+              {`Backtracks: ${backtracks}`}
             </Text>
           </View>
 
@@ -236,158 +206,57 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
               Distance Traveled
             </Text>
             <Text variant="bodyLarge" style={{ color: colors.primary }}>
-              {report.playerSemanticDistance.toFixed(2)}
+              {`${report.playerSemanticDistance.toFixed(
+                2,
+              )} (Optimal: ${report.optimalSemanticDistance.toFixed(2)})`}
             </Text>
           </View>
 
+          {/* Achievements Section */}
           <View style={styles.section}>
             <Text
               variant="titleMedium"
-              style={[styles.sectionTitle, { color: colors.primary }]}
+              style={[
+                styles.sectionTitle,
+                { color: colors.primary, marginBottom: 10 },
+              ]}
             >
-              Optimal Distance
+              Achievements ({report.earnedAchievements?.length || 0})
             </Text>
-            <Text variant="bodyLarge" style={{ color: colors.primary }}>
-              {report.optimalSemanticDistance.toFixed(2)}
-            </Text>
-          </View>
 
-          {(() => {
-            const globalMoves = report.optimalChoices.filter(
-              (choice) => choice.isGlobalOptimal,
-            );
-            const localMoves = report.optimalChoices.filter(
-              (choice) => choice.isLocalOptimal && !choice.isGlobalOptimal,
-            );
-            return (
-              <>
-                {globalMoves.length > 0 && (
-                  <View style={styles.section}>
-                    <CollapsibleSectionHeader
-                      title="Optimal Moves"
-                      expanded={optimalMovesExpanded}
-                      onToggle={() =>
-                        setOptimalMovesExpanded(!optimalMovesExpanded)
-                      }
-                      count={globalMoves.length}
-                    />
-                    {optimalMovesExpanded &&
-                      globalMoves.map((choice, index) => (
-                        <Text
-                          key={index}
-                          variant="bodyMedium"
-                          style={[
-                            styles.choiceText,
-                            { color: customColors.globalOptimalNode },
-                          ]}
-                        >
-                          {choice.playerPosition} → {choice.playerChose}{" "}
-                          <Text
-                            style={{ color: customColors.globalOptimalNode }}
-                          >
-                            ★
-                          </Text>
-                        </Text>
-                      ))}
-                  </View>
-                )}
-                {localMoves.length > 0 && (
-                  <View style={styles.section}>
-                    <CollapsibleSectionHeader
-                      title="Suggested Moves"
-                      expanded={suggestedMovesExpanded}
-                      onToggle={() =>
-                        setSuggestedMovesExpanded(!suggestedMovesExpanded)
-                      }
-                      count={localMoves.length}
-                    />
-                    {suggestedMovesExpanded &&
-                      localMoves.map((choice, index) => (
-                        <Text
-                          key={index}
-                          variant="bodyMedium"
-                          style={[
-                            styles.choiceText,
-                            { color: customColors.localOptimalNode },
-                          ]}
-                        >
-                          {choice.playerPosition} → {choice.playerChose}{" "}
-                          <Text
-                            style={{ color: customColors.localOptimalNode }}
-                          >
-                            ★
-                          </Text>
-                        </Text>
-                      ))}
-                  </View>
-                )}
-              </>
-            );
-          })()}
-
-          {report.backtrackEvents && report.backtrackEvents.length > 0 && (
-            <View style={styles.section}>
-              <CollapsibleSectionHeader
-                title="Backtracking Moves"
-                expanded={backtrackingExpanded}
-                onToggle={() => setBacktrackingExpanded(!backtrackingExpanded)}
-                count={report.backtrackEvents.length}
-              />
-              {backtrackingExpanded &&
-                report.backtrackEvents.map((event, index) => (
-                  <Text
+            <View>
+              {report.earnedAchievements &&
+              report.earnedAchievements.length > 0 ? (
+                report.earnedAchievements.map((achievement, index) => (
+                  <TouchableOpacity
                     key={index}
-                    variant="bodyMedium"
-                    style={{ color: colors.onSurface }}
+                    onPress={() => onAchievementPress?.(achievement)}
+                    style={styles.achievementItem}
                   >
-                    {event.landedOn} ← {event.jumpedFrom}
-                  </Text>
-                ))}
-            </View>
-          )}
-
-          {report.earnedAchievements &&
-            report.earnedAchievements.length > 0 && (
-              <View style={styles.section}>
-                <CollapsibleSectionHeader
-                  title="Achievements Earned"
-                  expanded={achievementsExpanded}
-                  onToggle={() =>
-                    setAchievementsExpanded(!achievementsExpanded)
-                  }
-                  count={report.earnedAchievements.length}
-                />
-                {achievementsExpanded &&
-                  report.earnedAchievements.map((achievement, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      onPress={() =>
-                        onAchievementPress && onAchievementPress(achievement)
-                      }
-                      style={styles.achievementItem}
-                    >
-                      <View style={styles.achievementHeader}>
-                        <View style={styles.achievementIconContainer}>
-                          <CustomIcon
-                            source="trophy"
-                            size={20}
-                            color={customColors.achievementIcon}
-                          />
-                        </View>
-                        <Text
-                          variant="bodyMedium"
-                          style={[
-                            styles.achievementName,
-                            { color: colors.primary },
-                          ]}
-                        >
+                    <View style={styles.achievementContent}>
+                      <CustomIcon
+                        source={achievement.icon || "trophy"}
+                        size={24}
+                        color={colors.primary}
+                      />
+                      <View style={styles.achievementTextContainer}>
+                        <Text style={[styles.achievementName]}>
                           {achievement.name}
                         </Text>
+                        <Text style={styles.achievementDescription}>
+                          {achievement.description}
+                        </Text>
                       </View>
-                    </TouchableOpacity>
-                  ))}
-              </View>
-            )}
+                    </View>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={{ color: colors.onSurface }}>
+                  No new achievements.
+                </Text>
+              )}
+            </View>
+          </View>
         </Card.Content>
       </Card>
     </ScrollView>
@@ -397,31 +266,27 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginVertical: 8,
   },
   scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 20,
+    padding: 16,
+    paddingBottom: 50, // Ensure there's space for the last card's shadow
   },
   card: {
-    margin: 8,
-    borderRadius: 8,
+    marginBottom: 16,
     borderWidth: 1,
   },
   section: {
     marginBottom: 16,
   },
   buttonSection: {
-    marginTop: 8,
     alignItems: "center",
   },
   challengeButton: {
-    marginTop: 8,
     width: "80%",
+    marginBottom: 10,
   },
   sectionTitle: {
     marginBottom: 8,
-    fontWeight: "bold",
   },
   pathContainer: {
     flexDirection: "row",
@@ -429,52 +294,37 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   pathRow: {
-    marginBottom: 8,
+    flexDirection: "column",
+    alignItems: "flex-start",
   },
   pathTitle: {
     marginBottom: 4,
-    fontWeight: "bold",
   },
   pathWord: {
     fontSize: 16,
-    marginRight: 4,
   },
   pathArrow: {
     fontSize: 16,
-    marginRight: 4,
-    color: "#888",
-  },
-  choiceItem: {
-    marginVertical: 4,
-  },
-  choiceText: {
-    fontWeight: "500",
-    lineHeight: 22,
   },
   achievementItem: {
     marginBottom: 10,
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: "rgba(0,0,0,0.05)",
   },
-  achievementHeader: {
+  achievementContent: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
   },
-  achievementIconContainer: {
-    marginRight: 8,
+  achievementTextContainer: {
+    marginLeft: 10,
+    flex: 1,
   },
   achievementName: {
     fontWeight: "bold",
   },
-  achievementDescription: {},
-  collapsibleHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 8,
-    marginBottom: 8,
-  },
-  collapsibleHeaderContent: {
-    flex: 1,
+  achievementDescription: {
+    fontSize: 12,
   },
 });
 
