@@ -201,7 +201,7 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
             >
               {word}
             </PaperDialog.Title>
-            <PaperDialog.Content style={styles.dialogContent}>
+            <PaperDialog.Content>
               <ScrollView
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={true}
@@ -324,20 +324,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     maxHeight: "80%",
-    overflow: "hidden",
   },
   dialogTitle: {
     fontWeight: "bold",
     fontSize: 20,
   },
-  dialogContent: {
-    flex: 1,
-    paddingHorizontal: 0,
-    paddingVertical: 0,
-  },
   scrollView: {
-    flex: 1,
-    paddingHorizontal: 16,
+    maxHeight: 400,
   },
   definition: {
     fontSize: 16,
