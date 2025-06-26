@@ -6,6 +6,21 @@
   NODE_VERSION = "22"
   NPM_VERSION = "10"
 
+# Production context: Deploys from the main branch
+[context.production]
+  command = "npm run build:web"
+  publish = "web-build"
+
+# Deploy Preview context: All deploys from pull requests
+[context.deploy-preview]
+  command = "npm run build:web"
+  publish = "web-build"
+
+# Branch-deploy context for the develop branch
+[context.develop]
+  command = "npm run build:web"
+  publish = "web-build"
+
 # SPA redirect - handle client-side routing
 [[redirects]]
   from = "/*"
