@@ -196,11 +196,36 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
             ]}
           >
             <View style={styles.titleContainer}>
-              <PaperDialog.Title
-                style={[styles.dialogTitle, { color: colors.primary }]}
-              >
-                {word}
-              </PaperDialog.Title>
+              {canBacktrackToWord ? (
+                <AnimatedPaperButton
+                  mode="text"
+                  onPress={handleBacktrack}
+                  style={styles.titleButton}
+                  contentStyle={styles.titleButtonContent}
+                >
+                  <View style={styles.titleContent}>
+                    <CustomIcon
+                      source="step-backward"
+                      size={20}
+                      color={colors.primary}
+                    />
+                    <PaperDialog.Title
+                      style={[
+                        styles.dialogTitleWithIcon,
+                        { color: colors.primary },
+                      ]}
+                    >
+                      {word}
+                    </PaperDialog.Title>
+                  </View>
+                </AnimatedPaperButton>
+              ) : (
+                <PaperDialog.Title
+                  style={[styles.dialogTitle, { color: colors.primary }]}
+                >
+                  {word}
+                </PaperDialog.Title>
+              )}
               <AnimatedPaperButton
                 mode="text"
                 onPress={onDismiss}
@@ -285,24 +310,6 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                 )}
               </ScrollView>
             </PaperDialog.Content>
-            {canBacktrackToWord && (
-              <View style={styles.actionsContainer}>
-                <AnimatedPaperButton
-                  mode="text"
-                  onPress={handleBacktrack}
-                  icon={() => (
-                    <CustomIcon
-                      source="step-backward"
-                      size={20}
-                      color={buttonTextColor}
-                    />
-                  )}
-                  textColor={buttonTextColor}
-                >
-                  Backtrack
-                </AnimatedPaperButton>
-              </View>
-            )}
           </View>
         </Animated.View>
       </Modal>
@@ -373,6 +380,27 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     paddingHorizontal: 16,
     paddingVertical: 8,
+  },
+  titleButton: {
+    flex: 1,
+    justifyContent: "flex-start",
+    margin: 0,
+    paddingHorizontal: 0,
+  },
+  titleButtonContent: {
+    justifyContent: "flex-start",
+    paddingHorizontal: 0,
+  },
+  titleContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  dialogTitleWithIcon: {
+    fontWeight: "bold",
+    fontSize: 20,
+    marginLeft: 8,
+    flex: 1,
   },
 });
 
