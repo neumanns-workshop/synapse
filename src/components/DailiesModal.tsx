@@ -7,6 +7,7 @@ import {
   Text,
   Button,
   ActivityIndicator,
+  Appbar,
 } from "react-native-paper";
 
 import { useTheme as useAppTheme } from "../context/ThemeContext";
@@ -274,17 +275,17 @@ const DailiesModal = () => {
           },
         ]}
       >
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: appTheme.colors.primary }]}>
-            Daily Challenges
-          </Text>
-          <Button
+        <Appbar.Header style={styles.appbarHeader}>
+          <Appbar.Content
+            title="Daily Challenges"
+            titleStyle={[styles.title, { color: appTheme.colors.primary }]}
+          />
+          <Appbar.Action
+            icon="close"
             onPress={() => setDailiesModalVisible(false)}
-            textColor={appTheme.colors.primary}
-          >
-            Close
-          </Button>
-        </View>
+            color={appTheme.colors.onSurfaceVariant}
+          />
+        </Appbar.Header>
 
         <View style={styles.content}>{renderContent()}</View>
 
@@ -319,11 +320,18 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
+  appbarHeader: {
+    backgroundColor: "transparent",
+    height: 40,
+    elevation: 0,
+    justifyContent: "space-between",
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 15,
+    display: "none", // Hide the old header
   },
   title: {
     fontSize: 22,

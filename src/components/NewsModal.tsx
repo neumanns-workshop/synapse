@@ -9,6 +9,7 @@ import {
   Modal,
   Card,
   Button,
+  Appbar,
 } from "react-native-paper";
 import Animated, {
   useAnimatedStyle,
@@ -135,25 +136,31 @@ const NewsModal: React.FC<NewsModalProps> = ({ visible, onDismiss }) => {
               },
             ]}
           >
-            <Dialog.Content style={{ maxHeight: 500, paddingBottom: 0 }}>
-              <View style={styles.newsHeaderContainer}>
-                <Dialog.Title
-                  style={[styles.tabTitle, { color: colors.primary, flex: 1 }]}
+            <Appbar.Header style={styles.appbarHeader}>
+              <Appbar.Content
+                title="News & Updates"
+                titleStyle={[styles.tabTitle, { color: colors.primary }]}
+              />
+              {unreadArticles.length > 0 && (
+                <Button
+                  mode="outlined"
+                  onPress={handleMarkAllRead}
+                  style={styles.markAllReadButtonSmall}
+                  labelStyle={styles.markAllReadButtonLabel}
+                  compact
                 >
-                  News & Updates
-                </Dialog.Title>
-                {unreadArticles.length > 0 && (
-                  <Button
-                    mode="outlined"
-                    onPress={handleMarkAllRead}
-                    style={styles.markAllReadButtonSmall}
-                    labelStyle={styles.markAllReadButtonLabel}
-                    compact
-                  >
-                    Mark All Read
-                  </Button>
-                )}
-              </View>
+                  Mark All Read
+                </Button>
+              )}
+              <Appbar.Action
+                icon="close"
+                onPress={handleClose}
+                color={colors.onSurface}
+              />
+            </Appbar.Header>
+
+            <Dialog.Content style={{ maxHeight: 500, paddingBottom: 0 }}>
+              <View style={styles.newsHeaderContainer} />
 
               <ScrollView
                 style={styles.newsScrollContainer}
@@ -266,6 +273,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
+  appbarHeader: {
+    backgroundColor: "transparent",
+    height: 48, // Adjusted height for better balance
+    elevation: 0,
+    paddingHorizontal: 0,
+  },
   animatedContainer: {
     width: "100%",
   },
@@ -284,8 +297,12 @@ const styles = StyleSheet.create({
   },
   newsHeaderContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    padding: 12,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 8,
+    display: "none", // Hide the old header
   },
   markAllReadButtonSmall: {
     paddingHorizontal: 8,

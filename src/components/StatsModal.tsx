@@ -23,6 +23,7 @@ import {
   Dialog,
   TextInput,
   Snackbar,
+  Appbar,
 } from "react-native-paper";
 
 import { useAuth } from "../context/AuthContext";
@@ -1451,28 +1452,14 @@ const StatsModal = () => {
           },
         ]}
       >
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: appTheme.colors.onBackground }]}>
-            Stats
-          </Text>
-          <Button
-            mode="text"
+        <Appbar.Header style={styles.appbarHeader}>
+          <Appbar.Content title="Stats" titleStyle={styles.title} />
+          <Appbar.Action
+            icon="close"
             onPress={() => setStatsModalVisible(false)}
-            icon={() => (
-              <CustomIcon
-                source="close"
-                size={20}
-                color={appTheme.colors.onSurfaceVariant}
-              />
-            )}
-            compact
-            style={styles.closeButton}
-            labelStyle={{ color: appTheme.colors.onSurfaceVariant }}
-          >
-            Close
-          </Button>
-        </View>
-
+            color={appTheme.colors.onSurfaceVariant}
+          />
+        </Appbar.Header>
         <SegmentedButtons
           value={activeTab}
           onValueChange={setActiveTab}
@@ -1535,11 +1522,18 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
+  appbarHeader: {
+    backgroundColor: "transparent",
+    height: 40,
+    elevation: 0,
+    justifyContent: "space-between",
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 15,
+    display: "none", // Hide the old header
   },
   title: {
     fontSize: 22,

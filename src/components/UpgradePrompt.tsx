@@ -180,6 +180,18 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
         {visible && (
           <View style={styles.modalContent}>
             <Card style={[styles.card, { backgroundColor: colors.surface }]}>
+              <Button
+                mode="text"
+                onPress={onDismiss}
+                style={styles.closeButton}
+                labelStyle={styles.closeButtonLabel}
+              >
+                <CustomIcon
+                  source="close"
+                  size={24}
+                  color={colors.onSurfaceVariant}
+                />
+              </Button>
               <View style={styles.header}>
                 <CustomIcon
                   source="brain"
@@ -362,6 +374,21 @@ const styles = StyleSheet.create({
   },
   upgradeButton: {
     flex: 1,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    zIndex: 10,
+    minWidth: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
+  },
+  closeButtonLabel: {
+    marginHorizontal: 0,
+    marginVertical: 0,
   },
 });
 

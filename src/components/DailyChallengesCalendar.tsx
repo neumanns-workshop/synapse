@@ -278,7 +278,7 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
       case "beat-ai":
         return "#607D8B"; // Silver/blue for beating AI
       case "completed":
-        return customColors.startNode; // Green for basic completion
+        return colors.surface; // White for basic completion
       case "today":
         return colors.primary;
       case "available":

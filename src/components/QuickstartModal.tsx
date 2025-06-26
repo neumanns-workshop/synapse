@@ -9,6 +9,7 @@ import {
   useTheme,
   Modal,
   SegmentedButtons,
+  Appbar,
 } from "react-native-paper";
 import Animated, {
   useAnimatedStyle,
@@ -115,6 +116,14 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
               },
             ]}
           >
+            <Appbar.Header style={styles.appbarHeader}>
+              <Appbar.Content title="" />
+              <Appbar.Action
+                icon="close"
+                onPress={onDismiss}
+                color={colors.onSurface}
+              />
+            </Appbar.Header>
             <Dialog.Content style={{ maxHeight: 500, paddingBottom: 0 }}>
               <SegmentedButtons
                 value={activeTab}
@@ -521,6 +530,11 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
 };
 
 const styles = StyleSheet.create({
+  appbarHeader: {
+    backgroundColor: "transparent",
+    height: 40,
+    elevation: 0,
+  },
   modalContainer: {
     justifyContent: "center",
     alignItems: "center",

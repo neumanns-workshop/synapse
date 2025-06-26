@@ -11,6 +11,7 @@ import {
   Button,
   Menu,
   Snackbar,
+  Appbar,
 } from "react-native-paper";
 import Animated, {
   useAnimatedStyle,
@@ -202,6 +203,17 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
               },
             ]}
           >
+            <Appbar.Header style={styles.appbarHeader}>
+              <Appbar.Content
+                title="Contact Us"
+                titleStyle={[styles.title, { color: colors.primary }]}
+              />
+              <Appbar.Action
+                icon="close"
+                onPress={onDismiss}
+                color={colors.onSurface}
+              />
+            </Appbar.Header>
             <Dialog.Content style={{ maxHeight: 600, paddingBottom: 0 }}>
               <ScrollView
                 style={{ flex: 1 }}
@@ -209,11 +221,6 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
                 nestedScrollEnabled={true}
                 contentContainerStyle={{ paddingBottom: 20 }}
               >
-                <Dialog.Title style={[styles.title, { color: colors.primary }]}>
-                  Contact Us
-                </Dialog.Title>
-
-                {/* Contact Type Selection */}
                 <Text
                   style={[styles.sectionLabel, { color: colors.onSurface }]}
                 >
@@ -266,7 +273,6 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
                   ))}
                 </Menu>
 
-                {/* Subject */}
                 <Text
                   style={[
                     styles.sectionLabel,
@@ -284,7 +290,6 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
                   maxLength={100}
                 />
 
-                {/* Email (if not logged in) */}
                 {!auth.user && (
                   <>
                     <Text
@@ -307,7 +312,6 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
                   </>
                 )}
 
-                {/* Description */}
                 <Text
                   style={[
                     styles.sectionLabel,
@@ -327,14 +331,12 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
                   maxLength={1000}
                 />
 
-                {/* Character count */}
                 <Text
                   style={[styles.charCount, { color: colors.onSurfaceVariant }]}
                 >
                   {description.length}/1000 characters
                 </Text>
 
-                {/* Submit Button */}
                 <View style={styles.buttonContainer}>
                   <Button
                     mode="contained"
@@ -350,27 +352,25 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
             </Dialog.Content>
           </Dialog>
         </Animated.View>
+
+        <Snackbar
+          visible={showSuccess}
+          onDismiss={() => setShowSuccess(false)}
+          duration={3000}
+          style={{ backgroundColor: colors.primary }}
+        >
+          Message sent successfully! We'll get back to you soon.
+        </Snackbar>
+
+        <Snackbar
+          visible={showError}
+          onDismiss={() => setShowError(false)}
+          duration={3000}
+          style={{ backgroundColor: colors.error }}
+        >
+          Please fill in all required fields.
+        </Snackbar>
       </Modal>
-
-      {/* Success Snackbar */}
-      <Snackbar
-        visible={showSuccess}
-        onDismiss={() => setShowSuccess(false)}
-        duration={3000}
-        style={{ backgroundColor: colors.primary }}
-      >
-        Message sent successfully! We'll get back to you soon.
-      </Snackbar>
-
-      {/* Error Snackbar */}
-      <Snackbar
-        visible={showError}
-        onDismiss={() => setShowError(false)}
-        duration={3000}
-        style={{ backgroundColor: colors.error }}
-      >
-        Please fill in all required fields.
-      </Snackbar>
     </Portal>
   );
 };
@@ -380,6 +380,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+  },
+  appbarHeader: {
+    backgroundColor: "transparent",
+    height: 48,
+    elevation: 0,
+    paddingHorizontal: 0,
   },
   animatedContainer: {
     width: "100%",
@@ -396,6 +402,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 20,
     letterSpacing: 0.5,
+    display: "none",
   },
   sectionLabel: {
     fontSize: 16,

@@ -12,6 +12,7 @@ import {
   useTheme,
   Dialog,
   Portal,
+  Appbar,
 } from "react-native-paper";
 
 import { dailyChallengesService } from "../services/DailyChallengesService";
@@ -141,22 +142,22 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
         ]}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <View style={styles.headerText}>
-              <Dialog.Title style={{ color: colors.primary }}>Lab</Dialog.Title>
-              <Text
-                variant="bodyMedium"
-                style={[styles.subtitle, { color: colors.onSurfaceVariant }]}
-              >
-                Experiments coming to Galaxy Brain users first
-              </Text>
-            </View>
-          </View>
-          <Button mode="text" onPress={onDismiss}>
-            <CustomIcon source="close" size={20} />
-          </Button>
-        </View>
+        <Appbar.Header style={styles.appbarHeader}>
+          <Appbar.Content
+            title="Lab"
+            subtitle="Experiments for Premium Users"
+            titleStyle={{ color: colors.primary }}
+            subtitleStyle={[
+              styles.subtitle,
+              { color: colors.onSurfaceVariant },
+            ]}
+          />
+          <Appbar.Action
+            icon="close"
+            onPress={onDismiss}
+            color={colors.onSurface}
+          />
+        </Appbar.Header>
 
         <Divider style={{ marginVertical: 16 }} />
 
@@ -267,10 +268,18 @@ const styles = StyleSheet.create({
     width: "100%",
     maxHeight: "80%",
   },
+  appbarHeader: {
+    elevation: 0,
+    paddingHorizontal: 4,
+    backgroundColor: "transparent",
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    display: "none", // Hide old header
   },
   headerContent: {
     flexDirection: "row",
