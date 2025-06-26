@@ -216,6 +216,17 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                       ]}
                     >
                       {word}
+                      {optimalChoiceInfo && (
+                        <Text
+                          style={[
+                            styles.optimalInTitle,
+                            { color: customColors.globalOptimalNode },
+                          ]}
+                        >
+                          {" "}
+                          (Optimal: {optimalChoiceInfo.optimalChoice})
+                        </Text>
+                      )}
                     </PaperDialog.Title>
                   </View>
                 </AnimatedPaperButton>
@@ -224,6 +235,17 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                   style={[styles.dialogTitle, { color: colors.primary }]}
                 >
                   {word}
+                  {optimalChoiceInfo && (
+                    <Text
+                      style={[
+                        styles.optimalInTitle,
+                        { color: customColors.globalOptimalNode },
+                      ]}
+                    >
+                      {" "}
+                      (Optimal: {optimalChoiceInfo.optimalChoice})
+                    </Text>
+                  )}
                 </PaperDialog.Title>
               )}
               <AnimatedPaperButton
@@ -278,35 +300,6 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                   >
                     No definition available for this word.
                   </Text>
-                )}
-
-                {/* Show optimal choice information for completed games */}
-                {optimalChoiceInfo && (
-                  <>
-                    <Divider
-                      style={[
-                        styles.divider,
-                        { backgroundColor: colors.outline, marginVertical: 12 },
-                      ]}
-                    />
-                    <Text
-                      variant="bodyMedium"
-                      style={[
-                        styles.optimalChoiceText,
-                        { color: colors.onSurface },
-                      ]}
-                    >
-                      Optimal:{" "}
-                      <Text
-                        style={{
-                          fontWeight: "bold",
-                          color: customColors.globalOptimalNode,
-                        }}
-                      >
-                        {optimalChoiceInfo.optimalChoice}
-                      </Text>
-                    </Text>
-                  </>
                 )}
               </ScrollView>
             </View>
@@ -372,9 +365,7 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: 8,
   },
-  optimalChoiceText: {
-    lineHeight: 20,
-  },
+
   actionsContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
@@ -406,6 +397,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
     paddingTop: 8,
+  },
+  optimalInTitle: {
+    fontSize: 16,
+    fontWeight: "normal",
   },
 });
 
