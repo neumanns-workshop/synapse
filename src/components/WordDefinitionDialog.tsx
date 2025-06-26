@@ -136,12 +136,29 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
     // Only show if this was a suboptimal choice
     if (choice.isGlobalOptimal || choice.isLocalOptimal) return null;
 
+    // Determine if the optimal choice is global or local by checking paths
+    const optimalPath = gameReportModalReport.optimalPath;
+    const suggestedPath = gameReportModalReport.suggestedPath;
+
+    const playerPosInOptimal = optimalPath.indexOf(choice.playerPosition);
+    const playerPosInSuggested = suggestedPath.indexOf(choice.playerPosition);
+
+    const isOptimalChoiceGlobal =
+      playerPosInOptimal >= 0 &&
+      playerPosInOptimal < optimalPath.length - 1 &&
+      optimalPath[playerPosInOptimal + 1] === choice.optimalChoice;
+
+    const isOptimalChoiceLocal =
+      playerPosInSuggested >= 0 &&
+      playerPosInSuggested < suggestedPath.length - 1 &&
+      suggestedPath[playerPosInSuggested + 1] === choice.optimalChoice;
+
     return {
       playerChoice: choice.playerChose,
       optimalChoice: choice.optimalChoice,
       playerPosition: choice.playerPosition,
-      isGlobalOptimal: choice.isGlobalOptimal,
-      isLocalOptimal: choice.isLocalOptimal,
+      isOptimalChoiceGlobal,
+      isOptimalChoiceLocal,
     };
   }, [
     gameStatus,
@@ -217,14 +234,19 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                     >
                       {word}
                       {optimalChoiceInfo && (
-                        <Text
-                          style={[
-                            styles.optimalInTitle,
-                            { color: customColors.globalOptimalNode },
-                          ]}
-                        >
+                        <Text style={styles.optimalInTitle}>
                           {" "}
-                          (Optimal: {optimalChoiceInfo.optimalChoice})
+                          (Optimal:{" "}
+                          <Text
+                            style={{
+                              color: optimalChoiceInfo.isOptimalChoiceGlobal
+                                ? customColors.globalOptimalNode
+                                : customColors.localOptimalNode,
+                            }}
+                          >
+                            {optimalChoiceInfo.optimalChoice}
+                          </Text>
+                          )
                         </Text>
                       )}
                     </PaperDialog.Title>
@@ -236,14 +258,19 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                 >
                   {word}
                   {optimalChoiceInfo && (
-                    <Text
-                      style={[
-                        styles.optimalInTitle,
-                        { color: customColors.globalOptimalNode },
-                      ]}
-                    >
+                    <Text style={styles.optimalInTitle}>
                       {" "}
-                      (Optimal: {optimalChoiceInfo.optimalChoice})
+                      (Optimal:{" "}
+                      <Text
+                        style={{
+                          color: optimalChoiceInfo.isOptimalChoiceGlobal
+                            ? customColors.globalOptimalNode
+                            : customColors.localOptimalNode,
+                        }}
+                      >
+                        {optimalChoiceInfo.optimalChoice}
+                      </Text>
+                      )
                     </Text>
                   )}
                 </PaperDialog.Title>
@@ -324,6 +351,7 @@ const styles = StyleSheet.create({
   dialogBase: {
     borderRadius: 16,
     borderWidth: 1,
+    minHeight: 200,
     maxHeight: "80%",
   },
   titleContainer: {
@@ -349,7 +377,7 @@ const styles = StyleSheet.create({
     margin: 0,
   },
   scrollView: {
-    maxHeight: 400,
+    flexShrink: 1,
   },
   definition: {
     fontSize: 16,
@@ -401,6 +429,7 @@ const styles = StyleSheet.create({
   optimalInTitle: {
     fontSize: 16,
     fontWeight: "normal",
+    color: "inherit",
   },
 });
 
