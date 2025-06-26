@@ -273,7 +273,7 @@ export const generateGameReport = (
         optimalPathGlobal[optimalPathGlobal.indexOf(choice.playerPosition) + 1];
       if (optimalNextStep && choice.playerChose !== optimalNextStep) {
         missedOptimalMovesList.push(
-          `At ${choice.playerPosition}, chose ${choice.playerChose} instead of optimal ${optimalNextStep}`,
+          `At ${choice.playerPosition}, chose ${choice.playerChose} instead of ${optimalNextStep}`,
         );
       }
     }

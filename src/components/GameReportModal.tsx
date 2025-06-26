@@ -285,6 +285,7 @@ const GameReportModal = () => {
                   onChallengePress={handleChallengeShare}
                   onAchievementPress={showAchievementDetail}
                   screenshotRef={reportSectionRef}
+                  disableScrollView={true}
                 />
               </View>
             )}

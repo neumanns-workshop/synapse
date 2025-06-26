@@ -14,6 +14,7 @@ interface GameReportDisplayProps {
   onAchievementPress?: (achievement: Achievement) => void;
   onChallengePress?: () => void;
   screenshotRef?: React.RefObject<View>;
+  disableScrollView?: boolean;
 }
 
 // Utility function to render text path with arrows (similar to what was in ReportScreen)
@@ -40,6 +41,7 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
   report,
   onAchievementPress,
   onChallengePress,
+  disableScrollView = false,
 }) => {
   const { customColors, colors } = useTheme() as ExtendedTheme;
   const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
@@ -115,8 +117,11 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
     </TouchableOpacity>
   );
 
+  const ContentWrapper = disableScrollView ? View : ScrollView;
+  const wrapperStyle = disableScrollView ? styles.containerView : styles.container;
+
   return (
-    <ScrollView style={styles.container}>
+    <ContentWrapper style={wrapperStyle}>
       <Card
         style={[
           styles.card,
@@ -333,27 +338,21 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                 />
                 {missedMovesExpanded &&
                   report.missedOptimalMoves.map((missedMove, index) => {
-                    // Parse the missed move text to extract the optimal word
-                    // Format: "At [position], chose [chosen] instead of optimal [optimal_word]"
-                    const optimalWordMatch = missedMove.match(
-                      /instead of optimal (\w+)/,
+                    // Parse the missed move text to extract all words
+                    // Format: "At [position], chose [chosen] instead of [better_word]"
+                    const fullMatch = missedMove.match(
+                      /At (\w+), chose (\w+) instead of (\w+)/,
                     );
-                    const optimalWord = optimalWordMatch
-                      ? optimalWordMatch[1]
-                      : null;
-
-                    // Determine if this was a global optimal move
-                    const isGlobalOptimal =
-                      optimalWord && report.optimalPath.includes(optimalWord);
-
-                    // Use the appropriate color for the optimal word that was missed
-                    const optimalColor = isGlobalOptimal
-                      ? customColors.globalOptimalNode
-                      : customColors.localOptimalNode;
-
-                    // Split the text to style the optimal word differently
-                    if (optimalWord) {
-                      const parts = missedMove.split(`optimal ${optimalWord}`);
+                    
+                                          if (fullMatch) {
+                        const [, positionWord, chosenWord, betterWord] = fullMatch;
+                        
+                        // Determine colors for each word
+                        const isGlobalOptimal = report.optimalPath.includes(betterWord);
+                        const betterWordColor = isGlobalOptimal
+                          ? customColors.globalOptimalNode
+                          : customColors.localOptimalNode;
+                      
                       return (
                         <View key={index} style={styles.missedMoveContainer}>
                           <Text
@@ -363,16 +362,33 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
                               { color: colors.onSurface },
                             ]}
                           >
-                            {parts[0]}optimal{" "}
+                            At{" "}
                             <Text
                               style={{
-                                color: optimalColor,
+                                color: customColors.pathNode,
                                 fontWeight: "bold",
                               }}
                             >
-                              {optimalWord}
+                              {positionWord}
                             </Text>
-                            {parts[1]}
+                            , chose{" "}
+                            <Text
+                              style={{
+                                color: customColors.currentNode,
+                                fontWeight: "bold",
+                              }}
+                            >
+                              {chosenWord}
+                            </Text>
+                                                         {" "}instead of{" "}
+                             <Text
+                               style={{
+                                 color: betterWordColor,
+                                 fontWeight: "bold",
+                               }}
+                             >
+                               {betterWord}
+                             </Text>
                           </Text>
                         </View>
                       );
@@ -460,13 +476,16 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
             )}
         </Card.Content>
       </Card>
-    </ScrollView>
+    </ContentWrapper>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginVertical: 8,
+  },
+  containerView: {
     marginVertical: 8,
   },
   card: {
