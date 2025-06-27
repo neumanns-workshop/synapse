@@ -105,6 +105,7 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
       >
         <Animated.View style={[animatedStyle, styles.animatedContainer]}>
           <View style={styles.dialogContainer}>
+            <ModalCloseButton onPress={onDismiss} style={styles.closeButton} />
             <Dialog
               visible={true}
               onDismiss={onDismiss}
@@ -117,7 +118,6 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                 },
               ]}
             >
-              <ModalCloseButton onPress={onDismiss} />
               <Dialog.Content style={styles.dialogContent}>
                 <SegmentedButtons
                   value={activeTab}
@@ -538,14 +538,18 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     maxHeight: "90%",
   },
-  dialogContainer: {},
+  dialogContainer: {
+    flex: 1,
+  },
   dialogBase: {
+    flex: 1,
     borderWidth: 1,
     paddingTop: 40,
     width: "100%",
     alignSelf: "center",
   },
   dialogContent: {
+    flex: 1,
     paddingBottom: 0,
     paddingHorizontal: 0,
   },
@@ -570,6 +574,12 @@ const styles = StyleSheet.create({
   },
   paragraph: {
     paddingHorizontal: 24,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 50,
+    right: 10,
+    zIndex: 1,
   },
 });
 
