@@ -175,9 +175,9 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                         >
                           How:
                         </Text>{" "}
-                        Tap a neighbor to advance (most similar are listed first).
-                        Tap any word in your path or a neighbor to see its
-                        definition.
+                        Tap a neighbor to advance (most similar are listed
+                        first). Tap any word in your path or a neighbor to see
+                        its definition.
                       </Paragraph>
                       <Paragraph style={[paragraphStyle, styles.paragraph]}>
                         <Text
@@ -351,7 +351,8 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                           Word Selection:
                         </Text>{" "}
                         The wordlist has been designed to be common and
-                        categorically evenly distributed via swadesh-style lists.
+                        categorically evenly distributed via swadesh-style
+                        lists.
                       </Paragraph>
                       <Paragraph style={[paragraphStyle, styles.paragraph]}>
                         <Text
@@ -370,7 +371,8 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                           Practice Daily:
                         </Text>{" "}
                         Regular practice helps you recognize common word
-                        relationship patterns and improve your pathfinding skills.
+                        relationship patterns and improve your pathfinding
+                        skills.
                       </Paragraph>
                     </>
                   )}
@@ -506,11 +508,11 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                       >
                         Word embeddings encode meaning in a different way than
                         traditional dictionary definitions. They capture more
-                        complex and nuanced relationships from the bodies of text
-                        they are trained on. It is important to note that there
-                        may be some relationships between words in the already
-                        carefully-pruned vocabulary that are surprising or
-                        offensive to some users. This is a feature of the
+                        complex and nuanced relationships from the bodies of
+                        text they are trained on. It is important to note that
+                        there may be some relationships between words in the
+                        already carefully-pruned vocabulary that are surprising
+                        or offensive to some users. This is a feature of the
                         underlying model.
                       </Paragraph>
                     </>

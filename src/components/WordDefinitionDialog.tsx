@@ -213,7 +213,10 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
               },
             ]}
           >
-            <ModalCloseButton onPress={onDismiss} style={{ top: 12, right: 12 }} />
+            <ModalCloseButton
+              onPress={onDismiss}
+              style={{ top: 12, right: 12 }}
+            />
             <View style={styles.titleContainer}>
               {canBacktrackToWord ? (
                 <AnimatedPaperButton
