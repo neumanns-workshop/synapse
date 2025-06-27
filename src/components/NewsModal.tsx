@@ -26,6 +26,7 @@ import {
 import type { NewsArticle } from "../data/news";
 import { unifiedDataStore } from "../services/UnifiedDataStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import ModalCloseButton from "./ModalCloseButton";
 
 interface NewsModalProps {
   visible: boolean;
@@ -135,6 +136,7 @@ const NewsModal: React.FC<NewsModalProps> = ({ visible, onDismiss }) => {
               },
             ]}
           >
+            <ModalCloseButton onPress={handleClose} />
             <Dialog.Content style={{ maxHeight: 500, paddingBottom: 0 }}>
               <View style={styles.newsHeaderContainer}>
                 <Dialog.Title
@@ -274,6 +276,7 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     width: "100%",
     alignSelf: "center",
+    paddingTop: 30,
   },
   tabTitle: {
     fontWeight: "bold",
@@ -285,11 +288,15 @@ const styles = StyleSheet.create({
   newsHeaderContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
+    justifyContent: "space-between",
   },
   markAllReadButtonSmall: {
     paddingHorizontal: 8,
     paddingVertical: 4,
+    marginLeft: 16,
   },
   markAllReadButtonLabel: {
     fontSize: 14,

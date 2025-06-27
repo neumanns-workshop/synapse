@@ -15,6 +15,7 @@ import StripeService from "../services/StripeService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import CustomIcon from "./CustomIcon";
+import ModalCloseButton from "./ModalCloseButton";
 
 // Define different upgrade contexts for targeted messaging
 export type UpgradeContext =
@@ -180,6 +181,7 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
         {visible && (
           <View style={styles.modalContent}>
             <Card style={[styles.card, { backgroundColor: colors.surface }]}>
+              <ModalCloseButton onPress={onDismiss} />
               <View style={styles.header}>
                 <CustomIcon
                   source="brain"
@@ -317,6 +319,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
     marginBottom: 24,
+    paddingTop: 30, // for close button
   },
   title: {
     marginTop: 12,

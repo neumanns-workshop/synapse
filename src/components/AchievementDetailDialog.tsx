@@ -7,6 +7,7 @@ import type { Achievement } from "../features/achievements";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import AnimatedButton from "./AnimatedButton";
 import CustomIcon from "./CustomIcon";
+import ModalCloseButton from "./ModalCloseButton";
 
 interface AchievementDetailDialogProps {
   achievement: Achievement | null;
@@ -33,11 +34,12 @@ const AchievementDetailDialog: React.FC<AchievementDetailDialogProps> = ({
           { backgroundColor: colors.surface, borderColor: colors.outline },
         ]}
       >
+        <ModalCloseButton onPress={onDismiss} style={{ top: 12, right: 12 }} />
         <View style={styles.titleContainer}>
           <Dialog.Title style={[styles.dialogTitle, { color: colors.primary }]}>
             {achievement.name}
           </Dialog.Title>
-          <AnimatedButton
+          {/* <AnimatedButton
             mode="text"
             onPress={onDismiss}
             icon={() => (
@@ -47,7 +49,7 @@ const AchievementDetailDialog: React.FC<AchievementDetailDialogProps> = ({
             contentStyle={styles.closeButtonContent}
           >
             ""
-          </AnimatedButton>
+          </AnimatedButton> */}
         </View>
         <Dialog.Content>
           <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant }}>
@@ -77,7 +79,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     flex: 1,
   },
-  closeButton: {
+  /* closeButton: {
     margin: 0,
     minWidth: 40,
     width: 40,
@@ -87,7 +89,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     margin: 0,
-  },
+  }, */
 });
 
 export default AchievementDetailDialog;

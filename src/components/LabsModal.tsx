@@ -18,6 +18,7 @@ import { dailyChallengesService } from "../services/DailyChallengesService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import CustomIcon from "./CustomIcon";
+import ModalCloseButton from "./ModalCloseButton";
 
 interface LabsModalProps {
   visible: boolean;
@@ -140,6 +141,7 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
           { backgroundColor: colors.surface },
         ]}
       >
+        <ModalCloseButton onPress={onDismiss} />
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerContent}>
@@ -153,9 +155,6 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
               </Text>
             </View>
           </View>
-          <Button mode="text" onPress={onDismiss}>
-            <CustomIcon source="close" size={20} />
-          </Button>
         </View>
 
         <Divider style={{ marginVertical: 16 }} />
@@ -269,8 +268,11 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingRight: 40, // for close button
   },
   headerContent: {
     flexDirection: "row",
