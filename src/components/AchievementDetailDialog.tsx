@@ -85,7 +85,7 @@ const AchievementDetailDialog: React.FC<AchievementDetailDialogProps> = ({
           >
             <ModalCloseButton
               onPress={onDismiss}
-              style={{ top: 12, right: 12 }}
+              style={{ position: "absolute", top: 12, right: 12, zIndex: 1 }}
             />
             <View style={styles.titleContainer}>
               <PaperDialog.Title
@@ -126,14 +126,14 @@ const styles = StyleSheet.create({
   dialogBase: {
     borderRadius: 16,
     borderWidth: 1,
+    paddingTop: 40,
   },
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingRight: 48, // space for close button
+    paddingRight: 24,
     paddingLeft: 24,
-    paddingTop: 24,
     paddingBottom: 8,
   },
   dialogTitle: {

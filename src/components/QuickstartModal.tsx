@@ -326,136 +326,136 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                   <Text style={[styles.tabTitle, { color: colors.primary }]}>
                     About Synapse
                   </Text>
-
-                  <Text
-                    style={[
-                      styles.boldText,
-                      {
-                        fontSize: 16,
-                        color: colors.primary,
-                        marginBottom: 4,
-                        marginTop: 12,
-                      },
-                    ]}
-                  >
-                    Model
-                  </Text>
-                  <Paragraph style={[paragraphStyle, styles.paragraph]}>
-                    Word relationships are powered by the{" "}
+                  <View style={styles.paragraph}>
                     <Text
-                      style={{
-                        color: colors.primary,
-                        textDecorationLine: "underline",
-                      }}
-                      onPress={() =>
-                        Linking.openURL(
-                          "https://ollama.com/library/nomic-embed-text",
-                        )
-                      }
+                      style={[
+                        styles.boldText,
+                        {
+                          fontSize: 16,
+                          color: colors.primary,
+                          marginBottom: 4,
+                        },
+                      ]}
                     >
-                      nomic-embed-text:v1.5
-                    </Text>{" "}
-                    model (via Ollama).
-                  </Paragraph>
-
-                  <Text
-                    style={[
-                      styles.boldText,
-                      {
-                        fontSize: 16,
-                        color: colors.primary,
-                        marginBottom: 4,
-                        marginTop: 12,
-                      },
-                    ]}
-                  >
-                    Vocabulary
-                  </Text>
-                  <Paragraph style={[paragraphStyle, styles.paragraph]}>
-                    Custom, lemmatized word list (~5000 words).
-                  </Paragraph>
-
-                  <Text
-                    style={[
-                      styles.boldText,
-                      {
-                        fontSize: 16,
-                        color: colors.primary,
-                        marginBottom: 4,
-                        marginTop: 12,
-                      },
-                    ]}
-                  >
-                    Daily Challenges
-                  </Text>
-                  <Paragraph style={[paragraphStyle, styles.paragraph]}>
-                    New puzzles every day at midnight EST, with performance
-                    tracking and achievements to unlock.
-                  </Paragraph>
-
-                  <Text
-                    style={[
-                      styles.boldText,
-                      {
-                        fontSize: 16,
-                        color: colors.primary,
-                        marginBottom: 4,
-                        marginTop: 12,
-                      },
-                    ]}
-                  >
-                    Definitions
-                  </Text>
-                  <Paragraph style={[paragraphStyle, styles.paragraph]}>
-                    Sourced from{" "}
-                    <Text
-                      style={{
-                        color: colors.primary,
-                        textDecorationLine: "underline",
-                      }}
-                      onPress={() =>
-                        Linking.openURL("https://wordnet.princeton.edu/")
-                      }
-                    >
-                      WordNet
+                      Model
                     </Text>
-                    .
-                  </Paragraph>
+                    <Paragraph style={paragraphStyle}>
+                      Word relationships are powered by the{" "}
+                      <Text
+                        style={{
+                          color: colors.primary,
+                          textDecorationLine: "underline",
+                        }}
+                        onPress={() =>
+                          Linking.openURL(
+                            "https://ollama.com/library/nomic-embed-text",
+                          )
+                        }
+                      >
+                        nomic-embed-text:v1.5
+                      </Text>{" "}
+                      model (via Ollama).
+                    </Paragraph>
 
-                  {/* Disclaimer */}
-                  <Text
-                    style={[
-                      styles.boldText,
-                      {
-                        fontSize: 16,
-                        color: colors.error,
-                        marginBottom: 4,
-                        marginTop: 16,
-                        letterSpacing: 1,
-                      },
-                    ]}
-                  >
-                    DISCLAIMER
-                  </Text>
-                  <Paragraph
-                    style={[
-                      paragraphStyle,
-                      styles.paragraph,
-                      {
-                        color: colors.onSurfaceVariant,
-                        fontStyle: "italic",
-                        fontSize: 15,
-                      },
-                    ]}
-                  >
-                    Word embeddings encode meaning in a different way than
-                    traditional dictionary definitions. They capture more
-                    complex and nuanced relationships from the bodies of text
-                    they are trained on. It is important to note that there may
-                    be some relationships between words in the already
-                    carefully-pruned vocabulary that are surprising or offensive
-                    to some users. This is a feature of the underlying model.
-                  </Paragraph>
+                    <Text
+                      style={[
+                        styles.boldText,
+                        {
+                          fontSize: 16,
+                          color: colors.primary,
+                          marginBottom: 4,
+                          marginTop: 12,
+                        },
+                      ]}
+                    >
+                      Vocabulary
+                    </Text>
+                    <Paragraph style={paragraphStyle}>
+                      Custom, lemmatized word list (~5000 words).
+                    </Paragraph>
+
+                    <Text
+                      style={[
+                        styles.boldText,
+                        {
+                          fontSize: 16,
+                          color: colors.primary,
+                          marginBottom: 4,
+                          marginTop: 12,
+                        },
+                      ]}
+                    >
+                      Daily Challenges
+                    </Text>
+                    <Paragraph style={paragraphStyle}>
+                      New puzzles every day at midnight EST, with performance
+                      tracking and achievements to unlock.
+                    </Paragraph>
+
+                    <Text
+                      style={[
+                        styles.boldText,
+                        {
+                          fontSize: 16,
+                          color: colors.primary,
+                          marginBottom: 4,
+                          marginTop: 12,
+                        },
+                      ]}
+                    >
+                      Definitions
+                    </Text>
+                    <Paragraph style={paragraphStyle}>
+                      Sourced from{" "}
+                      <Text
+                        style={{
+                          color: colors.primary,
+                          textDecorationLine: "underline",
+                        }}
+                        onPress={() =>
+                          Linking.openURL("https://wordnet.princeton.edu/")
+                        }
+                      >
+                        WordNet
+                      </Text>
+                      .
+                    </Paragraph>
+
+                    {/* Disclaimer */}
+                    <Text
+                      style={[
+                        styles.boldText,
+                        {
+                          fontSize: 16,
+                          color: colors.error,
+                          marginBottom: 4,
+                          marginTop: 16,
+                          letterSpacing: 1,
+                        },
+                      ]}
+                    >
+                      DISCLAIMER
+                    </Text>
+                    <Paragraph
+                      style={[
+                        paragraphStyle,
+                        {
+                          color: colors.onSurfaceVariant,
+                          fontStyle: "italic",
+                          fontSize: 15,
+                        },
+                      ]}
+                    >
+                      Word embeddings encode meaning in a different way than
+                      traditional dictionary definitions. They capture more
+                      complex and nuanced relationships from the bodies of text
+                      they are trained on. It is important to note that there
+                      may be some relationships between words in the already
+                      carefully-pruned vocabulary that are surprising or
+                      offensive to some users. This is a feature of the
+                      underlying model.
+                    </Paragraph>
+                  </View>
                 </>
               )}
             </ScrollView>
