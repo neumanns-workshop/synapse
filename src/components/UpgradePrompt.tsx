@@ -181,21 +181,19 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
         {visible && (
           <View style={styles.modalContent}>
             <Card style={[styles.card, { backgroundColor: colors.surface }]}>
+              <ModalCloseButton onPress={onDismiss} />
               <View style={styles.header}>
-                <View style={styles.headerLeft}>
-                  <CustomIcon
-                    source="brain"
-                    size={32}
-                    color={customColors.localOptimalNode}
-                  />
-                  <Text
-                    variant="headlineSmall"
-                    style={[styles.title, { color: colors.onSurface }]}
-                  >
-                    {contextContent.title}
-                  </Text>
-                </View>
-                <ModalCloseButton onPress={onDismiss} />
+                <CustomIcon
+                  source="brain"
+                  size={48}
+                  color={customColors.localOptimalNode}
+                />
+                <Text
+                  variant="headlineSmall"
+                  style={[styles.title, { color: colors.onSurface }]}
+                >
+                  {contextContent.title}
+                </Text>
               </View>
 
               <View style={styles.content}>
@@ -319,17 +317,12 @@ const styles = StyleSheet.create({
     minWidth: 300,
   },
   header: {
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     marginBottom: 24,
-  },
-  headerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
+    paddingTop: 30, // for close button
   },
   title: {
+    marginTop: 12,
     textAlign: "center",
     fontWeight: "bold",
   },
