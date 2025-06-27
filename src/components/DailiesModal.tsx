@@ -24,6 +24,7 @@ import WordDefinitionDialog from "./WordDefinitionDialog";
 import DailyChallengesCalendar from "./DailyChallengesCalendar";
 import DailyChallengeReport from "./DailyChallengeReport";
 import AchievementDetailDialog from "./AchievementDetailDialog";
+import ModalCloseButton from "./ModalCloseButton";
 
 const DailiesModal = () => {
   const { dailiesModalVisible, setDailiesModalVisible } = useGameStore(
@@ -274,16 +275,11 @@ const DailiesModal = () => {
           },
         ]}
       >
+        <ModalCloseButton onPress={() => setDailiesModalVisible(false)} />
         <View style={styles.header}>
           <Text style={[styles.title, { color: appTheme.colors.primary }]}>
             Daily Challenges
           </Text>
-          <Button
-            onPress={() => setDailiesModalVisible(false)}
-            textColor={appTheme.colors.primary}
-          >
-            Close
-          </Button>
         </View>
 
         <View style={styles.content}>{renderContent()}</View>
@@ -324,6 +320,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 15,
+    paddingRight: 40,
   },
   title: {
     fontSize: 22,
