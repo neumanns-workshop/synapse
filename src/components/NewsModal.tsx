@@ -140,7 +140,10 @@ const NewsModal: React.FC<NewsModalProps> = ({ visible, onDismiss }) => {
               <View style={styles.header}>
                 <View style={styles.newsHeaderContainer}>
                   <Dialog.Title
-                    style={[styles.tabTitle, { color: colors.primary, flex: 1 }]}
+                    style={[
+                      styles.tabTitle,
+                      { color: colors.primary, flex: 1 },
+                    ]}
                   >
                     News & Updates
                   </Dialog.Title>

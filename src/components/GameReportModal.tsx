@@ -238,7 +238,10 @@ const GameReportModal = () => {
         <Surface
           style={[styles.modalSurface, { backgroundColor: colors.surface }]}
         >
-          <ModalCloseButton onPress={hideGameReportModal} style={styles.closeButton} />
+          <ModalCloseButton
+            onPress={hideGameReportModal}
+            style={styles.closeButton}
+          />
           {/* Header with close button */}
           <View style={styles.modalHeader}>
             <Text variant="headlineSmall" style={{ color: colors.primary }}>

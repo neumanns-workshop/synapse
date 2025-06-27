@@ -53,7 +53,10 @@ const TutorialModal: React.FC = () => {
             >
               {currentTutorialStep.title}
             </Text>
-            <ModalCloseButton onPress={skipTutorial} style={styles.closeButton} />
+            <ModalCloseButton
+              onPress={skipTutorial}
+              style={styles.closeButton}
+            />
           </View>
 
           <ScrollView
