@@ -1,8 +1,8 @@
 import React from "react";
 import { StyleSheet } from "react-native";
 import { IconButton, useTheme } from "react-native-paper";
-import CustomIcon from "./CustomIcon";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import CustomIcon from "./CustomIcon";
 
 interface ModalCloseButtonProps {
   onPress: () => void;
@@ -37,4 +37,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ModalCloseButton; 
+export default ModalCloseButton;
