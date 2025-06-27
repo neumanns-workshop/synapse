@@ -95,10 +95,18 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
       <Modal
         visible={visible}
         onDismiss={onDismiss}
-        contentContainerStyle={styles.modalContainer}
+        contentContainerStyle={styles.modalContentContainer}
       >
-        <View style={styles.modalWrapper}>
-          <Animated.View style={[animatedStyle, styles.animatedContainer]}>
+        <Animated.View style={[styles.animatedDialogContainer, animatedStyle]}>
+          <View
+            style={[
+              styles.dialogBase,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.outline,
+              },
+            ]}
+          >
             <View style={styles.header}>
               <View style={{ flex: 1 }} />
               <ModalCloseButton onPress={onDismiss} />
@@ -493,32 +501,31 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                 )}
               </ScrollView>
             </View>
-          </Animated.View>
-        </View>
+          </View>
+        </Animated.View>
       </Modal>
     </Portal>
   );
 };
 
 const styles = StyleSheet.create({
-  modalContainer: {
-    flex: 1,
-  },
-  modalWrapper: {
+  modalContentContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
   },
-  animatedContainer: {
+  animatedDialogContainer: {
     width: "100%",
     maxWidth: 500,
     maxHeight: "90%",
+    flexShrink: 1,
+  },
+  dialogBase: {
     borderRadius: 12,
     borderWidth: 1,
-    paddingHorizontal: 15,
-    paddingBottom: 15,
-    paddingTop: 15,
+    padding: 15,
+    flex: 1,
   },
   header: {
     flexDirection: "row",
@@ -531,6 +538,7 @@ const styles = StyleSheet.create({
   },
   contentArea: {
     flex: 1,
+    overflow: "hidden",
   },
   buttonStyle: {
     flex: 1,
