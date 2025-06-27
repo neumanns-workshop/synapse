@@ -22,6 +22,7 @@ import Animated, {
 import { useAuth } from "../context/AuthContext";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import CustomIcon from "./CustomIcon";
+import ModalCloseButton from "./ModalCloseButton";
 
 interface ContactModalProps {
   visible: boolean;
@@ -203,16 +204,18 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
             ]}
           >
             <Dialog.Content style={{ maxHeight: 600, paddingBottom: 0 }}>
+              <View style={styles.header}>
+                <Dialog.Title style={[styles.title, { color: colors.primary }]}>
+                  Contact Us
+                </Dialog.Title>
+                <ModalCloseButton onPress={onDismiss} />
+              </View>
               <ScrollView
                 style={{ flex: 1 }}
                 showsVerticalScrollIndicator={false}
                 nestedScrollEnabled={true}
                 contentContainerStyle={{ paddingBottom: 20 }}
               >
-                <Dialog.Title style={[styles.title, { color: colors.primary }]}>
-                  Contact Us
-                </Dialog.Title>
-
                 {/* Contact Type Selection */}
                 <Text
                   style={[styles.sectionLabel, { color: colors.onSurface }]}
@@ -389,6 +392,11 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     width: "100%",
     alignSelf: "center",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   title: {
     fontWeight: "bold",

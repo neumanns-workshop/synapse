@@ -7,6 +7,7 @@ import {
   Alert,
   Dimensions,
   Pressable,
+  StyleSheet,
 } from "react-native";
 
 import HCaptcha from "@hcaptcha/react-hcaptcha";
@@ -30,6 +31,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import CustomIcon from "../components/CustomIcon";
+import ModalCloseButton from "../components/ModalCloseButton";
 import StripeService from "../services/StripeService";
 import SupabaseService from "../services/SupabaseService";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -1540,6 +1542,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               alignSelf: "center",
             }}
           >
+            <ModalCloseButton
+              onPress={handleClose}
+              style={styles.closeButton}
+            />
             <Dialog.Content
               style={{
                 maxHeight: Dimensions.get("window").height * 0.8,
@@ -1621,5 +1627,14 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
     </Portal>
   );
 };
+
+const styles = StyleSheet.create({
+  closeButton: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    zIndex: 10,
+  },
+});
 
 export default AuthScreen;

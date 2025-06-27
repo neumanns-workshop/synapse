@@ -60,6 +60,7 @@ import GraphVisualization from "./GraphVisualization";
 import GameReportDisplay from "./GameReportDisplay";
 import CustomIcon from "./CustomIcon";
 import AchievementDetailDialog from "./AchievementDetailDialog";
+import ModalCloseButton from "./ModalCloseButton";
 
 // GameHistoryCard component for displaying game history entries
 const GameHistoryCard = React.memo(
@@ -390,6 +391,7 @@ const WordCollectionCard = ({
             },
           ]}
         >
+          <ModalCloseButton onPress={hideWordDialog} />
           <View style={styles.wordDialogHeader}>
             <View style={styles.wordDialogTitle}>
               {collection.icon && (
@@ -411,7 +413,6 @@ const WordCollectionCard = ({
                 {collection.isWordlistViewable ? "Wordlist" : "Collected Words"}
               </Text>
             </View>
-            <Button onPress={hideWordDialog}>Close</Button>
           </View>
 
           <ScrollView style={styles.wordDialogScrollView}>
@@ -548,7 +549,7 @@ const WLRatioDisplay = ({
 // --- Main StatsModal ---
 const StatsModal = () => {
   const { theme: appTheme } = useAppTheme();
-  const auth = useAuth();
+  const { user } = useAuth();
   const statsModalVisible = useGameStore((state) => state.statsModalVisible);
   const setStatsModalVisible = useGameStore(
     (state) => state.setStatsModalVisible,
@@ -1451,26 +1452,16 @@ const StatsModal = () => {
           },
         ]}
       >
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: appTheme.colors.onBackground }]}>
-            Stats
+        <View
+          style={[
+            styles.header,
+            { borderBottomColor: appTheme.colors.outline },
+          ]}
+        >
+          <Text style={[styles.title, { color: appTheme.colors.primary }]}>
+            Player Stats & History
           </Text>
-          <Button
-            mode="text"
-            onPress={() => setStatsModalVisible(false)}
-            icon={() => (
-              <CustomIcon
-                source="close"
-                size={20}
-                color={appTheme.colors.onSurfaceVariant}
-              />
-            )}
-            compact
-            style={styles.closeButton}
-            labelStyle={{ color: appTheme.colors.onSurfaceVariant }}
-          >
-            Close
-          </Button>
+          <ModalCloseButton onPress={() => setStatsModalVisible(false)} />
         </View>
 
         <SegmentedButtons
@@ -1539,15 +1530,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
+    lineHeight: 28,
   },
   segmentedButtons: {
-    marginHorizontal: 0,
+    marginHorizontal: 16,
     marginBottom: 15,
+    marginTop: 8,
   },
   tabContent: {
     flex: 1,
@@ -1807,7 +1802,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 15,
+    paddingRight: 40,
   },
   wordDialogTitle: {
     flexDirection: "row",
@@ -1841,14 +1837,16 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   wordCollectionDialogContainer: {
-    padding: 20,
-    margin: 16,
-    borderRadius: 8,
-    maxWidth: 700,
-    width: "90%",
-    maxHeight: "90%",
-    alignSelf: "center",
+    margin: 20,
+    padding: 15,
+    borderRadius: 12,
+    maxHeight: "70%",
+    flex: 1,
     borderWidth: 1,
+    maxWidth: 500,
+    width: "100%",
+    alignSelf: "center",
+    paddingTop: 40,
   },
   dialogStyle: {
     maxWidth: 500,

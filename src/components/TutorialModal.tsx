@@ -13,6 +13,7 @@ import {
 import { useTutorial } from "../context/TutorialContext";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import CustomIcon from "./CustomIcon";
+import ModalCloseButton from "./ModalCloseButton";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const MODAL_WIDTH = Math.min(SCREEN_WIDTH - 40, 500); // Max width of 500, or screen width - 40px padding
@@ -44,14 +45,7 @@ const TutorialModal: React.FC = () => {
         style={{ backgroundColor: "rgba(20,20,20,0.95)" }}
       >
         <View style={styles.contentContainer}>
-          <IconButton
-            icon={() => (
-              <CustomIcon source="close" size={24} color={colors.onSurface} />
-            )}
-            size={24}
-            onPress={skipTutorial}
-            style={styles.closeButton}
-          />
+          <ModalCloseButton onPress={skipTutorial} style={styles.closeButton} />
 
           <Text
             variant="headlineSmall"
@@ -151,16 +145,15 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "flex-start",
   },
+  closeButton: {
+    position: "absolute",
+    top: -10,
+    right: -10,
+    zIndex: 1,
+  },
   scrollArea: {
     flex: 1,
     width: "100%",
-  },
-  closeButton: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    zIndex: 1,
-    margin: 0,
   },
   title: {
     marginBottom: 16,

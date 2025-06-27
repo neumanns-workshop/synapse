@@ -403,10 +403,12 @@ function AppContent() {
               />
             </Suspense>
             <Suspense fallback={<ModalLoadingFallback />}>
-              <ContactModal
-                visible={contactModalVisible}
-                onDismiss={() => setContactModalVisible(false)}
-              />
+              {contactModalVisible && (
+                <ContactModal
+                  visible={contactModalVisible}
+                  onDismiss={() => setContactModalVisible(false)}
+                />
+              )}
             </Suspense>
             <Suspense fallback={<ModalLoadingFallback />}>
               <LabsModal
@@ -430,35 +432,24 @@ function AppContent() {
             </Suspense>
 
             {/* Auth Modal */}
-            <AuthScreen
-              visible={showAuth}
-              onAuthComplete={async () => {
-                setShowAuth(false);
-                setPaymentMessage(null);
-                setAuthScreenInitialEmail(undefined);
-
-                // Refresh game access state after successful sign-in
-                // This ensures premium status and free games are updated,
-                // and upgrade prompt dismissal is reset if user now has access
-                try {
-                  await useGameStore.getState().refreshGameAccessState();
-                  console.log("✅ Game access state refreshed after sign-in");
-                } catch (error) {
-                  console.error(
-                    "❌ Error refreshing game access state:",
-                    error,
-                  );
-                }
-              }}
-              onDismiss={() => {
-                setShowAuth(false);
-                setPaymentMessage(null);
-                setAuthScreenInitialEmail(undefined);
-              }}
-              defaultMode={authScreenMode}
-              paymentSuccessMessage={paymentMessage}
-              initialEmail={authScreenInitialEmail}
-            />
+            {showAuth && (
+              <AuthScreen
+                visible={showAuth}
+                onAuthComplete={() => {
+                  setShowAuth(false);
+                  setAuthScreenInitialEmail(undefined);
+                  // After successful auth, you might want to sync data or refresh state
+                  // This is handled by the AuthContext now.
+                }}
+                onDismiss={() => {
+                  setShowAuth(false);
+                  setAuthScreenInitialEmail(undefined);
+                }}
+                defaultMode={authScreenMode}
+                paymentSuccessMessage={paymentMessage}
+                initialEmail={authScreenInitialEmail}
+              />
+            )}
 
             {/* Account Modal */}
             {showAccount && auth.user && (
