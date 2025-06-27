@@ -101,7 +101,10 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
         ]}
       >
         <Animated.View style={[animatedStyle, styles.animatedContainer]}>
-          <ModalCloseButton onPress={onDismiss} style={styles.closeButton} />
+          <View style={styles.header}>
+            <View style={{ flex: 1 }} />
+            <ModalCloseButton onPress={onDismiss} />
+          </View>
           <SegmentedButtons
             value={activeTab}
             onValueChange={setActiveTab}
@@ -476,18 +479,19 @@ const styles = StyleSheet.create({
     maxHeight: "90%",
     borderRadius: 12,
     borderWidth: 1,
-    padding: 15,
+    paddingHorizontal: 15,
+    paddingBottom: 15,
+    paddingTop: 15,
     flex: 1,
   },
-  closeButton: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    zIndex: 1,
+  header: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginBottom: 8,
   },
   segmentedButtons: {
     marginBottom: 15,
-    marginTop: 8,
   },
   contentArea: {
     flex: 1,

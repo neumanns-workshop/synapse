@@ -203,18 +203,19 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
               },
             ]}
           >
-            <ModalCloseButton onPress={onDismiss} />
             <Dialog.Content style={{ maxHeight: 600, paddingBottom: 0 }}>
+              <View style={styles.header}>
+                <Dialog.Title style={[styles.title, { color: colors.primary }]}>
+                  Contact Us
+                </Dialog.Title>
+                <ModalCloseButton onPress={onDismiss} />
+              </View>
               <ScrollView
                 style={{ flex: 1 }}
                 showsVerticalScrollIndicator={false}
                 nestedScrollEnabled={true}
                 contentContainerStyle={{ paddingBottom: 20 }}
               >
-                <Dialog.Title style={[styles.title, { color: colors.primary }]}>
-                  Contact Us
-                </Dialog.Title>
-
                 {/* Contact Type Selection */}
                 <Text
                   style={[styles.sectionLabel, { color: colors.onSurface }]}
@@ -391,7 +392,11 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     width: "100%",
     alignSelf: "center",
-    paddingTop: 30,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   title: {
     fontWeight: "bold",

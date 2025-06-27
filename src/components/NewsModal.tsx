@@ -136,25 +136,27 @@ const NewsModal: React.FC<NewsModalProps> = ({ visible, onDismiss }) => {
               },
             ]}
           >
-            <ModalCloseButton onPress={handleClose} />
             <Dialog.Content style={{ maxHeight: 500, paddingBottom: 0 }}>
-              <View style={styles.newsHeaderContainer}>
-                <Dialog.Title
-                  style={[styles.tabTitle, { color: colors.primary, flex: 1 }]}
-                >
-                  News & Updates
-                </Dialog.Title>
-                {unreadArticles.length > 0 && (
-                  <Button
-                    mode="outlined"
-                    onPress={handleMarkAllRead}
-                    style={styles.markAllReadButtonSmall}
-                    labelStyle={styles.markAllReadButtonLabel}
-                    compact
+              <View style={styles.header}>
+                <View style={styles.newsHeaderContainer}>
+                  <Dialog.Title
+                    style={[styles.tabTitle, { color: colors.primary, flex: 1 }]}
                   >
-                    Mark All Read
-                  </Button>
-                )}
+                    News & Updates
+                  </Dialog.Title>
+                  {unreadArticles.length > 0 && (
+                    <Button
+                      mode="outlined"
+                      onPress={handleMarkAllRead}
+                      style={styles.markAllReadButtonSmall}
+                      labelStyle={styles.markAllReadButtonLabel}
+                      compact
+                    >
+                      Mark All Read
+                    </Button>
+                  )}
+                </View>
+                <ModalCloseButton onPress={handleClose} />
               </View>
 
               <ScrollView
@@ -276,7 +278,11 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     width: "100%",
     alignSelf: "center",
-    paddingTop: 30,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
   },
   tabTitle: {
     fontWeight: "bold",

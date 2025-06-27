@@ -45,14 +45,16 @@ const TutorialModal: React.FC = () => {
         style={{ backgroundColor: "rgba(20,20,20,0.95)" }}
       >
         <View style={styles.contentContainer}>
-          <ModalCloseButton onPress={skipTutorial} style={styles.closeButton} />
-
-          <Text
-            variant="headlineSmall"
-            style={[styles.title, { color: colors.primary }]}
-          >
-            {currentTutorialStep.title}
-          </Text>
+          <View style={styles.header}>
+            <View style={styles.headerSpacer} />
+            <Text
+              variant="headlineSmall"
+              style={[styles.title, { color: colors.primary }]}
+            >
+              {currentTutorialStep.title}
+            </Text>
+            <ModalCloseButton onPress={skipTutorial} style={styles.closeButton} />
+          </View>
 
           <ScrollView
             style={styles.scrollArea}
@@ -145,15 +147,27 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "flex-start",
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  headerSpacer: {
+    width: 40, // Same width as close button to balance title
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+  },
   scrollArea: {
     flex: 1,
     width: "100%",
   },
   title: {
-    marginBottom: 16,
+    flex: 1,
     textAlign: "center",
     fontWeight: "bold",
-    marginTop: 10,
   },
   contentText: {
     marginBottom: 24,

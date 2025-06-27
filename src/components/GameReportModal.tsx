@@ -238,20 +238,12 @@ const GameReportModal = () => {
         <Surface
           style={[styles.modalSurface, { backgroundColor: colors.surface }]}
         >
-          <ModalCloseButton onPress={hideGameReportModal} />
+          <ModalCloseButton onPress={hideGameReportModal} style={styles.closeButton} />
           {/* Header with close button */}
           <View style={styles.modalHeader}>
             <Text variant="headlineSmall" style={{ color: colors.primary }}>
               Game Report
             </Text>
-            {/* <IconButton
-              icon={() => (
-                <CustomIcon source="close" size={24} color={colors.onSurface} />
-              )}
-              size={24}
-              onPress={hideGameReportModal}
-              style={styles.closeButton}
-            /> */}
           </View>
 
           <ScrollView style={styles.scrollView}>
@@ -445,7 +437,6 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
     borderBottomWidth: 1,
-    paddingRight: 40, // Ensure title doesn't overlap with close button
   },
   scrollView: {
     flex: 1,
@@ -504,9 +495,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: Platform.OS === "web" ? "monospace" : undefined,
   },
-  /* closeButton: {
-    margin: 4,
-  }, */
+  closeButton: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    zIndex: 1,
+  },
   snackbar: {
     bottom: 70, // Adjust to avoid FAB
   },

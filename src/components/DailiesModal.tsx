@@ -275,11 +275,11 @@ const DailiesModal = () => {
           },
         ]}
       >
-        <ModalCloseButton onPress={() => setDailiesModalVisible(false)} />
         <View style={styles.header}>
           <Text style={[styles.title, { color: appTheme.colors.primary }]}>
             Daily Challenges
           </Text>
+          <ModalCloseButton onPress={() => setDailiesModalVisible(false)} />
         </View>
 
         <View style={styles.content}>{renderContent()}</View>
@@ -320,7 +320,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 15,
-    paddingRight: 40,
   },
   title: {
     fontSize: 22,

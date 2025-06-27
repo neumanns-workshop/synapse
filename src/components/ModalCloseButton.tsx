@@ -29,10 +29,6 @@ const ModalCloseButton: React.FC<ModalCloseButtonProps> = ({
 
 const styles = StyleSheet.create({
   closeButton: {
-    position: "absolute",
-    right: 5,
-    top: 5,
-    zIndex: 1,
     margin: 0,
   },
 });

@@ -141,7 +141,6 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
           { backgroundColor: colors.surface },
         ]}
       >
-        <ModalCloseButton onPress={onDismiss} />
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerContent}>
@@ -155,6 +154,7 @@ const LabsModal: React.FC<LabsModalProps> = ({ visible, onDismiss }) => {
               </Text>
             </View>
           </View>
+          <ModalCloseButton onPress={onDismiss} />
         </View>
 
         <Divider style={{ marginVertical: 16 }} />
@@ -272,7 +272,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingTop: 8,
-    paddingRight: 40, // for close button
   },
   headerContent: {
     flexDirection: "row",

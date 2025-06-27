@@ -1452,7 +1452,6 @@ const StatsModal = () => {
           },
         ]}
       >
-        <ModalCloseButton onPress={() => setStatsModalVisible(false)} />
         <View
           style={[
             styles.header,
@@ -1462,6 +1461,7 @@ const StatsModal = () => {
           <Text style={[styles.title, { color: appTheme.colors.primary }]}>
             Player Stats & History
           </Text>
+          <ModalCloseButton onPress={() => setStatsModalVisible(false)} />
         </View>
 
         <SegmentedButtons
@@ -1533,7 +1533,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 4,
-    paddingRight: 40,
   },
   title: {
     fontSize: 20,
