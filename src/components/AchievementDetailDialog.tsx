@@ -97,7 +97,10 @@ const AchievementDetailDialog: React.FC<AchievementDetailDialogProps> = ({
             <PaperDialog.Content style={styles.contentContainer}>
               <Text
                 variant="bodyMedium"
-                style={{ color: colors.onSurfaceVariant }}
+                style={[
+                  styles.descriptionText,
+                  { color: colors.onSurfaceVariant },
+                ]}
               >
                 {achievement.description}
               </Text>
@@ -129,16 +132,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingRight: 48, // space for close button
-    paddingLeft: 16,
-    paddingVertical: 12,
+    paddingLeft: 24,
+    paddingTop: 24,
+    paddingBottom: 8,
   },
   dialogTitle: {
     fontWeight: "bold",
-    fontSize: 20,
+    fontSize: 22,
+    lineHeight: 28,
   },
   contentContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  descriptionText: {
+    fontSize: 16,
+    lineHeight: 24,
   },
 });
 
