@@ -63,8 +63,9 @@ const AchievementDetailDialog: React.FC<AchievementDetailDialogProps> = ({
 
 const styles = StyleSheet.create({
   dialogContainer: {
+    paddingTop: 40,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 16,
     maxWidth: 500,
     width: "90%",
     alignSelf: "center",
@@ -74,6 +75,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingRight: 8,
+    paddingLeft: 16,
   },
   dialogTitle: {
     fontWeight: "bold",

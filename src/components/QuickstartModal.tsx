@@ -128,7 +128,6 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
                 />
 
                 <ScrollView
-                  style={{ flex: 1 }}
                   showsVerticalScrollIndicator={false}
                   nestedScrollEnabled={true}
                   contentContainerStyle={{ paddingBottom: 20 }}
@@ -539,18 +538,14 @@ const styles = StyleSheet.create({
     maxWidth: 500,
     maxHeight: "90%",
   },
-  dialogContainer: {
-    flex: 1,
-  },
+  dialogContainer: {},
   dialogBase: {
-    flex: 1,
     borderWidth: 1,
     paddingTop: 40,
     width: "100%",
     alignSelf: "center",
   },
   dialogContent: {
-    flex: 1,
     paddingBottom: 0,
     paddingHorizontal: 0,
   },
