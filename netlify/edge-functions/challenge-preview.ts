@@ -29,12 +29,13 @@ export default async (request: Request, context: Context) => {
 
     // Check if this is a preview request (usually from social media crawlers)
     const userAgent = request.headers.get("user-agent") || "";
-    const isBot = userAgent.includes("bot") || 
-                  userAgent.includes("crawl") || 
-                  userAgent.includes("facebook") ||
-                  userAgent.includes("twitter") ||
-                  userAgent.includes("linkedin") ||
-                  userAgent.includes("telegram");
+    const isBot =
+      userAgent.includes("bot") ||
+      userAgent.includes("crawl") ||
+      userAgent.includes("facebook") ||
+      userAgent.includes("twitter") ||
+      userAgent.includes("linkedin") ||
+      userAgent.includes("telegram");
 
     if (!isBot) {
       // Not a bot, let the main app handle it
@@ -55,21 +56,23 @@ export default async (request: Request, context: Context) => {
     // Call the preview function
     const previewUrl = `/.netlify/functions/preview?${previewParams.toString()}`;
     const previewResponse = await fetch(`${url.origin}${previewUrl}`);
-    
+
     if (!previewResponse.ok) {
       return context.next();
     }
 
     const previewSvg = await previewResponse.text();
-    
+
     // Generate meta tags for social sharing
-    const title = type === "dailychallenge" 
-      ? `Daily Challenge ${date} - ${startWord} → ${targetWord}`
-      : `Word Challenge - ${startWord} → ${targetWord}`;
-    
-    const description = type === "dailychallenge"
-      ? `Try today's daily challenge! Connect "${startWord}" to "${targetWord}" in the fewest moves.`
-      : `Can you connect "${startWord}" to "${targetWord}"? Play this word association challenge!`;
+    const title =
+      type === "dailychallenge"
+        ? `Daily Challenge ${date} - ${startWord} → ${targetWord}`
+        : `Word Challenge - ${startWord} → ${targetWord}`;
+
+    const description =
+      type === "dailychallenge"
+        ? `Try today's daily challenge! Connect "${startWord}" to "${targetWord}" in the fewest moves.`
+        : `Can you connect "${startWord}" to "${targetWord}"? Play this word association challenge!`;
 
     const ogImageUrl = `${url.origin}${previewUrl}`;
 
@@ -127,10 +130,9 @@ export default async (request: Request, context: Context) => {
     return new Response(html, {
       headers: {
         "Content-Type": "text/html",
-        "Cache-Control": "public, max-age=3600"
-      }
+        "Cache-Control": "public, max-age=3600",
+      },
     });
-
   } catch (error) {
     console.error("Edge function error:", error);
     return context.next();

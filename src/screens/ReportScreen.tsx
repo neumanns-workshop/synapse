@@ -25,8 +25,6 @@ import { QRCodeDisplay } from "../components/QRCodeDisplay";
 import WordDefinitionDialog from "../components/WordDefinitionDialog";
 import {
   shareChallenge,
-  generateSecureGameDeepLink,
-  generateSecureDailyChallengeDeepLink,
   generateChallengeMessage,
   generateDailyChallengeTaunt,
   encodePathQuality,
@@ -133,8 +131,15 @@ const ReportScreen = () => {
         if (gameReport.isDailyChallenge && gameReport.dailyChallengeId) {
           // Use separate encoding for clean URL structure
           const quality = gameReport ? encodePathQuality(gameReport) : "";
-          const tsne = gameReport ? encodeCoordinates(gameReport, tsneCoordinates as unknown as Record<string, [number, number]>) : "";
-          const share = generateUrlHash(`${gameReport.dailyChallengeId}:${startWord}:${targetWord}`);
+          const tsne = gameReport
+            ? encodeCoordinates(
+                gameReport,
+                tsneCoordinates as unknown as Record<string, [number, number]>,
+              )
+            : "";
+          const share = generateUrlHash(
+            `${gameReport.dailyChallengeId}:${startWord}:${targetWord}`,
+          );
 
           link = generateEnhancedGameDeepLink(
             "dailychallenge",
@@ -169,7 +174,12 @@ const ReportScreen = () => {
         } else {
           // Use separate encoding for clean URL structure
           const quality = gameReport ? encodePathQuality(gameReport) : "";
-          const tsne = gameReport ? encodeCoordinates(gameReport, tsneCoordinates as unknown as Record<string, [number, number]>) : "";
+          const tsne = gameReport
+            ? encodeCoordinates(
+                gameReport,
+                tsneCoordinates as unknown as Record<string, [number, number]>,
+              )
+            : "";
           const share = generateUrlHash(`${startWord}:${targetWord}`);
 
           link = generateEnhancedGameDeepLink(

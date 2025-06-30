@@ -75,7 +75,12 @@ export const shareChallenge = async ({
   try {
     // Encode quality and coordinates separately for clean URL structure
     const quality = gameReport ? encodePathQuality(gameReport) : "";
-    const tsne = gameReport ? encodeCoordinates(gameReport, tsneCoordinates as unknown as Record<string, [number, number]>) : "";
+    const tsne = gameReport
+      ? encodeCoordinates(
+          gameReport,
+          tsneCoordinates as unknown as Record<string, [number, number]>,
+        )
+      : "";
     const share = generateUrlHash(`${startWord}:${targetWord}`); // Simple hash for security
 
     // Generate the deep link with enhanced structure
@@ -198,7 +203,12 @@ export const shareDailyChallenge = async ({
   try {
     // Encode quality and coordinates separately for clean URL structure
     const quality = gameReport ? encodePathQuality(gameReport) : "";
-    const tsne = gameReport ? encodeCoordinates(gameReport, tsneCoordinates as unknown as Record<string, [number, number]>) : "";
+    const tsne = gameReport
+      ? encodeCoordinates(
+          gameReport,
+          tsneCoordinates as unknown as Record<string, [number, number]>,
+        )
+      : "";
     const share = generateUrlHash(`${challengeId}:${startWord}:${targetWord}`); // Simple hash for security
 
     // Generate the daily challenge deep link with enhanced structure
@@ -876,16 +886,16 @@ export const encodePathQuality = (report: GameReport): string => {
  */
 export const encodeCoordinates = (
   report: GameReport,
-  tsneCoordinates?: Record<string, [number, number]>
+  coordinatesData?: Record<string, [number, number]>,
 ): string => {
   const { playerPath, suggestedPath, status } = report;
 
-  if (!playerPath || playerPath.length === 0 || !tsneCoordinates) {
+  if (!playerPath || playerPath.length === 0 || !coordinatesData) {
     return "";
   }
 
   const allWords = [...playerPath];
-  
+
   // Add suggested path words if game was given up
   if (status === "given_up" && suggestedPath && suggestedPath.length > 1) {
     allWords.push(...suggestedPath.slice(1));
@@ -894,7 +904,7 @@ export const encodeCoordinates = (
   // Encode coordinates as truncated integers for compact representation
   const coordinatePoints: string[] = [];
   for (const word of allWords) {
-    const coords = tsneCoordinates[word];
+    const coords = coordinatesData[word];
     if (coords) {
       // Truncate to 1 decimal place and multiply by 10 to avoid decimals
       // Then convert to base36 for compactness
@@ -903,29 +913,31 @@ export const encodeCoordinates = (
       coordinatePoints.push(`${x},${y}`);
     }
   }
-  
-  return coordinatePoints.join(';');
+
+  return coordinatePoints.join(";");
 };
 
 /**
  * Decode enhanced game report data for preview generation
  */
-export const decodeEnhancedGameReportForSharing = (encodedData: string): {
+export const decodeEnhancedGameReportForSharing = (
+  encodedData: string,
+): {
   pathQuality: string;
   coordinates: Array<{ x: number; y: number }>;
   words?: string[];
 } => {
   const params = new URLSearchParams(encodedData);
-  const pathQuality = params.get('quality') || '';
-  const tsneData = params.get('tsne') || '';
-  const wordsData = params.get('words') || '';
+  const pathQuality = params.get("quality") || "";
+  const tsneData = params.get("tsne") || "";
+  const wordsData = params.get("words") || "";
 
   const coordinates: Array<{ x: number; y: number }> = [];
-  
+
   if (tsneData) {
-    const points = tsneData.split(';');
+    const points = tsneData.split(";");
     for (const point of points) {
-      const [xStr, yStr] = point.split(',');
+      const [xStr, yStr] = point.split(",");
       if (xStr && yStr) {
         // Convert back from base36 and divide by 10 to restore decimal
         const x = parseInt(xStr, 36) / 10;
@@ -936,11 +948,11 @@ export const decodeEnhancedGameReportForSharing = (encodedData: string): {
   }
 
   // Decode word list
-  let words: string[] | undefined = undefined;
+  let words: string[] | undefined;
   if (wordsData) {
     try {
       const decodedWords = decodeURIComponent(wordsData);
-      words = decodedWords.split(',').filter(word => word.trim().length > 0);
+      words = decodedWords.split(",").filter((word) => word.trim().length > 0);
     } catch (error) {
       console.error("Error decoding words:", error);
     }
@@ -949,7 +961,7 @@ export const decodeEnhancedGameReportForSharing = (encodedData: string): {
   return {
     pathQuality,
     coordinates,
-    words
+    words,
   };
 };
 
@@ -957,7 +969,7 @@ export const decodeEnhancedGameReportForSharing = (encodedData: string): {
  * Encode game report data into a compact visual representation
  * S = Start (🟩), T = Target (🟥), C = Current (🟦), N = Normal (⬜),
  * G = Global optimal (🟨), L = Local optimal (🟪), R = Remaining path (⚫)
- * 
+ *
  * @deprecated Use encodeEnhancedGameReportForSharing for better preview support
  */
 export const encodeGameReportForSharing = (report: GameReport): string => {
@@ -1037,7 +1049,7 @@ export const generateEnhancedGameDeepLink = (
   params.set("type", type);
   params.set("start", startWord);
   params.set("target", targetWord);
-  
+
   if (share) params.set("share", share);
   if (quality) params.set("quality", quality);
   if (tsne) params.set("tsne", tsne);

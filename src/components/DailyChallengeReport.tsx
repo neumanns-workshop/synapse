@@ -19,7 +19,6 @@ import {
 
 import {
   shareDailyChallenge,
-  generateSecureDailyChallengeDeepLink,
   generateDailyChallengeTaunt,
   encodePathQuality,
   encodeCoordinates,
@@ -106,8 +105,15 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
       if (Platform.OS === "web") {
         // Use separate encoding for clean URL structure
         const quality = gameReport ? encodePathQuality(gameReport) : "";
-        const tsne = gameReport ? encodeCoordinates(gameReport, tsneCoordinates as unknown as Record<string, [number, number]>) : "";
-        const share = generateUrlHash(`${challenge.id}:${challenge.startWord}:${challenge.targetWord}`);
+        const tsne = gameReport
+          ? encodeCoordinates(
+              gameReport,
+              tsneCoordinates as unknown as Record<string, [number, number]>,
+            )
+          : "";
+        const share = generateUrlHash(
+          `${challenge.id}:${challenge.startWord}:${challenge.targetWord}`,
+        );
 
         const link = generateEnhancedGameDeepLink(
           "dailychallenge",

@@ -20,8 +20,6 @@ import {
 
 import {
   shareChallenge,
-  generateSecureGameDeepLink,
-  generateSecureDailyChallengeDeepLink,
   generateChallengeMessage,
   generateDailyChallengeTaunt,
   encodePathQuality,
@@ -147,15 +145,24 @@ const GameReportModal = () => {
           gameReportModalReport.dailyChallengeId
         ) {
           // Use separate encoding for clean URL structure
-          const quality = gameReportModalReport ? encodePathQuality(gameReportModalReport) : "";
-          const tsne = gameReportModalReport ? encodeCoordinates(gameReportModalReport, tsneCoordinates as unknown as Record<string, [number, number]>) : "";
-          const share = generateUrlHash(`${gameReportModalReport.dailyChallengeId}:${startWord}:${targetWord}`);
+          const quality = gameReportModalReport
+            ? encodePathQuality(gameReportModalReport)
+            : "";
+          const tsne = gameReportModalReport
+            ? encodeCoordinates(
+                gameReportModalReport,
+                tsneCoordinates as unknown as Record<string, [number, number]>,
+              )
+            : "";
+          const share = generateUrlHash(
+            `${gameReportModalReport.dailyChallengeId}:${startWord}:${targetWord}`,
+          );
 
           link = generateEnhancedGameDeepLink(
             "dailychallenge",
             startWord,
             targetWord,
-            undefined, // no theme for daily challenges  
+            undefined, // no theme for daily challenges
             share,
             quality,
             tsne,
@@ -183,8 +190,15 @@ const GameReportModal = () => {
           });
         } else {
           // Use separate encoding for clean URL structure
-          const quality = gameReportModalReport ? encodePathQuality(gameReportModalReport) : "";
-          const tsne = gameReportModalReport ? encodeCoordinates(gameReportModalReport, tsneCoordinates as unknown as Record<string, [number, number]>) : "";
+          const quality = gameReportModalReport
+            ? encodePathQuality(gameReportModalReport)
+            : "";
+          const tsne = gameReportModalReport
+            ? encodeCoordinates(
+                gameReportModalReport,
+                tsneCoordinates as unknown as Record<string, [number, number]>,
+              )
+            : "";
           const share = generateUrlHash(`${startWord}:${targetWord}`);
 
           link = generateEnhancedGameDeepLink(
