@@ -115,10 +115,6 @@ module.exports = async function (env, argv) {
   );
 
   // Load environment variables from both .env files and process.env
-  // NOTE: The default Expo webpack config already handles this automatically.
-  // This custom logic is redundant and can cause issues if it conflicts with
-  // Expo's internal implementation. We are removing it to restore default behavior.
-  /*
   const dotenv = require("dotenv");
   const fs = require("fs");
 
@@ -170,19 +166,17 @@ module.exports = async function (env, argv) {
       config.plugins.push(new webpack.DefinePlugin(envDefinitions));
     }
   }
-  */
 
   // Debug: Log what environment variables we're injecting
   console.log("🔧 Webpack mode:", mode);
-  // The default Expo config will handle env vars, so we don't need custom logging.
-  // console.log("🔧 Webpack: Found environment variables:", Object.keys(envVars));
-  // if (Object.keys(envVars).length > 0) {
-  //   console.log(
-  //     "🔧 Webpack: Injecting environment variables into DefinePlugin",
-  //   );
-  // } else {
-  //   console.log("⚠️ Webpack: No EXPO_PUBLIC_ environment variables found!");
-  // }
+  console.log("🔧 Webpack: Found environment variables:", Object.keys(envVars));
+  if (Object.keys(envVars).length > 0) {
+    console.log(
+      "🔧 Webpack: Injecting environment variables into DefinePlugin",
+    );
+  } else {
+    console.log("⚠️ Webpack: No EXPO_PUBLIC_ environment variables found!");
+  }
 
   // Add performance hints for production
   if (mode === "production") {
