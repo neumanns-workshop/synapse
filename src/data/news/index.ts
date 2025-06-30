@@ -2,11 +2,11 @@
 export type { NewsArticle } from "./types";
 
 // Import types
-import { welcome2025 } from "./posts";
+import { welcome2025, beta110Update } from "./posts";
 import type { NewsArticle } from "./types";
 
 // Export all articles as a flat array
-export const newsArticles: NewsArticle[] = [welcome2025];
+export const newsArticles: NewsArticle[] = [beta110Update, welcome2025];
 
 // Helper function to get unread articles
 export const getUnreadArticles = (readArticleIds: string[]): NewsArticle[] => {
