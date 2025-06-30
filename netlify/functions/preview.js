@@ -360,13 +360,13 @@ exports.handler = async (event) => {
     const url = new URL(event.rawUrl);
 
     // Parse the new URL structure parameters
-    const type = url.searchParams.get("type"); // "challenge" or "dailychallenge"
+    const type = url.searchParams.get("type");
     const startWord = url.searchParams.get("start");
     const targetWord = url.searchParams.get("target");
     const quality = url.searchParams.get("quality"); // path quality encoding
     const tsne = url.searchParams.get("tsne"); // coordinate encoding
     const theme = url.searchParams.get("theme");
-    const date = url.searchParams.get("date"); // for daily challenges
+    const date = url.searchParams.get("date");
 
     // Validate required parameters
     if (!type || !startWord || !targetWord) {
@@ -376,28 +376,72 @@ exports.handler = async (event) => {
       };
     }
 
-    // Determine if it's a daily challenge
-    const isDaily = type === "dailychallenge";
+    // Colors for graph visualization
+    const colors = {
+      background: "#ffffff", // White background for better contrast
+      startNode: "#4CAF50",
+      endNode: "#F44336", 
+      currentNode: "#2196F3",
+      pathNode: "#9C27B0",
+      globalOptimalNode: "#FF9800",
+      localOptimalNode: "#9C27B0",
+      normalNode: "#9E9E9E",
+      pathLink: "#9C27B0",
+    };
 
-    // For daily challenges, we need the date
-    if (isDaily && !date) {
-      return {
-        statusCode: 400,
-        body: "Missing required parameter for daily challenge: date",
-      };
+    let svgContent = "";
+
+    // Try to decode and visualize the path if we have the data
+    if (quality && tsne) {
+      try {
+        const shareData = `quality=${quality}&tsne=${tsne}`;
+        const decodedData = decodeEnhancedShareData(shareData);
+        
+        if (decodedData.coordinates && decodedData.coordinates.length > 0) {
+          // Create player path array
+          const playerPath = [startWord];
+          for (let i = 1; i < decodedData.coordinates.length - 1; i++) {
+            playerPath.push(""); // Anonymous intermediate nodes
+          }
+          playerPath.push(targetWord);
+
+          // Generate just the graph visualization
+          const graphSVG = generateGraphVisualization(decodedData, colors, playerPath);
+          
+          // Calculate graph bounds for proper sizing
+          const coordinates = decodedData.coordinates;
+          const minX = Math.min(...coordinates.map(c => c.x));
+          const maxX = Math.max(...coordinates.map(c => c.x));
+          const minY = Math.min(...coordinates.map(c => c.y));
+          const maxY = Math.max(...coordinates.map(c => c.y));
+          
+          const padding = 40;
+          const graphWidth = 1200 - 2 * padding;
+          const graphHeight = 630 - 2 * padding;
+          
+          svgContent = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+            <rect width="1200" height="630" fill="${colors.background}"/>
+            <g transform="translate(${padding}, ${padding})">
+              ${graphSVG}
+            </g>
+          </svg>`;
+        }
+      } catch (error) {
+        console.log("Error processing graph data:", error);
+      }
     }
 
-    // Generate the preview image as SVG
-    const svgContent = generateSVGPreview({
-      startWord,
-      targetWord,
-      type,
-      date,
-      theme: theme || "dark",
-      quality,
-      tsne,
-      isDaily,
-    });
+    // Fallback if no graph data or processing failed
+    if (!svgContent) {
+      svgContent = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1200" height="630" fill="${colors.background}"/>
+        <circle cx="200" cy="315" r="30" fill="${colors.startNode}"/>
+        <line x1="230" y1="315" x2="970" y2="315" stroke="${colors.pathLink}" stroke-width="4"/>
+        <circle cx="1000" cy="315" r="30" fill="${colors.endNode}"/>
+        <text x="200" y="365" text-anchor="middle" font-family="Arial" font-size="16" fill="#333">${startWord}</text>
+        <text x="1000" y="365" text-anchor="middle" font-family="Arial" font-size="16" fill="#333">${targetWord}</text>
+      </svg>`;
+    }
 
     // Convert SVG to PNG using Sharp
     const pngBuffer = await sharp(Buffer.from(svgContent)).png().toBuffer();
@@ -407,15 +451,30 @@ exports.handler = async (event) => {
       headers: {
         "Content-Type": "image/png",
         "Cache-Control": "public, max-age=3600",
+        "Access-Control-Allow-Origin": "*",
       },
       body: pngBuffer.toString("base64"),
       isBase64Encoded: true,
     };
   } catch (error) {
     console.error("Preview generation error:", error);
+    
+    // Simple fallback
+    const fallbackSvg = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+      <rect width="1200" height="630" fill="#f0f0f0"/>
+      <circle cx="200" cy="315" r="20" fill="#4CAF50"/>
+      <line x1="220" y1="315" x2="980" y2="315" stroke="#9C27B0" stroke-width="3"/>
+      <circle cx="1000" cy="315" r="20" fill="#F44336"/>
+    </svg>`;
+    
     return {
-      statusCode: 500,
-      body: "Error generating preview",
+      statusCode: 200,
+      headers: {
+        "Content-Type": "image/svg+xml",
+        "Cache-Control": "public, max-age=3600",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: fallbackSvg,
     };
   }
 };
