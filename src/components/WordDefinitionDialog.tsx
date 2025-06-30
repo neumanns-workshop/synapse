@@ -21,6 +21,7 @@ import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import AnimatedPaperButton from "./AnimatedButton";
 import CustomIcon from "./CustomIcon";
+import ModalCloseButton from "./ModalCloseButton";
 
 interface WordDefinitionDialogProps {
   word: string;
@@ -212,6 +213,10 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
               },
             ]}
           >
+            <ModalCloseButton
+              onPress={onDismiss}
+              style={{ position: "absolute", top: 12, right: 12, zIndex: 1 }}
+            />
             <View style={styles.titleContainer}>
               {canBacktrackToWord ? (
                 <AnimatedPaperButton
@@ -275,21 +280,6 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
                   )}
                 </PaperDialog.Title>
               )}
-              <AnimatedPaperButton
-                mode="text"
-                onPress={onDismiss}
-                icon={() => (
-                  <CustomIcon
-                    source="close"
-                    size={24}
-                    color={colors.onSurface}
-                  />
-                )}
-                style={styles.closeButton}
-                contentStyle={styles.closeButtonContent}
-              >
-                ""
-              </AnimatedPaperButton>
             </View>
             <View style={styles.contentContainer}>
               <ScrollView
@@ -353,28 +343,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     minHeight: 200,
     maxHeight: "80%",
+    paddingTop: 40,
   },
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingRight: 8,
+    paddingLeft: 16,
   },
   dialogTitle: {
     fontWeight: "bold",
     fontSize: 20,
     flex: 1,
-  },
-  closeButton: {
-    margin: 0,
-    minWidth: 40,
-    width: 40,
-    height: 40,
-  },
-  closeButtonContent: {
-    width: 40,
-    height: 40,
-    margin: 0,
   },
   scrollView: {
     flexShrink: 1,

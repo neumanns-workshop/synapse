@@ -36,6 +36,7 @@ import GraphVisualization from "./GraphVisualization";
 import PlayerPathDisplay from "./PlayerPathDisplay";
 import { QRCodeDisplay } from "./QRCodeDisplay";
 import WordDefinitionDialog from "./WordDefinitionDialog";
+import ModalCloseButton from "./ModalCloseButton";
 
 const GameReportModal = () => {
   const { colors } = useTheme() as ExtendedTheme;
@@ -237,18 +238,15 @@ const GameReportModal = () => {
         <Surface
           style={[styles.modalSurface, { backgroundColor: colors.surface }]}
         >
+          <ModalCloseButton
+            onPress={hideGameReportModal}
+            style={styles.closeButton}
+          />
           {/* Header with close button */}
           <View style={styles.modalHeader}>
             <Text variant="headlineSmall" style={{ color: colors.primary }}>
               Game Report
             </Text>
-            <IconButton
-              icon={() => (
-                <CustomIcon source="close" size={24} color={colors.onSurface} />
-              )}
-              size={24}
-              onPress={hideGameReportModal}
-            />
           </View>
 
           <ScrollView style={styles.scrollView}>
@@ -438,13 +436,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.1)",
   },
   scrollView: {
     flex: 1,
     padding: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   graphContainer: {
     height: 250,
@@ -496,6 +497,15 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontSize: 14,
     fontFamily: Platform.OS === "web" ? "monospace" : undefined,
+  },
+  closeButton: {
+    position: "absolute",
+    right: 10,
+    top: 10,
+    zIndex: 1,
+  },
+  snackbar: {
+    bottom: 70, // Adjust to avoid FAB
   },
 });
 

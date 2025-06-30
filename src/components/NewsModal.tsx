@@ -26,6 +26,7 @@ import {
 import type { NewsArticle } from "../data/news";
 import { unifiedDataStore } from "../services/UnifiedDataStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
+import ModalCloseButton from "./ModalCloseButton";
 
 interface NewsModalProps {
   visible: boolean;
@@ -136,23 +137,29 @@ const NewsModal: React.FC<NewsModalProps> = ({ visible, onDismiss }) => {
             ]}
           >
             <Dialog.Content style={{ maxHeight: 500, paddingBottom: 0 }}>
-              <View style={styles.newsHeaderContainer}>
-                <Dialog.Title
-                  style={[styles.tabTitle, { color: colors.primary, flex: 1 }]}
-                >
-                  News & Updates
-                </Dialog.Title>
-                {unreadArticles.length > 0 && (
-                  <Button
-                    mode="outlined"
-                    onPress={handleMarkAllRead}
-                    style={styles.markAllReadButtonSmall}
-                    labelStyle={styles.markAllReadButtonLabel}
-                    compact
+              <View style={styles.header}>
+                <View style={styles.newsHeaderContainer}>
+                  <Dialog.Title
+                    style={[
+                      styles.tabTitle,
+                      { color: colors.primary, flex: 1 },
+                    ]}
                   >
-                    Mark All Read
-                  </Button>
-                )}
+                    News & Updates
+                  </Dialog.Title>
+                  {unreadArticles.length > 0 && (
+                    <Button
+                      mode="outlined"
+                      onPress={handleMarkAllRead}
+                      style={styles.markAllReadButtonSmall}
+                      labelStyle={styles.markAllReadButtonLabel}
+                      compact
+                    >
+                      Mark All Read
+                    </Button>
+                  )}
+                </View>
+                <ModalCloseButton onPress={handleClose} />
               </View>
 
               <ScrollView
@@ -275,6 +282,11 @@ const styles = StyleSheet.create({
     width: "100%",
     alignSelf: "center",
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
   tabTitle: {
     fontWeight: "bold",
     fontSize: 22,
@@ -285,11 +297,15 @@ const styles = StyleSheet.create({
   newsHeaderContainer: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 12,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
+    justifyContent: "space-between",
   },
   markAllReadButtonSmall: {
     paddingHorizontal: 8,
     paddingVertical: 4,
+    marginLeft: 16,
   },
   markAllReadButtonLabel: {
     fontSize: 14,

@@ -15,6 +15,7 @@ import StripeService from "../services/StripeService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import CustomIcon from "./CustomIcon";
+import ModalCloseButton from "./ModalCloseButton";
 
 // Define different upgrade contexts for targeted messaging
 export type UpgradeContext =
@@ -181,17 +182,20 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
           <View style={styles.modalContent}>
             <Card style={[styles.card, { backgroundColor: colors.surface }]}>
               <View style={styles.header}>
-                <CustomIcon
-                  source="brain"
-                  size={48}
-                  color={customColors.localOptimalNode}
-                />
-                <Text
-                  variant="headlineSmall"
-                  style={[styles.title, { color: colors.onSurface }]}
-                >
-                  {contextContent.title}
-                </Text>
+                <View style={styles.headerLeft}>
+                  <CustomIcon
+                    source="brain"
+                    size={32}
+                    color={customColors.localOptimalNode}
+                  />
+                  <Text
+                    variant="headlineSmall"
+                    style={[styles.title, { color: colors.onSurface }]}
+                  >
+                    {contextContent.title}
+                  </Text>
+                </View>
+                <ModalCloseButton onPress={onDismiss} />
               </View>
 
               <View style={styles.content}>
@@ -315,11 +319,17 @@ const styles = StyleSheet.create({
     minWidth: 300,
   },
   header: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 24,
   },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
   title: {
-    marginTop: 12,
     textAlign: "center",
     fontWeight: "bold",
   },
