@@ -380,7 +380,7 @@ exports.handler = async (event) => {
     const colors = {
       background: "#ffffff", // White background for better contrast
       startNode: "#4CAF50",
-      endNode: "#F44336", 
+      endNode: "#F44336",
       currentNode: "#2196F3",
       pathNode: "#9C27B0",
       globalOptimalNode: "#FF9800",
@@ -396,7 +396,7 @@ exports.handler = async (event) => {
       try {
         const shareData = `quality=${quality}&tsne=${tsne}`;
         const decodedData = decodeEnhancedShareData(shareData);
-        
+
         if (decodedData.coordinates && decodedData.coordinates.length > 0) {
           // Create player path array
           const playerPath = [startWord];
@@ -406,19 +406,23 @@ exports.handler = async (event) => {
           playerPath.push(targetWord);
 
           // Generate just the graph visualization
-          const graphSVG = generateGraphVisualization(decodedData, colors, playerPath);
-          
+          const graphSVG = generateGraphVisualization(
+            decodedData,
+            colors,
+            playerPath,
+          );
+
           // Calculate graph bounds for proper sizing
           const coordinates = decodedData.coordinates;
-          const minX = Math.min(...coordinates.map(c => c.x));
-          const maxX = Math.max(...coordinates.map(c => c.x));
-          const minY = Math.min(...coordinates.map(c => c.y));
-          const maxY = Math.max(...coordinates.map(c => c.y));
-          
+          const minX = Math.min(...coordinates.map((c) => c.x));
+          const maxX = Math.max(...coordinates.map((c) => c.x));
+          const minY = Math.min(...coordinates.map((c) => c.y));
+          const maxY = Math.max(...coordinates.map((c) => c.y));
+
           const padding = 40;
           const graphWidth = 1200 - 2 * padding;
           const graphHeight = 630 - 2 * padding;
-          
+
           svgContent = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
             <rect width="1200" height="630" fill="${colors.background}"/>
             <g transform="translate(${padding}, ${padding})">
@@ -458,7 +462,7 @@ exports.handler = async (event) => {
     };
   } catch (error) {
     console.error("Preview generation error:", error);
-    
+
     // Simple fallback
     const fallbackSvg = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
       <rect width="1200" height="630" fill="#f0f0f0"/>
@@ -466,7 +470,7 @@ exports.handler = async (event) => {
       <line x1="220" y1="315" x2="980" y2="315" stroke="#9C27B0" stroke-width="3"/>
       <circle cx="1000" cy="315" r="20" fill="#F44336"/>
     </svg>`;
-    
+
     return {
       statusCode: 200,
       headers: {
