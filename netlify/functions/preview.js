@@ -1,4 +1,5 @@
 // Enhanced Netlify function for generating preview images
+const sharp = require("sharp");
 
 // Generate SVG graph visualization from decoded data
 function generateGraphVisualization(decodedData, colors, playerPath) {
@@ -386,7 +387,7 @@ exports.handler = async (event) => {
       };
     }
 
-    // Generate the preview image
+    // Generate the preview image as SVG
     const svgContent = generateSVGPreview({
       startWord,
       targetWord,
@@ -398,13 +399,17 @@ exports.handler = async (event) => {
       isDaily,
     });
 
+    // Convert SVG to PNG using Sharp
+    const pngBuffer = await sharp(Buffer.from(svgContent)).png().toBuffer();
+
     return {
       statusCode: 200,
       headers: {
-        "Content-Type": "image/svg+xml",
+        "Content-Type": "image/png",
         "Cache-Control": "public, max-age=3600",
       },
-      body: svgContent,
+      body: pngBuffer.toString("base64"),
+      isBase64Encoded: true,
     };
   } catch (error) {
     console.error("Preview generation error:", error);
