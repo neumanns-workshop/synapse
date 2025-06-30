@@ -13,10 +13,10 @@ export const getUnreadArticles = (readArticleIds: string[]): NewsArticle[] => {
   return newsArticles.filter((article) => !readArticleIds.includes(article.id));
 };
 
-// Helper function to get articles sorted by date (oldest first)
+// Helper function to get articles sorted by date (newest first)
 export const getSortedArticles = (): NewsArticle[] => {
   return [...newsArticles].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 };
 
