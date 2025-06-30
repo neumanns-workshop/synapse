@@ -16,7 +16,6 @@ import {
   Text,
   Dialog,
   Button,
-  IconButton,
 } from "react-native-paper";
 
 import {
@@ -30,7 +29,7 @@ import {
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import AchievementDetailDialog from "./AchievementDetailDialog";
-import CustomIcon from "./CustomIcon";
+
 import GameReportDisplay from "./GameReportDisplay";
 import GraphVisualization from "./GraphVisualization";
 import PlayerPathDisplay from "./PlayerPathDisplay";

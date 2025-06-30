@@ -21,7 +21,7 @@ interface DailyChallengesCalendarProps {
 const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
   onChallengeSelect,
 }) => {
-  const { colors, customColors } = useTheme() as ExtendedTheme;
+  const { colors } = useTheme() as ExtendedTheme;
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [challenges, setChallenges] = useState<DailyChallenge[]>([]);
   const [progress, setProgress] = useState<

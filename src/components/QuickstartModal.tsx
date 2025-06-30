@@ -31,7 +31,7 @@ const QuickstartModal: React.FC<QuickstartModalProps> = ({
   visible,
   onDismiss,
 }) => {
-  const { customColors, colors, roundness } = useTheme() as ExtendedTheme;
+  const { customColors, colors } = useTheme() as ExtendedTheme;
   const { startTutorial } = useTutorial();
   const [activeTab, setActiveTab] = useState("howtoplay");
 
