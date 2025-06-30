@@ -1,6 +1,6 @@
 {
   "name": "synapse-native",
-  "version": "1.0.0",
+  "version": "1.1.0-beta",
   "private": true,
   "description": "Navigate between words through semantic connections. Find the shortest path from start to target by choosing related words. Daily AI challenges and friend competitions!",
   "keywords": [
