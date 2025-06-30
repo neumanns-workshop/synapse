@@ -7,12 +7,12 @@ import {
 
 import { useGameStore } from "../stores/useGameStore";
 import { Logger } from "../utils/logger";
-import type { GameReport } from "../utils/gameReportUtils";
+
 import { UnifiedDataStore, UnifiedAppData } from "./UnifiedDataStore";
 
 // Environment variables (set in your .env file)
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   // Temporarily comment out the throw to see the log even if vars are missing
@@ -106,12 +106,6 @@ interface NewsStatusData {
   lastChecked: number;
 }
 
-interface GameHistoryItem extends Partial<GameReport> {
-  id?: string;
-  timestamp: number;
-  [key: string]: unknown;
-}
-
 export class SupabaseService {
   private static instance: SupabaseService;
   private supabase: SupabaseClient;
@@ -126,40 +120,41 @@ export class SupabaseService {
 
   private constructor() {
     // ACCESS ENV VARS AND CHECK HERE:
-    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
-    const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim();
+    const localSupabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL?.trim();
+    const localSupabaseAnonKey =
+      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim();
 
     // Only throw error in non-test environments
     if (
-      !supabaseUrl ||
-      !supabaseAnonKey ||
-      supabaseUrl === "" ||
-      supabaseAnonKey === ""
+      !localSupabaseUrl ||
+      !localSupabaseAnonKey ||
+      localSupabaseUrl === "" ||
+      localSupabaseAnonKey === ""
     ) {
       // Skip error in test environments (Jest sets NODE_ENV to 'test')
       if (process.env.NODE_ENV !== "test") {
         console.error("❌ Missing Supabase environment variables");
-        console.error("URL present:", !!supabaseUrl);
-        console.error("Key present:", !!supabaseAnonKey);
+        console.error("URL present:", !!localSupabaseUrl);
+        console.error("Key present:", !!localSupabaseAnonKey);
         throw new Error(
           "Missing Supabase environment variables. Check .env file and restart server.",
         );
       }
 
       // Use default test values if in test environment
-      const testUrl = supabaseUrl || "https://test.supabase.co";
-      const testKey = supabaseAnonKey || "test-anon-key";
+      const testUrl = localSupabaseUrl || "https://test.supabase.co";
+      const testKey = localSupabaseAnonKey || "test-anon-key";
       this.supabase = createClient(testUrl, testKey);
     } else {
       // Validate URL format before creating client
       try {
-        new URL(supabaseUrl);
-        this.supabase = createClient(supabaseUrl, supabaseAnonKey);
+        new URL(localSupabaseUrl!);
+        this.supabase = createClient(localSupabaseUrl!, localSupabaseAnonKey!);
       } catch (urlError) {
         console.error(
           "❌ Invalid Supabase URL format - check environment variables",
         );
-        console.error("URL that failed validation:", supabaseUrl);
+        console.error("URL that failed validation:", localSupabaseUrl);
         throw new Error(
           `Invalid Supabase URL format. Please check your environment variables.`,
         );
@@ -1604,10 +1599,10 @@ export class SupabaseService {
   ): Promise<{ data: T | null; error: Error | null }> {
     try {
       // Get environment variables at runtime to support testing
-      const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-      const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+      const functionSupabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+      const functionSupabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-      if (!supabaseUrl || !supabaseAnonKey) {
+      if (!functionSupabaseUrl || !functionSupabaseAnonKey) {
         // Skip error in test environments (Jest sets NODE_ENV to 'test')
         if (process.env.NODE_ENV !== "test") {
           throw new Error(
@@ -1616,8 +1611,8 @@ export class SupabaseService {
         }
 
         // Use default test values if in test environment
-        const testUrl = supabaseUrl || "https://test.supabase.co";
-        const testKey = supabaseAnonKey || "test-anon-key";
+        const testUrl = functionSupabaseUrl || "https://test.supabase.co";
+        const testKey = functionSupabaseAnonKey || "test-anon-key";
 
         const headers: HeadersInit = {
           apikey: testKey,
@@ -1664,7 +1659,7 @@ export class SupabaseService {
       }
 
       const headers: HeadersInit = {
-        apikey: supabaseAnonKey,
+        apikey: functionSupabaseAnonKey,
         "Content-Type": "application/json",
       };
 
@@ -1684,7 +1679,7 @@ export class SupabaseService {
       }
 
       const response = await fetch(
-        `${supabaseUrl}/functions/v1/${functionName}`,
+        `${functionSupabaseUrl}/functions/v1/${functionName}`,
         {
           method: "POST",
           headers,

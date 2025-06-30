@@ -8,7 +8,6 @@ import type {
   WordCollectionWithStatus,
 } from "../features/wordCollections";
 import {
-  getFilteredWordCollections,
   getAllWordCollectionsWithStatus,
   allWordCollections,
 } from "../features/wordCollections";
@@ -560,8 +559,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     const {
       graphData,
       shouldRestoreTempGame,
-      hasPlayedTodaysChallenge,
-      currentDailyChallenge,
       remainingFreeGames,
       upgradePromptVisible,
       upgradePromptDismissedThisSession,

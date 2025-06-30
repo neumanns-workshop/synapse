@@ -1,15 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Modal as RNModal } from "react-native";
 
-import {
-  Modal,
-  Text,
-  Button,
-  Card,
-  useTheme,
-  ActivityIndicator,
-  Portal,
-} from "react-native-paper";
+import { Text, Button, Card, useTheme } from "react-native-paper";
 
 import StripeService from "../services/StripeService";
 import { useGameStore } from "../stores/useGameStore";
@@ -136,14 +128,7 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
     (state) => state.setDailiesModalVisible,
   );
   const [stripeService] = useState(() => StripeService.getInstance());
-  const [pricing, setPricing] = useState(stripeService.getPricingInfo());
-  const [isLoading, setIsLoading] = useState(false);
-  const [stripeAvailable, setStripeAvailable] = useState(false);
-
-  // Check if Stripe is available
-  useEffect(() => {
-    stripeService.isAvailable().then(setStripeAvailable);
-  }, [stripeService]);
+  const [pricing] = useState(stripeService.getPricingInfo());
 
   // Get context-specific content
   const contextContent = getContextContent(
@@ -252,7 +237,6 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
                   mode="outlined"
                   onPress={onDismiss}
                   style={styles.dismissButton}
-                  disabled={isLoading}
                 >
                   Maybe Later
                 </Button>
@@ -260,24 +244,15 @@ const UpgradePrompt: React.FC<UpgradePromptProps> = ({
                   mode="contained"
                   onPress={handleUpgrade}
                   style={styles.upgradeButton}
-                  icon={
-                    isLoading
-                      ? undefined
-                      : () => (
-                          <CustomIcon
-                            source="brain"
-                            size={20}
-                            color={colors.onPrimary}
-                          />
-                        )
-                  }
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <ActivityIndicator size="small" color={colors.onPrimary} />
-                  ) : (
-                    contextContent.ctaText
+                  icon={() => (
+                    <CustomIcon
+                      source="brain"
+                      size={20}
+                      color={colors.onPrimary}
+                    />
                   )}
+                >
+                  {contextContent.ctaText}
                 </Button>
               </View>
             </Card>

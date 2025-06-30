@@ -37,7 +37,7 @@ const NewsModal: React.FC<NewsModalProps> = ({ visible, onDismiss }) => {
 
   // News-related state
   const [readArticleIds, setReadArticleIds] = useState<string[]>([]);
-  const [newsLoading, setNewsLoading] = useState(true);
+  const [, setNewsLoading] = useState(true);
 
   // Scale animation value
   const scale = useSharedValue(0.9);

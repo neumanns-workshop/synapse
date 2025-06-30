@@ -19,7 +19,7 @@ const MODAL_WIDTH = Math.min(SCREEN_WIDTH - 40, 500); // Max width of 500, or sc
 const MODAL_HEIGHT = Math.min(SCREEN_HEIGHT - 80, 540); // Dynamic height based on screen size
 
 const TutorialModal: React.FC = () => {
-  const { colors, customColors } = useTheme() as ExtendedTheme;
+  const { colors } = useTheme() as ExtendedTheme;
   const {
     showTutorial,
     currentStep,

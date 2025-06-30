@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   ScrollView,
@@ -8,7 +8,6 @@ import {
   Platform,
 } from "react-native";
 
-import * as ExpoClipboard from "expo-clipboard";
 import {
   Modal,
   Portal,
@@ -20,33 +19,17 @@ import {
   Surface,
   Chip,
   ProgressBar,
-  Dialog,
-  TextInput,
   Snackbar,
 } from "react-native-paper";
 
-import { useAuth } from "../context/AuthContext";
 import { useTheme as useAppTheme } from "../context/ThemeContext";
 import { allAchievements, Achievement } from "../features/achievements";
-import type {
-  WordCollection,
-  WordCollectionWithStatus,
-} from "../features/wordCollections";
-import {
-  shareChallenge,
-  generateSecureGameDeepLink,
-  generateSecureDailyChallengeDeepLink,
-  generateChallengeMessage,
-  generateDailyChallengeTaunt,
-  encodeGameReportForSharing,
-} from "../services/SharingService";
+import type { WordCollectionWithStatus } from "../features/wordCollections";
 import {
   loadGameHistory,
   getLifetimeStats,
   getUnlockedAchievementIds,
   getWordCollectionsProgress,
-  resetAllPlayerData,
-  type LifetimeStats,
   type WordCollectionProgress,
 } from "../services/StorageAdapter";
 import { unifiedDataStore } from "../services/UnifiedDataStore";
@@ -54,10 +37,6 @@ import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type { GameReport } from "../utils/gameReportUtils";
 import WordDefinitionDialog from "./WordDefinitionDialog";
-import { QRCodeDisplay } from "./QRCodeDisplay";
-import PlayerPathDisplay from "./PlayerPathDisplay";
-import GraphVisualization from "./GraphVisualization";
-import GameReportDisplay from "./GameReportDisplay";
 import CustomIcon from "./CustomIcon";
 import AchievementDetailDialog from "./AchievementDetailDialog";
 
@@ -451,118 +430,20 @@ const WordCollectionCard = ({
   );
 };
 
-// Add new HighlightStatBox component
-const HighlightStatBox = ({ label, value, unit = "", icon, iconColor }) => {
-  const { theme: appTheme } = useAppTheme();
-
-  return (
-    <View
-      style={[
-        styles.highlightStatBox,
-        { backgroundColor: appTheme.colors.surface },
-      ]}
-    >
-      <View style={styles.highlightStatHeader}>
-        <CustomIcon source={icon} size={20} color={iconColor} />
-        <Text
-          style={[
-            styles.highlightStatLabel,
-            { color: appTheme.colors.onSurfaceVariant },
-          ]}
-        >
-          {label}
-        </Text>
-      </View>
-      <View style={styles.highlightStatValueContainer}>
-        <Text
-          style={[
-            styles.highlightStatValue,
-            { color: appTheme.colors.onSurface },
-          ]}
-        >
-          {value}
-        </Text>
-        {unit && (
-          <Text
-            style={[
-              styles.highlightStatUnit,
-              { color: appTheme.colors.onSurfaceVariant },
-            ]}
-          >
-            {unit}
-          </Text>
-        )}
-      </View>
-    </View>
-  );
-};
-
-// Component for W/L Ratio Display
-const WLRatioDisplay = ({
-  wins: winCountInput,
-  totalGames: totalGamesInput,
-  theme,
-}) => {
-  const currentTotalGames = totalGamesInput || 0;
-  const currentWins = winCountInput || 0;
-  const currentLosses = currentTotalGames - currentWins;
-
-  const winPercentage =
-    currentTotalGames > 0 ? (currentWins / currentTotalGames) * 100 : 0;
-  const lossPercentage =
-    currentTotalGames > 0
-      ? (currentLosses / currentTotalGames) * 100
-      : currentTotalGames === 0
-        ? 100
-        : 0;
-
-  return (
-    <View style={styles.wlRatioBarWithLabels}>
-      <View style={[styles.wlRatioLine, { borderColor: theme.colors.outline }]}>
-        <View
-          style={[
-            styles.wlRatioWinsSegment,
-            {
-              width: `${winPercentage}%`,
-              backgroundColor: theme.customColors.startNode,
-            },
-          ]}
-        />
-        <View
-          style={[
-            styles.wlRatioLossesSegment,
-            {
-              width: `${lossPercentage}%`,
-              backgroundColor:
-                currentTotalGames > 0
-                  ? theme.customColors.warningColor
-                  : theme.colors.surfaceDisabled,
-            },
-          ]}
-        />
-      </View>
-    </View>
-  );
-};
-
 // --- Main StatsModal ---
 const StatsModal = () => {
   const { theme: appTheme } = useAppTheme();
-  const auth = useAuth();
   const statsModalVisible = useGameStore((state) => state.statsModalVisible);
   const setStatsModalVisible = useGameStore(
     (state) => state.setStatsModalVisible,
   );
   const wordCollections = useGameStore((state) => state.wordCollections);
-  const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
 
   // State
   const [activeTab, setActiveTab] = useState<"history" | "progress">("history");
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState<GameReport[]>([]);
-  const [lifetimeStats, setLifetimeStats] = useState<LifetimeStats | null>(
-    null,
-  );
+
   const [unlockedAchievementIds, setUnlockedAchievementIds] = useState<
     string[]
   >([]);
@@ -581,7 +462,7 @@ const StatsModal = () => {
   const [achievementDialogVisible, setAchievementDialogVisible] =
     useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarMessage] = useState("");
   const [progressiveAchievementCounts, setProgressiveAchievementCounts] =
     useState<Record<string, number>>({});
 
@@ -597,7 +478,7 @@ const StatsModal = () => {
     if (statsModalVisible) {
       const loadData = async () => {
         try {
-          const [historyData, lifetimeData, achievementIds, collectionsData] =
+          const [historyData, , achievementIds, collectionsData] =
             await Promise.all([
               loadGameHistory(),
               getLifetimeStats(),
@@ -610,7 +491,6 @@ const StatsModal = () => {
             await unifiedDataStore.getProgressiveAchievementCounts();
 
           setHistory(historyData);
-          setLifetimeStats(lifetimeData);
           setUnlockedAchievementIds(achievementIds);
           setCollectionsProgress(collectionsData);
           setProgressiveAchievementCounts(progressiveCounts);
@@ -672,13 +552,6 @@ const StatsModal = () => {
     [],
   );
 
-  // Handle word definition in history view
-  const showWordDefinition = (word: string, pathIndex?: number | null) => {
-    setDefinitionDialogWord(word);
-    setDefinitionDialogPathIndex(pathIndex !== undefined ? pathIndex : null);
-    setDefinitionDialogVisible(true);
-  };
-
   const hideWordDefinition = () => {
     setDefinitionDialogVisible(false);
     setDefinitionDialogWord(null);
@@ -711,36 +584,6 @@ const StatsModal = () => {
     } catch (error) {
       console.error("Error marking word collections as viewed:", error);
     }
-  };
-
-  // Function to copy text to clipboard on web (can be reused)
-  const copyToClipboard = async (text: string) => {
-    try {
-      if (Platform.OS === "web") {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(text);
-          setSnackbarMessage("Link copied to clipboard!");
-        } else {
-          // Fallback for older browsers or if navigator.clipboard is not available
-          const textArea = document.createElement("textarea");
-          textArea.value = text;
-          document.body.appendChild(textArea);
-          textArea.focus();
-          textArea.select();
-          document.execCommand("copy");
-          document.body.removeChild(textArea);
-          setSnackbarMessage("Link copied to clipboard (fallback)!");
-        }
-      } else {
-        // Native platforms
-        await ExpoClipboard.setStringAsync(text);
-        setSnackbarMessage("Link copied to clipboard!");
-      }
-    } catch (error) {
-      console.error("Failed to copy to clipboard:", error);
-      setSnackbarMessage("Failed to copy link.");
-    }
-    setSnackbarVisible(true);
   };
 
   // Aggregate lifetime stats from gameHistory
@@ -896,36 +739,6 @@ const StatsModal = () => {
   };
 
   const renderProgressTab = () => {
-    let completedCollectionsCount = 0;
-    if (wordCollections && Object.keys(collectionsProgress).length > 0) {
-      wordCollections.forEach((collection) => {
-        const progress = collectionsProgress[collection.id];
-        if (
-          collection.words &&
-          collection.words.length > 0 &&
-          progress &&
-          progress.collectedWords
-        ) {
-          if (progress.collectedWords.length === collection.words.length) {
-            completedCollectionsCount++;
-          }
-        }
-      });
-    }
-
-    const gamesPlayed = lifetimeStats?.totalGamesPlayed || 0;
-    const wins = lifetimeStats?.totalWins || 0;
-    // const losses = gamesPlayed - wins; // Calculated inside WLRatioDisplay
-
-    const averageMoveAccuracy =
-      lifetimeStats && gamesPlayed > 0
-        ? (
-            (lifetimeStats.cumulativeMoveAccuracySum || 0) / gamesPlayed
-          ).toFixed(1)
-        : "0.0";
-
-    const actualAchievementsUnlocked = unlockedAchievementIds.length;
-
     // Analyze games by difficulty (path length)
     const difficultyAnalysis = (() => {
       if (!history || history.length === 0) {
@@ -1389,10 +1202,6 @@ const StatsModal = () => {
               <View style={[styles.wordCollectionsContainer, { marginTop: 8 }]}>
                 {wordCollections.map((collection) => {
                   const progress = collectionsProgress[collection.id];
-                  const collectedCount = progress?.collectedWords?.length || 0;
-                  const totalWords = collection.words?.length || 0;
-                  const isCompleted =
-                    collectedCount === totalWords && totalWords > 0;
 
                   return (
                     <WordCollectionCard

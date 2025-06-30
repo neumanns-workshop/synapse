@@ -31,6 +31,8 @@
     "web": "expo start --web",
     "eject": "expo eject",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
     "test": "jest",
     "test:ci": "jest --coverage --watchAll=false --ci --testTimeout=30000 --forceExit",
     "build:web": "npx expo export:web && ./scripts/post-build.sh",

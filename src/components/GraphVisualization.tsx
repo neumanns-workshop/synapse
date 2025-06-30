@@ -64,9 +64,7 @@ const DEFAULT_NODE_STROKE = "#333";
 const DEFAULT_NODE_STROKE_WIDTH = 0.5;
 const PLAYER_PATH_LINK_STROKE_WIDTH = 3;
 const PLAYER_PATH_LINK_STROKE_OPACITY = 0.8;
-const BASE_LABEL_TEXT_FONT_SIZE = 12; // Base font size for scaling
-const MIN_LABEL_TEXT_FONT_SIZE = 8; // Minimum font size
-const MAX_LABEL_TEXT_FONT_SIZE = 16; // Maximum font size
+
 const LABEL_TEXT_FONT_WEIGHT = "bold";
 
 // Helper function to calculate dynamic font size based on available horizontal space to graph edges only
@@ -94,7 +92,7 @@ const calculateDynamicFontSize = (
 };
 
 // Helper function - NO truncation, just return the full text
-const truncateText = (text: string, fontSize: number): string => {
+const truncateText = (text: string): string => {
   // Never truncate - always show the full word and let font sizing handle it
   return text;
 };
@@ -241,223 +239,212 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   };
 
   // --- Memoized Data Preparation ---
-  const {
-    nodesToRender,
-    linksToRender,
-    viewBox,
-    viewBoxX,
-    viewBoxY,
-    viewBoxWidth,
-    viewBoxHeight,
-  } = useMemo(() => {
-    startMeasure(PerformanceMarks.GRAPH_RENDER);
+  const { nodesToRender, linksToRender, viewBox, viewBoxX, viewBoxWidth } =
+    useMemo(() => {
+      startMeasure(PerformanceMarks.GRAPH_RENDER);
 
-    // graphData comes from store, startWord/targetWord can be from report or store
-    if (
-      !graphData ||
-      !startWord ||
-      !targetWord ||
-      (gameStatus !== "won" &&
-        gameStatus !== "given_up" &&
-        (gameStatus === "idle" || gameStatus === "loading"))
-    ) {
-      return {
-        nodesToRender: [],
-        linksToRender: [],
-        viewBox: "0 0 100 100",
-        viewBoxX: 0,
-        viewBoxY: 0,
-        viewBoxWidth: 100,
-        viewBoxHeight: 100,
-      };
-    }
-
-    // Collect all relevant words
-    const relevantWords = new Set<string>([startWord, targetWord]);
-    if (currentWordForDisplay) {
-      // Use currentWordForDisplay here
-      relevantWords.add(currentWordForDisplay);
-    }
-
-    // Add words based on path display mode
-    if (pathDisplayMode.player) {
-      playerPath.forEach((word) => relevantWords.add(word));
-    }
-    if (pathDisplayMode.optimal && optimalPath) {
-      // Ensure optimalPath exists
-      optimalPath.forEach((word) => relevantWords.add(word));
-    }
-    if (pathDisplayMode.suggested && suggestedPath) {
-      // Ensure suggestedPath exists
-      suggestedPath.forEach((word) => relevantWords.add(word));
-    }
-    if (pathDisplayMode.ai && aiPath) {
-      // Add AI path words
-      aiPath.forEach((word) => relevantWords.add(word));
-    }
-
-    // Create node map with flags
-    const nodeMap = new Map<string, RenderNode>();
-    let minX = Infinity,
-      maxX = -Infinity,
-      minY = Infinity,
-      maxY = -Infinity;
-
-    relevantWords.forEach((word) => {
-      const nodeData = graphData[word];
-      if (nodeData?.tsne) {
-        const [x, y] = nodeData.tsne;
-        const node: RenderNode = {
-          id: word,
-          x,
-          y,
-          isStart: word === startWord,
-          isEnd: word === targetWord,
-          isCurrent: word === currentWordForDisplay, // Use currentWordForDisplay
-          isInPath: playerPath.includes(word),
-          isOptimal: optimalPath ? optimalPath.includes(word) : false, // Check if optimalPath exists
-          isSuggested: suggestedPath ? suggestedPath.includes(word) : false, // Check if suggestedPath exists
-          isAi: aiPath ? aiPath.includes(word) : false, // Check if word is in AI path
-          // Initialize new flags
-          isPlayerGlobalOptimalChoice: false,
-          isPlayerLocalOptimalChoice: false,
-          isNextGlobalOptimal: false,
-          isNextSuggested: false,
+      // graphData comes from store, startWord/targetWord can be from report or store
+      if (
+        !graphData ||
+        !startWord ||
+        !targetWord ||
+        (gameStatus !== "won" &&
+          gameStatus !== "given_up" &&
+          (gameStatus === "idle" || gameStatus === "loading"))
+      ) {
+        return {
+          nodesToRender: [],
+          linksToRender: [],
+          viewBox: "0 0 100 100",
+          viewBoxX: 0,
+          viewBoxWidth: 100,
         };
-        nodeMap.set(word, node);
-        // Update bounds
-        minX = Math.min(minX, x);
-        maxX = Math.max(maxX, x);
-        minY = Math.min(minY, y);
-        maxY = Math.max(maxY, y);
       }
-    });
 
-    // Set flags for player's optimal choices
-    optimalChoices.forEach((choice) => {
-      const chosenNode = nodeMap.get(choice.playerChose);
-      if (chosenNode) {
-        if (choice.isGlobalOptimal) {
-          chosenNode.isPlayerGlobalOptimalChoice = true;
-        } else if (choice.isLocalOptimal) {
-          // only set if not global
-          chosenNode.isPlayerLocalOptimalChoice = true;
+      // Collect all relevant words
+      const relevantWords = new Set<string>([startWord, targetWord]);
+      if (currentWordForDisplay) {
+        // Use currentWordForDisplay here
+        relevantWords.add(currentWordForDisplay);
+      }
+
+      // Add words based on path display mode
+      if (pathDisplayMode.player) {
+        playerPath.forEach((word) => relevantWords.add(word));
+      }
+      if (pathDisplayMode.optimal && optimalPath) {
+        // Ensure optimalPath exists
+        optimalPath.forEach((word) => relevantWords.add(word));
+      }
+      if (pathDisplayMode.suggested && suggestedPath) {
+        // Ensure suggestedPath exists
+        suggestedPath.forEach((word) => relevantWords.add(word));
+      }
+      if (pathDisplayMode.ai && aiPath) {
+        // Add AI path words
+        aiPath.forEach((word) => relevantWords.add(word));
+      }
+
+      // Create node map with flags
+      const nodeMap = new Map<string, RenderNode>();
+      let minX = Infinity,
+        maxX = -Infinity,
+        minY = Infinity,
+        maxY = -Infinity;
+
+      relevantWords.forEach((word) => {
+        const nodeData = graphData[word];
+        if (nodeData?.tsne) {
+          const [x, y] = nodeData.tsne;
+          const node: RenderNode = {
+            id: word,
+            x,
+            y,
+            isStart: word === startWord,
+            isEnd: word === targetWord,
+            isCurrent: word === currentWordForDisplay, // Use currentWordForDisplay
+            isInPath: playerPath.includes(word),
+            isOptimal: optimalPath ? optimalPath.includes(word) : false, // Check if optimalPath exists
+            isSuggested: suggestedPath ? suggestedPath.includes(word) : false, // Check if suggestedPath exists
+            isAi: aiPath ? aiPath.includes(word) : false, // Check if word is in AI path
+            // Initialize new flags
+            isPlayerGlobalOptimalChoice: false,
+            isPlayerLocalOptimalChoice: false,
+            isNextGlobalOptimal: false,
+            isNextSuggested: false,
+          };
+          nodeMap.set(word, node);
+          // Update bounds
+          minX = Math.min(minX, x);
+          maxX = Math.max(maxX, x);
+          minY = Math.min(minY, y);
+          maxY = Math.max(maxY, y);
+        }
+      });
+
+      // Set flags for player's optimal choices
+      optimalChoices.forEach((choice) => {
+        const chosenNode = nodeMap.get(choice.playerChose);
+        if (chosenNode) {
+          if (choice.isGlobalOptimal) {
+            chosenNode.isPlayerGlobalOptimalChoice = true;
+          } else if (choice.isLocalOptimal) {
+            // only set if not global
+            chosenNode.isPlayerLocalOptimalChoice = true;
+          }
+        }
+      });
+
+      const finalNodesToRender = Array.from(nodeMap.values());
+
+      // Create links between visible nodes
+      const finalLinksToRender: RenderLink[] = [];
+
+      // Add player path links
+      if (pathDisplayMode.player && playerPath.length > 1) {
+        for (let i = 0; i < playerPath.length - 1; i++) {
+          const sourceNode = nodeMap.get(playerPath[i]);
+          const targetNode = nodeMap.get(playerPath[i + 1]);
+          if (sourceNode && targetNode) {
+            finalLinksToRender.push({
+              key: `player-${sourceNode.id}-${targetNode.id}-${i}`,
+              source: sourceNode,
+              target: targetNode,
+              type: "player",
+            });
+          }
         }
       }
-    });
 
-    const finalNodesToRender = Array.from(nodeMap.values());
-
-    // Create links between visible nodes
-    const finalLinksToRender: RenderLink[] = [];
-
-    // Add player path links
-    if (pathDisplayMode.player && playerPath.length > 1) {
-      for (let i = 0; i < playerPath.length - 1; i++) {
-        const sourceNode = nodeMap.get(playerPath[i]);
-        const targetNode = nodeMap.get(playerPath[i + 1]);
-        if (sourceNode && targetNode) {
-          finalLinksToRender.push({
-            key: `player-${sourceNode.id}-${targetNode.id}-${i}`,
-            source: sourceNode,
-            target: targetNode,
-            type: "player",
-          });
+      // Add optimal path links
+      if (pathDisplayMode.optimal && optimalPath && optimalPath.length > 1) {
+        // Ensure optimalPath exists
+        for (let i = 0; i < optimalPath.length - 1; i++) {
+          const sourceNode = nodeMap.get(optimalPath[i]);
+          const targetNode = nodeMap.get(optimalPath[i + 1]);
+          if (sourceNode && targetNode) {
+            finalLinksToRender.push({
+              key: `optimal-${sourceNode.id}-${targetNode.id}-${i}`,
+              source: sourceNode,
+              target: targetNode,
+              type: "optimal",
+            });
+          }
         }
       }
-    }
 
-    // Add optimal path links
-    if (pathDisplayMode.optimal && optimalPath && optimalPath.length > 1) {
-      // Ensure optimalPath exists
-      for (let i = 0; i < optimalPath.length - 1; i++) {
-        const sourceNode = nodeMap.get(optimalPath[i]);
-        const targetNode = nodeMap.get(optimalPath[i + 1]);
-        if (sourceNode && targetNode) {
-          finalLinksToRender.push({
-            key: `optimal-${sourceNode.id}-${targetNode.id}-${i}`,
-            source: sourceNode,
-            target: targetNode,
-            type: "optimal",
-          });
+      // Add suggested path links
+      if (
+        pathDisplayMode.suggested &&
+        suggestedPath &&
+        suggestedPath.length > 1
+      ) {
+        // Ensure suggestedPath exists
+        for (let i = 0; i < suggestedPath.length - 1; i++) {
+          const sourceNode = nodeMap.get(suggestedPath[i]);
+          const targetNode = nodeMap.get(suggestedPath[i + 1]);
+          if (sourceNode && targetNode) {
+            finalLinksToRender.push({
+              key: `suggested-${sourceNode.id}-${targetNode.id}-${i}`,
+              source: sourceNode,
+              target: targetNode,
+              type: "suggested",
+            });
+          }
         }
       }
-    }
 
-    // Add suggested path links
-    if (
-      pathDisplayMode.suggested &&
-      suggestedPath &&
-      suggestedPath.length > 1
-    ) {
-      // Ensure suggestedPath exists
-      for (let i = 0; i < suggestedPath.length - 1; i++) {
-        const sourceNode = nodeMap.get(suggestedPath[i]);
-        const targetNode = nodeMap.get(suggestedPath[i + 1]);
-        if (sourceNode && targetNode) {
-          finalLinksToRender.push({
-            key: `suggested-${sourceNode.id}-${targetNode.id}-${i}`,
-            source: sourceNode,
-            target: targetNode,
-            type: "suggested",
-          });
+      // Add AI path links
+      if (pathDisplayMode.ai && aiPath && aiPath.length > 1) {
+        for (let i = 0; i < aiPath.length - 1; i++) {
+          const sourceNode = nodeMap.get(aiPath[i]);
+          const targetNode = nodeMap.get(aiPath[i + 1]);
+          if (sourceNode && targetNode) {
+            finalLinksToRender.push({
+              key: `ai-${sourceNode.id}-${targetNode.id}-${i}`,
+              source: sourceNode,
+              target: targetNode,
+              type: "ai",
+            });
+          }
         }
       }
-    }
 
-    // Add AI path links
-    if (pathDisplayMode.ai && aiPath && aiPath.length > 1) {
-      for (let i = 0; i < aiPath.length - 1; i++) {
-        const sourceNode = nodeMap.get(aiPath[i]);
-        const targetNode = nodeMap.get(aiPath[i + 1]);
-        if (sourceNode && targetNode) {
-          finalLinksToRender.push({
-            key: `ai-${sourceNode.id}-${targetNode.id}-${i}`,
-            source: sourceNode,
-            target: targetNode,
-            type: "ai",
-          });
-        }
-      }
-    }
+      // Calculate viewBox
+      const padding = 30;
+      const vbX = minX - padding;
+      const vbY = minY - padding;
+      const vbWidth = maxX - minX + 2 * padding;
+      const vbHeight = maxY - minY + 2 * padding;
 
-    // Calculate viewBox
-    const padding = 30;
-    const vbX = minX - padding;
-    const vbY = minY - padding;
-    const vbWidth = maxX - minX + 2 * padding;
-    const vbHeight = maxY - minY + 2 * padding;
+      const result = {
+        nodesToRender: finalNodesToRender,
+        linksToRender: finalLinksToRender,
+        viewBox: `${vbX} ${vbY} ${vbWidth} ${vbHeight}`,
+        viewBoxX: vbX,
+        viewBoxWidth: vbWidth,
+      };
 
-    const result = {
-      nodesToRender: finalNodesToRender,
-      linksToRender: finalLinksToRender,
-      viewBox: `${vbX} ${vbY} ${vbWidth} ${vbHeight}`,
-      viewBoxX: vbX,
-      viewBoxY: vbY,
-      viewBoxWidth: vbWidth,
-      viewBoxHeight: vbHeight,
-    };
+      endMeasure(
+        PerformanceMarks.GRAPH_RENDER,
+        PerformanceMarks.GRAPH_RENDER,
+        PerformanceMeasures.GRAPH_RENDER_TIME,
+      );
 
-    endMeasure(
-      PerformanceMarks.GRAPH_RENDER,
-      PerformanceMarks.GRAPH_RENDER,
-      PerformanceMeasures.GRAPH_RENDER_TIME,
-    );
-
-    return result;
-  }, [
-    graphData,
-    startWord,
-    targetWord,
-    currentWordForDisplay,
-    playerPath,
-    optimalPath,
-    suggestedPath,
-    pathDisplayMode,
-    gameStatus,
-    optimalChoices,
-    aiPath,
-  ]);
+      return result;
+    }, [
+      graphData,
+      startWord,
+      targetWord,
+      currentWordForDisplay,
+      playerPath,
+      optimalPath,
+      suggestedPath,
+      pathDisplayMode,
+      gameStatus,
+      optimalChoices,
+      aiPath,
+    ]);
 
   // --- Render Checks ---
   if (!graphData || gameStatus === "loading") {
@@ -678,7 +665,7 @@ const GraphVisualization: React.FC<GraphVisualizationProps> = ({
                 fontSize={fontSize}
                 fontWeight={LABEL_TEXT_FONT_WEIGHT}
               >
-                {truncateText(node.id, fontSize)}
+                {truncateText(node.id)}
               </Text>
             );
           })}

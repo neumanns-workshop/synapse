@@ -1,6 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import type { WordCollection } from "../features/wordCollections";
 import type { GameState } from "../stores/useGameStore";
 import type { DailyChallengeProgress } from "../types/dailyChallenges";
 import { DataCompressor, StorageSizeEstimator } from "../utils/dataCompression";

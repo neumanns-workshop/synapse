@@ -105,7 +105,12 @@ module.exports = {
     },
     {
       // Test files can be more relaxed with certain rules
-      files: ["**/*.test.{ts,tsx,js,jsx}", "**/__tests__/**/*.{ts,tsx,js,jsx}"],
+      files: [
+        "**/*.test.{ts,tsx,js,jsx}",
+        "**/__tests__/**/*.{ts,tsx,js,jsx}",
+        "**/test/**/*.{ts,tsx,js,jsx}",
+        "**/__mocks__/**/*.{ts,tsx,js,jsx}",
+      ],
       env: {
         jest: true, // Add jest globals
         node: true,
@@ -115,13 +120,16 @@ module.exports = {
         "@typescript-eslint/no-empty-function": "off", // Allow empty functions as test props
         "@typescript-eslint/no-explicit-any": "off", // Allow any in tests for mocking
         "@typescript-eslint/no-non-null-assertion": "off", // Allow non-null assertions in tests
+        "@typescript-eslint/no-unused-vars": "off", // Allow unused vars in tests
+        "@typescript-eslint/no-shadow": "off", // Allow variable shadowing in tests
         "no-console": "off", // Allow console statements in tests
         "react/no-unstable-nested-components": "off", // Allow nested components in test renders
         "react-native/no-inline-styles": "off", // Allow inline styles in tests
         "@typescript-eslint/ban-ts-comment": "off", // Allow @ts-ignore in tests
-        "@typescript-eslint/no-unused-vars": "off", // Allow unused vars in tests
         "react/no-unescaped-entities": "off", // Allow unescaped entities in tests
         "no-undef": "off", // Turn off no-undef for tests since jest globals are injected
+        "import/order": "off", // Don't enforce import order in tests
+        "react-hooks/exhaustive-deps": "off", // Allow missing dependencies in test hooks
       },
     },
     {
