@@ -24,12 +24,14 @@ let QRCodeSVG: React.ComponentType<QRCodeNativeProps> | null = null;
 
 if (Platform.OS === "web") {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     QRCode = require("react-qr-code").default;
   } catch (e) {
     console.warn("react-qr-code not available for web");
   }
 } else {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     QRCodeSVG = require("react-native-qrcode-svg").default;
   } catch (e) {
     console.warn("react-native-qrcode-svg not available for native");

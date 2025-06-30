@@ -228,7 +228,12 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     };
 
     loadInitialData();
-  }, []);
+  }, [
+    refreshReadArticles,
+    refreshUnviewedAchievements,
+    refreshUnviewedWordCollections,
+    checkIncompleteDailyChallenge,
+  ]);
 
   // Watch for news modal closing and refresh read articles
   React.useEffect(() => {
@@ -285,7 +290,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({
       checkIncompleteDailyChallenge();
     }, 5000); // Check every 5 seconds
     return () => clearInterval(interval);
-  }, []);
+  }, [
+    refreshUnviewedAchievements,
+    refreshUnviewedWordCollections,
+    checkIncompleteDailyChallenge,
+  ]);
 
   // Get the highest priority color among all notifications
   // Priority order: Red (high priority news) > Gold (achievements + word collections) > Daily Challenge > Other news
@@ -322,7 +331,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   };
 
   // Get color specifically for news badges (ignores achievements and daily challenges)
-  const getNewsPriorityColor = () => {
+  const getNewsPriorityColor = useCallback(() => {
     const unreadArticles = getUnreadArticles(readArticleIds);
 
     if (unreadArticles.length === 0) return customColors.endNode;
@@ -337,7 +346,12 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     }
     // Finally low priority (or default)
     return customColors.startNode; // green
-  };
+  }, [
+    readArticleIds,
+    customColors.endNode,
+    customColors.currentNode,
+    customColors.startNode,
+  ]);
 
   // Removed all animation code - using simple buttons now
 

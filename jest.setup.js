@@ -63,6 +63,7 @@ jest.mock("expo-font", () => ({
 
 // Mock for react-native-reanimated
 jest.mock("react-native-reanimated", () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const Reanimated = require("react-native-reanimated/mock");
   Reanimated.useSharedValue = jest.fn((initialValue) => ({
     value: initialValue,

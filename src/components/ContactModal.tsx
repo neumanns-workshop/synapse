@@ -49,6 +49,16 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
   const scale = useSharedValue(0.9);
   const opacity = useSharedValue(0);
 
+  const resetForm = React.useCallback(() => {
+    setContactType("feedback");
+    setSubject("");
+    setDescription("");
+    setUserEmail(auth.user?.email || "");
+    setIsSubmitting(false);
+    setShowSuccess(false);
+    setShowError(false);
+  }, [auth.user?.email]);
+
   // Update animation values when visibility changes
   React.useEffect(() => {
     if (visible) {
@@ -70,7 +80,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
       // Reset form when modal closes
       resetForm();
     }
-  }, [visible, scale, opacity, auth.user?.email]);
+  }, [visible, scale, opacity, auth.user?.email, resetForm]);
 
   // Animation style
   const animatedStyle = useAnimatedStyle(() => {
@@ -79,16 +89,6 @@ const ContactModal: React.FC<ContactModalProps> = ({ visible, onDismiss }) => {
       opacity: opacity.value,
     };
   });
-
-  const resetForm = () => {
-    setContactType("feedback");
-    setSubject("");
-    setDescription("");
-    setUserEmail(auth.user?.email || "");
-    setIsSubmitting(false);
-    setShowSuccess(false);
-    setShowError(false);
-  };
 
   const contactTypeOptions = [
     { value: "bug", label: "Bug Report", icon: "bug" },

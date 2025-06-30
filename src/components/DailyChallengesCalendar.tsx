@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
 
 import { Text, Card, useTheme, ActivityIndicator } from "react-native-paper";
@@ -32,11 +32,7 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
   // Access upgrade prompt function from game store
   const showUpgradePrompt = useGameStore((state) => state.showUpgradePrompt);
 
-  useEffect(() => {
-    loadChallengesForMonth();
-  }, [currentMonth]);
-
-  const loadChallengesForMonth = async () => {
+  const loadChallengesForMonth = useCallback(async () => {
     setLoading(true);
     try {
       // Get first and last day of the month
@@ -68,7 +64,11 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentMonth]);
+
+  useEffect(() => {
+    loadChallengesForMonth();
+  }, [loadChallengesForMonth]);
 
   const navigateMonth = (direction: "prev" | "next") => {
     const newMonth = new Date(currentMonth);

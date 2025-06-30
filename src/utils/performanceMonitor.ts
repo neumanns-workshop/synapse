@@ -88,11 +88,11 @@ export const startFrameRateMonitoring = () => {
     // Frame rate limiting logic
     if (isFrameRateLimited) {
       const now = performance.now();
-      const elapsed = now - lastFrameTime;
+      const frameElapsed = now - lastFrameTime;
 
-      if (elapsed < FRAME_TIME) {
+      if (frameElapsed < FRAME_TIME) {
         // If we're ahead of schedule, wait for the next frame
-        const waitTime = Math.max(0, FRAME_TIME - elapsed);
+        const waitTime = Math.max(0, FRAME_TIME - frameElapsed);
         rafId = requestAnimationFrame(() => {
           setTimeout(() => {
             frameCount++;

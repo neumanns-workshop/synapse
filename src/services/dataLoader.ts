@@ -45,10 +45,11 @@ export const loadGraphData = async (): Promise<GraphData> => {
         typeof (graphDataJson as { nodes?: unknown }).nodes === "object" &&
         (graphDataJson as { nodes?: unknown }).nodes !== null
       ) {
-        graphDataCache = (graphDataJson as any).nodes as GraphData;
+        graphDataCache = (graphDataJson as { nodes: unknown })
+          .nodes as GraphData;
         return graphDataCache;
       } else if (keys.length > 1) {
-        graphDataCache = graphDataJson as any as GraphData;
+        graphDataCache = graphDataJson as unknown as GraphData;
         return graphDataCache;
       } else {
         throw new Error("Invalid graph data structure.");
