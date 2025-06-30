@@ -8,6 +8,7 @@ jest.mock("../DailyChallengesService");
 jest.mock("../SharingService", () => ({
   parseGameDeepLink: jest.fn(),
   parseDailyChallengeDeepLink: jest.fn(),
+  parseEnhancedGameLink: jest.fn(),
 }));
 jest.mock("../UnifiedDataStore", () => ({
   unifiedDataStore: {
@@ -465,6 +466,7 @@ describe("GameFlowManager", () => {
       const sharingService = require("../SharingService");
       sharingService.parseGameDeepLink.mockReturnValue(null);
       sharingService.parseDailyChallengeDeepLink.mockReturnValue(null);
+      sharingService.parseEnhancedGameLink.mockReturnValue(null);
     });
 
     it("should parse daily challenge URL", () => {

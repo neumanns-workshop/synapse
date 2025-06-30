@@ -84,6 +84,7 @@
     "metro-react-native-babel-transformer": "^0.77.0",
     "process": "^0.11.10",
     "puppeteer": "^22.15.0",
+    "canvas": "^2.11.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.73.6",

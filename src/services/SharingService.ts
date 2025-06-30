@@ -1070,3 +1070,74 @@ export const generateEnhancedGameDeepLink = (
   // For native apps, use the custom scheme
   return `synapse://challenge?${params.toString()}`;
 };
+
+/**
+ * Parse enhanced game URL with type, quality, and coordinate data
+ */
+export const parseEnhancedGameLink = (
+  url: string,
+): {
+  type?: "challenge" | "dailychallenge";
+  startWord?: string;
+  targetWord?: string;
+  share?: string;
+  quality?: string;
+  tsne?: string;
+  date?: string;
+  theme?: string;
+  isValid?: boolean;
+} | null => {
+  try {
+    Logger.debug("🎮 parseEnhancedGameLink: Parsing URL:", url);
+
+    // Check if URL contains challenge parameters with type
+    if (url.includes("/challenge") && url.includes("type=")) {
+      const urlObj = new URL(url);
+      const params = urlObj.searchParams;
+
+      const type = params.get("type") as "challenge" | "dailychallenge" | null;
+      const startWord = params.get("start");
+      const targetWord = params.get("target");
+      const share = params.get("share");
+      const quality = params.get("quality");
+      const tsne = params.get("tsne");
+      const date = params.get("date");
+      const theme = params.get("theme");
+
+      if (!type || !startWord || !targetWord) {
+        Logger.debug("🎮 parseEnhancedGameLink: Missing required parameters");
+        return null;
+      }
+
+      Logger.debug(
+        "🎮 parseEnhancedGameLink: Successfully parsed enhanced URL",
+        {
+          type,
+          startWord,
+          targetWord,
+          hasShare: !!share,
+          hasQuality: !!quality,
+          hasTsne: !!tsne,
+        },
+      );
+
+      return {
+        type,
+        startWord,
+        targetWord,
+        share: share || undefined,
+        quality: quality || undefined,
+        tsne: tsne || undefined,
+        date: date || undefined,
+        theme: theme || undefined,
+        isValid: true, // Enhanced format is always valid if it has required params
+      };
+    }
+
+    Logger.debug("🎮 parseEnhancedGameLink: Not an enhanced format URL");
+    return null;
+  } catch (error) {
+    Logger.debug("🎮 parseEnhancedGameLink: Error parsing URL:", error);
+    return null;
+  }
+};

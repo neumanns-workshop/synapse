@@ -3,6 +3,7 @@ import { Logger } from "../utils/logger";
 import {
   parseGameDeepLink,
   parseDailyChallengeDeepLink,
+  parseEnhancedGameLink,
 } from "./SharingService";
 import { dailyChallengesService } from "./DailyChallengesService";
 
@@ -237,10 +238,40 @@ export class GameFlowManager {
   } {
     Logger.debug(" GameFlowManager.parseEntryUrl: Parsing URL:", url);
 
-    // Check for daily challenge link
+    // First, check for enhanced format URLs (new format with type parameter)
+    const enhancedParams = parseEnhancedGameLink(url);
+    Logger.debug(
+      "🎮 GameFlowManager.parseEntryUrl: Enhanced params:",
+      enhancedParams,
+    );
+    if (enhancedParams) {
+      if (enhancedParams.type === "dailychallenge") {
+        return {
+          entryType: "dailyChallenge",
+          challengeData: {
+            challengeId: enhancedParams.date,
+            startWord: enhancedParams.startWord,
+            targetWord: enhancedParams.targetWord,
+            isValid: enhancedParams.isValid || false,
+          },
+        };
+      } else if (enhancedParams.type === "challenge") {
+        return {
+          entryType: "playerChallenge",
+          challengeData: {
+            startWord: enhancedParams.startWord,
+            targetWord: enhancedParams.targetWord,
+            isValid: enhancedParams.isValid || false,
+          },
+        };
+      }
+    }
+
+    // Fallback to old format parsers for backward compatibility
+    // Check for daily challenge link (old format)
     const dailyChallengeParams = parseDailyChallengeDeepLink(url);
     Logger.debug(
-      "🎮 GameFlowManager.parseEntryUrl: Daily challenge params:",
+      "🎮 GameFlowManager.parseEntryUrl: Daily challenge params (old format):",
       dailyChallengeParams,
     );
     if (dailyChallengeParams) {
@@ -255,10 +286,10 @@ export class GameFlowManager {
       };
     }
 
-    // Check for player challenge link
+    // Check for player challenge link (old format)
     const playerChallengeParams = parseGameDeepLink(url);
     Logger.debug(
-      "🎮 GameFlowManager.parseEntryUrl: Player challenge params:",
+      "🎮 GameFlowManager.parseEntryUrl: Player challenge params (old format):",
       playerChallengeParams,
     );
     if (playerChallengeParams) {

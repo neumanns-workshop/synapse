@@ -257,7 +257,10 @@ const PreviewImageScreen: React.FC<PreviewImageScreenProps> = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.surface }]}
+      testID="preview-container"
+    >
       {/* Graph preview with identical styling to GameReportModal */}
       <View style={{ position: "relative" }}>
         <View
