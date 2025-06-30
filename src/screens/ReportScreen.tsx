@@ -25,12 +25,16 @@ import { QRCodeDisplay } from "../components/QRCodeDisplay";
 import WordDefinitionDialog from "../components/WordDefinitionDialog";
 import {
   shareChallenge,
-  generateSecureGameDeepLink,
-  generateSecureDailyChallengeDeepLink,
   generateChallengeMessage,
   generateDailyChallengeTaunt,
-  encodeGameReportForSharing,
+  encodePathQuality,
+  encodeCoordinates,
+  generateEnhancedGameDeepLink,
+  generateUrlHash,
 } from "../services/SharingService";
+
+// Import t-SNE coordinates for enhanced encoding
+import tsneCoordinates from "../../data/tsne_coordinates.json";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 
@@ -125,16 +129,27 @@ const ReportScreen = () => {
         let message: string;
 
         if (gameReport.isDailyChallenge && gameReport.dailyChallengeId) {
-          // Encode game report data for sharing
-          const encodedPath = gameReport
-            ? encodeGameReportForSharing(gameReport)
+          // Use separate encoding for clean URL structure
+          const quality = gameReport ? encodePathQuality(gameReport) : "";
+          const tsne = gameReport
+            ? encodeCoordinates(
+                gameReport,
+                tsneCoordinates as unknown as Record<string, [number, number]>,
+              )
             : "";
+          const share = generateUrlHash(
+            `${gameReport.dailyChallengeId}:${startWord}:${targetWord}`,
+          );
 
-          link = generateSecureDailyChallengeDeepLink(
-            gameReport.dailyChallengeId,
+          link = generateEnhancedGameDeepLink(
+            "dailychallenge",
             startWord,
             targetWord,
-            encodedPath,
+            undefined, // no theme for daily challenges
+            share,
+            quality,
+            tsne,
+            gameReport.dailyChallengeId, // date
           );
 
           // Generate proper daily challenge taunt
@@ -157,16 +172,24 @@ const ReportScreen = () => {
             optimalPathLength: gameReport.optimalPath.length - 1,
           });
         } else {
-          // Encode game report data for sharing
-          const encodedPath = gameReport
-            ? encodeGameReportForSharing(gameReport)
+          // Use separate encoding for clean URL structure
+          const quality = gameReport ? encodePathQuality(gameReport) : "";
+          const tsne = gameReport
+            ? encodeCoordinates(
+                gameReport,
+                tsneCoordinates as unknown as Record<string, [number, number]>,
+              )
             : "";
+          const share = generateUrlHash(`${startWord}:${targetWord}`);
 
-          link = generateSecureGameDeepLink(
+          link = generateEnhancedGameDeepLink(
+            "challenge",
             startWord,
             targetWord,
-            undefined,
-            encodedPath,
+            undefined, // no theme
+            share,
+            quality,
+            tsne,
           );
           message = generateChallengeMessage({
             startWord,
