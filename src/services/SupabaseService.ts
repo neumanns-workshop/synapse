@@ -148,7 +148,9 @@ export class SupabaseService {
     } else {
       // Validate URL format before creating client
       try {
+        // eslint-disable-next-line no-new, @typescript-eslint/no-non-null-assertion
         new URL(localSupabaseUrl!);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.supabase = createClient(localSupabaseUrl!, localSupabaseAnonKey!);
       } catch (urlError) {
         console.error(
@@ -198,9 +200,9 @@ export class SupabaseService {
     }
 
     // Listen for auth changes
-    this.supabase.auth.onAuthStateChange(async (event, session) => {
+    this.supabase.auth.onAuthStateChange(async (event, newSession) => {
       Logger.debug("Auth state changed:", event);
-      await this.handleAuthStateChange(session);
+      await this.handleAuthStateChange(newSession);
     });
   }
 
@@ -762,7 +764,7 @@ export class SupabaseService {
         );
 
         // Map the privacy settings to the local format
-        const localPrivacyUpdates: any = {};
+        const localPrivacyUpdates: Record<string, boolean> = {};
         if (privacyUpdates.allow_challenge_sharing !== undefined) {
           localPrivacyUpdates.allowChallengeSharing =
             privacyUpdates.allow_challenge_sharing;
@@ -880,7 +882,8 @@ export class SupabaseService {
     marketing_emails?: boolean;
     analytics?: boolean;
   }) {
-    const results: Array<{ consentType: string; result: { error: any } }> = [];
+    const results: Array<{ consentType: string; result: { error: unknown } }> =
+      [];
 
     for (const [consentType, accepted] of Object.entries(consents)) {
       if (accepted !== undefined) {
@@ -1082,19 +1085,6 @@ export class SupabaseService {
 
       // Get local data (uncompressed for processing)
       const localData = await this.unifiedStore.exportData();
-
-      // Prepare data for cloud storage
-      const cloudData = {
-        ...localData,
-        user: {
-          ...localData.user,
-          id: userId, // Use Supabase user ID
-        },
-        meta: {
-          ...localData.meta,
-          lastSyncAt: Date.now(),
-        },
-      };
 
       // Compress data for efficient cloud storage
       const compressedCloudData =
@@ -1751,10 +1741,11 @@ export class SupabaseService {
           );
         }
 
-        const { data: refreshData, error: refreshError } =
-          await this.supabase.auth.refreshSession({
+        const { error: refreshError } = await this.supabase.auth.refreshSession(
+          {
             refresh_token: session.refresh_token,
-          });
+          },
+        );
 
         if (refreshError) {
           console.warn("🗑️ Session refresh failed:", refreshError);

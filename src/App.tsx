@@ -1,5 +1,12 @@
 import React, { useEffect, useState, Suspense, lazy } from "react";
-import { Platform, Linking, View, Alert, AppState } from "react-native";
+import {
+  Platform,
+  Linking,
+  View,
+  Alert,
+  AppState,
+  StyleSheet,
+} from "react-native";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -55,8 +62,16 @@ const customScreenOptions: Partial<NativeStackNavigationOptions> = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Loading fallback component for lazy-loaded modals
+const modalLoadingStyles = StyleSheet.create({
+  container: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+});
+
 const ModalLoadingFallback: React.FC = () => (
-  <View style={{ justifyContent: "center", alignItems: "center", padding: 20 }}>
+  <View style={modalLoadingStyles.container}>
     <ActivityIndicator size="small" />
   </View>
 );
@@ -280,7 +295,7 @@ function AppContent() {
 
     const subscription = Linking.addEventListener("url", handleDeepLink);
     return () => subscription.remove();
-  }, []); // Dependencies: gameFlowManager or other services if they change
+  }, [auth.user]); // Dependencies: gameFlowManager or other services if they change
 
   // Set up AppState handling to flush pending data saves when app backgrounds
   useEffect(() => {
@@ -305,21 +320,25 @@ function AppContent() {
 
   // Show loading screen while auth is initializing
   if (auth.isLoading) {
+    const loadingScreenStyles = StyleSheet.create({
+      container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: theme.colors.background,
+      },
+      text: {
+        marginTop: 16,
+        color: theme.colors.onBackground,
+      },
+    });
+
     return (
       <PaperProvider theme={theme}>
         <SafeAreaProvider>
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: theme.colors.background,
-            }}
-          >
+          <View style={loadingScreenStyles.container}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
-            <Text style={{ marginTop: 16, color: theme.colors.onBackground }}>
-              Loading...
-            </Text>
+            <Text style={loadingScreenStyles.text}>Loading...</Text>
           </View>
           <StatusBar style={theme.dark ? "light" : "dark"} />
         </SafeAreaProvider>
@@ -329,10 +348,16 @@ function AppContent() {
 
   // Show legal page if requested
   if (currentLegalPage) {
+    const legalPageStyles = StyleSheet.create({
+      container: {
+        flex: 1,
+      },
+    });
+
     return (
       <PaperProvider theme={theme}>
         <SafeAreaProvider>
-          <View style={{ flex: 1 }}>
+          <View style={legalPageStyles.container}>
             <LegalPage
               type={currentLegalPage}
               onBack={() => setCurrentLegalPage(null)}
