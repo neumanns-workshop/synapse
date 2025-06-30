@@ -21,8 +21,14 @@ import {
   shareDailyChallenge,
   generateSecureDailyChallengeDeepLink,
   generateDailyChallengeTaunt,
-  encodeGameReportForSharing,
+  encodePathQuality,
+  encodeCoordinates,
+  generateEnhancedGameDeepLink,
+  generateUrlHash,
 } from "../services/SharingService";
+
+// Import t-SNE coordinates for enhanced encoding
+import tsneCoordinates from "../../data/tsne_coordinates.json";
 import type { Achievement } from "../features/achievements";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type {
@@ -98,16 +104,20 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
 
       // For web, show the challenge link in a dialog
       if (Platform.OS === "web") {
-        // Encode game report data for sharing
-        const encodedPath = gameReport
-          ? encodeGameReportForSharing(gameReport)
-          : "";
+        // Use separate encoding for clean URL structure
+        const quality = gameReport ? encodePathQuality(gameReport) : "";
+        const tsne = gameReport ? encodeCoordinates(gameReport, tsneCoordinates as unknown as Record<string, [number, number]>) : "";
+        const share = generateUrlHash(`${challenge.id}:${challenge.startWord}:${challenge.targetWord}`);
 
-        const link = generateSecureDailyChallengeDeepLink(
-          challenge.id,
+        const link = generateEnhancedGameDeepLink(
+          "dailychallenge",
           challenge.startWord,
           challenge.targetWord,
-          encodedPath,
+          undefined, // no theme for daily challenges
+          share,
+          quality,
+          tsne,
+          challenge.id, // date
         );
 
         // Generate the taunt message (same as native)
@@ -119,7 +129,6 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
           userCompleted,
           userGaveUp,
           challengeDate: challenge.date,
-          encodedPath,
           optimalPathLength: challenge.optimalPathLength,
         });
 
