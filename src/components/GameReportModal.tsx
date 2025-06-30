@@ -169,7 +169,6 @@ const GameReportModal = () => {
             userCompleted,
             userGaveUp,
             challengeDate,
-            encodedPath,
             optimalPathLength: gameReportModalReport.optimalPath.length - 1,
           });
         } else {
@@ -191,7 +190,6 @@ const GameReportModal = () => {
             steps: pathLength,
             deepLink: link,
             gameStatus: gameReportModalReport.status,
-            encodedPath,
             optimalPathLength: gameReportModalReport.optimalPath.length - 1,
           });
         }
