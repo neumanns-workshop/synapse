@@ -80,11 +80,13 @@ function generateGraphVisualization(decodedData, colors, playerPath) {
     svg += `<circle cx="${coord.x}" cy="${coord.y}" r="${nodeRadius}" 
                     fill="${nodeColor}" stroke="#333" stroke-width="0.5"/>`;
 
-    // Draw word label
-    const fontSize = 12;
-    svg += `<text x="${coord.x}" y="${coord.y + nodeRadius + fontSize + 4}" 
-                  font-family="Arial, sans-serif" font-size="${fontSize}" 
-                  fill="${colors.text}" text-anchor="middle" font-weight="bold">${word}</text>`;
+    // Draw word label (only for start/target, keep intermediate nodes anonymous)
+    if (word && word.length > 0) {
+      const fontSize = 12;
+      svg += `<text x="${coord.x}" y="${coord.y + nodeRadius + fontSize + 4}" 
+                    font-family="Arial, sans-serif" font-size="${fontSize}" 
+                    fill="${colors.text}" text-anchor="middle" font-weight="bold">${word}</text>`;
+    }
   }
 
   return svg;
@@ -213,25 +215,20 @@ function generateSVGPreview(params) {
       if (params.tsne) shareData.push(`tsne=${params.tsne}`);
       decodedData = decodeEnhancedShareData(shareData.join("&"));
 
-      // Extract words from decoded data if available
-      if (decodedData.words && decodedData.words.length > 0) {
-        playerPath = decodedData.words;
-      } else {
-        // Fallback: create path based on coordinate count
-        if (decodedData.coordinates.length > 2) {
-          const pathLength = decodedData.coordinates.length;
-          playerPath = [startWord];
+      // Create anonymized path for preview (don't reveal intermediate words)
+      if (decodedData.coordinates.length > 2) {
+        const pathLength = decodedData.coordinates.length;
+        playerPath = [startWord];
 
-          // Add placeholder intermediate words
-          for (let i = 1; i < pathLength - 1; i++) {
-            playerPath.push(`step${i}`);
-          }
-
-          playerPath.push(targetWord);
-        } else {
-          // Simple 2-word path
-          playerPath = [startWord, targetWord];
+        // Add anonymous intermediate nodes (no word labels)
+        for (let i = 1; i < pathLength - 1; i++) {
+          playerPath.push(""); // Empty string = no label
         }
+
+        playerPath.push(targetWord);
+      } else {
+        // Simple 2-word path
+        playerPath = [startWord, targetWord];
       }
     } catch (error) {
       console.log("Could not decode share data:", error);
