@@ -1,18 +1,11 @@
 import React from "react";
 import { StyleSheet, View, Dimensions, Image, ScrollView } from "react-native";
 
-import {
-  Modal,
-  Portal,
-  Text,
-  Button,
-  IconButton,
-  useTheme,
-} from "react-native-paper";
+import { Modal, Portal, Text, Button, useTheme } from "react-native-paper";
 
 import { useTutorial } from "../context/TutorialContext";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
-import CustomIcon from "./CustomIcon";
+
 import ModalCloseButton from "./ModalCloseButton";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");

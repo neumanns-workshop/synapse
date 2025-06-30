@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, ScrollView, StyleSheet } from "react-native";
 
-import {
-  Modal,
-  Portal,
-  Text,
-  Button,
-  ActivityIndicator,
-} from "react-native-paper";
+import { Modal, Portal, Text, ActivityIndicator } from "react-native-paper";
 
 import { useTheme as useAppTheme } from "../context/ThemeContext";
 import { Achievement } from "../features/achievements";

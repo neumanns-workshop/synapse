@@ -83,14 +83,13 @@ export const shareChallenge = async ({
       encodedPath,
     );
 
-    // Generate challenge message with emoji path
+    // Generate challenge message (now without emoji path)
     const challengeMessage = generateChallengeMessage({
       startWord,
       targetWord,
       playerPath,
       steps,
       deepLink,
-      encodedPath,
       optimalPathLength: gameReport?.optimalPath.length
         ? gameReport.optimalPath.length - 1
         : undefined,
@@ -204,7 +203,7 @@ export const shareDailyChallenge = async ({
       encodedPath,
     );
 
-    // Generate taunting message with emoji path
+    // Generate taunting message (now without emoji path)
     const tauntMessage = generateDailyChallengeTaunt({
       startWord,
       targetWord,
@@ -213,7 +212,6 @@ export const shareDailyChallenge = async ({
       userCompleted,
       userGaveUp,
       challengeDate,
-      encodedPath,
       optimalPathLength: gameReport?.optimalPath.length
         ? gameReport.optimalPath.length - 1
         : undefined,
@@ -296,7 +294,6 @@ interface ChallengeMessageOptions {
   steps?: number;
   deepLink: string;
   gameStatus?: "won" | "given_up";
-  encodedPath?: string; // Add encoded path for emoji display
   optimalPathLength?: number; // Add optimal path length to check for perfect games
 }
 
@@ -310,7 +307,6 @@ export const generateChallengeMessage = (
     steps,
     deepLink: _deepLink,
     gameStatus,
-    encodedPath,
     optimalPathLength,
   } = options;
 
@@ -351,11 +347,7 @@ export const generateChallengeMessage = (
     }
   }
 
-  // Add emoji path if available
-  if (encodedPath) {
-    const emojiPath = pathEncodingToEmojis(encodedPath);
-    challengeMessage += `\n\n${emojiPath}`;
-  }
+  // Emoji path removed - now using visual previews with QR codes
 
   // We won't include the deep link in the message as it will be included as URL in the share options
   return challengeMessage;
@@ -458,7 +450,6 @@ interface DailyChallengeTauntOptions {
   userCompleted?: boolean;
   userGaveUp?: boolean;
   challengeDate: string;
-  encodedPath?: string; // Add encoded path for emoji display
   optimalPathLength?: number; // Add optimal path length to check for perfect games
 }
 
@@ -473,7 +464,6 @@ export const generateDailyChallengeTaunt = (
     userCompleted,
     userGaveUp,
     challengeDate,
-    encodedPath,
     optimalPathLength,
   } = options;
 
@@ -521,12 +511,7 @@ export const generateDailyChallengeTaunt = (
       }
     }
 
-    // Add emoji path if available
-    if (encodedPath) {
-      const emojiPath = pathEncodingToEmojis(encodedPath);
-      message += `\n\n${emojiPath}`;
-    }
-
+    // Emoji path removed - now using visual previews with QR codes
     return message;
   }
 
@@ -542,25 +527,15 @@ export const generateDailyChallengeTaunt = (
       message = `I couldn't get ${formattedDate}'s challenge ("${startWord}" → "${targetWord}") and had to give up, but the AI got it in ${aiSteps} ${aiMoveText}. Can you beat the AI in less than ${aiSteps} moves?`;
     }
 
-    // Add emoji path if available
-    if (encodedPath) {
-      const emojiPath = pathEncodingToEmojis(encodedPath);
-      message += `\n\n${emojiPath}`;
-    }
-
+    // Emoji path removed - now using visual previews with QR codes
     return message;
   }
 
   // If user hasn't attempted it or no steps recorded, just taunt with AI score
   const aiMoveText = aiSteps === 1 ? "move" : "moves";
-  let message = `I beat the AI in ${aiSteps} ${aiMoveText} on ${formattedDate}'s challenge ("${startWord}" → "${targetWord}"). Can you do better?`;
+  const message = `I beat the AI in ${aiSteps} ${aiMoveText} on ${formattedDate}'s challenge ("${startWord}" → "${targetWord}"). Can you do better?`;
 
-  // Add emoji path if available
-  if (encodedPath) {
-    const emojiPath = pathEncodingToEmojis(encodedPath);
-    message += `\n\n${emojiPath}`;
-  }
-
+  // Emoji path removed - now using visual previews with QR codes
   return message;
 };
 
@@ -897,30 +872,4 @@ export const encodeGameReportForSharing = (report: GameReport): string => {
   return encoded;
 };
 
-/**
- * Converts an encoded path string to emoji representation
- * Legend:
- * S = Start (🟢 green circle)
- * T = Target (🔴 red circle)
- * C = Current position when gave up (🔵 blue circle)
- * N = Normal move, not optimal (⚪ white circle)
- * G = Globally optimal move (🟡 yellow circle)
- * L = Locally optimal move when not global (🟣 purple circle)
- * R = Remaining AI path when player gave up (⚫ black circle)
- */
-export function pathEncodingToEmojis(encoded: string): string {
-  const emojiMap: Record<string, string> = {
-    S: "🟢", // Start - green circle
-    T: "🔴", // Target - red circle
-    C: "🔵", // Current position when gave up - blue circle
-    N: "⚪", // Normal move, not optimal - white circle
-    G: "🟡", // Globally optimal move - yellow circle
-    L: "🟣", // Locally optimal move when not global - purple circle
-    R: "⚫", // Remaining AI path when player gave up - black circle
-  };
-
-  return encoded
-    .split("")
-    .map((char) => emojiMap[char] || char)
-    .join("");
-}
+// pathEncodingToEmojis function removed - now using visual previews with QR codes instead of text-based emoji paths

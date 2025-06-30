@@ -16,7 +16,6 @@ import {
   Text,
   Dialog,
   Button,
-  IconButton,
 } from "react-native-paper";
 
 import {
@@ -30,7 +29,7 @@ import {
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import AchievementDetailDialog from "./AchievementDetailDialog";
-import CustomIcon from "./CustomIcon";
+
 import GameReportDisplay from "./GameReportDisplay";
 import GraphVisualization from "./GraphVisualization";
 import PlayerPathDisplay from "./PlayerPathDisplay";
@@ -170,7 +169,6 @@ const GameReportModal = () => {
             userCompleted,
             userGaveUp,
             challengeDate,
-            encodedPath,
             optimalPathLength: gameReportModalReport.optimalPath.length - 1,
           });
         } else {
@@ -192,7 +190,6 @@ const GameReportModal = () => {
             steps: pathLength,
             deepLink: link,
             gameStatus: gameReportModalReport.status,
-            encodedPath,
             optimalPathLength: gameReportModalReport.optimalPath.length - 1,
           });
         }

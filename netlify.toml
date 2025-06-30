@@ -27,6 +27,12 @@
   to = "/index.html"
   status = 200
 
+# Preview API endpoint for challenge images  
+[[redirects]]
+  from = "/api/preview"
+  to = "/.netlify/functions/preview"
+  status = 200
+
 # Specific routes that should serve index.html
 [[redirects]]
   from = "/challenge"

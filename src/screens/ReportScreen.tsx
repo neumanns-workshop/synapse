@@ -154,7 +154,6 @@ const ReportScreen = () => {
             userCompleted,
             userGaveUp,
             challengeDate,
-            encodedPath,
             optimalPathLength: gameReport.optimalPath.length - 1,
           });
         } else {
@@ -176,7 +175,6 @@ const ReportScreen = () => {
             steps: pathLength,
             deepLink: link,
             gameStatus: gameReport.status,
-            encodedPath,
             optimalPathLength: gameReport.optimalPath.length - 1,
           });
         }
