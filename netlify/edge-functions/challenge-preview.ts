@@ -12,11 +12,16 @@ export default async (request: Request, context: Context) => {
   }
 
   try {
-    // Parse the new URL structure parameters
-    const type = url.searchParams.get("type");
+    // Parse challenge parameters - support both old and new URL structures
+    const type =
+      url.searchParams.get("type") ||
+      (url.pathname.startsWith("/dailychallenge")
+        ? "dailychallenge"
+        : "challenge");
     const startWord = url.searchParams.get("start");
     const targetWord = url.searchParams.get("target");
-    const share = url.searchParams.get("share");
+    const challengeId = url.searchParams.get("id"); // For daily challenges
+    const share = url.searchParams.get("share"); // Encoded path data
     const quality = url.searchParams.get("quality");
     const tsne = url.searchParams.get("tsne");
     const theme = url.searchParams.get("theme");
@@ -35,14 +40,19 @@ export default async (request: Request, context: Context) => {
       userAgent.includes("facebook") ||
       userAgent.includes("twitter") ||
       userAgent.includes("linkedin") ||
-      userAgent.includes("telegram");
+      userAgent.includes("telegram") ||
+      userAgent.includes("discord") ||
+      userAgent.includes("whatsapp") ||
+      userAgent.includes("slack") ||
+      userAgent.includes("preview") ||
+      userAgent.includes("spider");
 
     if (!isBot) {
       // Not a bot, let the main app handle it
       return context.next();
     }
 
-    // Generate preview for social media bots
+    // Generate preview image URL for bots
     const previewParams = new URLSearchParams();
     previewParams.set("type", type);
     previewParams.set("start", startWord);
@@ -51,32 +61,25 @@ export default async (request: Request, context: Context) => {
     if (quality) previewParams.set("quality", quality);
     if (tsne) previewParams.set("tsne", tsne);
     if (theme) previewParams.set("theme", theme);
+    if (challengeId) previewParams.set("id", challengeId);
     if (date) previewParams.set("date", date);
 
-    // Call the preview function
-    const previewUrl = `/.netlify/functions/preview?${previewParams.toString()}`;
-    const previewResponse = await fetch(`${url.origin}${previewUrl}`);
+    const previewImageUrl = `${url.origin}/.netlify/functions/preview?${previewParams}`;
 
-    if (!previewResponse.ok) {
-      return context.next();
-    }
+    // Generate dynamic meta tags
+    const isDailyChallenge =
+      type === "dailychallenge" || url.pathname.startsWith("/dailychallenge");
+    const title = isDailyChallenge
+      ? `Daily Challenge ${date || challengeId} - ${startWord} → ${targetWord}`
+      : `Word Challenge - ${startWord} → ${targetWord}`;
 
-    const previewSvg = await previewResponse.text();
+    const description = isDailyChallenge
+      ? `Try today's daily challenge! Connect "${startWord}" to "${targetWord}" in the fewest moves.`
+      : share
+        ? `Someone shared their path! Can you solve this Synapse word challenge?`
+        : `Can you connect "${startWord}" to "${targetWord}" in Synapse?`;
 
-    // Generate meta tags for social sharing
-    const title =
-      type === "dailychallenge"
-        ? `Daily Challenge ${date} - ${startWord} → ${targetWord}`
-        : `Word Challenge - ${startWord} → ${targetWord}`;
-
-    const description =
-      type === "dailychallenge"
-        ? `Try today's daily challenge! Connect "${startWord}" to "${targetWord}" in the fewest moves.`
-        : `Can you connect "${startWord}" to "${targetWord}"? Play this word association challenge!`;
-
-    const ogImageUrl = `${url.origin}${previewUrl}`;
-
-    // Return HTML with meta tags and preview
+    // Return standalone HTML for social media crawlers
     const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -87,7 +90,7 @@ export default async (request: Request, context: Context) => {
   <!-- Open Graph tags -->
   <meta property="og:title" content="${title}">
   <meta property="og:description" content="${description}">
-  <meta property="og:image" content="${ogImageUrl}">
+  <meta property="og:image" content="${previewImageUrl}">
   <meta property="og:url" content="${request.url}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Synapse">
@@ -96,7 +99,7 @@ export default async (request: Request, context: Context) => {
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
-  <meta name="twitter:image" content="${ogImageUrl}">
+  <meta name="twitter:image" content="${previewImageUrl}">
   
   <!-- Redirect to app after a short delay -->
   <meta http-equiv="refresh" content="3;url=${request.url}">
@@ -108,21 +111,11 @@ export default async (request: Request, context: Context) => {
       background: #6750A4;
       color: white;
     }
-    .preview { 
-      max-width: 600px; 
-      margin: 20px auto; 
-      border-radius: 12px; 
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
   </style>
 </head>
 <body>
   <h1>🧠 Synapse</h1>
   <p>Loading challenge...</p>
-  <div class="preview">
-    ${previewSvg}
-  </div>
   <p>Redirecting to the game...</p>
 </body>
 </html>`;
