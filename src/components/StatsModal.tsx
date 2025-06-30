@@ -12,7 +12,6 @@ import {
   Modal,
   Portal,
   Text,
-  Button,
   Card,
   SegmentedButtons,
   ActivityIndicator,

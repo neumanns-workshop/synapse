@@ -303,10 +303,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    flex: 1,
+    marginRight: 12, // Add margin to ensure space for close button
   },
   title: {
-    textAlign: "center",
+    textAlign: "left", // Change to left align since we have an icon
     fontWeight: "bold",
+    flex: 1, // Allow title to take remaining space but wrap properly
+    flexShrink: 1, // Allow title to shrink if needed
   },
   content: {
     marginBottom: 24,

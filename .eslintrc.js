@@ -183,6 +183,14 @@ module.exports = {
       },
     },
     {
+      // Netlify functions need CommonJS require statements
+      files: ["**/netlify/functions/**/*.js"],
+      rules: {
+        "@typescript-eslint/no-var-requires": "off", // Allow require in Netlify functions
+        "no-console": "off", // Allow console in serverless functions
+      },
+    },
+    {
       // React Native screens and components often need inline styles for prototyping
       files: ["**/screens/**/*.{ts,tsx}", "**/components/**/*.{ts,tsx}"],
       rules: {

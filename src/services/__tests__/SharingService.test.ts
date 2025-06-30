@@ -60,22 +60,7 @@ const encodeGameReportForSharing = (report: GameReport): string => {
   return encoded;
 };
 
-const pathEncodingToEmojis = (encoded: string): string => {
-  const emojiMap: Record<string, string> = {
-    S: "🟢", // Start - green circle
-    T: "🔴", // Target - red circle
-    C: "🔵", // Current position when gave up - blue circle
-    N: "⚪", // Normal move, not optimal - white circle
-    G: "🟡", // Globally optimal move - yellow circle
-    L: "🟣", // Locally optimal move when not global - purple circle
-    R: "⚫", // Remaining AI path when player gave up - black circle
-  };
-
-  return encoded
-    .split("")
-    .map((char) => emojiMap[char] || char)
-    .join("");
-};
+// pathEncodingToEmojis function removed - now using visual previews with QR codes
 
 // Copy the generateDailyChallengeTaunt and generateChallengeMessage function logic for testing without React Native dependencies
 const generateDailyChallengeTaunt = (options: {
@@ -86,7 +71,6 @@ const generateDailyChallengeTaunt = (options: {
   userCompleted?: boolean;
   userGaveUp?: boolean;
   challengeDate: string;
-  encodedPath?: string;
   optimalPathLength?: number;
 }): string => {
   const {
@@ -97,7 +81,6 @@ const generateDailyChallengeTaunt = (options: {
     userCompleted,
     userGaveUp,
     challengeDate,
-    encodedPath,
     optimalPathLength,
   } = options;
 
@@ -151,7 +134,6 @@ const generateChallengeMessage = (options: {
   steps?: number;
   deepLink: string;
   gameStatus?: "won" | "given_up";
-  encodedPath?: string;
   optimalPathLength?: number;
 }): string => {
   const {
@@ -161,7 +143,6 @@ const generateChallengeMessage = (options: {
     steps,
     deepLink: _deepLink,
     gameStatus,
-    encodedPath,
     optimalPathLength,
   } = options;
 
@@ -348,25 +329,7 @@ describe("SharingService Encoding", () => {
     });
   });
 
-  describe("pathEncodingToEmojis", () => {
-    it("should convert encoded path to emojis correctly", () => {
-      const encoded = "SGGGT";
-      const result = pathEncodingToEmojis(encoded);
-      expect(result).toBe("🟢🟡🟡🟡🔴"); // Start + 3 global optimal + Target
-    });
-
-    it("should convert mixed path to emojis correctly", () => {
-      const encoded = "SNLGT";
-      const result = pathEncodingToEmojis(encoded);
-      expect(result).toBe("🟢⚪🟣🟡🔴"); // Start + normal + local + global + Target
-    });
-
-    it("should convert path with remaining moves to emojis correctly", () => {
-      const encoded = "SNCRRT";
-      const result = pathEncodingToEmojis(encoded);
-      expect(result).toBe("🟢⚪🔵⚫⚫🔴"); // Start + normal + current + 2 remaining + Target
-    });
-  });
+  // pathEncodingToEmojis tests removed - now using visual previews with QR codes
 });
 
 describe("SharingService Daily Challenge Taunts", () => {
