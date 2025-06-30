@@ -13,7 +13,11 @@ export default async (request: Request, context: Context) => {
 
   try {
     // Parse challenge parameters - support both old and new URL structures
-    const type = url.searchParams.get("type") || (url.pathname.startsWith("/dailychallenge") ? "dailychallenge" : "challenge");
+    const type =
+      url.searchParams.get("type") ||
+      (url.pathname.startsWith("/dailychallenge")
+        ? "dailychallenge"
+        : "challenge");
     const startWord = url.searchParams.get("start");
     const targetWord = url.searchParams.get("target");
     const challengeId = url.searchParams.get("id"); // For daily challenges
@@ -63,7 +67,8 @@ export default async (request: Request, context: Context) => {
     const previewImageUrl = `${url.origin}/.netlify/functions/preview?${previewParams}`;
 
     // Generate dynamic meta tags
-    const isDailyChallenge = type === "dailychallenge" || url.pathname.startsWith("/dailychallenge");
+    const isDailyChallenge =
+      type === "dailychallenge" || url.pathname.startsWith("/dailychallenge");
     const title = isDailyChallenge
       ? `Daily Challenge ${date || challengeId} - ${startWord} → ${targetWord}`
       : `Word Challenge - ${startWord} → ${targetWord}`;
@@ -71,8 +76,8 @@ export default async (request: Request, context: Context) => {
     const description = isDailyChallenge
       ? `Try today's daily challenge! Connect "${startWord}" to "${targetWord}" in the fewest moves.`
       : share
-      ? `Someone shared their path! Can you solve this Synapse word challenge?`
-      : `Can you connect "${startWord}" to "${targetWord}" in Synapse?`;
+        ? `Someone shared their path! Can you solve this Synapse word challenge?`
+        : `Can you connect "${startWord}" to "${targetWord}" in Synapse?`;
 
     // Return standalone HTML for social media crawlers
     const html = `<!DOCTYPE html>
