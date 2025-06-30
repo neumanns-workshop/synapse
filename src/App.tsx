@@ -36,6 +36,7 @@ import { TutorialProvider } from "./context/TutorialContext";
 import AccountScreen from "./screens/AccountScreen";
 import AuthScreen from "./screens/AuthScreen";
 import GameScreen from "./screens/GameScreen";
+import PreviewImageScreen from "./screens/PreviewImageScreen";
 import { preloadAllData } from "./services/dataLoader";
 import { gameFlowManager } from "./services/GameFlowManager";
 import PaymentHandler from "./services/PaymentHandler";
@@ -89,7 +90,7 @@ function AppContent() {
   const [showAccount, setShowAccount] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const [currentLegalPage, setCurrentLegalPage] = useState<
-    "terms" | "privacy" | "dmca" | "about" | "contact" | null
+    "terms" | "privacy" | "dmca" | "about" | "contact" | "preview-image" | null
   >(null);
 
   // Get the actions from the store - updated for new modal states
@@ -132,7 +133,7 @@ function AppContent() {
         if (typeof window !== "undefined") {
           entryUrl = window.location.href;
 
-          // Check if we're on a legal page
+          // Check if we're on a legal page or preview-image page
           const pathname = window.location.pathname;
           if (pathname === "/terms") {
             setCurrentLegalPage("terms");
@@ -148,6 +149,10 @@ function AppContent() {
             return;
           } else if (pathname === "/contact") {
             setCurrentLegalPage("contact");
+            return;
+          } else if (pathname === "/preview-image") {
+            // Handle preview image route - render PreviewImageScreen directly
+            setCurrentLegalPage("preview-image");
             return;
           }
         }
@@ -346,13 +351,27 @@ function AppContent() {
     );
   }
 
-  // Show legal page if requested
+  // Show legal page or preview image if requested
   if (currentLegalPage) {
     const legalPageStyles = StyleSheet.create({
       container: {
         flex: 1,
       },
     });
+
+    // Handle preview-image route specially
+    if (currentLegalPage === "preview-image") {
+      return (
+        <PaperProvider theme={theme}>
+          <SafeAreaProvider>
+            <View style={legalPageStyles.container}>
+              <PreviewImageScreen />
+            </View>
+            <StatusBar style={theme.dark ? "light" : "dark"} />
+          </SafeAreaProvider>
+        </PaperProvider>
+      );
+    }
 
     return (
       <PaperProvider theme={theme}>

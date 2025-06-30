@@ -64,6 +64,11 @@
   to = "/index.html"
   status = 200
 
+[[redirects]]
+  from = "/preview-image"
+  to = "/index.html"
+  status = 200
+
 # Security headers
 [[headers]]
   for = "/*"
@@ -131,4 +136,13 @@
 [[headers]]
   for = "/sitemap.xml"
   [headers.values]
-    Cache-Control = "public, max-age=3600" 
+    Cache-Control = "public, max-age=3600"
+
+# Function configuration for Puppeteer support
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["puppeteer"]
+
+# Function-specific settings for preview function
+[functions.preview]
+  timeout = 30 
