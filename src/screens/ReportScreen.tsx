@@ -16,7 +16,6 @@ import {
   Dialog,
   Button,
 } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import AchievementDetailDialog from "../components/AchievementDetailDialog";
 import GameReportDisplay from "../components/GameReportDisplay";

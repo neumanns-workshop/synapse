@@ -4,7 +4,7 @@ import SupabaseService from "./SupabaseService";
 import { UnifiedDataStore } from "./UnifiedDataStore";
 
 // Environment variables - set these in your .env file
-const stripePublishableKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!;
+const stripePublishableKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
 if (!stripePublishableKey) {
   console.warn("Missing Stripe publishable key - payments will not work");
@@ -36,7 +36,7 @@ export class StripeService {
     "Unlock unlimited games, access to all past daily challenges, and unique themed word collections";
 
   private constructor() {
-    this.stripe = loadStripe(stripePublishableKey);
+    this.stripe = loadStripe(stripePublishableKey || "");
     this.supabaseService = SupabaseService.getInstance();
     this.unifiedStore = UnifiedDataStore.getInstance();
   }

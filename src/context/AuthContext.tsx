@@ -6,8 +6,6 @@ import React, {
   ReactNode,
 } from "react";
 
-import { User } from "@supabase/supabase-js";
-
 import SupabaseService, {
   AuthState,
   UserProfile,

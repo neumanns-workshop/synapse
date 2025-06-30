@@ -78,7 +78,7 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
   });
 
   const renderListItemIcon = React.useCallback(
-    (props: { color: string; style: ViewStyle }) => (
+    (_props: { color: string; style: ViewStyle }) => (
       <CustomIcon
         source="book-open-variant"
         size={24}
@@ -191,8 +191,6 @@ const WordDefinitionDialog: React.FC<WordDefinitionDialogProps> = ({
   if (!visible && opacity.value === 0) {
     return null;
   }
-
-  const buttonTextColor = theme.dark ? colors.onSurface : colors.primary;
 
   return (
     <Portal>

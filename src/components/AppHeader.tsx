@@ -2,21 +2,20 @@ import React, { useCallback } from "react";
 import {
   Image,
   StyleSheet,
-  Pressable,
   View,
   Text,
   StyleProp,
   ViewStyle,
 } from "react-native";
 
-import { Appbar, useTheme, Badge, Button, Menu } from "react-native-paper";
+import { Appbar, useTheme, Button, Menu } from "react-native-paper";
 
 // Removed react-native-reanimated imports - using simple buttons instead
 
 import { useAuth } from "../context/AuthContext";
 import { getUnreadArticles } from "../data/news";
 import { dailyChallengesService } from "../services/DailyChallengesService";
-import SupabaseService from "../services/SupabaseService";
+
 import { unifiedDataStore } from "../services/UnifiedDataStore";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -58,8 +57,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   giveUpDisabled = false,
   gameInProgress = false,
 }) => {
-  const { customColors, colors, roundness } = useTheme() as ExtendedTheme;
-  const supabaseService = SupabaseService.getInstance();
+  const { customColors, colors } = useTheme() as ExtendedTheme;
   const auth = useAuth();
 
   // Updated store selectors for new modal states
@@ -83,12 +81,10 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   const setLabsModalVisible = useGameStore(
     (state) => state.setLabsModalVisible,
   );
-  const showUpgradePrompt = useGameStore((state) => state.showUpgradePrompt);
 
   // State for tracking unread news count, menu visibility, and premium status
   const [unreadCount, setUnreadCount] = React.useState(0);
   const [menuVisible, setMenuVisible] = React.useState(false);
-  const [isPremium, setIsPremium] = React.useState(false);
   const [readArticleIds, setReadArticleIds] = React.useState<string[]>([]);
   const [unviewedAchievementCount, setUnviewedAchievementCount] =
     React.useState(0);
@@ -225,9 +221,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         // Check daily challenge status
         await checkIncompleteDailyChallenge();
 
-        // Load premium status
-        const premiumStatus = await dailyChallengesService.isPremiumUser();
-        setIsPremium(premiumStatus);
+        // Premium status checked when needed
       } catch (error) {
         console.error("Error loading header data:", error);
       }
@@ -384,11 +378,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     setDailiesModalVisible(true);
     // Clear daily challenge notification immediately when opening modal
     checkIncompleteDailyChallenge();
-  };
-
-  const handleUpgrade = () => {
-    setMenuVisible(false);
-    showUpgradePrompt("", "generalUpgrade");
   };
 
   const handleLab = () => {

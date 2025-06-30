@@ -10,7 +10,7 @@ import type {
 import { captureRef } from "react-native-view-shot";
 
 import { Logger } from "../utils/logger";
-import type { GameReport, OptimalChoice } from "../utils/gameReportUtils";
+import type { GameReport } from "../utils/gameReportUtils";
 
 // Import image manipulator conditionally to avoid web errors
 

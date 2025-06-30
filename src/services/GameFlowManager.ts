@@ -1,4 +1,3 @@
-import type { UpgradeContext } from "../components/UpgradePrompt";
 import { useGameStore } from "../stores/useGameStore";
 import { Logger } from "../utils/logger";
 import {
@@ -68,8 +67,6 @@ export class GameFlowManager {
     // Use the store's data instead of making independent calls
     // This ensures we're using the same data that was loaded by loadInitialData
     const remainingFreeGames = gameStore.remainingFreeGames;
-    const hasPlayedToday = gameStore.hasPlayedTodaysChallenge;
-    const currentDailyChallenge = gameStore.currentDailyChallenge;
 
     // Check tutorial completion
     const tutorialComplete = await this.checkTutorialComplete();

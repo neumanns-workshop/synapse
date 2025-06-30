@@ -75,7 +75,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [featuresExpanded, setFeaturesExpanded] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isWaitingForAuth, setIsWaitingForAuth] = useState(false);
 
@@ -268,7 +268,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   const onCaptchaVerify = (token: string) => {
     console.log("🔐 CAPTCHA verified with token:", token);
     console.log("🔐 Current mode:", mode);
-    setCaptchaToken(token);
 
     // Determine which action to take based on current mode
     if (mode === "signup") {
@@ -532,83 +531,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
       // STEP 7: Cleanup and wait for auth state
       await unifiedStore.clearPendingConversionDetails(anonymousUserId);
-      setIsWaitingForAuth(true);
-      // The auth state change will trigger onAuthComplete
-    } catch (error) {
-      console.error("🎫 Error during promo signup:", error);
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Failed to create account with promo code",
-      );
-    } finally {
-      setIsLoading(false);
-      setIsApplyingPromo(false);
-    }
-  };
-
-  const handlePromoCodeSignup = async () => {
-    setIsLoading(true);
-    setIsApplyingPromo(true);
-
-    try {
-      const code = promoCode.toUpperCase().trim();
-      console.log("🎫 Validating promo code:", code);
-
-      // STEP 1: Validate promo code WITHOUT authentication
-      // The edge function uses service role internally and doesn't need user auth
-      console.log("🎫 Calling promo validation edge function...");
-      const { data: validationResult, error: validationError } =
-        await supabaseService.invokeFunction("validate-promo-code", {
-          code,
-          userEmail: email,
-          userAgent: navigator.userAgent,
-        }); // No JWT token passed - function works without auth
-
-      if (
-        validationError ||
-        !(validationResult as { valid?: boolean })?.valid
-      ) {
-        const errorMessage =
-          (validationResult as { error?: string })?.error ||
-          (validationError instanceof Error
-            ? validationError.message
-            : "Invalid promo code");
-        setErrorMessage(errorMessage);
-        return;
-      }
-
-      console.log("🎫 Promo code validated successfully, creating account...");
-
-      // STEP 2: Create the account directly via Supabase (similar to traditional signup)
-      const { user, error: signUpError } = await supabaseService.signUp(
-        email,
-        password,
-        emailUpdatesOptIn,
-      );
-
-      if (signUpError) {
-        setErrorMessage(
-          signUpError instanceof Error
-            ? signUpError.message
-            : "Failed to create account",
-        );
-        return;
-      }
-
-      if (!user) {
-        setErrorMessage("Account created but user data missing");
-        return;
-      }
-
-      console.log("🎫 Account created, setting premium status...");
-
-      // STEP 3: Set premium status locally (same as traditional signup after payment)
-      await stripeService.createPromoAccount(code);
-
-      console.log("🎫 Premium account created successfully!");
-
-      // Wait for auth state to complete (similar to traditional signup)
       setIsWaitingForAuth(true);
       // The auth state change will trigger onAuthComplete
     } catch (error) {
@@ -1508,7 +1430,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             sitekey={
               __DEV__
                 ? "10000000-ffff-ffff-ffff-000000000001"
-                : process.env.EXPO_PUBLIC_HCAPTCHA_SITE_KEY!
+                : process.env.EXPO_PUBLIC_HCAPTCHA_SITE_KEY || ""
             }
             onVerify={onCaptchaVerify}
             size="invisible"

@@ -5,13 +5,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PaperProvider, ActivityIndicator, Text } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { QueryClient, QueryClientProvider } from "react-query";
-
-// Initialize logger early (includes anti-tampering protection)
-import { Logger } from "./utils/logger";
 
 // Lazy load heavy modal components for better web performance
 const ContactModal = lazy(() => import("./components/ContactModal"));
@@ -38,10 +33,8 @@ import { preloadAllData } from "./services/dataLoader";
 import { gameFlowManager } from "./services/GameFlowManager";
 import PaymentHandler from "./services/PaymentHandler";
 import type { PaymentRedirectResult } from "./services/PaymentHandler";
-import { resetAllPlayerData } from "./services/StorageAdapter";
 import { unifiedDataStore } from "./services/UnifiedDataStore";
 import { useGameStore } from "./stores/useGameStore";
-import { SynapseLightTheme } from "./theme/SynapseTheme";
 import { initializeWebOptimizations } from "./utils/webOptimizations";
 
 // Define the root stack parameter list
@@ -60,8 +53,6 @@ const customScreenOptions: Partial<NativeStackNavigationOptions> = {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-const queryClient = new QueryClient();
 
 // Loading fallback component for lazy-loaded modals
 const ModalLoadingFallback: React.FC = () => (

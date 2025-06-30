@@ -35,7 +35,7 @@ export const ProgressiveSyncExample: React.FC = () => {
       } else {
         Alert.alert(
           "Sync Failed",
-          `Failed to sync data: ${result.error?.message || "Unknown error"}`,
+          `Failed to sync data: ${result.error instanceof Error ? result.error.message : "Unknown error"}`,
           [{ text: "OK" }],
         );
       }
@@ -66,7 +66,7 @@ export const ProgressiveSyncExample: React.FC = () => {
       } else {
         Alert.alert(
           "Sync Failed",
-          `Failed to load data: ${result.error?.message || "Unknown error"}`,
+          `Failed to load data: ${result.error instanceof Error ? result.error.message : "Unknown error"}`,
           [{ text: "OK" }],
         );
       }

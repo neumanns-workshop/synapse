@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import { ScrollView, View, Platform, Pressable } from "react-native";
+import { ScrollView, View, Platform } from "react-native";
 
-import { Text, Card, Divider, IconButton } from "react-native-paper";
+import { Text, Card, IconButton } from "react-native-paper";
 
 import { useTheme } from "../context/ThemeContext";
 

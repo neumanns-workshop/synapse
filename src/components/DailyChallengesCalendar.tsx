@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 
 import { Text, Card, useTheme, ActivityIndicator } from "react-native-paper";
 
@@ -184,12 +184,6 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
     return "unavailable";
   };
 
-  // Helper function to check if a date is an equinox or solstice
-  const getCelestialEvent = (day: number): string | null => {
-    // Removed celestial event detection - no longer needed
-    return null;
-  };
-
   // Helper function to get active collections for a given date
   const getActiveCollectionsForDate = (date: Date): WordCollection[] => {
     return allWordCollections.filter((collection) => {
@@ -315,10 +309,6 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
     }
   };
 
-  const getGradeLetter = (status: string): string | null => {
-    return null; // No longer using grade letters
-  };
-
   const handleDayPress = async (day: number) => {
     const challenge = getChallengeForDay(day);
     if (challenge && onChallengeSelect) {
@@ -432,7 +422,7 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
                 {/* Event indicators - bottom border bars */}
                 {eventIndicators.length > 0 && (
                   <View style={styles.eventBorderBars}>
-                    {eventIndicators.slice(0, 3).map((event, idx) => (
+                    {eventIndicators.slice(0, 3).map((event) => (
                       <View
                         key={event.id}
                         style={[
@@ -545,7 +535,7 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
                   Active Collections
                 </Text>
                 <View style={styles.activeThemesList}>
-                  {activeCollections.map((collection, index) => (
+                  {activeCollections.map((collection) => (
                     <View
                       key={collection.id}
                       style={[
