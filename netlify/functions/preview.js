@@ -1,484 +1,237 @@
-// Enhanced Netlify function for generating preview images
-const sharp = require("sharp");
+// Enhanced Netlify function for generating preview images with Puppeteer
+// This function takes screenshots of the actual React components for perfect fidelity
 
-// Generate SVG graph visualization from decoded data
-function generateGraphVisualization(decodedData, colors, playerPath) {
-  const { pathQuality, coordinates } = decodedData;
+const puppeteer = require("puppeteer");
 
-  if (!coordinates || coordinates.length === 0 || !pathQuality || !playerPath) {
-    return "";
-  }
+// Fallback SVG generation for when Puppeteer fails
+function generateFallbackPreview(params) {
+  const { startWord, targetWord, type, date } = params;
 
-  // Calculate bounds and scaling
-  const minX = Math.min(...coordinates.map((c) => c.x));
-  const maxX = Math.max(...coordinates.map((c) => c.x));
-  const minY = Math.min(...coordinates.map((c) => c.y));
-  const maxY = Math.max(...coordinates.map((c) => c.y));
-
-  const graphWidth = 500; // Available width for graph
-  const graphHeight = 300; // Available height for graph
-  const padding = 60; // More padding for labels
-
-  const scaleX = (graphWidth - 2 * padding) / (maxX - minX);
-  const scaleY = (graphHeight - 2 * padding) / (maxY - minY);
-  const scale = Math.min(scaleX, scaleY); // Use uniform scaling
-
-  // Transform coordinates to SVG space
-  const transformedCoords = coordinates.map((coord) => ({
-    x: padding + (coord.x - minX) * scale,
-    y: padding + (coord.y - minY) * scale,
-  }));
-
-  let svg = "";
-
-  // Draw path links first (so they appear behind nodes)
-  for (let i = 0; i < transformedCoords.length - 1; i++) {
-    const curr = transformedCoords[i];
-    const next = transformedCoords[i + 1];
-
-    svg += `<line x1="${curr.x}" y1="${curr.y}" x2="${next.x}" y2="${next.y}" 
-                  stroke="${colors.pathLink}" stroke-width="3" stroke-opacity="0.8"/>`;
-  }
-
-  // Draw nodes with labels
-  for (let i = 0; i < transformedCoords.length; i++) {
-    const coord = transformedCoords[i];
-    const qualityChar = pathQuality[i];
-    const word = playerPath[i];
-
-    let nodeColor = colors.normalNode;
-    let nodeRadius = 6;
-
-    // Determine node color based on quality
-    switch (qualityChar) {
-      case "S": // Start
-        nodeColor = colors.startNode;
-        nodeRadius = 8;
-        break;
-      case "T": // Target
-        nodeColor = colors.endNode;
-        nodeRadius = 8;
-        break;
-      case "C": // Current
-        nodeColor = colors.currentNode;
-        nodeRadius = 8;
-        break;
-      case "G": // Global optimal
-        nodeColor = colors.globalOptimalNode;
-        break;
-      case "L": // Local optimal
-        nodeColor = colors.localOptimalNode;
-        break;
-      case "R": // Remaining path
-        nodeColor = colors.pathNode;
-        break;
-      default: // Normal
-        nodeColor = colors.pathNode;
-        break;
-    }
-
-    // Draw node
-    svg += `<circle cx="${coord.x}" cy="${coord.y}" r="${nodeRadius}" 
-                    fill="${nodeColor}" stroke="#333" stroke-width="0.5"/>`;
-
-    // Draw word label (only for start/target, keep intermediate nodes anonymous)
-    if (word && word.length > 0) {
-      const fontSize = 12;
-      svg += `<text x="${coord.x}" y="${coord.y + nodeRadius + fontSize + 4}" 
-                    font-family="Arial, sans-serif" font-size="${fontSize}" 
-                    fill="${colors.text}" text-anchor="middle" font-weight="bold">${word}</text>`;
-    }
-  }
-
-  return svg;
-}
-
-// Generate the challenge URL for QR code
-function generateChallengeUrl(params) {
-  const { startWord, targetWord, type, date, share, theme } = params;
-
-  // Build URL parameters for the new structure
-  const urlParams = new URLSearchParams();
-  urlParams.set("type", type);
-  urlParams.set("start", startWord);
-  urlParams.set("target", targetWord);
-
-  if (share) urlParams.set("share", share);
-  if (theme) urlParams.set("theme", theme);
-  if (date && type === "dailychallenge") urlParams.set("date", date);
-
-  return `https://synapsegame.ai/challenge?${urlParams.toString()}`;
-}
-
-// Simple hash function (matching SharingService.ts)
-function generateUrlHash(data) {
-  let hash = 0;
-  const secret = "synapse_challenge_2025";
-  const combined = data + secret;
-
-  for (let i = 0; i < combined.length; i++) {
-    const char = combined.charCodeAt(i);
-    // eslint-disable-next-line no-bitwise
-    hash = (hash << 5) - hash + char;
-    // eslint-disable-next-line no-bitwise
-    hash = hash & hash;
-  }
-
-  return Math.abs(hash).toString(36).substring(0, 8);
-}
-
-// Generate QR code as SVG using proper QR code algorithm
-function generateQRCodeSVG(text, size = 100) {
-  // For now, use a more sophisticated pattern that resembles a real QR code
-  // In production, you'd want to use a proper QR code library like 'qrcode' npm package
-
-  const moduleSize = size / 25; // 25x25 grid for better appearance
-  let svg = "";
-
-  // Create a deterministic pattern based on the URL
-  const hash = generateUrlHash(text);
-  let seed = parseInt(hash, 36);
-
-  // Simple Linear Congruential Generator for deterministic randomness
-  function nextRandom() {
-    // eslint-disable-next-line no-bitwise
-    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
-    return seed / 0x7fffffff;
-  }
-
-  for (let i = 0; i < 25; i++) {
-    for (let j = 0; j < 25; j++) {
-      let shouldFill = false;
-
-      // Add finder patterns (3 corners)
-      const isTopLeftFinder = i < 7 && j < 7;
-      const isTopRightFinder = i < 7 && j > 17;
-      const isBottomLeftFinder = i > 17 && j < 7;
-
-      if (isTopLeftFinder || isTopRightFinder || isBottomLeftFinder) {
-        // Finder pattern structure
-        const fi = isTopLeftFinder ? i : isTopRightFinder ? i : i - 18;
-        const fj = isTopLeftFinder ? j : isTopRightFinder ? j - 18 : j;
-
-        shouldFill =
-          fi === 0 ||
-          fi === 6 ||
-          fj === 0 ||
-          fj === 6 ||
-          (fi >= 2 && fi <= 4 && fj >= 2 && fj <= 4);
-      } else {
-        // Data area - use deterministic pattern
-        shouldFill = nextRandom() > 0.5;
-      }
-
-      if (shouldFill) {
-        svg += `<rect x="${j * moduleSize}" y="${i * moduleSize}" width="${moduleSize}" height="${moduleSize}" fill="black"/>`;
-      }
-    }
-  }
-
-  return svg;
-}
-
-// Simple canvas-like implementation for generating SVG
-function generateSVGPreview(params) {
-  const { startWord, targetWord, date, isDaily, theme } = params;
-
-  // Theme colors
+  // Match the actual app colors and styling
   const colors = {
-    background: theme === "dark" ? "#1a1a1a" : "#6750A4",
-    text: theme === "dark" ? "#ffffff" : "#ffffff",
-    accent: theme === "dark" ? "#bb86fc" : "#ffd3b6",
-    secondary: theme === "dark" ? "#03dac6" : "#ffaaa5",
-
-    // Node colors (matching the app's dark theme)
+    background: "#6750A4", // Synapse brand purple
+    surface: "#fff",
+    text: "#fff",
+    accent: "#ffd3b6",
     startNode: "#4CAF50",
     endNode: "#F44336",
-    currentNode: "#2196F3",
     pathNode: "#9C27B0",
-    globalOptimalNode: "#FF9800",
-    localOptimalNode: "#9C27B0",
-    normalNode: "#9E9E9E",
-    pathLink: "#9C27B0",
   };
 
-  const title = isDaily ? `Daily Challenge - ${date}` : "Word Challenge";
+  const title =
+    type === "dailychallenge" ? `Daily Challenge - ${date}` : "Word Challenge";
   const subtitle = "Can you solve this?";
 
-  // Decode enhanced share data if available
-  let decodedData = null;
-  let playerPath = null;
-  if (params.quality || params.tsne) {
-    try {
-      // Build share data from quality and tsne parameters
-      const shareData = [];
-      if (params.quality) shareData.push(`quality=${params.quality}`);
-      if (params.tsne) shareData.push(`tsne=${params.tsne}`);
-      decodedData = decodeEnhancedShareData(shareData.join("&"));
-
-      // Create anonymized path for preview (don't reveal intermediate words)
-      if (decodedData.coordinates.length > 2) {
-        const pathLength = decodedData.coordinates.length;
-        playerPath = [startWord];
-
-        // Add anonymous intermediate nodes (no word labels)
-        for (let i = 1; i < pathLength - 1; i++) {
-          playerPath.push(""); // Empty string = no label
-        }
-
-        playerPath.push(targetWord);
-      } else {
-        // Simple 2-word path
-        playerPath = [startWord, targetWord];
-      }
-    } catch (error) {
-      console.log("Could not decode share data:", error);
-    }
-  }
-
-  // Generate graph visualization if we have decoded data
-  let graphSVG = "";
-  if (decodedData && decodedData.coordinates.length > 0 && playerPath) {
-    graphSVG = generateGraphVisualization(decodedData, colors, playerPath);
-  }
-
-  // Generate the challenge URL for QR code
-  const challengeUrl = generateChallengeUrl(params);
-  const qrCodeSVG = generateQRCodeSVG(challengeUrl, 100);
-
-  return `
-<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:${colors.background};stop-opacity:1" />
-      <stop offset="100%" style="stop-color:${colors.background}cc;stop-opacity:1" />
-    </linearGradient>
-  </defs>
-  
-  <!-- Background -->
-  <rect width="1200" height="630" fill="url(#bgGradient)"/>
-  
-  <!-- Brand header -->
-  <text x="60" y="80" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="${colors.text}">🧠 Synapse</text>
-  <text x="60" y="120" font-family="Arial, sans-serif" font-size="24" fill="${colors.accent}">${title}</text>
-  
-  ${
-    graphSVG
-      ? `
-  <!-- Graph visualization -->
-  <g transform="translate(60, 150)">
-    ${graphSVG}
-  </g>
-  `
-      : `
-  <!-- Challenge words (fallback when no graph data) -->
-  <text x="60" y="200" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="${colors.text}">${startWord}</text>
-  <text x="60" y="260" font-family="Arial, sans-serif" font-size="36" fill="${colors.accent}">↓</text>
-  <text x="60" y="320" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="${colors.text}">${targetWord}</text>
-  <text x="60" y="380" font-family="Arial, sans-serif" font-size="28" fill="${colors.secondary}">${subtitle}</text>
-  `
-  }
-  
-  <!-- QR Code -->
-  <g transform="translate(1000, 350)">
-    <rect width="120" height="120" fill="${colors.text}" opacity="0.9" rx="8"/>
-    <g transform="translate(10, 10)">
-      ${qrCodeSVG}
+  return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background matching app theme -->
+    <defs>
+      <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:${colors.background};stop-opacity:1" />
+        <stop offset="100%" style="stop-color:${colors.background};stop-opacity:0.9" />
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="630" fill="url(#bgGradient)"/>
+    
+    <!-- Brand header matching app -->
+    <text x="60" y="80" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="${colors.text}">🧠 Synapse</text>
+    <text x="60" y="120" font-family="Arial, sans-serif" font-size="24" fill="${colors.accent}">${title}</text>
+    
+    <!-- Challenge words with proper styling -->
+    <text x="60" y="200" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="${colors.text}">${startWord}</text>
+    <text x="60" y="260" font-family="Arial, sans-serif" font-size="36" fill="${colors.accent}">→</text>
+    <text x="60" y="320" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="${colors.text}">${targetWord}</text>
+    <text x="60" y="380" font-family="Arial, sans-serif" font-size="28" fill="${colors.accent}">${subtitle}</text>
+    
+    <!-- Graph visualization placeholder matching app style -->
+    <g transform="translate(400, 150)">
+      <!-- Start node -->
+      <circle cx="50" cy="100" r="12" fill="${colors.startNode}" stroke="#333" stroke-width="1"/>
+      <text x="50" y="130" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="${colors.text}">${startWord}</text>
+      
+      <!-- Path line -->
+      <line x1="62" y1="100" x2="288" y2="100" stroke="${colors.pathNode}" stroke-width="3" stroke-opacity="0.8"/>
+      
+      <!-- End node -->
+      <circle cx="300" cy="100" r="12" fill="${colors.endNode}" stroke="#333" stroke-width="1"/>
+      <text x="300" y="130" text-anchor="middle" font-family="Arial" font-size="14" font-weight="bold" fill="${colors.text}">${targetWord}</text>
     </g>
-  </g>
-  
-  <!-- Footer -->
-  <text x="60" y="520" font-family="Arial, sans-serif" font-size="20" fill="${colors.accent}">synapsegame.ai</text>
-  <text x="60" y="550" font-family="Arial, sans-serif" font-size="16" fill="${colors.secondary}">Build semantic pathways between words</text>
-</svg>`;
+    
+    <!-- QR code placeholder matching app -->
+    <g transform="translate(1000, 400)">
+      <rect width="120" height="120" fill="${colors.surface}" opacity="0.9" rx="8"/>
+      <text x="60" y="70" text-anchor="middle" font-family="Arial" font-size="16" fill="#333">QR</text>
+    </g>
+    
+    <!-- Footer matching app -->
+    <text x="60" y="520" font-family="Arial, sans-serif" font-size="20" fill="${colors.accent}">synapsegame.ai</text>
+    <text x="60" y="550" font-family="Arial, sans-serif" font-size="16" fill="${colors.accent}">Build semantic pathways between words</text>
+  </svg>`;
 }
 
-// Decode enhanced share data (matching SharingService.ts)
-function decodeEnhancedShareData(encodedData) {
-  if (!encodedData || encodedData.length === 0) {
-    return { pathQuality: "", coordinates: [] };
-  }
-
+// Convert SVG to PNG buffer
+async function svgToPngBuffer(svgContent) {
   try {
-    // Split the encoded data into quality and coordinates parts
-    const parts = encodedData.split("&");
-    let qualityPart = "";
-    let coordinatesPart = "";
-
-    for (const part of parts) {
-      if (part.startsWith("quality=")) {
-        qualityPart = part.substring(8); // Remove 'quality='
-      } else if (part.startsWith("tsne=")) {
-        coordinatesPart = part.substring(5); // Remove 'tsne='
-      }
-    }
-
-    // Decode quality (simple string)
-    const pathQuality = qualityPart;
-
-    // Decode coordinates
-    const coordinates = [];
-    if (coordinatesPart) {
-      const coordPairs = coordinatesPart.split(";");
-
-      for (const pair of coordPairs) {
-        if (pair.trim()) {
-          const [xStr, yStr] = pair.split(",");
-
-          // Decode the base-36 coordinates and scale back
-          const x = parseInt(xStr, 36) / 10.0; // Scale back from integer
-          const y = parseInt(yStr, 36) / 10.0;
-
-          coordinates.push({ x, y });
-        }
-      }
-    }
-
-    // Decode word list
-    let words = null;
-    for (const part of parts) {
-      if (part.startsWith("words=")) {
-        try {
-          const wordsData = decodeURIComponent(part.substring(6));
-          words = wordsData.split(",").filter((word) => word.trim().length > 0);
-        } catch (error) {
-          console.error("Error decoding words:", error);
-        }
-        break;
-      }
-    }
-
-    return { pathQuality, coordinates, words };
+    const sharp = require("sharp");
+    return await sharp(Buffer.from(svgContent)).png().toBuffer();
   } catch (error) {
-    console.error("Error decoding enhanced share data:", error);
-    return { pathQuality: "", coordinates: [] };
+    console.error("Sharp not available, using fallback");
+    // If Sharp is not available, return the SVG as text
+    return Buffer.from(svgContent);
   }
 }
 
 exports.handler = async (event) => {
-  try {
-    const url = new URL(event.rawUrl);
+  const startTime = Date.now();
 
-    // Parse the new URL structure parameters
-    const type = url.searchParams.get("type");
-    const startWord = url.searchParams.get("start");
-    const targetWord = url.searchParams.get("target");
-    const quality = url.searchParams.get("quality"); // path quality encoding
-    const tsne = url.searchParams.get("tsne"); // coordinate encoding
-    const theme = url.searchParams.get("theme");
-    const date = url.searchParams.get("date");
+  try {
+    console.log("🎯 Preview function called:", event.rawUrl);
+
+    const url = new URL(event.rawUrl);
+    const params = new URLSearchParams(url.search);
+
+    // Parse parameters
+    const type = params.get("type");
+    const startWord = params.get("start");
+    const targetWord = params.get("target");
+    const _date = params.get("date");
+    const _quality = params.get("quality");
+    const _tsne = params.get("tsne");
+    const _share = params.get("share");
+    const _theme = params.get("theme");
 
     // Validate required parameters
     if (!type || !startWord || !targetWord) {
+      console.log("❌ Missing required parameters");
       return {
         statusCode: 400,
         body: "Missing required parameters: type, start, target",
       };
     }
 
-    // Colors for graph visualization
-    const colors = {
-      background: "#ffffff", // White background for better contrast
-      startNode: "#4CAF50",
-      endNode: "#F44336",
-      currentNode: "#2196F3",
-      pathNode: "#9C27B0",
-      globalOptimalNode: "#FF9800",
-      localOptimalNode: "#9C27B0",
-      normalNode: "#9E9E9E",
-      pathLink: "#9C27B0",
-    };
+    console.log(
+      `🎯 Generating preview for: ${startWord} -> ${targetWord} (${type})`,
+    );
 
-    let svgContent = "";
+    // Build preview page URL with all parameters
+    const baseUrl = process.env.URL || "http://localhost:3000";
+    const previewPageUrl = `${baseUrl}/preview-image?${params.toString()}`;
 
-    // Try to decode and visualize the path if we have the data
-    if (quality && tsne) {
-      try {
-        const shareData = `quality=${quality}&tsne=${tsne}`;
-        const decodedData = decodeEnhancedShareData(shareData);
+    console.log(`🎯 Preview page URL: ${previewPageUrl}`);
 
-        if (decodedData.coordinates && decodedData.coordinates.length > 0) {
-          // Create player path array
-          const playerPath = [startWord];
-          for (let i = 1; i < decodedData.coordinates.length - 1; i++) {
-            playerPath.push(""); // Anonymous intermediate nodes
-          }
-          playerPath.push(targetWord);
+    // Launch Puppeteer with optimizations
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-accelerated-2d-canvas",
+        "--no-first-run",
+        "--no-zygote",
+        "--disable-gpu",
+        "--disable-background-timer-throttling",
+        "--disable-backgrounding-occluded-windows",
+        "--disable-renderer-backgrounding",
+      ],
+      timeout: 30000,
+    });
 
-          // Generate just the graph visualization
-          const graphSVG = generateGraphVisualization(
-            decodedData,
-            colors,
-            playerPath,
-          );
+    console.log("🎯 Browser launched");
 
-          // Calculate graph bounds for proper sizing
-          const coordinates = decodedData.coordinates;
-          const minX = Math.min(...coordinates.map((c) => c.x));
-          const maxX = Math.max(...coordinates.map((c) => c.x));
-          const minY = Math.min(...coordinates.map((c) => c.y));
-          const maxY = Math.max(...coordinates.map((c) => c.y));
+    const page = await browser.newPage();
 
-          const padding = 40;
-          const graphWidth = 1200 - 2 * padding;
-          const graphHeight = 630 - 2 * padding;
+    // Set viewport to match our preview container size
+    await page.setViewport({
+      width: 1200,
+      height: 800,
+      deviceScaleFactor: 2, // High DPI for better quality
+    });
 
-          svgContent = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
-            <rect width="1200" height="630" fill="${colors.background}"/>
-            <g transform="translate(${padding}, ${padding})">
-              ${graphSVG}
-            </g>
-          </svg>`;
-        }
-      } catch (error) {
-        console.log("Error processing graph data:", error);
-      }
-    }
+    // Set timeout for page load
+    page.setDefaultTimeout(15000);
 
-    // Fallback if no graph data or processing failed
-    if (!svgContent) {
-      svgContent = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1200" height="630" fill="${colors.background}"/>
-        <circle cx="200" cy="315" r="30" fill="${colors.startNode}"/>
-        <line x1="230" y1="315" x2="970" y2="315" stroke="${colors.pathLink}" stroke-width="4"/>
-        <circle cx="1000" cy="315" r="30" fill="${colors.endNode}"/>
-        <text x="200" y="365" text-anchor="middle" font-family="Arial" font-size="16" fill="#333">${startWord}</text>
-        <text x="1000" y="365" text-anchor="middle" font-family="Arial" font-size="16" fill="#333">${targetWord}</text>
-      </svg>`;
-    }
+    console.log("🎯 Navigating to preview page...");
 
-    // Convert SVG to PNG using Sharp
-    const pngBuffer = await sharp(Buffer.from(svgContent)).png().toBuffer();
+    // Navigate to preview page and wait for React to render
+    await page.goto(previewPageUrl, {
+      waitUntil: "networkidle0",
+      timeout: 15000,
+    });
+
+    console.log("🎯 Page loaded, waiting for React components...");
+
+    // Wait for the graph visualization to load
+    await page.waitForSelector("svg", { timeout: 10000 });
+
+    // Additional wait for graph rendering
+    await page.waitForTimeout(2000);
+
+    console.log("🎯 Taking screenshot...");
+
+    // Take screenshot of the preview container
+    // The container is sized to 600x400 as per our styles
+    const screenshot = await page.screenshot({
+      type: "png",
+      clip: { x: 300, y: 200, width: 600, height: 400 }, // Center the 600x400 container
+      quality: 100,
+    });
+
+    await browser.close();
+
+    console.log(
+      `✅ Preview generated successfully in ${Date.now() - startTime}ms`,
+    );
 
     return {
       statusCode: 200,
       headers: {
         "Content-Type": "image/png",
-        "Cache-Control": "public, max-age=3600",
+        "Cache-Control": "public, max-age=3600", // Cache for 1 hour
         "Access-Control-Allow-Origin": "*",
       },
-      body: pngBuffer.toString("base64"),
+      body: screenshot.toString("base64"),
       isBase64Encoded: true,
     };
   } catch (error) {
-    console.error("Preview generation error:", error);
+    console.error("❌ Preview generation error:", error);
 
-    // Simple fallback
-    const fallbackSvg = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
-      <rect width="1200" height="630" fill="#f0f0f0"/>
-      <circle cx="200" cy="315" r="20" fill="#4CAF50"/>
-      <line x1="220" y1="315" x2="980" y2="315" stroke="#9C27B0" stroke-width="3"/>
-      <circle cx="1000" cy="315" r="20" fill="#F44336"/>
-    </svg>`;
+    // Fallback to SVG generation
+    try {
+      const url = new URL(event.rawUrl);
+      const params = new URLSearchParams(url.search);
 
-    return {
-      statusCode: 200,
-      headers: {
-        "Content-Type": "image/svg+xml",
-        "Cache-Control": "public, max-age=3600",
-        "Access-Control-Allow-Origin": "*",
-      },
-      body: fallbackSvg,
-    };
+      const fallbackParams = {
+        startWord: params.get("start") || "word",
+        targetWord: params.get("target") || "word",
+        type: params.get("type") || "challenge",
+        date: params.get("date"),
+      };
+
+      console.log("🎯 Using fallback SVG generation");
+      const fallbackSvg = generateFallbackPreview(fallbackParams);
+      const fallbackBuffer = await svgToPngBuffer(fallbackSvg);
+
+      return {
+        statusCode: 200,
+        headers: {
+          "Content-Type": "image/png",
+          "Cache-Control": "public, max-age=300", // Shorter cache for fallback
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: fallbackBuffer.toString("base64"),
+        isBase64Encoded: true,
+      };
+    } catch (fallbackError) {
+      console.error("❌ Fallback generation failed:", fallbackError);
+
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          error: "Preview generation failed",
+          message: error.message,
+          fallbackError: fallbackError.message,
+        }),
+      };
+    }
   }
 };
