@@ -20,6 +20,7 @@ import {
 
 import {
   shareChallenge,
+  shareDailyChallenge,
   generateChallengeMessage,
   generateDailyChallengeTaunt,
   generateSecureGameDeepLink,
@@ -128,9 +129,68 @@ const GameReportModal = () => {
       // Prepare graph view for preview (player path only)
       prepareGraphPreview();
 
-      // For web, show the challenge link in a dialog
+      // For web, capture screenshot first, then show dialog with enhanced link
       if (Platform.OS === "web") {
-        // Check if this is a daily challenge and generate appropriate link
+        try {
+          // First, try to capture and upload screenshot for preview
+          if (graphPreviewRef?.current) {
+            // Use the shareChallenge function to handle screenshot capture and upload
+            // But capture the generated link instead of using native sharing
+            if (
+              gameReportModalReport.isDailyChallenge &&
+              gameReportModalReport.dailyChallengeId
+            ) {
+              // For daily challenges, use shareDailyChallenge to get the enhanced link
+              const success = await shareDailyChallenge({
+                challengeId: gameReportModalReport.dailyChallengeId,
+                startWord,
+                targetWord,
+                aiSteps: gameReportModalReport.aiPath
+                  ? gameReportModalReport.aiPath.length - 1
+                  : gameReportModalReport.optimalPath.length - 1,
+                userSteps: gameReportModalReport.totalMoves,
+                userCompleted: gameReportModalReport.status === "won",
+                userGaveUp: gameReportModalReport.status === "given_up",
+                challengeDate: gameReportModalReport.dailyChallengeId,
+                screenshotRef: graphPreviewRef,
+                includeScreenshot: true,
+                gameReport: gameReportModalReport,
+              });
+
+              if (success) {
+                setSnackbarMessage("Daily challenge shared successfully!");
+                setSnackbarVisible(true);
+                return;
+              }
+            } else {
+              // For regular challenges, use shareChallenge to get the enhanced link
+              const success = await shareChallenge({
+                startWord,
+                targetWord,
+                playerPath,
+                screenshotRef: graphPreviewRef,
+                includeScreenshot: true,
+                steps: pathLength,
+                gameReport: gameReportModalReport,
+              });
+
+              if (success) {
+                setSnackbarMessage("Challenge shared successfully!");
+                setSnackbarVisible(true);
+                return;
+              }
+            }
+          }
+
+          // If sharing failed or screenshot not available, fall back to basic dialog
+          console.warn(
+            "Web sharing with screenshot failed, falling back to basic dialog",
+          );
+        } catch (error) {
+          console.warn("Web screenshot sharing error:", error);
+        }
+
+        // Fallback: Generate basic link without screenshot (original behavior)
         let link: string;
         let message: string;
 
@@ -138,7 +198,6 @@ const GameReportModal = () => {
           gameReportModalReport.isDailyChallenge &&
           gameReportModalReport.dailyChallengeId
         ) {
-          // Generate clean daily challenge URL
           link = generateSecureGameDeepLink(
             "dailychallenge",
             startWord,
@@ -147,14 +206,13 @@ const GameReportModal = () => {
             gameReportModalReport.dailyChallengeId, // challengeId
           );
 
-          // Generate proper daily challenge taunt
           const aiSteps = gameReportModalReport.aiPath
             ? gameReportModalReport.aiPath.length - 1
             : gameReportModalReport.optimalPath.length - 1;
           const userSteps = gameReportModalReport.totalMoves;
           const userCompleted = gameReportModalReport.status === "won";
           const userGaveUp = gameReportModalReport.status === "given_up";
-          const challengeDate = gameReportModalReport.dailyChallengeId; // Use challenge ID as date for now
+          const challengeDate = gameReportModalReport.dailyChallengeId;
 
           message = generateDailyChallengeTaunt({
             startWord,
@@ -167,7 +225,6 @@ const GameReportModal = () => {
             optimalPathLength: gameReportModalReport.optimalPath.length - 1,
           });
         } else {
-          // Generate clean challenge URL
           link = generateSecureGameDeepLink(
             "challenge",
             startWord,

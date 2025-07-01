@@ -95,9 +95,42 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
         : progress?.completed === true && (progress?.playerMoves || 0) > 0;
       const userGaveUp = gameReport ? gameReport.status === "given_up" : false;
 
-      // For web, show the challenge link in a dialog
+      // For web, capture screenshot first, then show dialog with enhanced link
       if (Platform.OS === "web") {
-        // Generate clean daily challenge URL
+        try {
+          // First, try to capture and upload screenshot for preview
+          if (graphPreviewRef?.current) {
+            // Use shareDailyChallenge to handle screenshot capture and upload
+            const success = await shareDailyChallenge({
+              challengeId: challenge.id,
+              startWord: challenge.startWord,
+              targetWord: challenge.targetWord,
+              aiSteps,
+              userSteps,
+              userCompleted,
+              userGaveUp,
+              challengeDate: challenge.date,
+              screenshotRef: graphPreviewRef,
+              includeScreenshot: true,
+              gameReport,
+            });
+
+            if (success) {
+              setSnackbarMessage("Daily challenge shared successfully!");
+              setSnackbarVisible(true);
+              return;
+            }
+          }
+
+          // If sharing failed or screenshot not available, fall back to basic dialog
+          console.warn(
+            "Web daily challenge sharing with screenshot failed, falling back to basic dialog",
+          );
+        } catch (error) {
+          console.warn("Web daily challenge screenshot sharing error:", error);
+        }
+
+        // Fallback: Generate basic link without screenshot (original behavior)
         const link = generateSecureGameDeepLink(
           "dailychallenge",
           challenge.startWord,
@@ -106,7 +139,6 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
           challenge.id, // challengeId
         );
 
-        // Generate the taunt message (same as native)
         const taunt = generateDailyChallengeTaunt({
           startWord: challenge.startWord,
           targetWord: challenge.targetWord,
