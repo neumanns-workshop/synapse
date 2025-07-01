@@ -290,8 +290,12 @@ export const shareChallenge = async ({
   gameReport,
 }: ShareChallengeOptions): Promise<boolean> => {
   try {
-    console.log("🎯 shareChallenge called with:", { startWord, targetWord, includeScreenshot });
-    
+    console.log("🎯 shareChallenge called with:", {
+      startWord,
+      targetWord,
+      includeScreenshot,
+    });
+
     // Upload screenshot to get public URL for social media previews
     let previewImageUrl: string | null = null;
     if (includeScreenshot && screenshotRef && screenshotRef.current) {
@@ -308,14 +312,20 @@ export const shareChallenge = async ({
           console.warn("Failed to upload screenshot:", uploadResult.error);
           // Continue without preview image
         } else {
-          console.log("🎯 Screenshot uploaded successfully, URL:", uploadResult.publicUrl);
+          console.log(
+            "🎯 Screenshot uploaded successfully, URL:",
+            uploadResult.publicUrl,
+          );
           previewImageUrl = uploadResult.publicUrl;
         }
       } else {
         console.warn("🎯 Screenshot capture failed");
       }
     } else {
-      console.log("🎯 Skipping screenshot capture:", { includeScreenshot, hasRef: !!screenshotRef?.current });
+      console.log("🎯 Skipping screenshot capture:", {
+        includeScreenshot,
+        hasRef: !!screenshotRef?.current,
+      });
     }
 
     // Generate the secure deep link
@@ -342,7 +352,7 @@ export const shareChallenge = async ({
     // Web-specific sharing handling
     if (typeof window !== "undefined") {
       console.log("🎯 Web platform detected, checking sharing options...");
-      
+
       // Check if Web Share API is supported
       if (typeof navigator !== "undefined" && navigator.share) {
         console.log("🎯 Web Share API available, trying...");
