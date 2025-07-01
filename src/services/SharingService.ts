@@ -631,14 +631,22 @@ export const captureGameScreen = async (
 
           // Check if element is a valid DOM element
           if (element && typeof element.getBoundingClientRect === "function") {
-            console.log("🔥 DEBUG: Element found, calling html2canvas");
+            const rect = element.getBoundingClientRect();
+            console.log("🔥 DEBUG: Element found, calling html2canvas", {
+              width: rect.width,
+              height: rect.height,
+              x: rect.x,
+              y: rect.y,
+            });
+
             const canvas = await html2canvas(element, {
               useCORS: true,
               allowTaint: false,
               backgroundColor: null,
               scale: 1,
-              width: 800,
-              height: 600,
+              // Remove fixed dimensions to capture actual element size
+              // width: 800,
+              // height: 600,
             });
 
             // Convert canvas to data URL

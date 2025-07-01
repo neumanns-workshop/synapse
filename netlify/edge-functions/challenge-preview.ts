@@ -35,10 +35,10 @@ export default async (request: Request, _context: Context) => {
   // Create title and description
   const title =
     type === "dailychallenge" && date
-      ? `Daily Challenge - ${date}`
-      : "Synapse Word Challenge";
+      ? `Synapse Daily Challenge (${date}): ${startWord} → ${targetWord}`
+      : `Synapse Challenge: ${startWord} → ${targetWord}`;
 
-  const description = `Can you connect "${startWord}" to "${targetWord}"? Test your word association skills in Synapse!`;
+  const description = `Synapse word challenge`;
 
   // Use valid preview image or fallback to default
   const ogImageUrl = validPreviewUrl || "https://synapsegame.ai/og-image.png";
