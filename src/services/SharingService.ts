@@ -95,8 +95,10 @@ const uploadScreenshotToStorage = async (
   try {
     console.log("🔥 DEBUG: Upload starting", {
       screenshotUriLength: screenshotUri.length,
-      screenshotUriType: screenshotUri.startsWith("data:") ? "data-uri" : "other",
-      challengeId
+      screenshotUriType: screenshotUri.startsWith("data:")
+        ? "data-uri"
+        : "other",
+      challengeId,
     });
 
     const supabaseService = SupabaseService.getInstance();
@@ -140,7 +142,7 @@ const uploadScreenshotToStorage = async (
     console.log("🔥 DEBUG: Rate limit passed, uploading to storage");
 
     // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("preview-images")
       .upload(filename, blob, {
         cacheControl: "3600",
@@ -584,7 +586,7 @@ const captureGameScreen = async (
       platform: Platform.OS,
       hasRef: !!ref,
       hasRefCurrent: !!ref?.current,
-      html2canvasAvailable: typeof html2canvas !== "undefined"
+      html2canvasAvailable: typeof html2canvas !== "undefined",
     });
 
     // For web, we need to handle HTML Canvas/DOM-based screenshot capture
@@ -596,10 +598,7 @@ const captureGameScreen = async (
           const element = ref.current as unknown as HTMLElement;
 
           // Check if element is a valid DOM element
-          if (
-            element &&
-            typeof element.getBoundingClientRect === "function"
-          ) {
+          if (element && typeof element.getBoundingClientRect === "function") {
             console.log("🔥 DEBUG: Element found, calling html2canvas");
             const canvas = await html2canvas(element, {
               useCORS: true,
@@ -612,7 +611,10 @@ const captureGameScreen = async (
 
             // Convert canvas to data URL
             const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
-            console.log("🔥 DEBUG: html2canvas SUCCESS, dataUrl length:", dataUrl.length);
+            console.log(
+              "🔥 DEBUG: html2canvas SUCCESS, dataUrl length:",
+              dataUrl.length,
+            );
             return dataUrl;
           } else {
             console.error("🔥 DEBUG: Invalid DOM element for screenshot");
