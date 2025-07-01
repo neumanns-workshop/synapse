@@ -32,13 +32,11 @@ export default async (request: Request, _context: Context) => {
     }
   }
 
-  // Create title and description
+  // Create title
   const title =
     type === "dailychallenge" && date
       ? `Synapse Daily Challenge (${date}): ${startWord} → ${targetWord}`
       : `Synapse Challenge: ${startWord} → ${targetWord}`;
-
-  const description = `Synapse word challenge`;
 
   // Use valid preview image or fallback to default
   const ogImageUrl = validPreviewUrl || "https://synapsegame.ai/og-image.png";
@@ -52,7 +50,6 @@ export default async (request: Request, _context: Context) => {
   
   <!-- Open Graph meta tags for social media -->
   <meta property="og:title" content="${title}" />
-  <meta property="og:description" content="${description}" />
   <meta property="og:image" content="${ogImageUrl}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -63,11 +60,9 @@ export default async (request: Request, _context: Context) => {
   <!-- Twitter Card meta tags -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${title}" />
-  <meta name="twitter:description" content="${description}" />
   <meta name="twitter:image" content="${ogImageUrl}" />
   
   <!-- Standard meta tags -->
-  <meta name="description" content="${description}" />
   <title>${title}</title>
   
   <!-- Redirect to app -->
@@ -82,7 +77,6 @@ export default async (request: Request, _context: Context) => {
 <body>
   <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
     <h1>${title}</h1>
-    <p>${description}</p>
     <p>Redirecting to Synapse...</p>
     <a href="${url.toString()}" style="color: #6750A4; text-decoration: none; font-weight: bold;">
       Click here if you're not redirected automatically
