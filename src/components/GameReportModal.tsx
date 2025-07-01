@@ -204,6 +204,7 @@ const GameReportModal = () => {
             targetWord,
             undefined, // no theme for daily challenges
             gameReportModalReport.dailyChallengeId, // challengeId
+            undefined, // no preview in fallback
           );
 
           const aiSteps = gameReportModalReport.aiPath
@@ -230,6 +231,8 @@ const GameReportModal = () => {
             startWord,
             targetWord,
             undefined, // no theme
+            undefined, // no challengeId for regular challenges
+            undefined, // no preview in fallback
           );
 
           message = generateChallengeMessage({

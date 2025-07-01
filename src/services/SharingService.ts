@@ -590,12 +590,6 @@ const captureGameScreen = async (
   ref: React.RefObject<View | null>,
 ): Promise<string | null> => {
   try {
-    console.log("📸 Starting screenshot capture...", {
-      platform: Platform.OS,
-      refExists: !!ref.current,
-      html2canvasAvailable: !!html2canvas,
-    });
-
     // For web, we need to handle HTML Canvas/DOM-based screenshot capture
     if (Platform.OS === "web") {
       // Web-specific screenshot capture using HTML Canvas
@@ -606,7 +600,6 @@ const captureGameScreen = async (
           result: "data-uri", // Ensure we get a data URI on web
         });
 
-        console.log("✅ Primary web screenshot capture successful");
         // On web, captureRef returns a data URI directly
         return uri;
       } catch (webError) {
@@ -615,9 +608,6 @@ const captureGameScreen = async (
         // Fallback: try html2canvas if available
         if (ref.current && typeof window !== "undefined" && html2canvas) {
           try {
-            console.log(
-              "Attempting html2canvas fallback for web screenshot...",
-            );
             const element = ref.current as unknown as HTMLElement;
 
             // Check if element is a valid DOM element
