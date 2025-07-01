@@ -88,7 +88,7 @@ interface ShareDailyChallengeOptions {
 /**
  * Upload screenshot to Supabase Storage with spam protection
  */
-const uploadScreenshotToStorage = async (
+export const uploadScreenshotToStorage = async (
   screenshotUri: string,
   challengeId: string,
 ): Promise<{ publicUrl: string | null; error: string | null }> => {
@@ -610,7 +610,7 @@ export const generateChallengeMessage = ({
 /**
  * Capture a screenshot of the game
  */
-const captureGameScreen = async (
+export const captureGameScreen = async (
   ref: React.RefObject<View | null>,
 ): Promise<string | null> => {
   try {

@@ -23,6 +23,8 @@ import {
   generateChallengeMessage,
   generateDailyChallengeTaunt,
   generateSecureGameDeepLink,
+  captureGameScreen,
+  uploadScreenshotToStorage,
 } from "../services/SharingService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
@@ -147,21 +149,40 @@ const GameReportModal = () => {
         // Main web flow: Generate enhanced link with screenshot for custom dialog
         let link: string;
         let message: string;
-        const previewImageUrl: string | undefined = undefined;
+        let previewImageUrl: string | undefined;
 
         // Try to capture screenshot and upload it
         try {
           if (mainGraphRef?.current) {
-            console.log(
-              "🚀 Attempting screenshot capture for enhanced link...",
-            );
-            // We'll use a simpler approach - trigger the sharing function but ignore its native sharing
-            // and extract the enhanced URL from it, or generate it ourselves
+            console.log("🚀 Attempting screenshot capture of graph...");
 
-            // For now, generate without preview, but we can enhance this later
-            console.log(
-              "🚀 Generating link without preview for now (TODO: add screenshot)",
-            );
+            const screenshotUri = await captureGameScreen(mainGraphRef);
+            if (screenshotUri) {
+              console.log("🚀 Screenshot captured successfully, uploading...");
+
+              const challengeId = `${startWord}-${targetWord}`;
+              const uploadResult = await uploadScreenshotToStorage(
+                screenshotUri,
+                challengeId,
+              );
+
+              if (uploadResult.error) {
+                console.warn(
+                  "🚀 Screenshot upload failed:",
+                  uploadResult.error,
+                );
+              } else if (uploadResult.publicUrl) {
+                console.log(
+                  "🚀 Screenshot uploaded successfully!",
+                  uploadResult.publicUrl,
+                );
+                previewImageUrl = uploadResult.publicUrl;
+              }
+            } else {
+              console.warn("🚀 Screenshot capture returned null");
+            }
+          } else {
+            console.warn("🚀 No mainGraphRef available");
           }
         } catch (error) {
           console.warn("🚀 Screenshot capture failed:", error);
@@ -177,7 +198,7 @@ const GameReportModal = () => {
             targetWord,
             undefined, // no theme for daily challenges
             gameReportModalReport.dailyChallengeId, // challengeId
-            previewImageUrl, // will be undefined for now, enhanced later
+            previewImageUrl, // Now includes the uploaded screenshot URL!
           );
 
           const aiSteps = gameReportModalReport.aiPath
@@ -205,7 +226,7 @@ const GameReportModal = () => {
             targetWord,
             undefined, // no theme
             undefined, // no challengeId for regular challenges
-            previewImageUrl, // will be undefined for now, enhanced later
+            previewImageUrl, // Now includes the uploaded screenshot URL!
           );
 
           message = generateChallengeMessage({
