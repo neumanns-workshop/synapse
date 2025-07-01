@@ -49,7 +49,7 @@ let html2canvas:
     ) => Promise<HTMLCanvasElement>)
   | null = null;
 
-if (Platform.OS === "web") {
+if (typeof window !== "undefined") {
   // Only import on web platform
   import("html2canvas")
     .then((module) => {
@@ -290,11 +290,15 @@ export const shareChallenge = async ({
   gameReport,
 }: ShareChallengeOptions): Promise<boolean> => {
   try {
+    console.log("🎯 shareChallenge called with:", { startWord, targetWord, includeScreenshot });
+    
     // Upload screenshot to get public URL for social media previews
     let previewImageUrl: string | null = null;
     if (includeScreenshot && screenshotRef && screenshotRef.current) {
+      console.log("🎯 Starting screenshot capture and upload...");
       const screenshotUri = await captureGameScreen(screenshotRef);
       if (screenshotUri) {
+        console.log("🎯 Screenshot captured, uploading to storage...");
         const challengeId = `${startWord}-${targetWord}`;
         const uploadResult = await uploadScreenshotToStorage(
           screenshotUri,
@@ -304,9 +308,14 @@ export const shareChallenge = async ({
           console.warn("Failed to upload screenshot:", uploadResult.error);
           // Continue without preview image
         } else {
+          console.log("🎯 Screenshot uploaded successfully, URL:", uploadResult.publicUrl);
           previewImageUrl = uploadResult.publicUrl;
         }
+      } else {
+        console.warn("🎯 Screenshot capture failed");
       }
+    } else {
+      console.log("🎯 Skipping screenshot capture:", { includeScreenshot, hasRef: !!screenshotRef?.current });
     }
 
     // Generate the secure deep link
@@ -331,30 +340,43 @@ export const shareChallenge = async ({
     });
 
     // Web-specific sharing handling
-    if (Platform.OS === "web") {
+    if (typeof window !== "undefined") {
+      console.log("🎯 Web platform detected, checking sharing options...");
+      
       // Check if Web Share API is supported
       if (typeof navigator !== "undefined" && navigator.share) {
+        console.log("🎯 Web Share API available, trying...");
         try {
           await navigator.share({
             title: "Synapse Word Challenge",
             text: challengeMessage,
             url: deepLink,
           });
+          console.log("🎯 Web Share API succeeded");
           return true;
         } catch (error) {
+          console.log("🎯 Web Share API failed:", error);
           // Fall through to clipboard fallback
         }
+      } else {
+        console.log("🎯 Web Share API not available");
       }
 
       // Fallback: copy to clipboard with a confirmation
       if (typeof navigator !== "undefined" && navigator.clipboard) {
+        console.log("🎯 Clipboard API available, trying...");
         try {
           const textToCopy = `${challengeMessage}\n\n${deepLink}`;
           await navigator.clipboard.writeText(textToCopy);
+          console.log("🎯 Clipboard API succeeded");
           return true;
         } catch (clipboardError) {
+          console.log("🎯 Clipboard API failed:", clipboardError);
           throw new Error("Could not copy challenge link to clipboard");
         }
+      } else {
+        console.log("🎯 Clipboard API not available");
+        throw new Error("No web sharing options available");
       }
     }
 
@@ -458,7 +480,7 @@ export const shareDailyChallenge = async ({
     });
 
     // Web-specific sharing handling
-    if (Platform.OS === "web") {
+    if (typeof window !== "undefined") {
       // Check if Web Share API is supported
       if (typeof navigator !== "undefined" && navigator.share) {
         try {
@@ -590,7 +612,7 @@ const captureGameScreen = async (
     });
 
     // For web, we need to handle HTML Canvas/DOM-based screenshot capture
-    if (Platform.OS === "web") {
+    if (typeof window !== "undefined") {
       // Skip captureRef on web and go straight to html2canvas
       if (ref.current && typeof window !== "undefined" && html2canvas) {
         try {
@@ -754,7 +776,7 @@ export const generateSecureGameDeepLink = (
   if (previewImageUrl) params.set("preview", previewImageUrl);
 
   // Use the app's scheme for deep linking
-  if (Platform.OS === "web") {
+  if (typeof window !== "undefined") {
     // Use current origin or a fixed URL for the web version
     const origin =
       typeof window !== "undefined"

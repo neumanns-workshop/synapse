@@ -117,31 +117,39 @@ const GameReportModal = () => {
 
   // Function to handle challenge sharing
   const handleChallengeShare = async () => {
+    console.log("🚀 handleChallengeShare called");
+    
     if (!gameReportModalReport) {
+      console.log("🚀 No gameReportModalReport, returning early");
       return;
     }
 
     try {
       const { startWord, targetWord, playerPath } = gameReportModalReport;
+      console.log("🚀 Challenge data:", { startWord, targetWord, pathLength: playerPath.length - 1 });
 
       const pathLength = playerPath.length - 1;
 
       // Prepare graph view for preview (player path only)
       prepareGraphPreview();
+      console.log("🚀 Graph preview prepared");
 
-      // For web, capture screenshot first, then show dialog with enhanced link
-      if (Platform.OS === "web") {
-        try {
-          // First, try to capture and upload screenshot for preview
-          if (graphPreviewRef?.current) {
-            // Use the shareChallenge function to handle screenshot capture and upload
-            // But capture the generated link instead of using native sharing
-            if (
-              gameReportModalReport.isDailyChallenge &&
-              gameReportModalReport.dailyChallengeId
-            ) {
-              // For daily challenges, use shareDailyChallenge to get the enhanced link
-              const success = await shareDailyChallenge({
+              // For web, capture screenshot first, then show dialog with enhanced link
+        if (Platform.OS === "web") {
+          console.log("🚀 Web platform detected");
+          try {
+            // First, try to capture and upload screenshot for preview
+            if (graphPreviewRef?.current) {
+              console.log("🚀 graphPreviewRef available");
+              // Use the shareChallenge function to handle screenshot capture and upload
+              // But capture the generated link instead of using native sharing
+              if (
+                gameReportModalReport.isDailyChallenge &&
+                gameReportModalReport.dailyChallengeId
+              ) {
+                console.log("🚀 Daily challenge detected, calling shareDailyChallenge");
+                // For daily challenges, use shareDailyChallenge to get the enhanced link
+                const success = await shareDailyChallenge({
                 challengeId: gameReportModalReport.dailyChallengeId,
                 startWord,
                 targetWord,
@@ -155,16 +163,21 @@ const GameReportModal = () => {
                 screenshotRef: graphPreviewRef,
                 includeScreenshot: true,
                 gameReport: gameReportModalReport,
-              });
-
-              if (success) {
-                setSnackbarMessage("Daily challenge shared successfully!");
-                setSnackbarVisible(true);
-                return;
-              }
-            } else {
-              // For regular challenges, use shareChallenge to get the enhanced link
-              const success = await shareChallenge({
+                              });
+                
+                console.log("🚀 shareDailyChallenge result:", success);
+                if (success) {
+                  console.log("🚀 Daily challenge sharing succeeded");
+                  setSnackbarMessage("Daily challenge shared successfully!");
+                  setSnackbarVisible(true);
+                  return;
+                } else {
+                  console.log("🚀 Daily challenge sharing failed");
+                }
+              } else {
+                console.log("🚀 Regular challenge detected, calling shareChallenge");
+                // For regular challenges, use shareChallenge to get the enhanced link
+                const success = await shareChallenge({
                 startWord,
                 targetWord,
                 playerPath,
@@ -172,22 +185,28 @@ const GameReportModal = () => {
                 includeScreenshot: true,
                 steps: pathLength,
                 gameReport: gameReportModalReport,
-              });
-
-              if (success) {
-                setSnackbarMessage("Challenge shared successfully!");
-                setSnackbarVisible(true);
-                return;
+                              });
+                
+                console.log("🚀 shareChallenge result:", success);
+                if (success) {
+                  console.log("🚀 Regular challenge sharing succeeded");
+                  setSnackbarMessage("Challenge shared successfully!");
+                  setSnackbarVisible(true);
+                  return;
+                } else {
+                  console.log("🚀 Regular challenge sharing failed");
+                }
               }
+            } else {
+              console.log("🚀 No graphPreviewRef available");
             }
-          }
 
-          // If sharing failed or screenshot not available, fall back to basic dialog
-          console.warn(
-            "Web sharing with screenshot failed, falling back to basic dialog",
-          );
-        } catch (error) {
-          console.warn("Web screenshot sharing error:", error);
+            // If sharing failed or screenshot not available, fall back to basic dialog
+            console.warn(
+              "Web sharing with screenshot failed, falling back to basic dialog",
+            );
+          } catch (error) {
+            console.warn("Web screenshot sharing error:", error);
         }
 
         // Fallback: Generate basic link without screenshot (original behavior)
