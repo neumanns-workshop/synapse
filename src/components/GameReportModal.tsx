@@ -40,6 +40,7 @@ const GameReportModal = () => {
   const { colors } = useTheme() as ExtendedTheme;
   const reportSectionRef = useRef(null);
   const graphPreviewRef = useRef(null);
+  const mainGraphRef = useRef(null); // Add ref for main graph that's always rendered
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [challengeLink, setChallengeLink] = useState("");
@@ -143,8 +144,8 @@ const GameReportModal = () => {
         console.log("🚀 Web platform detected");
         try {
           // First, try to capture and upload screenshot for preview
-          if (graphPreviewRef?.current) {
-            console.log("🚀 graphPreviewRef available");
+          if (mainGraphRef?.current) {
+            console.log("🚀 mainGraphRef available");
             // Use the shareChallenge function to handle screenshot capture and upload
             // But capture the generated link instead of using native sharing
             if (
@@ -166,7 +167,7 @@ const GameReportModal = () => {
                 userCompleted: gameReportModalReport.status === "won",
                 userGaveUp: gameReportModalReport.status === "given_up",
                 challengeDate: gameReportModalReport.dailyChallengeId,
-                screenshotRef: graphPreviewRef,
+                screenshotRef: mainGraphRef,
                 includeScreenshot: true,
                 gameReport: gameReportModalReport,
               });
@@ -189,7 +190,7 @@ const GameReportModal = () => {
                 startWord,
                 targetWord,
                 playerPath,
-                screenshotRef: graphPreviewRef,
+                screenshotRef: mainGraphRef,
                 includeScreenshot: true,
                 steps: pathLength,
                 gameReport: gameReportModalReport,
@@ -206,7 +207,7 @@ const GameReportModal = () => {
               }
             }
           } else {
-            console.log("🚀 No graphPreviewRef available");
+            console.log("🚀 No mainGraphRef available");
           }
 
           // If sharing failed or screenshot not available, fall back to basic dialog
@@ -325,7 +326,7 @@ const GameReportModal = () => {
           </View>
 
           <ScrollView style={styles.scrollView}>
-            <View style={styles.graphContainer}>
+            <View style={styles.graphContainer} ref={mainGraphRef}>
               {isLoading ? (
                 <View style={styles.loadingContainer}>
                   <Text>Loading...</Text>
