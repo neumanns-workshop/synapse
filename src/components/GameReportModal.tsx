@@ -22,14 +22,9 @@ import {
   shareChallenge,
   generateChallengeMessage,
   generateDailyChallengeTaunt,
-  encodePathQuality,
-  encodeCoordinates,
-  generateEnhancedGameDeepLink,
-  generateUrlHash,
+  generateSecureGameDeepLink,
+  shareDailyChallenge,
 } from "../services/SharingService";
-
-// Import t-SNE coordinates for enhanced encoding
-import tsneCoordinates from "../../data/tsne_coordinates.json";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import AchievementDetailDialog from "./AchievementDetailDialog";
@@ -144,29 +139,13 @@ const GameReportModal = () => {
           gameReportModalReport.isDailyChallenge &&
           gameReportModalReport.dailyChallengeId
         ) {
-          // Use separate encoding for clean URL structure
-          const quality = gameReportModalReport
-            ? encodePathQuality(gameReportModalReport)
-            : "";
-          const tsne = gameReportModalReport
-            ? encodeCoordinates(
-                gameReportModalReport,
-                tsneCoordinates as unknown as Record<string, [number, number]>,
-              )
-            : "";
-          const share = generateUrlHash(
-            `${gameReportModalReport.dailyChallengeId}:${startWord}:${targetWord}`,
-          );
-
-          link = generateEnhancedGameDeepLink(
+          // Generate clean daily challenge URL
+          link = generateSecureGameDeepLink(
             "dailychallenge",
             startWord,
             targetWord,
             undefined, // no theme for daily challenges
-            share,
-            quality,
-            tsne,
-            gameReportModalReport.dailyChallengeId, // date
+            gameReportModalReport.dailyChallengeId, // challengeId
           );
 
           // Generate proper daily challenge taunt
@@ -189,33 +168,19 @@ const GameReportModal = () => {
             optimalPathLength: gameReportModalReport.optimalPath.length - 1,
           });
         } else {
-          // Use separate encoding for clean URL structure
-          const quality = gameReportModalReport
-            ? encodePathQuality(gameReportModalReport)
-            : "";
-          const tsne = gameReportModalReport
-            ? encodeCoordinates(
-                gameReportModalReport,
-                tsneCoordinates as unknown as Record<string, [number, number]>,
-              )
-            : "";
-          const share = generateUrlHash(`${startWord}:${targetWord}`);
-
-          link = generateEnhancedGameDeepLink(
+          // Generate clean challenge URL
+          link = generateSecureGameDeepLink(
             "challenge",
             startWord,
             targetWord,
             undefined, // no theme
-            share,
-            quality,
-            tsne,
           );
+
           message = generateChallengeMessage({
             startWord,
             targetWord,
             playerPath,
             steps: pathLength,
-            deepLink: link,
             gameStatus: gameReportModalReport.status,
             optimalPathLength: gameReportModalReport.optimalPath.length - 1,
           });

@@ -27,14 +27,8 @@ import {
   shareChallenge,
   generateChallengeMessage,
   generateDailyChallengeTaunt,
-  encodePathQuality,
-  encodeCoordinates,
-  generateEnhancedGameDeepLink,
-  generateUrlHash,
+  generateSecureGameDeepLink,
 } from "../services/SharingService";
-
-// Import t-SNE coordinates for enhanced encoding
-import tsneCoordinates from "../../data/tsne_coordinates.json";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 
@@ -129,27 +123,13 @@ const ReportScreen = () => {
         let message: string;
 
         if (gameReport.isDailyChallenge && gameReport.dailyChallengeId) {
-          // Use separate encoding for clean URL structure
-          const quality = gameReport ? encodePathQuality(gameReport) : "";
-          const tsne = gameReport
-            ? encodeCoordinates(
-                gameReport,
-                tsneCoordinates as unknown as Record<string, [number, number]>,
-              )
-            : "";
-          const share = generateUrlHash(
-            `${gameReport.dailyChallengeId}:${startWord}:${targetWord}`,
-          );
-
-          link = generateEnhancedGameDeepLink(
+          // Generate clean daily challenge URL
+          link = generateSecureGameDeepLink(
             "dailychallenge",
             startWord,
             targetWord,
             undefined, // no theme for daily challenges
-            share,
-            quality,
-            tsne,
-            gameReport.dailyChallengeId, // date
+            gameReport.dailyChallengeId, // challengeId
           );
 
           // Generate proper daily challenge taunt
@@ -172,31 +152,19 @@ const ReportScreen = () => {
             optimalPathLength: gameReport.optimalPath.length - 1,
           });
         } else {
-          // Use separate encoding for clean URL structure
-          const quality = gameReport ? encodePathQuality(gameReport) : "";
-          const tsne = gameReport
-            ? encodeCoordinates(
-                gameReport,
-                tsneCoordinates as unknown as Record<string, [number, number]>,
-              )
-            : "";
-          const share = generateUrlHash(`${startWord}:${targetWord}`);
-
-          link = generateEnhancedGameDeepLink(
+          // Generate clean challenge URL
+          link = generateSecureGameDeepLink(
             "challenge",
             startWord,
             targetWord,
             undefined, // no theme
-            share,
-            quality,
-            tsne,
           );
+
           message = generateChallengeMessage({
             startWord,
             targetWord,
             playerPath,
             steps: pathLength,
-            deepLink: link,
             gameStatus: gameReport.status,
             optimalPathLength: gameReport.optimalPath.length - 1,
           });

@@ -6,7 +6,7 @@ import GraphVisualization from "../components/GraphVisualization";
 import { QRCodeDisplay } from "../components/QRCodeDisplay";
 import { useGameStore } from "../stores/useGameStore";
 import type { GameReport } from "../utils/gameReportUtils";
-import { generateEnhancedGameDeepLink } from "../services/SharingService";
+import { generateSecureGameDeepLink } from "../services/SharingService";
 
 // Import t-SNE coordinates for coordinate reconstruction
 import tsneCoordinates from "../../data/tsne_coordinates.json";
@@ -211,15 +211,12 @@ const PreviewImageScreen: React.FC<PreviewImageScreenProps> = () => {
           const tsne = urlParams.get("tsne");
           const date = urlParams.get("date");
 
-          const link = generateEnhancedGameDeepLink(
+          const link = generateSecureGameDeepLink(
             type,
             startWord,
             targetWord,
             theme || undefined,
-            share || undefined,
-            quality || undefined,
-            tsne || undefined,
-            date || undefined,
+            type === "dailychallenge" ? date || undefined : undefined, // challengeId for daily challenges
           );
           setChallengeLink(link);
         }

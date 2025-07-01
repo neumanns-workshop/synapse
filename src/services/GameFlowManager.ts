@@ -1,10 +1,6 @@
 import { useGameStore } from "../stores/useGameStore";
 import { Logger } from "../utils/logger";
-import {
-  parseGameDeepLink,
-  parseDailyChallengeDeepLink,
-  parseEnhancedGameLink,
-} from "./SharingService";
+import { parseEnhancedGameLink } from "./SharingService";
 import { dailyChallengesService } from "./DailyChallengesService";
 
 export interface GameFlowState {
@@ -33,6 +29,15 @@ export interface FlowDecision {
   targetWord?: string;
   showUpgradePrompt?: boolean;
   message?: string;
+}
+
+interface ParsedEntryData {
+  type: "challenge" | "dailychallenge";
+  startWord: string;
+  targetWord: string;
+  challengeId?: string;
+  theme?: string;
+  isValid: boolean;
 }
 
 export class GameFlowManager {
@@ -225,89 +230,39 @@ export class GameFlowManager {
   }
 
   /**
-   * Parse URL parameters for different entry types
+   * Parse URL parameters to extract entry information
    */
-  public parseEntryUrl(url: string): {
-    entryType: "landing" | "playerChallenge" | "dailyChallenge";
-    challengeData?: {
-      startWord?: string;
-      targetWord?: string;
-      challengeId?: string;
-      isValid?: boolean;
-    };
-  } {
-    Logger.debug(" GameFlowManager.parseEntryUrl: Parsing URL:", url);
+  public parseEntryUrl = (url: string): ParsedEntryData | null => {
+    try {
+      Logger.debug("🎮 GameFlowManager: Parsing entry URL:", url);
 
-    // First, check for enhanced format URLs (new format with type parameter)
-    const enhancedParams = parseEnhancedGameLink(url);
-    Logger.debug(
-      "🎮 GameFlowManager.parseEntryUrl: Enhanced params:",
-      enhancedParams,
-    );
-    if (enhancedParams) {
-      if (enhancedParams.type === "dailychallenge") {
+      // Try enhanced format first (with type parameter)
+      const enhancedData = parseEnhancedGameLink(url);
+      if (
+        enhancedData &&
+        enhancedData.type &&
+        enhancedData.startWord &&
+        enhancedData.targetWord
+      ) {
+        Logger.debug("🎮 GameFlowManager: Using enhanced URL format");
+
         return {
-          entryType: "dailyChallenge",
-          challengeData: {
-            challengeId: enhancedParams.date,
-            startWord: enhancedParams.startWord,
-            targetWord: enhancedParams.targetWord,
-            isValid: enhancedParams.isValid || false,
-          },
-        };
-      } else if (enhancedParams.type === "challenge") {
-        return {
-          entryType: "playerChallenge",
-          challengeData: {
-            startWord: enhancedParams.startWord,
-            targetWord: enhancedParams.targetWord,
-            isValid: enhancedParams.isValid || false,
-          },
+          type: enhancedData.type as "challenge" | "dailychallenge",
+          startWord: enhancedData.startWord,
+          targetWord: enhancedData.targetWord,
+          challengeId: enhancedData.challengeId,
+          theme: enhancedData.theme,
+          isValid: true,
         };
       }
-    }
 
-    // Fallback to old format parsers for backward compatibility
-    // Check for daily challenge link (old format)
-    const dailyChallengeParams = parseDailyChallengeDeepLink(url);
-    Logger.debug(
-      "🎮 GameFlowManager.parseEntryUrl: Daily challenge params (old format):",
-      dailyChallengeParams,
-    );
-    if (dailyChallengeParams) {
-      return {
-        entryType: "dailyChallenge",
-        challengeData: {
-          challengeId: dailyChallengeParams.challengeId,
-          startWord: dailyChallengeParams.startWord,
-          targetWord: dailyChallengeParams.targetWord,
-          isValid: dailyChallengeParams.isValid || false,
-        },
-      };
+      Logger.debug("🎮 GameFlowManager: No valid URL format found");
+      return null;
+    } catch (error) {
+      console.error("🎮 GameFlowManager: Error parsing entry URL:", error);
+      return null;
     }
-
-    // Check for player challenge link (old format)
-    const playerChallengeParams = parseGameDeepLink(url);
-    Logger.debug(
-      "🎮 GameFlowManager.parseEntryUrl: Player challenge params (old format):",
-      playerChallengeParams,
-    );
-    if (playerChallengeParams) {
-      return {
-        entryType: "playerChallenge",
-        challengeData: {
-          startWord: playerChallengeParams.startWord,
-          targetWord: playerChallengeParams.targetWord,
-          isValid: playerChallengeParams.isValid,
-        },
-      };
-    }
-
-    Logger.debug(
-      "🎮 GameFlowManager.parseEntryUrl: No challenge detected, defaulting to landing",
-    );
-    return { entryType: "landing" };
-  }
+  };
 
   /**
    * Execute the flow decision
@@ -370,7 +325,7 @@ export class GameFlowManager {
   private async checkTutorialComplete(): Promise<boolean> {
     try {
       // Use UnifiedDataStore instead of AsyncStorage for consistency
-      const { unifiedDataStore } = await import("../services/UnifiedDataStore");
+      const { unifiedDataStore } = require("../services/UnifiedDataStore");
       return await unifiedDataStore.isTutorialComplete();
     } catch {
       return false;
@@ -379,7 +334,7 @@ export class GameFlowManager {
 
   private async hasGameHistory(): Promise<boolean> {
     try {
-      const { loadGameHistory } = await import("./StorageAdapter");
+      const { loadGameHistory } = require("./StorageAdapter");
       const history = await loadGameHistory();
       return history.length > 0;
     } catch {
@@ -389,7 +344,7 @@ export class GameFlowManager {
 
   private async hasUnfinishedGame(): Promise<boolean> {
     try {
-      const { loadCurrentGame } = await import("./StorageAdapter");
+      const { loadCurrentGame } = require("./StorageAdapter");
       const savedGame = await loadCurrentGame(false); // Regular game
       return savedGame !== null && savedGame.gameStatus === "playing";
     } catch {
@@ -399,7 +354,7 @@ export class GameFlowManager {
 
   private async hasUnfinishedDailyChallenge(): Promise<boolean> {
     try {
-      const { loadCurrentGame } = await import("./StorageAdapter");
+      const { loadCurrentGame } = require("./StorageAdapter");
       const savedGame = await loadCurrentGame(true); // Challenge game
 
       if (
@@ -421,7 +376,7 @@ export class GameFlowManager {
         savedGame.currentDailyChallengeId !== todaysChallenge.id
       ) {
         // Clear the expired daily challenge
-        const { clearCurrentGame } = await import("./StorageAdapter");
+        const { clearCurrentGame } = require("./StorageAdapter");
         await clearCurrentGame(true); // Clear challenge game storage
         return false;
       }
