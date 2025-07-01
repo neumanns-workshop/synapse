@@ -20,7 +20,6 @@ import {
 
 import {
   shareChallenge,
-  shareDailyChallenge,
   generateChallengeMessage,
   generateDailyChallengeTaunt,
   generateSecureGameDeepLink,
@@ -139,88 +138,34 @@ const GameReportModal = () => {
       prepareGraphPreview();
       console.log("🚀 Graph preview prepared");
 
-      // For web, capture screenshot first, then show dialog with enhanced link
+      // For web, show custom dialog (skip native sharing entirely)
       if (Platform.OS === "web") {
-        console.log("🚀 Web platform detected");
-        try {
-          // First, try to capture and upload screenshot for preview
-          if (mainGraphRef?.current) {
-            console.log("🚀 mainGraphRef available");
-            // Use the shareChallenge function to handle screenshot capture and upload
-            // But capture the generated link instead of using native sharing
-            if (
-              gameReportModalReport.isDailyChallenge &&
-              gameReportModalReport.dailyChallengeId
-            ) {
-              console.log(
-                "🚀 Daily challenge detected, calling shareDailyChallenge",
-              );
-              // For daily challenges, use shareDailyChallenge to get the enhanced link
-              const success = await shareDailyChallenge({
-                challengeId: gameReportModalReport.dailyChallengeId,
-                startWord,
-                targetWord,
-                aiSteps: gameReportModalReport.aiPath
-                  ? gameReportModalReport.aiPath.length - 1
-                  : gameReportModalReport.optimalPath.length - 1,
-                userSteps: gameReportModalReport.totalMoves,
-                userCompleted: gameReportModalReport.status === "won",
-                userGaveUp: gameReportModalReport.status === "given_up",
-                challengeDate: gameReportModalReport.dailyChallengeId,
-                screenshotRef: mainGraphRef,
-                includeScreenshot: true,
-                gameReport: gameReportModalReport,
-              });
+        console.log("🚀 Web platform detected - showing custom dialog");
+        // Skip native sharing and go straight to our custom dialog
+        // The shareChallenge functions trigger native sharing which we don't want
 
-              console.log("🚀 shareDailyChallenge result:", success);
-              if (success) {
-                console.log("🚀 Daily challenge sharing succeeded");
-                setSnackbarMessage("Daily challenge shared successfully!");
-                setSnackbarVisible(true);
-                return;
-              } else {
-                console.log("🚀 Daily challenge sharing failed");
-              }
-            } else {
-              console.log(
-                "🚀 Regular challenge detected, calling shareChallenge",
-              );
-              // For regular challenges, use shareChallenge to get the enhanced link
-              const success = await shareChallenge({
-                startWord,
-                targetWord,
-                playerPath,
-                screenshotRef: mainGraphRef,
-                includeScreenshot: true,
-                steps: pathLength,
-                gameReport: gameReportModalReport,
-              });
-
-              console.log("🚀 shareChallenge result:", success);
-              if (success) {
-                console.log("🚀 Regular challenge sharing succeeded");
-                setSnackbarMessage("Challenge shared successfully!");
-                setSnackbarVisible(true);
-                return;
-              } else {
-                console.log("🚀 Regular challenge sharing failed");
-              }
-            }
-          } else {
-            console.log("🚀 No mainGraphRef available");
-          }
-
-          // If sharing failed or screenshot not available, fall back to basic dialog
-          console.warn(
-            "Web sharing with screenshot failed, falling back to basic dialog",
-          );
-        } catch (error) {
-          console.warn("Web screenshot sharing error:", error);
-        }
-
-        // Fallback: Generate basic link without screenshot (original behavior)
+        // Main web flow: Generate enhanced link with screenshot for custom dialog
         let link: string;
         let message: string;
+        const previewImageUrl: string | undefined = undefined;
+
+        // Try to capture screenshot and upload it
+        try {
+          if (mainGraphRef?.current) {
+            console.log(
+              "🚀 Attempting screenshot capture for enhanced link...",
+            );
+            // We'll use a simpler approach - trigger the sharing function but ignore its native sharing
+            // and extract the enhanced URL from it, or generate it ourselves
+
+            // For now, generate without preview, but we can enhance this later
+            console.log(
+              "🚀 Generating link without preview for now (TODO: add screenshot)",
+            );
+          }
+        } catch (error) {
+          console.warn("🚀 Screenshot capture failed:", error);
+        }
 
         if (
           gameReportModalReport.isDailyChallenge &&
@@ -232,7 +177,7 @@ const GameReportModal = () => {
             targetWord,
             undefined, // no theme for daily challenges
             gameReportModalReport.dailyChallengeId, // challengeId
-            undefined, // no preview in fallback
+            previewImageUrl, // will be undefined for now, enhanced later
           );
 
           const aiSteps = gameReportModalReport.aiPath
@@ -260,7 +205,7 @@ const GameReportModal = () => {
             targetWord,
             undefined, // no theme
             undefined, // no challengeId for regular challenges
-            undefined, // no preview in fallback
+            previewImageUrl, // will be undefined for now, enhanced later
           );
 
           message = generateChallengeMessage({
