@@ -1,7 +1,13 @@
 import { useGameStore } from "../stores/useGameStore";
 import { Logger } from "../utils/logger";
-import { parseEnhancedGameLink } from "./SharingService";
+import { unifiedDataStore } from "../services/UnifiedDataStore";
 import { dailyChallengesService } from "./DailyChallengesService";
+import { parseEnhancedGameLink } from "./SharingService";
+import {
+  loadGameHistory,
+  loadCurrentGame,
+  clearCurrentGame,
+} from "./StorageAdapter";
 
 export interface GameFlowState {
   isFirstTimeUser: boolean;
@@ -325,7 +331,6 @@ export class GameFlowManager {
   private async checkTutorialComplete(): Promise<boolean> {
     try {
       // Use UnifiedDataStore instead of AsyncStorage for consistency
-      const { unifiedDataStore } = require("../services/UnifiedDataStore");
       return await unifiedDataStore.isTutorialComplete();
     } catch {
       return false;
@@ -334,7 +339,6 @@ export class GameFlowManager {
 
   private async hasGameHistory(): Promise<boolean> {
     try {
-      const { loadGameHistory } = require("./StorageAdapter");
       const history = await loadGameHistory();
       return history.length > 0;
     } catch {
@@ -344,7 +348,6 @@ export class GameFlowManager {
 
   private async hasUnfinishedGame(): Promise<boolean> {
     try {
-      const { loadCurrentGame } = require("./StorageAdapter");
       const savedGame = await loadCurrentGame(false); // Regular game
       return savedGame !== null && savedGame.gameStatus === "playing";
     } catch {
@@ -354,7 +357,6 @@ export class GameFlowManager {
 
   private async hasUnfinishedDailyChallenge(): Promise<boolean> {
     try {
-      const { loadCurrentGame } = require("./StorageAdapter");
       const savedGame = await loadCurrentGame(true); // Challenge game
 
       if (
@@ -376,7 +378,6 @@ export class GameFlowManager {
         savedGame.currentDailyChallengeId !== todaysChallenge.id
       ) {
         // Clear the expired daily challenge
-        const { clearCurrentGame } = require("./StorageAdapter");
         await clearCurrentGame(true); // Clear challenge game storage
         return false;
       }

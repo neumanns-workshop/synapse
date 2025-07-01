@@ -102,7 +102,7 @@ const uploadScreenshotToStorage = async (
     }
 
     // Upload to Supabase Storage
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("preview-images")
       .upload(filename, blob, {
         cacheControl: "604800", // 7 days cache

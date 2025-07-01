@@ -206,9 +206,7 @@ const PreviewImageScreen: React.FC<PreviewImageScreenProps> = () => {
           const startWord = urlParams.get("start") || "";
           const targetWord = urlParams.get("target") || "";
           const theme = urlParams.get("theme");
-          const share = urlParams.get("share");
-          const quality = urlParams.get("quality");
-          const tsne = urlParams.get("tsne");
+
           const date = urlParams.get("date");
 
           const link = generateSecureGameDeepLink(

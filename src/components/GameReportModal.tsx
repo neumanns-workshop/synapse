@@ -23,7 +23,6 @@ import {
   generateChallengeMessage,
   generateDailyChallengeTaunt,
   generateSecureGameDeepLink,
-  shareDailyChallenge,
 } from "../services/SharingService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
