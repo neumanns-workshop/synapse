@@ -93,12 +93,10 @@ const uploadScreenshotToStorage = async (
   challengeId: string,
 ): Promise<{ publicUrl: string | null; error: string | null }> => {
   try {
-    console.log("🔄 Starting screenshot upload process...", {
-      challengeId,
-      screenshotUriType: screenshotUri.startsWith("data:")
-        ? "data-uri"
-        : "blob-url",
-      platform: Platform.OS,
+    console.log("🔥 DEBUG: Upload starting", {
+      screenshotUriLength: screenshotUri.length,
+      screenshotUriType: screenshotUri.startsWith("data:") ? "data-uri" : "other",
+      challengeId
     });
 
     const supabaseService = SupabaseService.getInstance();
@@ -111,81 +109,73 @@ const uploadScreenshotToStorage = async (
     // Create consistent filename (replaces previous uploads)
     const filename = `${userId}/${challengeId}/preview.jpg`;
 
-    // Convert URI to blob for upload
+    // Convert data URI to blob if needed
     let blob: Blob;
-    if (Platform.OS === "web") {
-      // On web, screenshot URI might be a data URI (data:image/jpeg;base64,...)
-      if (screenshotUri.startsWith("data:")) {
-        // Convert data URI to blob
-        const response = await fetch(screenshotUri);
-        blob = await response.blob();
-      } else {
-        // It's a blob URL, fetch it
-        const response = await fetch(screenshotUri);
-        blob = await response.blob();
-      }
-    } else {
-      // On native, convert file URI to blob
+    if (screenshotUri.startsWith("data:")) {
       const response = await fetch(screenshotUri);
       blob = await response.blob();
+      console.log("🔥 DEBUG: Converted data URI to blob, size:", blob.size);
+    } else {
+      // For native platforms, we might get a file URI
+      const response = await fetch(screenshotUri);
+      blob = await response.blob();
+      console.log("🔥 DEBUG: Fetched blob from URI, size:", blob.size);
     }
 
-    console.log("✅ Screenshot blob created successfully", {
-      blobSize: blob.size,
-      blobType: blob.type,
-    });
-
-    // Check file size (max 5MB)
     if (blob.size > 5 * 1024 * 1024) {
+      // 5MB limit
       return { publicUrl: null, error: "Image too large (max 5MB)" };
     }
 
-    // Rate limiting check - 10 uploads per hour per user
+    // Check upload rate limit
     const rateLimit = await checkUploadRateLimit(userId);
     if (!rateLimit.allowed) {
+      const retryAfter = Math.ceil(rateLimit.retryAfter / 60000); // Convert to minutes
       return {
         publicUrl: null,
-        error: `Rate limit exceeded. Try again in ${Math.ceil(rateLimit.retryAfter / 60)} minutes.`,
+        error: `Upload rate limit exceeded. Try again in ${retryAfter} minutes.`,
       };
     }
 
+    console.log("🔥 DEBUG: Rate limit passed, uploading to storage");
+
     // Upload to Supabase Storage
-    const { error } = await supabase.storage
+    const { data, error } = await supabase.storage
       .from("preview-images")
       .upload(filename, blob, {
-        cacheControl: "604800", // 7 days cache
-        upsert: true, // Allow overwriting
+        cacheControl: "3600",
+        upsert: true, // Replace existing file
       });
 
     if (error) {
-      console.error("Storage upload error:", error);
-      return { publicUrl: null, error: "Failed to upload image" };
+      console.error("🔥 DEBUG: Storage upload failed:", error);
+      return { publicUrl: null, error: error.message };
     }
+
+    console.log("🔥 DEBUG: Storage upload succeeded, getting public URL");
 
     // Get public URL
     const { data: publicUrlData } = supabase.storage
       .from("preview-images")
       .getPublicUrl(filename);
 
-    if (!publicUrlData?.publicUrl) {
-      return { publicUrl: null, error: "Failed to get public URL" };
-    }
+    const publicUrl = publicUrlData.publicUrl;
+    console.log("🔥 DEBUG: Public URL obtained:", publicUrl);
 
-    console.log("🎉 Screenshot uploaded successfully!", {
-      filename,
-      publicUrl: publicUrlData.publicUrl,
-    });
-
-    // Record upload for rate limiting
+    // Record the upload for rate limiting
     await recordUpload(userId);
 
-    // Schedule cleanup (delete after 7 days)
-    await scheduleImageCleanup(filename, Date.now() + 7 * 24 * 60 * 60 * 1000);
+    // Schedule cleanup after 7 days
+    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+    await scheduleImageCleanup(filename, expiresAt);
 
-    return { publicUrl: publicUrlData.publicUrl, error: null };
+    return { publicUrl, error: null };
   } catch (error) {
-    console.error("Error uploading screenshot:", error);
-    return { publicUrl: null, error: "Upload failed" };
+    console.error("🔥 DEBUG: Upload failed with error:", error);
+    return {
+      publicUrl: null,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 };
 
@@ -590,51 +580,50 @@ const captureGameScreen = async (
   ref: React.RefObject<View | null>,
 ): Promise<string | null> => {
   try {
+    console.log("🔥 DEBUG: Screenshot capture starting", {
+      platform: Platform.OS,
+      hasRef: !!ref,
+      hasRefCurrent: !!ref?.current,
+      html2canvasAvailable: typeof html2canvas !== "undefined"
+    });
+
     // For web, we need to handle HTML Canvas/DOM-based screenshot capture
     if (Platform.OS === "web") {
-      // Web-specific screenshot capture using HTML Canvas
-      try {
-        const uri = await captureRef(ref, {
-          format: "jpg",
-          quality: 0.8,
-          result: "data-uri", // Ensure we get a data URI on web
-        });
+      // Skip captureRef on web and go straight to html2canvas
+      if (ref.current && typeof window !== "undefined" && html2canvas) {
+        try {
+          console.log("🔥 DEBUG: Attempting html2canvas capture");
+          const element = ref.current as unknown as HTMLElement;
 
-        // On web, captureRef returns a data URI directly
-        return uri;
-      } catch (webError) {
-        console.warn("Web screenshot capture failed:", webError);
+          // Check if element is a valid DOM element
+          if (
+            element &&
+            typeof element.getBoundingClientRect === "function"
+          ) {
+            console.log("🔥 DEBUG: Element found, calling html2canvas");
+            const canvas = await html2canvas(element, {
+              useCORS: true,
+              allowTaint: false,
+              backgroundColor: null,
+              scale: 1,
+              width: 800,
+              height: 600,
+            });
 
-        // Fallback: try html2canvas if available
-        if (ref.current && typeof window !== "undefined" && html2canvas) {
-          try {
-            const element = ref.current as unknown as HTMLElement;
-
-            // Check if element is a valid DOM element
-            if (
-              element &&
-              typeof element.getBoundingClientRect === "function"
-            ) {
-              const canvas = await html2canvas(element, {
-                useCORS: true,
-                allowTaint: false,
-                backgroundColor: null,
-                scale: 1,
-                width: 800,
-                height: 600,
-              });
-
-              // Convert canvas to data URL
-              const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
-              console.log("✅ html2canvas screenshot generated successfully");
-              return dataUrl;
-            }
-          } catch (fallbackError) {
-            console.warn("html2canvas fallback method failed:", fallbackError);
+            // Convert canvas to data URL
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+            console.log("🔥 DEBUG: html2canvas SUCCESS, dataUrl length:", dataUrl.length);
+            return dataUrl;
+          } else {
+            console.error("🔥 DEBUG: Invalid DOM element for screenshot");
+            return null;
           }
-        } else if (ref.current && typeof window !== "undefined") {
-          console.log("html2canvas not available, no web screenshot fallback");
+        } catch (fallbackError) {
+          console.error("🔥 DEBUG: html2canvas failed:", fallbackError);
+          return null;
         }
+      } else {
+        console.error("🔥 DEBUG: html2canvas not available or no ref");
         return null;
       }
     }
@@ -660,41 +649,7 @@ const captureGameScreen = async (
     // On web, just return the original URI or if processing failed
     return uri;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorStack = error instanceof Error ? error.stack : undefined;
-
-    // On web, provide more detailed error information
-    if (Platform.OS === "web") {
-      console.error("Web screenshot capture failed:", {
-        error: errorMessage,
-        stack: errorStack,
-        refCurrent: ref.current ? "exists" : "null",
-        browserSupport: {
-          canvas: typeof HTMLCanvasElement !== "undefined",
-          blob: typeof Blob !== "undefined",
-          fetch: typeof fetch !== "undefined",
-        },
-      });
-
-      // Provide user-friendly error message for web
-      if (
-        errorMessage?.includes("permission") ||
-        errorMessage?.includes("denied")
-      ) {
-        console.warn(
-          "Screenshot permission denied - this is normal on web browsers for security reasons",
-        );
-      } else if (
-        errorMessage?.includes("network") ||
-        errorMessage?.includes("cors")
-      ) {
-        console.warn("Network or CORS error during screenshot capture");
-      } else {
-        console.warn("Web screenshot not available - using text-only sharing");
-      }
-    } else {
-      console.error("Native screenshot capture failed:", error);
-    }
+    console.error("🔥 DEBUG: Screenshot capture failed with error:", error);
     return null;
   }
 };
