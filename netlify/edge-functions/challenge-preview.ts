@@ -24,7 +24,7 @@ export default async (request: Request, _context: Context) => {
     targetWord,
     type,
     hash,
-    challengeId
+    challengeId,
   });
 
   // Generate challenge hash for preview image lookup
@@ -46,7 +46,12 @@ export default async (request: Request, _context: Context) => {
   }
 
   const expectedHash = generateUrlHash(challengeData);
-  console.log("🔥 EDGE DEBUG: Hash comparison - expected:", expectedHash, "provided:", hash);
+  console.log(
+    "🔥 EDGE DEBUG: Hash comparison - expected:",
+    expectedHash,
+    "provided:",
+    hash,
+  );
 
   // Try to find preview image using hash-based lookup
   let validPreviewUrl: string | null = null;
@@ -56,7 +61,7 @@ export default async (request: Request, _context: Context) => {
 
     // Try common paths where images might be stored
     console.log("🔥 EDGE DEBUG: Trying to find preview image for hash:", hash);
-    
+
     const possibleUrls = [
       // All preview images are now stored in anonymous path
       `${baseStorageUrl}/anonymous/${hash}/${hash}.jpg`,
@@ -66,19 +71,23 @@ export default async (request: Request, _context: Context) => {
     for (const testUrl of possibleUrls) {
       console.log("🔥 EDGE DEBUG: Trying URL:", testUrl);
       try {
-        const response = await fetch(testUrl, { 
+        const response = await fetch(testUrl, {
           method: "HEAD",
           // Add headers to handle potential CORS issues
           headers: {
-            'User-Agent': 'Netlify-Edge-Function'
-          }
+            "User-Agent": "Netlify-Edge-Function",
+          },
         });
         if (response.ok) {
           validPreviewUrl = testUrl;
           console.log("🔥 EDGE DEBUG: Found image at:", testUrl);
           break;
         } else {
-          console.log("🔥 EDGE DEBUG: URL failed with status:", response.status, testUrl);
+          console.log(
+            "🔥 EDGE DEBUG: URL failed with status:",
+            response.status,
+            testUrl,
+          );
         }
       } catch (error) {
         console.log("🔥 EDGE DEBUG: URL failed with error:", testUrl, error);
@@ -96,7 +105,7 @@ export default async (request: Request, _context: Context) => {
 
   // Use valid preview image or fallback to default
   const ogImageUrl = validPreviewUrl || "https://synapsegame.ai/og-image.png";
-  
+
   console.log("🔥 EDGE DEBUG: Final preview image URL:", ogImageUrl);
 
   // Generate HTML with Open Graph meta tags
