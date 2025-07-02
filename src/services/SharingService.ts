@@ -107,17 +107,17 @@ export const uploadScreenshotToStorage = async (
     // Generate challenge hash for consistent filename
     const data = challengeId.toLowerCase();
     const challengeHash = generateUrlHash(data);
-    
+
     // Get user info for rate limiting
     const currentUser = supabaseService.getUser();
     const userId = currentUser?.id || "anonymous";
 
     // Use hash-based filename for shorter URLs
-    const timestamp = Date.now();
     const fileName = `${challengeHash}.jpg`;
-    const filePath = userId === "anonymous" 
-      ? `anonymous/${challengeHash}/${fileName}`
-      : `${userId}/${challengeHash}/${fileName}`;
+    const filePath =
+      userId === "anonymous"
+        ? `anonymous/${challengeHash}/${fileName}`
+        : `${userId}/${challengeHash}/${fileName}`;
 
     // Convert data URI to blob if needed
     let blob: Blob;
@@ -763,14 +763,16 @@ export const generateDailyChallengeTaunt = ({
  * Generate URL hash for security validation
  */
 const generateUrlHash = (data: string): string => {
-  // Simple hash function for URL validation
-  let hash = 0;
-  for (let i = 0; i < data.length; i++) {
-    const char = data.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
+  // Simple hash function for URL validation (matches edge function)
+  let hashValue = 0;
+  const secret = "synapse_challenge_2025";
+  const combined = data + secret;
+  for (let i = 0; i < combined.length; i++) {
+    const char = combined.charCodeAt(i);
+    hashValue = hashValue * 5 - hashValue + char;
+    hashValue = hashValue % 2147483647; // Keep it positive 32-bit
   }
-  return Math.abs(hash).toString(36).substring(0, 6);
+  return Math.abs(hashValue).toString(36).substring(0, 8);
 };
 
 /**
@@ -782,7 +784,7 @@ export const generateSecureGameDeepLink = (
   targetWord: string,
   theme?: string,
   challengeId?: string, // For daily challenges
-  previewImageUrl?: string, // For uploaded images (now unused - using hash lookup)
+  _previewImageUrl?: string, // For uploaded images (now unused - using hash lookup)
 ): string => {
   // Generate security hash
   const data = challengeId

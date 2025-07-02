@@ -23,18 +23,18 @@ export default async (request: Request, _context: Context) => {
   const challengeData = challengeId
     ? `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
     : `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
-  
+
   // Simple hash function matching SharingService.ts
   function generateUrlHash(data: string): string {
-    let hash = 0;
+    let hashValue = 0;
     const secret = "synapse_challenge_2025";
     const combined = data + secret;
     for (let i = 0; i < combined.length; i++) {
       const char = combined.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash;
+      hashValue = hashValue * 5 - hashValue + char;
+      hashValue = hashValue % 2147483647; // Keep it positive 32-bit
     }
-    return Math.abs(hash).toString(36).substring(0, 8);
+    return Math.abs(hashValue).toString(36).substring(0, 8);
   }
 
   const expectedHash = generateUrlHash(challengeData);
@@ -44,8 +44,9 @@ export default async (request: Request, _context: Context) => {
   if (hash === expectedHash) {
     // Use the same domain as the current request for Supabase storage
     // This assumes your Supabase project is consistently configured
-    const baseStorageUrl = "https://dvihvgdmmqdixmuuttve.supabase.co/storage/v1/object/public/preview-images";
-    
+    const baseStorageUrl =
+      "https://dvihvgdmmqdixmuuttve.supabase.co/storage/v1/object/public/preview-images";
+
     // Try different possible locations for the preview image
     const possibleUrls = [
       `${baseStorageUrl}/anonymous/${expectedHash}/${expectedHash}.jpg`,
