@@ -151,7 +151,10 @@ export const uploadScreenshotToStorage = async (
     console.log("🔥 DEBUG: Rate limit passed, uploading to storage");
 
     // Upload to Supabase Storage
-    console.log("🔥 DEBUG: Starting Supabase storage upload, filePath:", filePath);
+    console.log(
+      "🔥 DEBUG: Starting Supabase storage upload, filePath:",
+      filePath,
+    );
     const { error } = await supabase.storage
       .from("preview-images")
       .upload(filePath, blob, {
@@ -217,7 +220,12 @@ const checkUploadRateLimit = async (
       .eq("user_id", userId)
       .gte("created_at", new Date(oneHourAgo).toISOString());
 
-    console.log("🔥 DEBUG: upload_rate_limits query completed, data:", data, "error:", error);
+    console.log(
+      "🔥 DEBUG: upload_rate_limits query completed, data:",
+      data,
+      "error:",
+      error,
+    );
 
     if (error) {
       console.error("Rate limit check error:", error);
@@ -227,7 +235,12 @@ const checkUploadRateLimit = async (
 
     const uploadCount = data?.length || 0;
     const maxUploads = 10; // 10 uploads per hour
-    console.log("🔥 DEBUG: uploadCount:", uploadCount, "maxUploads:", maxUploads);
+    console.log(
+      "🔥 DEBUG: uploadCount:",
+      uploadCount,
+      "maxUploads:",
+      maxUploads,
+    );
 
     if (uploadCount >= maxUploads) {
       // Find oldest upload to calculate retry time
