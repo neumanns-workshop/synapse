@@ -203,10 +203,17 @@ export class GameReportCompressor {
     else if (compressed.flags & GAME_FLAGS.GAVE_UP) status = "given_up";
 
     // Handle backward compatibility: old format used 'day', new format uses 'timestamp'
-    const timestamp =
-      (compressed.timestamp ?? (compressed as any).day)
-        ? TimestampCompressor.daysToTimestamp((compressed as any).day)
-        : Date.now(); // Fallback to current time if neither exists
+    let timestamp: number;
+    if (compressed.timestamp) {
+      // New format: use timestamp directly
+      timestamp = compressed.timestamp;
+    } else if ((compressed as any).day !== undefined) {
+      // Old format: convert day to timestamp
+      timestamp = TimestampCompressor.daysToTimestamp((compressed as any).day);
+    } else {
+      // Fallback: use current time if neither exists
+      timestamp = Date.now();
+    }
 
     return {
       id: `${timestamp}_${compressed.moves}`, // Generate ID from timestamp and moves
