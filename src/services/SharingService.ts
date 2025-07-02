@@ -114,10 +114,8 @@ export const uploadScreenshotToStorage = async (
 
     // Use hash-based filename for shorter URLs
     const fileName = `${challengeHash}.jpg`;
-    const filePath =
-      userId === "anonymous"
-        ? `anonymous/${challengeHash}/${fileName}`
-        : `${userId}/${challengeHash}/${fileName}`;
+    // Always use anonymous path for preview images since they're meant to be shared publicly
+    const filePath = `anonymous/${challengeHash}/${fileName}`;
 
     // Convert data URI to blob if needed
     let blob: Blob;

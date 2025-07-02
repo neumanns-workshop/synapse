@@ -58,13 +58,9 @@ export default async (request: Request, _context: Context) => {
     console.log("🔥 EDGE DEBUG: Trying to find preview image for hash:", hash);
     
     const possibleUrls = [
-      // Anonymous users
+      // All preview images are now stored in anonymous path
       `${baseStorageUrl}/anonymous/${hash}/${hash}.jpg`,
-      // Common user patterns - we'll add known user IDs as we encounter them
-      `${baseStorageUrl}/5ac6ead3-b47f-4480-b728-ad8385c27834/${hash}/${hash}.jpg`,
-      // Try with different file extensions
       `${baseStorageUrl}/anonymous/${hash}/${hash}.png`,
-      `${baseStorageUrl}/5ac6ead3-b47f-4480-b728-ad8385c27834/${hash}/${hash}.png`,
     ];
 
     for (const testUrl of possibleUrls) {
