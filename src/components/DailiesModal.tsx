@@ -128,16 +128,26 @@ const DailiesModal = () => {
 
       // Strategy 3: Match by start/target words and date (less reliable but covers older games)
       if (!challengeGameReport) {
-        challengeGameReport = gameHistory.find(
-          (report) =>
-            report.startWord === challenge.startWord &&
-            report.targetWord === challenge.targetWord &&
-            // More flexible date matching - check multiple date formats
-            (new Date(report.timestamp).toDateString() ===
-              new Date(challenge.date).toDateString() ||
-              new Date(report.timestamp).toISOString().split("T")[0] ===
-                challenge.date),
-        );
+        challengeGameReport = gameHistory.find((report) => {
+          if (
+            report.startWord !== challenge.startWord ||
+            report.targetWord !== challenge.targetWord
+          ) {
+            return false;
+          }
+
+          // Convert game report timestamp to EST date string for comparison
+          const reportDate = new Date(report.timestamp);
+          const estFormatter = new Intl.DateTimeFormat("en-CA", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            timeZone: "America/New_York",
+          });
+          const reportDateEST = estFormatter.format(reportDate);
+
+          return reportDateEST === challenge.date;
+        });
       }
 
       // If we found a game report, show it in the modal
