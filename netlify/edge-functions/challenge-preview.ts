@@ -137,10 +137,10 @@ export default async (request: Request, context: Context) => {
           // Screenshots are JPG, fallback og-image is PNG
           imageType = testUrl.endsWith(".png") ? "image/png" : "image/jpeg";
 
-          // Use approximate game screenshot dimensions - these are wide landscape images
-          // Based on typical Synapse game interface screenshots, accounting for slight variations
-          imageWidth = 660;
-          imageHeight = 250;
+          // Use Facebook-friendly aspect ratio for testing (1.91:1)
+          // Temporarily using 600x315 to see if extreme wide ratio was the issue
+          imageWidth = 600;
+          imageHeight = 315;
 
           console.log(
             "🔥 EDGE DEBUG: Using screenshot dimensions:",
