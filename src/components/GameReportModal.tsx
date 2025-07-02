@@ -198,8 +198,6 @@ const GameReportModal = () => {
               const uploadResult = await uploadScreenshotToStorage(
                 screenshotUri,
                 challengeId,
-                startWord,
-                targetWord,
               );
 
               if (uploadResult.error) {

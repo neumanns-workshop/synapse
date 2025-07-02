@@ -91,8 +91,6 @@ interface ShareDailyChallengeOptions {
 export const uploadScreenshotToStorage = async (
   screenshotUri: string,
   challengeId: string,
-  startWord?: string,
-  targetWord?: string,
 ): Promise<{ publicUrl: string | null; error?: string }> => {
   try {
     console.log("🔥 DEBUG: Upload starting", {
@@ -111,12 +109,7 @@ export const uploadScreenshotToStorage = async (
     const userId = currentUser?.id || "anonymous";
 
     // Generate challenge hash for consistent filename (unique per user)
-    // Must match the edge function's expectation: userId:challengeData
-    const challengeData =
-      startWord && targetWord
-        ? `${challengeId.toLowerCase()}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
-        : challengeId.toLowerCase();
-    const data = `${userId}:${challengeData}`;
+    const data = `${userId}:${challengeId.toLowerCase()}`;
     const challengeHash = generateUrlHash(data);
 
     // Use hash-based filename for shorter URLs
@@ -347,8 +340,6 @@ export const shareChallenge = async ({
         const uploadResult = await uploadScreenshotToStorage(
           screenshotUri,
           challengeId,
-          startWord,
-          targetWord,
         );
         if (uploadResult.error) {
           console.warn("Failed to upload screenshot:", uploadResult.error);
@@ -498,8 +489,6 @@ export const shareDailyChallenge = async ({
         const uploadResult = await uploadScreenshotToStorage(
           screenshotUri,
           challengeIdForUpload,
-          startWord,
-          targetWord,
         );
         if (uploadResult.error) {
           console.warn("Failed to upload screenshot:", uploadResult.error);
