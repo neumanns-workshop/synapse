@@ -18,6 +18,7 @@ export default async (request: Request, _context: Context) => {
   const date = url.searchParams.get("date");
   const challengeId = url.searchParams.get("id");
   const hash = url.searchParams.get("hash");
+  const userId = url.searchParams.get("uid") || "anonymous";
 
   console.log("🔥 EDGE DEBUG: Preview request parameters:", {
     startWord,
@@ -25,9 +26,10 @@ export default async (request: Request, _context: Context) => {
     type,
     hash,
     challengeId,
+    userId,
   });
 
-  // Generate challenge hash for preview image lookup
+  // Generate challenge hash for preview image lookup (must match SharingService.ts)
   const challengeData = challengeId
     ? `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
     : `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
@@ -45,7 +47,9 @@ export default async (request: Request, _context: Context) => {
     return Math.abs(hashValue).toString(36).substring(0, 8);
   }
 
-  const expectedHash = generateUrlHash(challengeData);
+  // Generate hash that includes userId (matches upload logic)
+  const userSpecificData = `${userId}:${challengeData}`;
+  const expectedHash = generateUrlHash(userSpecificData);
   console.log(
     "🔥 EDGE DEBUG: Hash comparison - expected:",
     expectedHash,
@@ -63,9 +67,9 @@ export default async (request: Request, _context: Context) => {
     console.log("🔥 EDGE DEBUG: Trying to find preview image for hash:", hash);
 
     const possibleUrls = [
-      // All preview images are now stored in anonymous path
-      `${baseStorageUrl}/anonymous/${hash}/${hash}.jpg`,
-      `${baseStorageUrl}/anonymous/${hash}/${hash}.png`,
+      // Images are stored in user-specific paths
+      `${baseStorageUrl}/${userId}/${hash}/${hash}.jpg`,
+      `${baseStorageUrl}/${userId}/${hash}/${hash}.png`,
     ];
 
     for (const testUrl of possibleUrls) {

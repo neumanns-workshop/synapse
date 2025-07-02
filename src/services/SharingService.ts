@@ -104,18 +104,18 @@ export const uploadScreenshotToStorage = async (
     const supabaseService = SupabaseService.getInstance();
     const supabase = supabaseService.getSupabaseClient();
 
-    // Generate challenge hash for consistent filename
-    const data = challengeId.toLowerCase();
-    const challengeHash = generateUrlHash(data);
-
     // Get user info for rate limiting
     const currentUser = supabaseService.getUser();
     const userId = currentUser?.id || "anonymous";
 
+    // Generate challenge hash for consistent filename (unique per user)
+    const data = `${userId}:${challengeId.toLowerCase()}`;
+    const challengeHash = generateUrlHash(data);
+
     // Use hash-based filename for shorter URLs
     const fileName = `${challengeHash}.jpg`;
-    // Always use anonymous path for preview images since they're meant to be shared publicly
-    const filePath = `anonymous/${challengeHash}/${fileName}`;
+    // Store in user-specific path to prevent overwrites
+    const filePath = `${userId}/${challengeHash}/${fileName}`;
 
     // Convert data URI to blob if needed
     let blob: Blob;
@@ -811,6 +811,7 @@ export const generateSecureGameDeepLink = (
   theme?: string,
   challengeId?: string, // For daily challenges
   _previewImageUrl?: string, // For uploaded images (now unused - using hash lookup)
+  userId?: string, // For user-specific image lookup
 ): string => {
   // Generate security hash
   const data = challengeId
@@ -827,6 +828,7 @@ export const generateSecureGameDeepLink = (
 
   if (theme) params.set("theme", theme);
   if (challengeId) params.set("id", challengeId);
+  if (userId) params.set("uid", userId);
   // Note: No longer including preview parameter - using hash-based lookup instead
 
   // Use the app's scheme for deep linking

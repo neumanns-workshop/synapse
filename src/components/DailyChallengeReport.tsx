@@ -22,6 +22,7 @@ import {
   generateDailyChallengeTaunt,
   generateSecureGameDeepLink,
 } from "../services/SharingService";
+import { SupabaseService } from "../services/SupabaseService";
 import type { Achievement } from "../features/achievements";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type {
@@ -151,12 +152,19 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
         }
 
         // Fallback: Generate basic link without screenshot (original behavior)
+        // Get current user ID for image lookup
+        const supabaseService = SupabaseService.getInstance();
+        const currentUser = supabaseService.getUser();
+        const userId = currentUser?.id || "anonymous";
+
         const link = generateSecureGameDeepLink(
           "dailychallenge",
           challenge.startWord,
           challenge.targetWord,
           undefined, // no theme for daily challenges
           challenge.id, // challengeId
+          undefined, // no preview image URL in fallback
+          userId, // For user-specific image lookup
         );
 
         const taunt = generateDailyChallengeTaunt({

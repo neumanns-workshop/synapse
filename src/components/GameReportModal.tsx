@@ -26,6 +26,7 @@ import {
   captureGameScreen,
   uploadScreenshotToStorage,
 } from "../services/SharingService";
+import { SupabaseService } from "../services/SupabaseService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import AchievementDetailDialog from "./AchievementDetailDialog";
@@ -174,6 +175,11 @@ const GameReportModal = () => {
         let message: string;
         let previewImageUrl: string | undefined;
 
+        // Get current user ID for image lookup
+        const supabaseService = SupabaseService.getInstance();
+        const currentUser = supabaseService.getUser();
+        const userId = currentUser?.id || "anonymous";
+
         // Try to capture screenshot and upload it
         try {
           if (mainGraphRef?.current) {
@@ -227,6 +233,7 @@ const GameReportModal = () => {
             undefined, // no theme for daily challenges
             gameReportModalReport.dailyChallengeId, // challengeId
             previewImageUrl, // Now includes the uploaded screenshot URL!
+            userId, // For user-specific image lookup
           );
 
           const aiSteps = gameReportModalReport.aiPath
@@ -255,6 +262,7 @@ const GameReportModal = () => {
             undefined, // no theme
             undefined, // no challengeId for regular challenges
             previewImageUrl, // Now includes the uploaded screenshot URL!
+            userId, // For user-specific image lookup
           );
 
           message = generateChallengeMessage({
