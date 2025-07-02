@@ -201,24 +201,41 @@ export class GameFlowManager {
       // Fifth priority: Daily challenge if not completed (regardless of game history)
       const gameStore = useGameStore.getState();
       const todaysChallenge = gameStore.currentDailyChallenge;
-      const hasPlayedToday = gameStore.hasPlayedTodaysChallenge;
 
       Logger.debug(" Checking daily challenge priority:", {
         todaysChallenge: !!todaysChallenge,
-        hasPlayedToday,
         challengeId: todaysChallenge?.id,
         startWord: todaysChallenge?.startWord,
         targetWord: todaysChallenge?.targetWord,
       });
 
-      if (todaysChallenge && !hasPlayedToday) {
-        Logger.debug(" Starting today's daily challenge");
-        return {
-          action: "dailyChallenge",
-          challengeId: todaysChallenge.id,
-          startWord: todaysChallenge.startWord,
-          targetWord: todaysChallenge.targetWord,
-        };
+      if (todaysChallenge) {
+        // Check persistent storage FIRST to get the authoritative completion status
+        // This fixes the bug where users are taken to completed daily challenges after sync
+        const hasCompletedPersistent =
+          await dailyChallengesService.hasCompletedTodaysChallenge();
+        const hasPlayedToday = gameStore.hasPlayedTodaysChallenge;
+
+        Logger.debug(" Daily challenge completion check:", {
+          hasPlayedToday,
+          hasCompletedPersistent,
+          willAutoStart: !hasCompletedPersistent,
+        });
+
+        // Use persistent storage as the authoritative source
+        if (!hasCompletedPersistent) {
+          Logger.debug(" Starting today's daily challenge");
+          return {
+            action: "dailyChallenge",
+            challengeId: todaysChallenge.id,
+            startWord: todaysChallenge.startWord,
+            targetWord: todaysChallenge.targetWord,
+          };
+        } else {
+          Logger.debug(
+            " Daily challenge already completed, skipping auto-start",
+          );
+        }
       }
 
       // Sixth priority: Random game (respecting limits for non-premium users)
