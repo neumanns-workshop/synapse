@@ -183,8 +183,6 @@ export default async (request: Request, context: Context) => {
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="Can you solve this word challenge? Build semantic pathways in Synapse!" />
   <meta property="og:image" content="${ogImageUrl}" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="${appUrl.toString()}" />
   <meta property="og:site_name" content="Synapse" />
