@@ -150,17 +150,27 @@ export const uploadScreenshotToStorage = async (
 
     console.log("🔥 DEBUG: Rate limit passed, uploading to storage");
 
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage with timeout protection
     console.log(
       "🔥 DEBUG: Starting Supabase storage upload, filePath:",
       filePath,
     );
-    const { error } = await supabase.storage
+
+    const uploadPromise = supabase.storage
       .from("preview-images")
       .upload(filePath, blob, {
         cacheControl: "3600",
         upsert: true, // Replace existing file
       });
+
+    const uploadTimeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Storage upload timeout")), 15000),
+    );
+
+    const { error } = (await Promise.race([
+      uploadPromise,
+      uploadTimeoutPromise,
+    ])) as any;
 
     console.log("🔥 DEBUG: Supabase storage upload completed, error:", error);
     if (error) {
