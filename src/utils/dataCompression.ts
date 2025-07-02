@@ -131,7 +131,7 @@ const GAME_FLAGS = {
 } as const;
 
 export interface CompressedGameReport {
-  day: number; // Days since epoch (2 bytes)
+  timestamp: number; // Keep full timestamp precision - we show this to users anyway
   flags: number; // Packed booleans (1 byte)
   moves: number; // Move count (1 byte, max 255)
   accuracy: number; // Move accuracy 0-100 (1 byte)
@@ -154,7 +154,7 @@ export interface CompressedGameReport {
   backtrackEvents?: BacktrackReportEntry[]; // Backtracking history
   earnedAchievements?: Achievement[]; // Achievements earned in this game
   potentialRarestMoves?: PotentialRarestMove[]; // Rare move tracking data
-  startTime?: number; // Game start timestamp (compressed to days)
+  startTime?: number; // Game start timestamp - keep full precision
 }
 
 export class GameReportCompressor {
@@ -168,7 +168,7 @@ export class GameReportCompressor {
     if (report.isDailyChallenge) flags |= GAME_FLAGS.IS_DAILY;
 
     return {
-      day: TimestampCompressor.timestampToDays(report.timestamp || Date.now()),
+      timestamp: report.timestamp || Date.now(),
       flags,
       moves: Math.min(report.totalMoves || 0, 255), // Cap at 255
       accuracy: Math.round(Math.min(report.moveAccuracy || 0, 100)), // Round to integer
@@ -192,9 +192,7 @@ export class GameReportCompressor {
       backtrackEvents: report.backtrackEvents,
       earnedAchievements: report.earnedAchievements,
       potentialRarestMoves: report.potentialRarestMoves,
-      startTime: report.startTime
-        ? TimestampCompressor.timestampToDays(report.startTime)
-        : undefined,
+      startTime: report.startTime,
     };
   }
 
@@ -205,8 +203,8 @@ export class GameReportCompressor {
     else if (compressed.flags & GAME_FLAGS.GAVE_UP) status = "given_up";
 
     return {
-      id: `${compressed.day}_${compressed.moves}`, // Generate ID from compressed data
-      timestamp: TimestampCompressor.daysToTimestamp(compressed.day),
+      id: `${compressed.timestamp}_${compressed.moves}`, // Generate ID from timestamp and moves
+      timestamp: compressed.timestamp,
       startWord: compressed.startWord || "",
       targetWord: compressed.endWord || "", // Use targetWord to match interface
       playerPath: compressed.path || [], // Use playerPath to match interface
@@ -232,9 +230,7 @@ export class GameReportCompressor {
       backtrackEvents: compressed.backtrackEvents,
       earnedAchievements: compressed.earnedAchievements || [],
       potentialRarestMoves: compressed.potentialRarestMoves,
-      startTime: compressed.startTime
-        ? TimestampCompressor.daysToTimestamp(compressed.startTime)
-        : undefined,
+      startTime: compressed.startTime,
     };
   }
 }
