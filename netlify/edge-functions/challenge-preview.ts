@@ -6,10 +6,16 @@ interface Context {
 export default async (request: Request, _context: Context) => {
   const url = new URL(request.url);
 
+  console.log("🔥 EDGE DEBUG: Function called with URL:", url.href);
+  console.log("🔥 EDGE DEBUG: Pathname:", url.pathname);
+
   // Only handle challenge URLs
   if (!url.pathname.includes("/challenge")) {
+    console.log("🔥 EDGE DEBUG: Not a challenge URL, returning undefined");
     return;
   }
+
+  console.log("🔥 EDGE DEBUG: This IS a challenge URL, proceeding...");
 
   // Get challenge parameters
   const startWord = url.searchParams.get("start") || "word";
