@@ -212,13 +212,24 @@ const checkUploadRateLimit = async (
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
     console.log("🔥 DEBUG: oneHourAgo timestamp:", oneHourAgo);
 
-    // Count uploads in last hour
+    // Count uploads in last hour with timeout protection
     console.log("🔥 DEBUG: About to query upload_rate_limits table");
-    const { data, error } = await supabase
+
+    // Add timeout to prevent hanging queries
+    const queryPromise = supabase
       .from("upload_rate_limits")
       .select("*")
       .eq("user_id", userId)
       .gte("created_at", new Date(oneHourAgo).toISOString());
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Rate limit query timeout")), 10000),
+    );
+
+    const { data, error } = (await Promise.race([
+      queryPromise,
+      timeoutPromise,
+    ])) as any;
 
     console.log(
       "🔥 DEBUG: upload_rate_limits query completed, data:",

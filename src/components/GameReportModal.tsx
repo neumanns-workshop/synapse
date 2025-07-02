@@ -278,7 +278,9 @@ const GameReportModal = () => {
         setChallengeLink(link);
         setChallengeMessage(message);
         setChallengeDialogVisible(true);
-        setIsGeneratingChallenge(false);
+
+        // Keep generating flag set to prevent concurrent calls
+        // It will be reset when dialog is dismissed
         return;
       }
 
