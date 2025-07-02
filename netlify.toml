@@ -21,7 +21,14 @@
   command = "npm run build:web"
   publish = "web-build"
 
-# SPA redirect - handle client-side routing
+# Allow edge function to handle challenge URLs
+[[redirects]]
+  from = "/challenge*"
+  to = "/challenge*"
+  status = 200
+  force = false
+
+# SPA redirect - handle client-side routing (after edge function)
 [[redirects]]
   from = "/*"
   to = "/index.html"
