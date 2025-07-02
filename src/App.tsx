@@ -202,8 +202,41 @@ function AppContent() {
       // --- End of Payment Redirect Handling ---
 
       // If not a payment redirect, proceed with normal app initialization
-      const { entryType, challengeData } =
-        gameFlowManager.parseEntryUrl(entryUrl);
+      const parsedEntry = gameFlowManager.parseEntryUrl(entryUrl);
+
+      console.log("🎮 App: Parsed entry data:", parsedEntry);
+
+      // Convert parsed data to the format expected by determineGameFlow
+      let entryType: "landing" | "playerChallenge" | "dailyChallenge" =
+        "landing";
+      let challengeData: any;
+
+      if (parsedEntry && parsedEntry.isValid) {
+        if (parsedEntry.type === "challenge") {
+          entryType = "playerChallenge";
+          challengeData = {
+            startWord: parsedEntry.startWord,
+            targetWord: parsedEntry.targetWord,
+            isValid: true,
+          };
+        } else if (parsedEntry.type === "dailychallenge") {
+          entryType = "dailyChallenge";
+          challengeData = {
+            startWord: parsedEntry.startWord,
+            targetWord: parsedEntry.targetWord,
+            challengeId: parsedEntry.challengeId,
+            isValid: true,
+          };
+        }
+        console.log("🎮 App: Converted to flow format:", {
+          entryType,
+          challengeData,
+        });
+      } else {
+        console.log(
+          "🎮 App: No valid challenge data found, using landing flow",
+        );
+      }
 
       // Start data preloading in parallel with loadInitialData for better performance
       const [,] = await Promise.all([
@@ -288,9 +321,38 @@ function AppContent() {
       // --- End of Payment Redirect Handling for open app ---
 
       // If not a payment redirect, proceed with normal deep link handling
-      const { entryType, challengeData } = gameFlowManager.parseEntryUrl(
-        event.url,
-      );
+      const parsedEntry = gameFlowManager.parseEntryUrl(event.url);
+
+      console.log("🎮 App (deep link): Parsed entry data:", parsedEntry);
+
+      // Convert parsed data to the format expected by determineGameFlow
+      let entryType: "landing" | "playerChallenge" | "dailyChallenge" =
+        "landing";
+      let challengeData: any;
+
+      if (parsedEntry && parsedEntry.isValid) {
+        if (parsedEntry.type === "challenge") {
+          entryType = "playerChallenge";
+          challengeData = {
+            startWord: parsedEntry.startWord,
+            targetWord: parsedEntry.targetWord,
+            isValid: true,
+          };
+        } else if (parsedEntry.type === "dailychallenge") {
+          entryType = "dailyChallenge";
+          challengeData = {
+            startWord: parsedEntry.startWord,
+            targetWord: parsedEntry.targetWord,
+            challengeId: parsedEntry.challengeId,
+            isValid: true,
+          };
+        }
+        console.log("🎮 App (deep link): Converted to flow format:", {
+          entryType,
+          challengeData,
+        });
+      }
+
       const flowDecision = await gameFlowManager.determineGameFlow(
         entryType,
         challengeData,
