@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -90,6 +90,16 @@ const GameReportModal = () => {
   const setChallengeGraphMode = useGameStore(
     (state) => state.setPathDisplayMode,
   );
+
+  // Reset challenge dialog state when modal opens or game report changes
+  useEffect(() => {
+    if (gameReportModalVisible && gameReportModalReport) {
+      // Reset challenge dialog state for new game report
+      setChallengeDialogVisible(false);
+      setChallengeLink("");
+      setChallengeMessage("");
+    }
+  }, [gameReportModalVisible, gameReportModalReport]);
 
   // Function to prepare the challenge preview
   const prepareGraphPreview = () => {

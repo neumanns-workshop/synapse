@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -61,6 +61,16 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
   const [challengeLink, setChallengeLink] = useState("");
   const [challengeDialogVisible, setChallengeDialogVisible] = useState(false);
   const [tauntMessage, setTauntMessage] = useState("");
+
+  // Reset challenge dialog state when challenge or game report changes
+  useEffect(() => {
+    if (challenge || gameReport) {
+      // Reset challenge dialog state for new challenge/report
+      setChallengeDialogVisible(false);
+      setChallengeLink("");
+      setTauntMessage("");
+    }
+  }, [challenge, gameReport]);
 
   // Function to copy text to clipboard on web
   const copyToClipboard = async (text: string) => {

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -75,6 +75,16 @@ const ReportScreen = () => {
   const setChallengeGraphMode = useGameStore(
     (state) => state.setPathDisplayMode,
   );
+
+  // Reset challenge dialog state when game report changes
+  useEffect(() => {
+    if (gameReport) {
+      // Reset challenge dialog state for new game report
+      setChallengeDialogVisible(false);
+      setChallengeLink("");
+      setChallengeMessage("");
+    }
+  }, [gameReport]);
 
   // Function to prepare the challenge preview
   const prepareGraphPreview = () => {
