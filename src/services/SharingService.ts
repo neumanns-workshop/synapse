@@ -136,9 +136,12 @@ export const uploadScreenshotToStorage = async (
     }
 
     // Check upload rate limit
+    console.log("🔥 DEBUG: About to check rate limit for userId:", userId);
     const rateLimit = await checkUploadRateLimit(userId);
+    console.log("🔥 DEBUG: Rate limit check result:", rateLimit);
     if (!rateLimit.allowed) {
       const retryAfter = Math.ceil(rateLimit.retryAfter / 60000); // Convert to minutes
+      console.log("🔥 DEBUG: Rate limit exceeded, retryAfter:", retryAfter);
       return {
         publicUrl: null,
         error: `Upload rate limit exceeded. Try again in ${retryAfter} minutes.`,
@@ -148,6 +151,7 @@ export const uploadScreenshotToStorage = async (
     console.log("🔥 DEBUG: Rate limit passed, uploading to storage");
 
     // Upload to Supabase Storage
+    console.log("🔥 DEBUG: Starting Supabase storage upload, filePath:", filePath);
     const { error } = await supabase.storage
       .from("preview-images")
       .upload(filePath, blob, {
@@ -155,6 +159,7 @@ export const uploadScreenshotToStorage = async (
         upsert: true, // Replace existing file
       });
 
+    console.log("🔥 DEBUG: Supabase storage upload completed, error:", error);
     if (error) {
       console.error("🔥 DEBUG: Storage upload failed:", error);
       return { publicUrl: null, error: error.message };
@@ -197,17 +202,22 @@ const checkUploadRateLimit = async (
   retryAfter: number;
 }> => {
   try {
+    console.log("🔥 DEBUG: checkUploadRateLimit starting for userId:", userId);
     const supabaseService = SupabaseService.getInstance();
     const supabase = supabaseService.getSupabaseClient();
 
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    console.log("🔥 DEBUG: oneHourAgo timestamp:", oneHourAgo);
 
     // Count uploads in last hour
+    console.log("🔥 DEBUG: About to query upload_rate_limits table");
     const { data, error } = await supabase
       .from("upload_rate_limits")
       .select("*")
       .eq("user_id", userId)
       .gte("created_at", new Date(oneHourAgo).toISOString());
+
+    console.log("🔥 DEBUG: upload_rate_limits query completed, data:", data, "error:", error);
 
     if (error) {
       console.error("Rate limit check error:", error);
@@ -217,6 +227,7 @@ const checkUploadRateLimit = async (
 
     const uploadCount = data?.length || 0;
     const maxUploads = 10; // 10 uploads per hour
+    console.log("🔥 DEBUG: uploadCount:", uploadCount, "maxUploads:", maxUploads);
 
     if (uploadCount >= maxUploads) {
       // Find oldest upload to calculate retry time
@@ -231,9 +242,11 @@ const checkUploadRateLimit = async (
           Date.now()
         : 60 * 60 * 1000; // Default to 1 hour
 
+      console.log("🔥 DEBUG: Rate limit exceeded, retryAfter:", retryAfter);
       return { allowed: false, retryAfter: Math.max(0, retryAfter) };
     }
 
+    console.log("🔥 DEBUG: Rate limit check passed");
     return { allowed: true, retryAfter: 0 };
   } catch (error) {
     console.error("Rate limit check failed:", error);
