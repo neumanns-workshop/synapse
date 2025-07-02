@@ -164,7 +164,7 @@ export const uploadScreenshotToStorage = async (
       });
 
     const uploadTimeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Storage upload timeout")), 5000),
+      setTimeout(() => reject(new Error("Storage upload timeout")), 15000),
     );
 
     const { error } = (await Promise.race([
@@ -222,39 +222,38 @@ const checkUploadRateLimit = async (
     const oneHourAgo = Date.now() - 60 * 60 * 1000;
     console.log("🔥 DEBUG: oneHourAgo timestamp:", oneHourAgo);
 
-    // Count uploads in last hour with timeout protection
+    // Optimized query - just count instead of selecting all data
     console.log("🔥 DEBUG: About to query upload_rate_limits table");
 
-    // Add timeout to prevent hanging queries
+    // Add timeout to prevent hanging queries (increased to 10 seconds)
     const queryPromise = supabase
       .from("upload_rate_limits")
-      .select("*")
+      .select("id, created_at", { count: "exact" })
       .eq("user_id", userId)
-      .gte("created_at", new Date(oneHourAgo).toISOString());
+      .gte("created_at", new Date(oneHourAgo).toISOString())
+      .order("created_at", { ascending: false })
+      .limit(10); // Only get the most recent 10 to check limit
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Rate limit query timeout")), 3000),
+      setTimeout(() => reject(new Error("Rate limit query timeout")), 10000),
     );
 
-    const { data, error } = (await Promise.race([
-      queryPromise,
-      timeoutPromise,
-    ])) as any;
+    const result = (await Promise.race([queryPromise, timeoutPromise])) as any;
 
     console.log(
-      "🔥 DEBUG: upload_rate_limits query completed, data:",
-      data,
+      "🔥 DEBUG: upload_rate_limits query completed, count:",
+      result?.count,
       "error:",
-      error,
+      result?.error,
     );
 
-    if (error) {
-      console.error("Rate limit check error:", error);
+    if (result?.error) {
+      console.error("Rate limit check error:", result.error);
       // If we can't check, allow it but log the error
       return { allowed: true, retryAfter: 0 };
     }
 
-    const uploadCount = data?.length || 0;
+    const uploadCount = result?.count || result?.data?.length || 0;
     const maxUploads = 10; // 10 uploads per hour
     console.log(
       "🔥 DEBUG: uploadCount:",
@@ -264,11 +263,11 @@ const checkUploadRateLimit = async (
     );
 
     if (uploadCount >= maxUploads) {
-      // Find oldest upload to calculate retry time
-      const oldestUpload = data?.sort(
-        (a, b) =>
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-      )[0];
+      // If we have data, find oldest upload to calculate retry time
+      const oldestUpload =
+        result?.data?.length > 0
+          ? result.data[result.data.length - 1] // Last item in desc order
+          : null;
 
       const retryAfter = oldestUpload
         ? new Date(oldestUpload.created_at).getTime() +
@@ -284,7 +283,7 @@ const checkUploadRateLimit = async (
     return { allowed: true, retryAfter: 0 };
   } catch (error) {
     console.error("Rate limit check failed:", error);
-    // If rate limit check fails, allow the upload
+    // If rate limit check fails, allow the upload but log the issue
     return { allowed: true, retryAfter: 0 };
   }
 };
@@ -318,11 +317,19 @@ const scheduleImageCleanup = async (
     const supabaseService = SupabaseService.getInstance();
     const supabase = supabaseService.getSupabaseClient();
 
-    await supabase.from("image_cleanup_queue").insert({
-      filename,
-      expires_at: new Date(expiresAt).toISOString(),
-      created_at: new Date().toISOString(),
-    });
+    // Use upsert to handle duplicate filenames gracefully
+    await supabase.from("image_cleanup_queue").upsert(
+      {
+        filename,
+        expires_at: new Date(expiresAt).toISOString(),
+        created_at: new Date().toISOString(),
+        processed: false,
+      },
+      {
+        onConflict: "filename",
+        ignoreDuplicates: false,
+      },
+    );
   } catch (error) {
     console.error("Error scheduling cleanup:", error);
     // Non-critical error, don't fail the upload
@@ -353,27 +360,32 @@ export const shareChallenge = async ({
     let previewImageUrl: string | null = null;
     if (includeScreenshot && screenshotRef && screenshotRef.current) {
       console.log("🎯 Starting screenshot capture and upload...");
-      const screenshotUri = await captureGameScreen(screenshotRef);
-      if (screenshotUri) {
-        console.log("🎯 Screenshot captured, uploading to storage...");
-        // Use the same format as URL generation for consistent hashing
-        const challengeId = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
-        const uploadResult = await uploadScreenshotToStorage(
-          screenshotUri,
-          challengeId,
-        );
-        if (uploadResult.error) {
-          console.warn("Failed to upload screenshot:", uploadResult.error);
-          // Continue without preview image
-        } else {
-          console.log(
-            "🎯 Screenshot uploaded successfully, URL:",
-            uploadResult.publicUrl,
+      try {
+        const screenshotUri = await captureGameScreen(screenshotRef);
+        if (screenshotUri) {
+          console.log("🎯 Screenshot captured, uploading to storage...");
+          // Use the same format as URL generation for consistent hashing
+          const challengeId = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+          const uploadResult = await uploadScreenshotToStorage(
+            screenshotUri,
+            challengeId,
           );
-          previewImageUrl = uploadResult.publicUrl;
+          if (uploadResult.error) {
+            console.warn("🎯 Failed to upload screenshot:", uploadResult.error);
+            // Continue without preview image - sharing will still work
+          } else {
+            console.log(
+              "🎯 Screenshot uploaded successfully, URL:",
+              uploadResult.publicUrl,
+            );
+            previewImageUrl = uploadResult.publicUrl;
+          }
+        } else {
+          console.warn("🎯 Screenshot capture failed");
         }
-      } else {
-        console.warn("🎯 Screenshot capture failed");
+      } catch (error) {
+        console.error("🎯 Screenshot process failed:", error);
+        // Don't fail the entire sharing flow if screenshot fails
       }
     } else {
       console.log("🎯 Skipping screenshot capture:", {
@@ -503,20 +515,29 @@ export const shareDailyChallenge = async ({
     // Upload screenshot to get public URL for social media previews
     let previewImageUrl: string | null = null;
     if (includeScreenshot && screenshotRef && screenshotRef.current) {
-      const screenshotUri = await captureGameScreen(screenshotRef);
-      if (screenshotUri) {
-        // Use the same format as URL generation for consistent hashing
-        const challengeIdForUpload = `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
-        const uploadResult = await uploadScreenshotToStorage(
-          screenshotUri,
-          challengeIdForUpload,
-        );
-        if (uploadResult.error) {
-          console.warn("Failed to upload screenshot:", uploadResult.error);
-          // Continue without preview image
-        } else {
-          previewImageUrl = uploadResult.publicUrl;
+      try {
+        const screenshotUri = await captureGameScreen(screenshotRef);
+        if (screenshotUri) {
+          // Use the same format as URL generation for consistent hashing
+          const challengeIdForUpload = `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+          const uploadResult = await uploadScreenshotToStorage(
+            screenshotUri,
+            challengeIdForUpload,
+          );
+          if (uploadResult.error) {
+            console.warn(
+              "🎯 Failed to upload daily challenge screenshot:",
+              uploadResult.error,
+            );
+            // Continue without preview image - sharing will still work
+          } else {
+            console.log("🎯 Daily challenge screenshot uploaded successfully");
+            previewImageUrl = uploadResult.publicUrl;
+          }
         }
+      } catch (error) {
+        console.error("🎯 Daily challenge screenshot process failed:", error);
+        // Don't fail the entire sharing flow if screenshot fails
       }
     }
 
