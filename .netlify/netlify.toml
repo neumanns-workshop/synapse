@@ -29,7 +29,12 @@ NPM_VERSION = "10"
 
 [functions]
 
+[functions.preview]
+timeout = 30.0
+
 [functions."*"]
+external_node_modules = ["puppeteer"]
+node_bundler = "esbuild"
 
 [[plugins]]
 origin = "ui"
@@ -200,6 +205,18 @@ force = false
 
 [[redirects]]
 from = "/contact"
+to = "/index.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/preview-image"
 to = "/index.html"
 status = 200.0
 force = false

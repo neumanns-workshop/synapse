@@ -14,6 +14,7 @@ interface GameReportDisplayProps {
   onAchievementPress?: (achievement: Achievement) => void;
   onChallengePress?: () => void;
   screenshotRef?: React.RefObject<View>;
+  isGeneratingChallenge?: boolean;
 }
 
 // Utility function to render text path with arrows (similar to what was in ReportScreen)
@@ -40,6 +41,7 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
   report,
   onAchievementPress,
   onChallengePress,
+  isGeneratingChallenge = false,
 }) => {
   const { customColors, colors } = useTheme() as ExtendedTheme;
   const setPathDisplayMode = useGameStore((state) => state.setPathDisplayMode);
@@ -98,20 +100,36 @@ const GameReportDisplay: React.FC<GameReportDisplayProps> = ({
               mode="outlined"
               icon={() => (
                 <CustomIcon
-                  source="share-variant"
+                  source={isGeneratingChallenge ? "loading" : "share-variant"}
                   size={20}
-                  color={colors.primary}
+                  color={
+                    isGeneratingChallenge
+                      ? colors.onSurfaceDisabled
+                      : colors.primary
+                  }
                 />
               )}
               onPress={() => {
-                if (onChallengePress) {
+                if (onChallengePress && !isGeneratingChallenge) {
                   onChallengePress();
                 }
               }}
-              style={[styles.challengeButton, { borderColor: colors.primary }]}
-              labelStyle={{ color: colors.primary }}
+              style={[
+                styles.challengeButton,
+                {
+                  borderColor: isGeneratingChallenge
+                    ? colors.onSurfaceDisabled
+                    : colors.primary,
+                },
+              ]}
+              labelStyle={{
+                color: isGeneratingChallenge
+                  ? colors.onSurfaceDisabled
+                  : colors.primary,
+              }}
+              disabled={isGeneratingChallenge}
             >
-              Challenge a Friend
+              {isGeneratingChallenge ? "Generating..." : "Challenge a Friend"}
             </Button>
           </View>
 

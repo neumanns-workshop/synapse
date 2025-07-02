@@ -5,6 +5,44 @@ All notable changes to Synapse will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-beta] - 2025-01-17
+
+### ✨ New Features
+
+- **Progressive Achievements**: All achievements can now be earned multiple times, building up your accomplishment history over time
+- **Perfect Game Recognition**: The game now celebrates when you find the optimal path, displaying "PERFECT game!" messages when sharing
+- **Enhanced Game Reports**: Move count is now prominently displayed in game summaries and sharing messages
+- **Visual Challenge Sharing**: Share challenges with rich previews including graph visualizations and QR codes for easy access
+
+### 🎯 Improvements
+
+- **Achievement Descriptions**: All achievements now include clear explanations of how to earn them
+- **Sharing Experience**: Challenge sharing now includes visual previews and removes cluttered emoji paths for cleaner messaging
+- **Code Quality**: Complete cleanup of development warnings and linting issues for improved stability
+
+### 🐛 Bug Fixes
+
+- **Report Screen Theme**: Fixed theme consistency issues when viewing game reports
+- **Graph Display**: Restored proper graph visualization in game history screens
+- **Contact Form**: Resolved hanging submission issues with improved token refresh
+- **Daily Challenge Navigation**: Fixed redirect logic when players have already completed the current challenge
+- **Challenge Link Dates**: Corrected timezone handling for accurate challenge timestamps
+- **Daily Challenge Sync**: Improved notification synchronization for daily challenges
+- **Calendar Results**: Fixed display of results appearing on wrong dates when completing previous challenges
+
+### 📅 Beta Extension Notice
+
+We're extending the beta period by one week to incorporate your valuable feedback. Coming soon:
+- **Content Updates**: Refined word list with improved connections
+- **Lab Mode**: Experiment with different nearest neighbor options (k=4, k=5) to customize game difficulty
+
+### 🧪 In Development
+
+- **Alternative Difficulty Modes**: Testing k=4 neighbor connections for more challenging gameplay
+- **Enhanced Word Curation**: Continuous improvements to word relationships and optimal paths
+
+---
+
 ## [1.0.0-beta] - 2025-01-10
 
 ### 🎮 Game Features

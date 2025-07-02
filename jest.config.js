@@ -28,4 +28,8 @@ module.exports = {
       "<rootDir>/__mocks__/fileMock.js",
     "\\.(css|less)$": "<rootDir>/__mocks__/styleMock.js",
   },
+  // Force Jest to exit even with open handles
+  forceExit: true,
+  // Detect open handles for debugging
+  detectOpenHandles: false,
 };

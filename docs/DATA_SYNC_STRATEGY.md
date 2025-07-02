@@ -2,101 +2,67 @@
 
 ## 📊 Data Architecture Overview
 
-### Local Storage (Everyone)
+### Local Storage (The Single Source of Truth)
 
-**All data is persisted locally via `UnifiedDataStore`** - this ensures the app works offline and provides instant performance.
+**All application data is persisted locally** using `AsyncStorage`, managed by the `UnifiedDataStore` singleton. This local-first approach ensures the app is fully functional offline and feels instantaneous to the user.
 
-```typescript
-interface UnifiedAppData {
-  user: UserProfile & Settings
-  stats: GameStatistics
-  gameHistory: GameReport[] (last 50 games)
-  achievements: AchievementProgress
-  collections: WordCollectionProgress
-  dailyChallenges: DailyChallengeData
-  news: NewsPreferences
-  currentGames: CurrentGameStates
-  meta: SyncMetadata
-}
-```
+The core data structure is defined by the `UnifiedAppData` interface in `src/services/UnifiedDataStore.ts`.
 
-### Cloud Sync (Premium Users Only)
+### Cloud Sync (For Authenticated Users)
 
-**Premium users get automatic cloud backup** via Supabase with two tables:
+**Authenticated users (both free and premium) have their data synced with Supabase.** This provides a seamless cross-device experience and serves as a backup. The sync process is designed to be resilient and efficient.
 
-#### 1. `user_profiles` Table (Queryable Profile Data)
+Data is stored in two main tables in Supabase:
 
-```sql
-user_profiles {
-  id: uuid (references auth.users)
-  email: string
-  created_at: timestamp
-  updated_at: timestamp
-  is_premium: boolean
-  platform_purchase_data: jsonb {
-    platform: 'ios' | 'android' | 'web' | 'stripe'
-    transactionId: string
-    purchaseDate: number
-    receiptData: string
-    validated: boolean
-    lastValidated: number
-  }
-  privacy_settings: jsonb {
-    allow_challenge_sharing: boolean
-    allow_stats_sharing: boolean
-    allow_leaderboards: boolean
-    data_collection: boolean
-    email_updates: boolean
-  }
-}
-```
+1.  **`user_profiles`**: Contains queryable, public-facing user metadata like email, premium status, and privacy settings.
+2.  **`user_data`**: Stores the complete `UnifiedAppData` object as a single, compressed JSONB blob. This table is not meant to be queried directly but serves as a full backup of the user's state.
 
-#### 2. `user_data` Table (Full Data Backup)
+## 🔄 The Sync System
 
-```sql
-user_data {
-  user_id: uuid (references auth.users)
-  data: jsonb (complete UnifiedAppData)
-  device_id: string
-  schema_version: integer
-  created_at: timestamp
-  updated_at: timestamp
-}
-```
+Our data synchronization is orchestrated by `ProgressiveSyncService.ts`. While the name is a holdover from a previous iteration, the current system is designed for efficiency and robustness by minimizing network requests.
 
-## 🔄 Sync Behavior
+### Sync Triggers
 
-### For All Users (Free & Premium)
+Data synchronization is automatically triggered in the following scenarios:
 
-- **Local persistence**: Everything saved locally
-- **Instant performance**: No network dependency
-- **Offline support**: Full functionality without internet
+1.  **On Authentication State Change**: When a user signs in, the app first syncs data from the cloud, merges it, and then syncs local changes back to the cloud.
+2.  **App Foregrounding**: When the app is brought from the background to the foreground, a two-way sync is initiated to ensure data is fresh.
 
-### For Premium Users Only
+Future enhancements could include periodic background syncs or triggers on critical events like completing a purchase.
 
-- **Automatic cloud backup**: Data synced on auth state changes
-- **Cross-device sync**: Restore progress on new devices
-- **Data security**: Encrypted backup in Supabase
+### Sync Process
 
-## 🚀 Sync Implementation
+The sync process is as follows:
 
-### When Sync Happens
+-   **From Cloud (Download)**:
+    1.  The app fetches the entire user data blob from Supabase in a single request (`getCloudData`).
+    2.  The fetched cloud data is then merged with the local data using a comprehensive set of merge rules defined in `SyncMergeService.ts`.
+    3.  The newly merged data is saved to the local `UnifiedDataStore`, becoming the new source of truth.
+    4.  Progress is reported to the UI during this process to provide user feedback.
 
-1. **On Login**: `syncLocalDataToCloud()` + `syncCloudDataToLocal()`
-2. **On Game Completion**: `syncLocalDataToCloud()` (if premium)
-3. **On Achievement Unlock**: `syncLocalDataToCloud()` (if premium)
-4. **On Purchase**: `syncPurchaseData()` + full sync
+-   **To Cloud (Upload)**:
+    1.  The app takes the current local data from `UnifiedDataStore`.
+    2.  The data is compressed.
+    3.  The compressed data is uploaded to Supabase in a single request, overwriting the previous cloud backup (`writeCloudData`).
 
-### Sync Methods
+### Merge Strategy & Conflict Resolution
 
-```typescript
-// Full bidirectional sync
-await supabaseService.syncLocalDataToCloud();
-await supabaseService.syncCloudDataToLocal();
+When syncing data, we employ an intelligent merge strategy, managed by `SyncMergeService.ts`, to prevent data loss.
 
-// Purchase-specific sync
-await supabaseService.syncPurchaseData(purchaseData);
-```
+-   **Newer Wins / Additive Merge**: For lists like game history, local and cloud records are combined and de-duplicated. For most other data, the most recently updated record (local or cloud) is kept.
+-   **Counters**: For progressive achievement counters, the highest value from local or cloud is retained.
+-   **Local In-Progress Games**: The user's current, in-progress game state is always preserved from the local device and is not overwritten by the cloud.
+
+## ⚙️ How It All Fits Together
+
+1.  The **`UnifiedDataStore`** acts as the single source of truth for the application's state on the device.
+2.  When a sync is triggered, the **`ProgressiveSyncService`** is called.
+3.  `ProgressiveSyncService` calls methods on **`SupabaseService`** to fetch (`getCloudData`) or push (`writeCloudData`) data.
+4.  For downloads, the **`SyncMergeService`** is used to intelligently combine the cloud data with the local data.
+5.  The final merged data is saved back to `UnifiedDataStore`.
+6.  The `ProgressiveSyncService` reports progress to the UI via components like `ProgressiveSyncIndicator`.
+
+This architecture provides a robust, resilient, and user-friendly data synchronization experience.
 
 ## 💰 In-App Purchase (IAP) Implementation
 

@@ -3,136 +3,171 @@ interface Context {
   next: () => Promise<Response>;
 }
 
-export default async (request: Request, context: Context) => {
+export default async (request: Request, _context: Context) => {
   const url = new URL(request.url);
 
-  // Only handle challenge paths with the new structure
-  if (!url.pathname.startsWith("/challenge")) {
-    return context.next();
+  // Only handle challenge URLs
+  if (!url.pathname.includes("/challenge")) {
+    return;
   }
 
-  try {
-    // Parse challenge parameters - support both old and new URL structures
-    const type =
-      url.searchParams.get("type") ||
-      (url.pathname.startsWith("/dailychallenge")
-        ? "dailychallenge"
-        : "challenge");
-    const startWord = url.searchParams.get("start");
-    const targetWord = url.searchParams.get("target");
-    const challengeId = url.searchParams.get("id"); // For daily challenges
-    const share = url.searchParams.get("share"); // Encoded path data
-    const quality = url.searchParams.get("quality");
-    const tsne = url.searchParams.get("tsne");
-    const theme = url.searchParams.get("theme");
-    const date = url.searchParams.get("date");
+  // Get challenge parameters
+  const startWord = url.searchParams.get("start") || "word";
+  const targetWord = url.searchParams.get("target") || "challenge";
+  const type = url.searchParams.get("type") || "challenge";
+  const date = url.searchParams.get("date");
+  const challengeId = url.searchParams.get("id");
+  const hash = url.searchParams.get("hash");
+  const userId = url.searchParams.get("uid") || "anonymous";
 
-    // Validate required parameters
-    if (!type || !startWord || !targetWord) {
-      return context.next();
+  console.log("🔥 EDGE DEBUG: Preview request parameters:", {
+    startWord,
+    targetWord,
+    type,
+    hash,
+    challengeId,
+    userId,
+  });
+
+  // Generate challenge hash for preview image lookup (must match SharingService.ts)
+  const challengeData = challengeId
+    ? `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
+    : `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+
+  // Simple hash function matching SharingService.ts
+  function generateUrlHash(data: string): string {
+    let hashValue = 0;
+    const secret = "synapse_challenge_2025";
+    const combined = data + secret;
+    for (let i = 0; i < combined.length; i++) {
+      const char = combined.charCodeAt(i);
+      hashValue = hashValue * 5 - hashValue + char;
+      hashValue = hashValue % 2147483647; // Keep it positive 32-bit
     }
+    return Math.abs(hashValue).toString(36).substring(0, 8);
+  }
 
-    // Check if this is a preview request (usually from social media crawlers)
-    const userAgent = request.headers.get("user-agent") || "";
-    const isBot =
-      userAgent.includes("bot") ||
-      userAgent.includes("crawl") ||
-      userAgent.includes("facebook") ||
-      userAgent.includes("twitter") ||
-      userAgent.includes("linkedin") ||
-      userAgent.includes("telegram") ||
-      userAgent.includes("discord") ||
-      userAgent.includes("whatsapp") ||
-      userAgent.includes("slack") ||
-      userAgent.includes("preview") ||
-      userAgent.includes("spider");
+  // Generate hash that includes userId (matches upload logic)
+  const userSpecificData = `${userId}:${challengeData}`;
+  const expectedHash = generateUrlHash(userSpecificData);
+  console.log(
+    "🔥 EDGE DEBUG: Hash comparison - expected:",
+    expectedHash,
+    "provided:",
+    hash,
+  );
 
-    if (!isBot) {
-      // Not a bot, let the main app handle it
-      return context.next();
+  // Try to find preview image using hash-based lookup
+  let validPreviewUrl: string | null = null;
+  if (hash === expectedHash) {
+    const baseStorageUrl =
+      "https://dvihvgdmmqdixmuuttve.supabase.co/storage/v1/object/public/preview-images";
+
+    // Try common paths where images might be stored
+    console.log("🔥 EDGE DEBUG: Trying to find preview image for hash:", hash);
+
+    const possibleUrls = [
+      // Images are stored in user-specific paths
+      `${baseStorageUrl}/${userId}/${hash}/${hash}.jpg`,
+      `${baseStorageUrl}/${userId}/${hash}/${hash}.png`,
+    ];
+
+    for (const testUrl of possibleUrls) {
+      console.log("🔥 EDGE DEBUG: Trying URL:", testUrl);
+      try {
+        const response = await fetch(testUrl, {
+          method: "HEAD",
+          // Add headers to handle potential CORS issues
+          headers: {
+            "User-Agent": "Netlify-Edge-Function",
+          },
+        });
+        if (response.ok) {
+          validPreviewUrl = testUrl;
+          console.log("🔥 EDGE DEBUG: Found image at:", testUrl);
+          break;
+        } else {
+          console.log(
+            "🔥 EDGE DEBUG: URL failed with status:",
+            response.status,
+            testUrl,
+          );
+        }
+      } catch (error) {
+        console.log("🔥 EDGE DEBUG: URL failed with error:", testUrl, error);
+      }
     }
+  } else {
+    console.log("🔥 EDGE DEBUG: Hash mismatch - skipping image lookup");
+  }
 
-    // Generate preview image URL for bots
-    const previewParams = new URLSearchParams();
-    previewParams.set("type", type);
-    previewParams.set("start", startWord);
-    previewParams.set("target", targetWord);
-    if (share) previewParams.set("share", share);
-    if (quality) previewParams.set("quality", quality);
-    if (tsne) previewParams.set("tsne", tsne);
-    if (theme) previewParams.set("theme", theme);
-    if (challengeId) previewParams.set("id", challengeId);
-    if (date) previewParams.set("date", date);
+  // Create title
+  const title =
+    type === "dailychallenge" && date
+      ? `Synapse Daily Challenge (${date}): ${startWord} → ${targetWord}`
+      : `Synapse Challenge: ${startWord} → ${targetWord}`;
 
-    const previewImageUrl = `${url.origin}/.netlify/functions/preview?${previewParams}`;
+  // Use valid preview image or fallback to default
+  const ogImageUrl = validPreviewUrl || "https://synapsegame.ai/og-image.png";
 
-    // Generate dynamic meta tags
-    const isDailyChallenge =
-      type === "dailychallenge" || url.pathname.startsWith("/dailychallenge");
-    const title = isDailyChallenge
-      ? `Daily Challenge ${date || challengeId} - ${startWord} → ${targetWord}`
-      : `Word Challenge - ${startWord} → ${targetWord}`;
+  console.log("🔥 EDGE DEBUG: Final preview image URL:", ogImageUrl);
 
-    const description = isDailyChallenge
-      ? `Try today's daily challenge! Connect "${startWord}" to "${targetWord}" in the fewest moves.`
-      : share
-        ? `Someone shared their path! Can you solve this Synapse word challenge?`
-        : `Can you connect "${startWord}" to "${targetWord}" in Synapse?`;
-
-    // Return standalone HTML for social media crawlers
-    const html = `<!DOCTYPE html>
-<html>
+  // Generate HTML with Open Graph meta tags
+  const html = `<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Favicon links for proper branding -->
+  <link rel="icon" type="image/x-icon" href="https://synapsegame.ai/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="https://synapsegame.ai/favicon.png" />
+  <link rel="icon" type="image/svg+xml" href="https://synapsegame.ai/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="https://synapsegame.ai/favicon.png" />
+  
+  <!-- Open Graph meta tags for social media -->
+  <meta property="og:title" content="${title}" />
+  <meta property="og:image" content="${ogImageUrl}" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="${url.toString()}" />
+  <meta property="og:site_name" content="Synapse" />
+  
+  <!-- Twitter Card meta tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="${title}" />
+  <meta name="twitter:image" content="${ogImageUrl}" />
+  
+  <!-- Standard meta tags -->
   <title>${title}</title>
-  <meta name="description" content="${description}">
   
-  <!-- Open Graph tags -->
-  <meta property="og:title" content="${title}">
-  <meta property="og:description" content="${description}">
-  <meta property="og:image" content="${previewImageUrl}">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="${title}">
-  <meta property="og:url" content="${request.url}">
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Synapse">
+  <!-- Redirect to app -->
+  <script>
+    // Immediate redirect to prevent showing this page
+    window.location.href = "${url.toString()}";
+  </script>
   
-  <!-- Twitter Card tags -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="${title}">
-  <meta name="twitter:description" content="${description}">
-  <meta name="twitter:image" content="${previewImageUrl}">
-  
-  <!-- Redirect to app after a short delay -->
-  <meta http-equiv="refresh" content="3;url=${request.url}">
-  <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      text-align: center; 
-      padding: 50px;
-      background: #6750A4;
-      color: white;
-    }
-  </style>
+  <!-- Fallback meta refresh -->
+  <meta http-equiv="refresh" content="0;url=${url.toString()}" />
 </head>
 <body>
-  <h1>🧠 Synapse</h1>
-  <p>Loading challenge...</p>
-  <p>Redirecting to the game...</p>
+  <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+    <h1>${title}</h1>
+    <p>Redirecting to Synapse...</p>
+    <a href="${url.toString()}" style="color: #6750A4; text-decoration: none; font-weight: bold;">
+      Click here if you're not redirected automatically
+    </a>
+  </div>
 </body>
 </html>`;
 
-    return new Response(html, {
-      headers: {
-        "Content-Type": "text/html",
-        "Cache-Control": "public, max-age=3600",
-      },
-    });
-  } catch (error) {
-    console.error("Edge function error:", error);
-    return context.next();
-  }
+  return new Response(html, {
+    headers: {
+      "Content-Type": "text/html",
+      "Cache-Control": "public, max-age=3600", // Cache for 1 hour
+    },
+  });
 };
 
 export const config = {

@@ -6,8 +6,7 @@ import { GameFlowManager, gameFlowManager } from "../GameFlowManager";
 jest.mock("../../stores/useGameStore");
 jest.mock("../DailyChallengesService");
 jest.mock("../SharingService", () => ({
-  parseGameDeepLink: jest.fn(),
-  parseDailyChallengeDeepLink: jest.fn(),
+  parseEnhancedGameLink: jest.fn(),
 }));
 jest.mock("../UnifiedDataStore", () => ({
   unifiedDataStore: {
@@ -58,6 +57,13 @@ describe("GameFlowManager", () => {
     // Mock daily challenges service
     mockedDailyChallengesService.isPremiumUser.mockResolvedValue(false);
     mockedDailyChallengesService.getTodaysChallenge.mockReturnValue(null);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.clearAllTimers();
+    // Reset singleton to prevent state leakage between tests
+    (GameFlowManager as any).instance = undefined;
   });
 
   describe("Singleton Pattern", () => {
@@ -463,60 +469,60 @@ describe("GameFlowManager", () => {
   describe("parseEntryUrl", () => {
     beforeEach(() => {
       const sharingService = require("../SharingService");
-      sharingService.parseGameDeepLink.mockReturnValue(null);
-      sharingService.parseDailyChallengeDeepLink.mockReturnValue(null);
+      sharingService.parseEnhancedGameLink.mockReturnValue(null);
     });
 
     it("should parse daily challenge URL", () => {
       const sharingService = require("../SharingService");
-      sharingService.parseDailyChallengeDeepLink.mockReturnValue({
-        challengeId: "daily-123",
+      sharingService.parseEnhancedGameLink.mockReturnValue({
+        type: "dailychallenge",
         startWord: "start",
         targetWord: "target",
-        isValid: true,
+        challengeId: "daily-123",
+        hash: "abc123",
       });
 
-      const result = manager.parseEntryUrl("https://example.com/daily/123");
+      const result = manager.parseEntryUrl(
+        "https://example.com/challenge?type=dailychallenge&id=daily-123",
+      );
 
       expect(result).toEqual({
-        entryType: "dailyChallenge",
-        challengeData: {
-          challengeId: "daily-123",
-          startWord: "start",
-          targetWord: "target",
-          isValid: true,
-        },
+        type: "dailychallenge",
+        startWord: "start",
+        targetWord: "target",
+        challengeId: "daily-123",
+        theme: undefined,
+        isValid: true,
       });
     });
 
     it("should parse player challenge URL", () => {
       const sharingService = require("../SharingService");
-      sharingService.parseGameDeepLink.mockReturnValue({
+      sharingService.parseEnhancedGameLink.mockReturnValue({
+        type: "challenge",
         startWord: "start",
         targetWord: "target",
-        isValid: true,
+        hash: "abc123",
       });
 
       const result = manager.parseEntryUrl(
-        "https://example.com/challenge?start=start&target=target",
+        "https://example.com/challenge?type=challenge&start=start&target=target",
       );
 
       expect(result).toEqual({
-        entryType: "playerChallenge",
-        challengeData: {
-          startWord: "start",
-          targetWord: "target",
-          isValid: true,
-        },
+        type: "challenge",
+        startWord: "start",
+        targetWord: "target",
+        challengeId: undefined,
+        theme: undefined,
+        isValid: true,
       });
     });
 
-    it("should default to landing for regular URLs", () => {
+    it("should return null for invalid URLs", () => {
       const result = manager.parseEntryUrl("https://example.com");
 
-      expect(result).toEqual({
-        entryType: "landing",
-      });
+      expect(result).toBeNull();
     });
   });
 

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -22,14 +22,11 @@ import {
   shareChallenge,
   generateChallengeMessage,
   generateDailyChallengeTaunt,
-  encodePathQuality,
-  encodeCoordinates,
-  generateEnhancedGameDeepLink,
-  generateUrlHash,
+  generateSecureGameDeepLink,
+  captureGameScreen,
+  uploadScreenshotToStorage,
 } from "../services/SharingService";
-
-// Import t-SNE coordinates for enhanced encoding
-import tsneCoordinates from "../../data/tsne_coordinates.json";
+import { SupabaseService } from "../services/SupabaseService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import AchievementDetailDialog from "./AchievementDetailDialog";
@@ -45,11 +42,13 @@ const GameReportModal = () => {
   const { colors } = useTheme() as ExtendedTheme;
   const reportSectionRef = useRef(null);
   const graphPreviewRef = useRef(null);
+  const mainGraphRef = useRef(null); // Add ref for main graph that's always rendered
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [challengeLink, setChallengeLink] = useState("");
   const [challengeDialogVisible, setChallengeDialogVisible] = useState(false);
   const [challengeMessage, setChallengeMessage] = useState("");
+  const [isGeneratingChallenge, setIsGeneratingChallenge] = useState(false);
 
   // Get modal state from store
   const gameReportModalVisible = useGameStore(
@@ -94,6 +93,17 @@ const GameReportModal = () => {
     (state) => state.setPathDisplayMode,
   );
 
+  // Reset challenge dialog state when modal opens or game report changes
+  useEffect(() => {
+    if (gameReportModalVisible && gameReportModalReport) {
+      // Reset challenge dialog state for new game report
+      setChallengeDialogVisible(false);
+      setChallengeLink("");
+      setChallengeMessage("");
+      setIsGeneratingChallenge(false);
+    }
+  }, [gameReportModalVisible, gameReportModalReport]);
+
   // Function to prepare the challenge preview
   const prepareGraphPreview = () => {
     // Show only the player path, hide optimal and suggested paths
@@ -111,8 +121,7 @@ const GameReportModal = () => {
         await navigator.clipboard.writeText(text);
         setSnackbarMessage("Challenge copied to clipboard!");
         setSnackbarVisible(true);
-        // Close dialog after copy (optional)
-        setChallengeDialogVisible(false);
+        // Keep dialog open so users can copy multiple times
       } catch (error) {
         setSnackbarMessage("Failed to copy challenge");
         setSnackbarVisible(true);
@@ -122,61 +131,120 @@ const GameReportModal = () => {
 
   // Function to handle challenge sharing
   const handleChallengeShare = async () => {
+    console.log("🚀 handleChallengeShare called");
+
     if (!gameReportModalReport) {
+      console.log("🚀 No gameReportModalReport, returning early");
+      return;
+    }
+
+    // Prevent multiple simultaneous calls
+    if (isGeneratingChallenge) {
+      console.log("🚀 Already generating challenge, skipping");
       return;
     }
 
     try {
+      setIsGeneratingChallenge(true);
+
       const { startWord, targetWord, playerPath } = gameReportModalReport;
+      console.log("🚀 Challenge data:", {
+        startWord,
+        targetWord,
+        pathLength: playerPath.length - 1,
+      });
 
       const pathLength = playerPath.length - 1;
 
       // Prepare graph view for preview (player path only)
       prepareGraphPreview();
+      console.log("🚀 Graph preview prepared");
 
-      // For web, show the challenge link in a dialog
+      // Give graph time to update before screenshot
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // For web, show custom dialog (skip native sharing entirely)
       if (Platform.OS === "web") {
-        // Check if this is a daily challenge and generate appropriate link
+        console.log("🚀 Web platform detected - showing custom dialog");
+        // Skip native sharing and go straight to our custom dialog
+        // The shareChallenge functions trigger native sharing which we don't want
+
+        // Main web flow: Generate enhanced link with screenshot for custom dialog
         let link: string;
         let message: string;
+        let previewImageUrl: string | undefined;
+
+        // Get current user ID for image lookup
+        const supabaseService = SupabaseService.getInstance();
+        const currentUser = supabaseService.getUser();
+        const userId = currentUser?.id || "anonymous";
+
+        // Try to capture screenshot and upload it
+        try {
+          if (mainGraphRef?.current) {
+            console.log("🚀 Attempting screenshot capture of graph...");
+
+            const screenshotUri = await captureGameScreen(mainGraphRef);
+            if (screenshotUri) {
+              console.log("🚀 Screenshot captured successfully, uploading...");
+
+              // Use consistent format with URL generation
+              const challengeId =
+                gameReportModalReport.isDailyChallenge &&
+                gameReportModalReport.dailyChallengeId
+                  ? `${gameReportModalReport.dailyChallengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
+                  : `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+              const uploadResult = await uploadScreenshotToStorage(
+                screenshotUri,
+                challengeId,
+              );
+
+              if (uploadResult.error) {
+                console.warn(
+                  "🚀 Screenshot upload failed:",
+                  uploadResult.error,
+                );
+                // Show user-friendly error message
+                setSnackbarMessage(uploadResult.error);
+                setSnackbarVisible(true);
+              } else if (uploadResult.publicUrl) {
+                console.log(
+                  "🚀 Screenshot uploaded successfully!",
+                  uploadResult.publicUrl,
+                );
+                previewImageUrl = uploadResult.publicUrl;
+              }
+            } else {
+              console.warn("🚀 Screenshot capture returned null");
+            }
+          } else {
+            console.warn("🚀 No mainGraphRef available");
+          }
+        } catch (error) {
+          console.warn("🚀 Screenshot capture failed:", error);
+        }
 
         if (
           gameReportModalReport.isDailyChallenge &&
           gameReportModalReport.dailyChallengeId
         ) {
-          // Use separate encoding for clean URL structure
-          const quality = gameReportModalReport
-            ? encodePathQuality(gameReportModalReport)
-            : "";
-          const tsne = gameReportModalReport
-            ? encodeCoordinates(
-                gameReportModalReport,
-                tsneCoordinates as unknown as Record<string, [number, number]>,
-              )
-            : "";
-          const share = generateUrlHash(
-            `${gameReportModalReport.dailyChallengeId}:${startWord}:${targetWord}`,
-          );
-
-          link = generateEnhancedGameDeepLink(
+          link = generateSecureGameDeepLink(
             "dailychallenge",
             startWord,
             targetWord,
             undefined, // no theme for daily challenges
-            share,
-            quality,
-            tsne,
-            gameReportModalReport.dailyChallengeId, // date
+            gameReportModalReport.dailyChallengeId, // challengeId
+            previewImageUrl, // Now includes the uploaded screenshot URL!
+            userId, // For user-specific image lookup
           );
 
-          // Generate proper daily challenge taunt
           const aiSteps = gameReportModalReport.aiPath
             ? gameReportModalReport.aiPath.length - 1
             : gameReportModalReport.optimalPath.length - 1;
           const userSteps = gameReportModalReport.totalMoves;
           const userCompleted = gameReportModalReport.status === "won";
           const userGaveUp = gameReportModalReport.status === "given_up";
-          const challengeDate = gameReportModalReport.dailyChallengeId; // Use challenge ID as date for now
+          const challengeDate = gameReportModalReport.dailyChallengeId;
 
           message = generateDailyChallengeTaunt({
             startWord,
@@ -189,33 +257,21 @@ const GameReportModal = () => {
             optimalPathLength: gameReportModalReport.optimalPath.length - 1,
           });
         } else {
-          // Use separate encoding for clean URL structure
-          const quality = gameReportModalReport
-            ? encodePathQuality(gameReportModalReport)
-            : "";
-          const tsne = gameReportModalReport
-            ? encodeCoordinates(
-                gameReportModalReport,
-                tsneCoordinates as unknown as Record<string, [number, number]>,
-              )
-            : "";
-          const share = generateUrlHash(`${startWord}:${targetWord}`);
-
-          link = generateEnhancedGameDeepLink(
+          link = generateSecureGameDeepLink(
             "challenge",
             startWord,
             targetWord,
             undefined, // no theme
-            share,
-            quality,
-            tsne,
+            undefined, // no challengeId for regular challenges
+            previewImageUrl, // Now includes the uploaded screenshot URL!
+            userId, // For user-specific image lookup
           );
+
           message = generateChallengeMessage({
             startWord,
             targetWord,
             playerPath,
             steps: pathLength,
-            deepLink: link,
             gameStatus: gameReportModalReport.status,
             optimalPathLength: gameReportModalReport.optimalPath.length - 1,
           });
@@ -224,6 +280,9 @@ const GameReportModal = () => {
         setChallengeLink(link);
         setChallengeMessage(message);
         setChallengeDialogVisible(true);
+
+        // Keep generating flag set to prevent concurrent calls
+        // It will be reset when dialog is dismissed
         return;
       }
 
@@ -246,7 +305,17 @@ const GameReportModal = () => {
     } catch (error) {
       setSnackbarMessage("Error sharing challenge");
       setSnackbarVisible(true);
+    } finally {
+      setIsGeneratingChallenge(false);
     }
+  };
+
+  // Function to handle challenge dialog dismissal
+  const handleChallengeDialogDismiss = () => {
+    setChallengeDialogVisible(false);
+    setChallengeLink("");
+    setChallengeMessage("");
+    setIsGeneratingChallenge(false);
   };
 
   return (
@@ -274,7 +343,7 @@ const GameReportModal = () => {
           </View>
 
           <ScrollView style={styles.scrollView}>
-            <View style={styles.graphContainer}>
+            <View style={styles.graphContainer} ref={mainGraphRef}>
               {isLoading ? (
                 <View style={styles.loadingContainer}>
                   <Text>Loading...</Text>
@@ -307,6 +376,7 @@ const GameReportModal = () => {
                   onChallengePress={handleChallengeShare}
                   onAchievementPress={showAchievementDetail}
                   screenshotRef={reportSectionRef}
+                  isGeneratingChallenge={isGeneratingChallenge}
                 />
               </View>
             )}
@@ -316,7 +386,7 @@ const GameReportModal = () => {
           <Portal>
             <Dialog
               visible={challengeDialogVisible}
-              onDismiss={() => setChallengeDialogVisible(false)}
+              onDismiss={handleChallengeDialogDismiss}
               style={[styles.dialog, { backgroundColor: colors.surface }]}
             >
               <Dialog.Title style={{ color: colors.primary }}>
@@ -401,7 +471,7 @@ const GameReportModal = () => {
                   Copy Challenge
                 </Button>
                 <Button
-                  onPress={() => setChallengeDialogVisible(false)}
+                  onPress={handleChallengeDialogDismiss}
                   mode="outlined"
                   textColor={colors.primary}
                 >

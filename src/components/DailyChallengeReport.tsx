@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -20,14 +20,9 @@ import {
 import {
   shareDailyChallenge,
   generateDailyChallengeTaunt,
-  encodePathQuality,
-  encodeCoordinates,
-  generateEnhancedGameDeepLink,
-  generateUrlHash,
+  generateSecureGameDeepLink,
 } from "../services/SharingService";
-
-// Import t-SNE coordinates for enhanced encoding
-import tsneCoordinates from "../../data/tsne_coordinates.json";
+import { SupabaseService } from "../services/SupabaseService";
 import type { Achievement } from "../features/achievements";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import type {
@@ -67,6 +62,18 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
   const [challengeLink, setChallengeLink] = useState("");
   const [challengeDialogVisible, setChallengeDialogVisible] = useState(false);
   const [tauntMessage, setTauntMessage] = useState("");
+  const [isGeneratingChallenge, setIsGeneratingChallenge] = useState(false);
+
+  // Reset challenge dialog state when challenge or game report changes
+  useEffect(() => {
+    if (challenge || gameReport) {
+      // Reset challenge dialog state for new challenge/report
+      setChallengeDialogVisible(false);
+      setChallengeLink("");
+      setTauntMessage("");
+      setIsGeneratingChallenge(false);
+    }
+  }, [challenge, gameReport]);
 
   // Function to copy text to clipboard on web
   const copyToClipboard = async (text: string) => {
@@ -90,7 +97,15 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
       return;
     }
 
+    // Prevent multiple simultaneous calls
+    if (isGeneratingChallenge) {
+      console.log("🚀 Already generating daily challenge, skipping");
+      return;
+    }
+
     try {
+      setIsGeneratingChallenge(true);
+
       const aiSteps =
         challenge.aiSolution?.stepsTaken || challenge.optimalPathLength;
 
@@ -101,32 +116,57 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
         : progress?.completed === true && (progress?.playerMoves || 0) > 0;
       const userGaveUp = gameReport ? gameReport.status === "given_up" : false;
 
-      // For web, show the challenge link in a dialog
+      // For web, capture screenshot first, then show dialog with enhanced link
       if (Platform.OS === "web") {
-        // Use separate encoding for clean URL structure
-        const quality = gameReport ? encodePathQuality(gameReport) : "";
-        const tsne = gameReport
-          ? encodeCoordinates(
+        try {
+          // First, try to capture and upload screenshot for preview
+          if (graphPreviewRef?.current) {
+            // Use shareDailyChallenge to handle screenshot capture and upload
+            const success = await shareDailyChallenge({
+              challengeId: challenge.id,
+              startWord: challenge.startWord,
+              targetWord: challenge.targetWord,
+              aiSteps,
+              userSteps,
+              userCompleted,
+              userGaveUp,
+              challengeDate: challenge.date,
+              screenshotRef: graphPreviewRef,
+              includeScreenshot: true,
               gameReport,
-              tsneCoordinates as unknown as Record<string, [number, number]>,
-            )
-          : "";
-        const share = generateUrlHash(
-          `${challenge.id}:${challenge.startWord}:${challenge.targetWord}`,
-        );
+            });
 
-        const link = generateEnhancedGameDeepLink(
+            if (success) {
+              setSnackbarMessage("Daily challenge shared successfully!");
+              setSnackbarVisible(true);
+              return;
+            }
+          }
+
+          // If sharing failed or screenshot not available, fall back to basic dialog
+          console.warn(
+            "Web daily challenge sharing with screenshot failed, falling back to basic dialog",
+          );
+        } catch (error) {
+          console.warn("Web daily challenge screenshot sharing error:", error);
+        }
+
+        // Fallback: Generate basic link without screenshot (original behavior)
+        // Get current user ID for image lookup
+        const supabaseService = SupabaseService.getInstance();
+        const currentUser = supabaseService.getUser();
+        const userId = currentUser?.id || "anonymous";
+
+        const link = generateSecureGameDeepLink(
           "dailychallenge",
           challenge.startWord,
           challenge.targetWord,
           undefined, // no theme for daily challenges
-          share,
-          quality,
-          tsne,
-          challenge.id, // date
+          challenge.id, // challengeId
+          undefined, // no preview image URL in fallback
+          userId, // For user-specific image lookup
         );
 
-        // Generate the taunt message (same as native)
         const taunt = generateDailyChallengeTaunt({
           startWord: challenge.startWord,
           targetWord: challenge.targetWord,
@@ -141,6 +181,7 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
         setChallengeLink(link);
         setTauntMessage(taunt);
         setChallengeDialogVisible(true);
+        setIsGeneratingChallenge(false);
         return;
       }
 
@@ -167,7 +208,17 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
     } catch (error) {
       setSnackbarMessage("Error sharing daily challenge");
       setSnackbarVisible(true);
+    } finally {
+      setIsGeneratingChallenge(false);
     }
+  };
+
+  // Function to handle challenge dialog dismissal
+  const handleChallengeDialogDismiss = () => {
+    setChallengeDialogVisible(false);
+    setChallengeLink("");
+    setTauntMessage("");
+    setIsGeneratingChallenge(false);
   };
 
   // If we have a game report, show the exact same layout as game history
@@ -208,13 +259,14 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
           report={gameReport}
           onAchievementPress={onAchievementPress}
           onChallengePress={handleDailyChallengeShare}
+          isGeneratingChallenge={isGeneratingChallenge}
         />
 
         {/* Challenge link dialog */}
         <Portal>
           <Dialog
             visible={challengeDialogVisible}
-            onDismiss={() => setChallengeDialogVisible(false)}
+            onDismiss={handleChallengeDialogDismiss}
             style={[styles.dialog, { backgroundColor: colors.surface }]}
           >
             <Dialog.Title style={{ color: colors.primary }}>
@@ -295,7 +347,7 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
                 Copy Challenge
               </Button>
               <Button
-                onPress={() => setChallengeDialogVisible(false)}
+                onPress={handleChallengeDialogDismiss}
                 mode="text"
                 textColor={colors.primary}
               >
