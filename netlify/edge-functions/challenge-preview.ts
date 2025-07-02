@@ -104,6 +104,10 @@ export default async (request: Request, context: Context) => {
 
   // Try to find preview image using hash-based lookup
   let validPreviewUrl: string | null = null;
+  let imageWidth = 1024; // Default fallback dimensions
+  let imageHeight = 1024;
+  let imageType = "image/png"; // Default type for fallback og-image.png
+
   if (hash === expectedHash) {
     const baseStorageUrl =
       "https://dvihvgdmmqdixmuuttve.supabase.co/storage/v1/object/public/preview-images";
@@ -129,6 +133,24 @@ export default async (request: Request, context: Context) => {
         if (response.ok) {
           validPreviewUrl = testUrl;
           console.log("🔥 EDGE DEBUG: Found image at:", testUrl);
+
+          // Screenshots are JPG, fallback og-image is PNG
+          imageType = testUrl.endsWith(".png") ? "image/png" : "image/jpeg";
+
+          // Try to get image dimensions from content-length and assume standard screenshot aspect ratio
+          // Most mobile screenshots are roughly 9:16 or 10:16 aspect ratio
+          // We'll use conservative estimates: assume 390x844 (iPhone 14 screenshot size)
+          imageWidth = 390;
+          imageHeight = 844;
+
+          console.log(
+            "🔥 EDGE DEBUG: Using screenshot dimensions:",
+            imageWidth,
+            "x",
+            imageHeight,
+            "type:",
+            imageType,
+          );
           break;
         } else {
           console.log(
@@ -184,6 +206,9 @@ export default async (request: Request, context: Context) => {
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="Can you solve this word challenge? Build semantic pathways in Synapse!" />
   <meta property="og:image" content="${ogImageUrl}" />
+  <meta property="og:image:width" content="${imageWidth}" />
+  <meta property="og:image:height" content="${imageHeight}" />
+  <meta property="og:image:type" content="${imageType}" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="${appUrl.toString()}" />
   <meta property="og:site_name" content="Synapse" />
@@ -214,8 +239,9 @@ export default async (request: Request, context: Context) => {
 
   return new Response(html, {
     headers: {
-      "Content-Type": "text/html",
+      "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "public, max-age=3600", // Cache for 1 hour
+      Vary: "Accept-Encoding", // Netlify handles gzip/deflate automatically
     },
   });
 };
