@@ -24,12 +24,12 @@ export interface GameFlowState {
 export interface FlowDecision {
   action:
     | "tutorial"
-    | "news"
     | "dailyChallenge"
     | "playerChallenge"
     | "randomGame"
     | "upgradePrompt"
-    | "restoreGame";
+    | "restoreGame"
+    | "showMessage";
   challengeId?: string;
   startWord?: string;
   targetWord?: string;
@@ -123,18 +123,32 @@ export class GameFlowManager {
       },
     });
 
-    // Handle player challenge entry (highest priority - bypasses everything)
+    // Handle player challenge entry (high priority but validates history)
     if (
       entryPoint === "playerChallenge" &&
       challengeData?.startWord &&
       challengeData?.targetWord
     ) {
-      Logger.info("Starting validated player challenge");
+      // Check if this challenge has already been played
+      const hasPlayedBefore = await this.hasPlayedChallenge(
+        challengeData.startWord,
+        challengeData.targetWord,
+      );
+
+      if (hasPlayedBefore) {
+        Logger.info("Challenge already played, showing message");
+        return {
+          action: "showMessage",
+          message: `You've already played the challenge from "${challengeData.startWord}" to "${challengeData.targetWord}". Check your game history to see your previous attempt!`,
+        };
+      }
+
+      Logger.info("Starting new player challenge");
       return {
         action: "playerChallenge",
         startWord: challengeData.startWord,
         targetWord: challengeData.targetWord,
-        message: "Starting player challenge - bypassing other games",
+        message: "Starting new player challenge",
       };
     }
 
@@ -144,10 +158,11 @@ export class GameFlowManager {
         Logger.debug(" Daily challenge entry but showing tutorial first");
         return { action: "tutorial" };
       }
-      if (state.shouldShowNews) {
-        Logger.debug(" Daily challenge entry but showing news first");
-        return { action: "news" };
-      }
+      // News is no longer forced - handled via menu notifications
+      // if (state.shouldShowNews) {
+      //   Logger.debug(" Daily challenge entry but showing news first");
+      //   return { action: "news" };
+      // }
       Logger.debug(" Starting daily challenge from entry");
       return {
         action: "dailyChallenge",
@@ -165,11 +180,11 @@ export class GameFlowManager {
         return { action: "tutorial" };
       }
 
-      // Second priority: News cards if no game history
-      if (state.shouldShowNews) {
-        Logger.debug(" Showing news");
-        return { action: "news" };
-      }
+      // Second priority: News cards (deprecated - now handled via menu notifications)
+      // if (state.shouldShowNews) {
+      //   Logger.debug(" Showing news");
+      //   return { action: "news" };
+      // }
 
       // Third priority: Restore unfinished games
       if (state.hasUnfinishedGame) {
@@ -284,10 +299,7 @@ export class GameFlowManager {
         // Tutorial will be handled by TutorialContext
         break;
 
-      case "news":
-        Logger.debug(" Executing: news");
-        // News cards will be handled by NewsContext (to be implemented)
-        break;
+      // Note: "news" action removed - news is now handled via menu notifications
 
       case "playerChallenge":
         Logger.debug(" Executing: playerChallenge");
@@ -317,12 +329,19 @@ export class GameFlowManager {
 
       case "upgradePrompt":
         Logger.debug(" Executing: upgradePrompt");
-        // Show upgrade prompt (to be implemented in UI)
         gameStore.showUpgradePrompt(
           decision.message ||
             "You've reached your daily limit. Upgrade to a Galaxy Brain account for unlimited play!",
           "freeGamesLimited",
         );
+        break;
+
+      case "showMessage":
+        Logger.debug(" Executing: showMessage");
+        Logger.info(" Challenge info message:", decision.message);
+        // For now, just log to console. In a full implementation,
+        // you could show a toast, modal, or snackbar
+        console.log("ℹ️ Challenge Info:", decision.message);
         break;
     }
   }
@@ -389,12 +408,46 @@ export class GameFlowManager {
   }
 
   private async shouldShowNews(): Promise<boolean> {
-    // Implement news logic here
-    // For now, return false but this could check for:
-    // - New features to announce
-    // - Important updates
-    // - Seasonal content
+    // News is now handled through notifications in the menu, not forced on users
     return false;
+  }
+
+  /**
+   * Check if a specific player challenge (start/target word combination) has been played before
+   */
+  private async hasPlayedChallenge(
+    startWord: string,
+    targetWord: string,
+  ): Promise<boolean> {
+    try {
+      const history = await loadGameHistory();
+      // Filter for regular player challenges (not daily challenges)
+      const challengeHistory = history.filter(
+        (game) => !game.isDailyChallenge, // Regular challenges are NOT daily challenges
+      );
+
+      // Check if this exact start/target combination has been played
+      const hasPlayed = challengeHistory.some(
+        (game) =>
+          game.startWord?.toLowerCase() === startWord.toLowerCase() &&
+          game.targetWord?.toLowerCase() === targetWord.toLowerCase(),
+      );
+
+      Logger.debug("🎮 GameFlowManager: Challenge history check:", {
+        startWord,
+        targetWord,
+        hasPlayed,
+        totalChallenges: challengeHistory.length,
+      });
+
+      return hasPlayed;
+    } catch (error) {
+      Logger.debug(
+        "🎮 GameFlowManager: Error checking challenge history:",
+        error,
+      );
+      return false; // Default to allow playing if we can't check
+    }
   }
 }
 

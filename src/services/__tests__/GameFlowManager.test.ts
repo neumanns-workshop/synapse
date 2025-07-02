@@ -114,7 +114,7 @@ describe("GameFlowManager", () => {
         hasUnfinishedDailyChallenge: false,
         remainingFreeGames: 5,
         shouldShowTutorial: true,
-        shouldShowNews: false,
+        shouldShowNews: false, // News is now handled via menu notifications
       });
     });
 
@@ -228,7 +228,11 @@ describe("GameFlowManager", () => {
     });
 
     describe("Player Challenge Entry", () => {
-      it("should prioritize player challenge over everything", async () => {
+      it("should prioritize player challenge over everything when not already played", async () => {
+        // Arrange - Mock empty game history
+        const storageAdapter = require("../StorageAdapter");
+        storageAdapter.loadGameHistory.mockResolvedValue([]);
+
         const decision = await manager.determineGameFlow("playerChallenge", {
           startWord: "start",
           targetWord: "target",
@@ -239,7 +243,7 @@ describe("GameFlowManager", () => {
           action: "playerChallenge",
           startWord: "start",
           targetWord: "target",
-          message: "Starting player challenge - bypassing other games",
+          message: "Starting new player challenge",
         });
       });
 
@@ -250,6 +254,55 @@ describe("GameFlowManager", () => {
         });
 
         expect(decision.action).not.toBe("playerChallenge");
+      });
+
+      it("should show message for already played challenge", async () => {
+        // Arrange - Mock loadGameHistory to return a challenge with matching words
+        const storageAdapter = require("../StorageAdapter");
+        storageAdapter.loadGameHistory.mockResolvedValue([
+          {
+            id: "test-game-1",
+            startWord: "start",
+            targetWord: "target",
+            isDailyChallenge: false,
+            status: "won",
+            timestamp: Date.now(),
+          },
+        ]);
+
+        // Act
+        const decision = await manager.determineGameFlow("playerChallenge", {
+          startWord: "start",
+          targetWord: "target",
+          isValid: true,
+        });
+
+        // Assert
+        expect(decision).toEqual({
+          action: "showMessage",
+          message: `You've already played the challenge from "start" to "target". Check your game history to see your previous attempt!`,
+        });
+      });
+
+      it("should start challenge for new word combination", async () => {
+        // Arrange - Mock loadGameHistory to return empty history
+        const storageAdapter = require("../StorageAdapter");
+        storageAdapter.loadGameHistory.mockResolvedValue([]);
+
+        // Act
+        const decision = await manager.determineGameFlow("playerChallenge", {
+          startWord: "hello",
+          targetWord: "world",
+          isValid: true,
+        });
+
+        // Assert
+        expect(decision).toEqual({
+          action: "playerChallenge",
+          startWord: "hello",
+          targetWord: "world",
+          message: "Starting new player challenge",
+        });
       });
     });
 
@@ -289,7 +342,7 @@ describe("GameFlowManager", () => {
         expect(decision).toEqual({ action: "tutorial" });
       });
 
-      it("should show news first when needed", async () => {
+      it("should start daily challenge without forced news", async () => {
         jest.spyOn(manager, "analyzePlayerState").mockResolvedValue({
           isFirstTimeUser: false,
           hasGameHistory: false,
@@ -299,14 +352,21 @@ describe("GameFlowManager", () => {
           hasUnfinishedDailyChallenge: false,
           remainingFreeGames: 3,
           shouldShowTutorial: false,
-          shouldShowNews: true,
+          shouldShowNews: false, // News is no longer forced
         });
 
         const decision = await manager.determineGameFlow("dailyChallenge", {
           challengeId: "daily-123",
+          startWord: "start",
+          targetWord: "target",
         });
 
-        expect(decision).toEqual({ action: "news" });
+        expect(decision).toEqual({
+          action: "dailyChallenge",
+          challengeId: "daily-123",
+          startWord: "start",
+          targetWord: "target",
+        });
       });
     });
 
@@ -329,7 +389,7 @@ describe("GameFlowManager", () => {
         expect(decision).toEqual({ action: "tutorial" });
       });
 
-      it("should show news when needed", async () => {
+      it("should not show forced news (now handled via menu)", async () => {
         jest.spyOn(manager, "analyzePlayerState").mockResolvedValue({
           isFirstTimeUser: false,
           hasGameHistory: false,
@@ -339,12 +399,13 @@ describe("GameFlowManager", () => {
           hasUnfinishedDailyChallenge: false,
           remainingFreeGames: 3,
           shouldShowTutorial: false,
-          shouldShowNews: true,
+          shouldShowNews: false, // News is no longer forced
         });
 
         const decision = await manager.determineGameFlow("landing");
 
-        expect(decision).toEqual({ action: "news" });
+        // Should go to daily challenge or random game, not news
+        expect(decision.action).not.toBe("news");
       });
 
       it("should restore unfinished regular game", async () => {
@@ -544,10 +605,7 @@ describe("GameFlowManager", () => {
       // Tutorial execution is handled by TutorialContext, so no direct calls expected
     });
 
-    it("should execute news decision", async () => {
-      await manager.executeFlowDecision({ action: "news" });
-      // News execution is handled by NewsContext, so no direct calls expected
-    });
+    // Note: "news" action removed - news is now handled via menu notifications
 
     it("should execute player challenge decision", async () => {
       await manager.executeFlowDecision({
