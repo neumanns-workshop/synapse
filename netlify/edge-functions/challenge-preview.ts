@@ -3,13 +3,28 @@ interface Context {
   next: () => Promise<Response>;
 }
 
-export default async (request: Request, _context: Context) => {
+export default async (request: Request, context: Context) => {
   const url = new URL(request.url);
 
   // Only handle challenge URLs
   if (!url.pathname.includes("/challenge")) {
-    return;
+    return context.next();
   }
+
+  // Get user agent to detect social media crawlers
+  const userAgent = request.headers.get("user-agent") || "";
+  const isBot =
+    /bot|crawler|spider|facebook|twitter|linkedin|whatsapp|telegram|discord|slack/i.test(
+      userAgent,
+    );
+  const isPreflightRequest = request.headers.get("purpose") === "prefetch";
+
+  console.log("🔥 EDGE DEBUG: Request details:", {
+    userAgent,
+    isBot,
+    isPreflightRequest,
+    url: url.toString(),
+  });
 
   // Get challenge parameters
   const startWord = url.searchParams.get("start") || "word";
@@ -20,7 +35,7 @@ export default async (request: Request, _context: Context) => {
   const hash = url.searchParams.get("hash");
   const userId = url.searchParams.get("uid") || "anonymous";
 
-  console.log("🔥 EDGE DEBUG: Preview request parameters:", {
+  console.log("🔥 EDGE DEBUG: Challenge parameters:", {
     startWord,
     targetWord,
     type,
@@ -28,6 +43,36 @@ export default async (request: Request, _context: Context) => {
     challengeId,
     userId,
   });
+
+  // For real users (not bots), redirect to the main app with challenge data
+  if (!isBot && !isPreflightRequest) {
+    console.log("🔥 EDGE DEBUG: Real user detected, redirecting to app");
+
+    // Build the redirect URL to the main app
+    const redirectUrl = new URL("https://synapsegame.ai");
+
+    // Preserve all challenge parameters for the app to handle
+    if (startWord) redirectUrl.searchParams.set("start", startWord);
+    if (targetWord) redirectUrl.searchParams.set("target", targetWord);
+    if (type) redirectUrl.searchParams.set("type", type);
+    if (hash) redirectUrl.searchParams.set("hash", hash);
+    if (challengeId) redirectUrl.searchParams.set("id", challengeId);
+    if (userId) redirectUrl.searchParams.set("uid", userId);
+    if (date) redirectUrl.searchParams.set("date", date);
+
+    console.log("🔥 EDGE DEBUG: Redirecting to:", redirectUrl.toString());
+
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: redirectUrl.toString(),
+        "Cache-Control": "no-cache",
+      },
+    });
+  }
+
+  // For social media crawlers and bots, generate preview meta tags
+  console.log("🔥 EDGE DEBUG: Bot/crawler detected, generating meta tags");
 
   // Generate challenge hash for preview image lookup (must match SharingService.ts)
   const challengeData = challengeId
@@ -77,7 +122,6 @@ export default async (request: Request, _context: Context) => {
       try {
         const response = await fetch(testUrl, {
           method: "HEAD",
-          // Add headers to handle potential CORS issues
           headers: {
             "User-Agent": "Netlify-Edge-Function",
           },
@@ -112,7 +156,17 @@ export default async (request: Request, _context: Context) => {
 
   console.log("🔥 EDGE DEBUG: Final preview image URL:", ogImageUrl);
 
-  // Generate HTML with Open Graph meta tags
+  // Build the app URL for meta tags (what should be shared)
+  const appUrl = new URL("https://synapsegame.ai");
+  if (startWord) appUrl.searchParams.set("start", startWord);
+  if (targetWord) appUrl.searchParams.set("target", targetWord);
+  if (type) appUrl.searchParams.set("type", type);
+  if (hash) appUrl.searchParams.set("hash", hash);
+  if (challengeId) appUrl.searchParams.set("id", challengeId);
+  if (userId) appUrl.searchParams.set("uid", userId);
+  if (date) appUrl.searchParams.set("date", date);
+
+  // Generate HTML with Open Graph meta tags (NO REDIRECT for bots)
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -127,37 +181,34 @@ export default async (request: Request, _context: Context) => {
   
   <!-- Open Graph meta tags for social media -->
   <meta property="og:title" content="${title}" />
+  <meta property="og:description" content="Can you solve this word challenge? Build semantic pathways in Synapse!" />
   <meta property="og:image" content="${ogImageUrl}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="${url.toString()}" />
+  <meta property="og:url" content="${appUrl.toString()}" />
   <meta property="og:site_name" content="Synapse" />
   
   <!-- Twitter Card meta tags -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${title}" />
+  <meta name="twitter:description" content="Can you solve this word challenge? Build semantic pathways in Synapse!" />
   <meta name="twitter:image" content="${ogImageUrl}" />
   
   <!-- Standard meta tags -->
   <title>${title}</title>
-  
-  <!-- Redirect to app -->
-  <script>
-    // Immediate redirect to prevent showing this page
-    window.location.href = "${url.toString()}";
-  </script>
-  
-  <!-- Fallback meta refresh -->
-  <meta http-equiv="refresh" content="0;url=${url.toString()}" />
+  <meta name="description" content="Can you solve this word challenge? Build semantic pathways in Synapse!" />
 </head>
 <body>
   <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
     <h1>${title}</h1>
-    <p>Redirecting to Synapse...</p>
-    <a href="${url.toString()}" style="color: #6750A4; text-decoration: none; font-weight: bold;">
-      Click here if you're not redirected automatically
+    <p>Play this challenge on Synapse!</p>
+    <a href="${appUrl.toString()}" style="color: #6750A4; text-decoration: none; font-weight: bold; padding: 10px 20px; border: 2px solid #6750A4; border-radius: 8px; display: inline-block; margin-top: 20px;">
+      🧠 Play Challenge
     </a>
+    <p style="margin-top: 30px; color: #666; font-size: 14px;">
+      Build semantic pathways between words in this neural network word game.
+    </p>
   </div>
 </body>
 </html>`;
