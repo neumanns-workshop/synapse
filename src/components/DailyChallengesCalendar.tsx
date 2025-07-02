@@ -47,8 +47,16 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
         0,
       );
 
-      const startDate = firstDay.toISOString().split("T")[0];
-      const endDate = lastDay.toISOString().split("T")[0];
+      // Convert to EST timezone to match daily challenge system
+      const estFormatter = new Intl.DateTimeFormat("en-CA", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        timeZone: "America/New_York",
+      });
+
+      const startDate = estFormatter.format(firstDay);
+      const endDate = estFormatter.format(lastDay);
 
       const monthChallenges = dailyChallengesService.getChallengesInRange(
         startDate,
@@ -108,11 +116,21 @@ const DailyChallengesCalendar: React.FC<DailyChallengesCalendarProps> = ({
   };
 
   const getChallengeForDay = (day: number): DailyChallenge | null => {
-    // Create date string directly without timezone conversion to avoid date shifts
-    const year = currentMonth.getFullYear();
-    const month = String(currentMonth.getMonth() + 1).padStart(2, "0");
-    const dayStr = String(day).padStart(2, "0");
-    const dateString = `${year}-${month}-${dayStr}`;
+    // Create EST-based date string to match daily challenge system
+    const tempDate = new Date(
+      currentMonth.getFullYear(),
+      currentMonth.getMonth(),
+      day,
+    );
+
+    const estFormatter = new Intl.DateTimeFormat("en-CA", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      timeZone: "America/New_York",
+    });
+
+    const dateString = estFormatter.format(tempDate);
 
     return (
       challenges.find((challenge) => challenge.date === dateString) || null
