@@ -202,9 +202,15 @@ export class GameReportCompressor {
     if (compressed.flags & GAME_FLAGS.WON) status = "won";
     else if (compressed.flags & GAME_FLAGS.GAVE_UP) status = "given_up";
 
+    // Handle backward compatibility: old format used 'day', new format uses 'timestamp'
+    const timestamp =
+      (compressed.timestamp ?? (compressed as any).day)
+        ? TimestampCompressor.daysToTimestamp((compressed as any).day)
+        : Date.now(); // Fallback to current time if neither exists
+
     return {
-      id: `${compressed.timestamp}_${compressed.moves}`, // Generate ID from timestamp and moves
-      timestamp: compressed.timestamp,
+      id: `${timestamp}_${compressed.moves}`, // Generate ID from timestamp and moves
+      timestamp,
       startWord: compressed.startWord || "",
       targetWord: compressed.endWord || "", // Use targetWord to match interface
       playerPath: compressed.path || [], // Use playerPath to match interface
@@ -243,10 +249,30 @@ export class GameHistoryManager {
   private static readonly MAX_HISTORY_SIZE = 100;
 
   static limitHistory(history: GameReport[]): GameReport[] {
+    // Deduplicate games based on content similarity before limiting
+    const deduped = this.deduplicateGames(history);
+
     // Sort by timestamp (newest first) and take only the most recent
-    return history
+    return deduped
       .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
       .slice(0, this.MAX_HISTORY_SIZE);
+  }
+
+  private static deduplicateGames(history: GameReport[]): GameReport[] {
+    const gameMap = new Map<string, GameReport>();
+
+    for (const game of history) {
+      // Create a key based on game content to identify duplicates
+      const key = `${game.startWord}-${game.targetWord}-${game.totalMoves}-${game.status}`;
+
+      // If we haven't seen this game before, or this version has a better timestamp, keep it
+      const existing = gameMap.get(key);
+      if (!existing || (game.timestamp || 0) > (existing.timestamp || 0)) {
+        gameMap.set(key, game);
+      }
+    }
+
+    return Array.from(gameMap.values());
   }
 
   static compressHistory(history: GameReport[]): CompressedGameReport[] {
