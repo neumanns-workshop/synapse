@@ -311,7 +311,8 @@ export const shareChallenge = async ({
       const screenshotUri = await captureGameScreen(screenshotRef);
       if (screenshotUri) {
         console.log("🎯 Screenshot captured, uploading to storage...");
-        const challengeId = `${startWord}-${targetWord}`;
+        // Use the same format as URL generation for consistent hashing
+        const challengeId = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
         const uploadResult = await uploadScreenshotToStorage(
           screenshotUri,
           challengeId,
@@ -459,7 +460,8 @@ export const shareDailyChallenge = async ({
     if (includeScreenshot && screenshotRef && screenshotRef.current) {
       const screenshotUri = await captureGameScreen(screenshotRef);
       if (screenshotUri) {
-        const challengeIdForUpload = `daily-${challengeId}-${startWord}-${targetWord}`;
+        // Use the same format as URL generation for consistent hashing
+        const challengeIdForUpload = `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
         const uploadResult = await uploadScreenshotToStorage(
           screenshotUri,
           challengeIdForUpload,

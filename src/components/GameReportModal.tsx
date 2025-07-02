@@ -160,7 +160,12 @@ const GameReportModal = () => {
             if (screenshotUri) {
               console.log("🚀 Screenshot captured successfully, uploading...");
 
-              const challengeId = `${startWord}-${targetWord}`;
+              // Use consistent format with URL generation
+              const challengeId =
+                gameReportModalReport.isDailyChallenge &&
+                gameReportModalReport.dailyChallengeId
+                  ? `${gameReportModalReport.dailyChallengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
+                  : `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
               const uploadResult = await uploadScreenshotToStorage(
                 screenshotUri,
                 challengeId,
