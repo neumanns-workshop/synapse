@@ -204,6 +204,9 @@ const GameReportModal = () => {
                   "🚀 Screenshot upload failed:",
                   uploadResult.error,
                 );
+                // Show user-friendly error message
+                setSnackbarMessage(uploadResult.error);
+                setSnackbarVisible(true);
               } else if (uploadResult.publicUrl) {
                 console.log(
                   "🚀 Screenshot uploaded successfully!",
