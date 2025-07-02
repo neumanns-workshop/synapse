@@ -121,8 +121,7 @@ const GameReportModal = () => {
         await navigator.clipboard.writeText(text);
         setSnackbarMessage("Challenge copied to clipboard!");
         setSnackbarVisible(true);
-        // Close dialog after copy (optional)
-        setChallengeDialogVisible(false);
+        // Keep dialog open so users can copy multiple times
       } catch (error) {
         setSnackbarMessage("Failed to copy challenge");
         setSnackbarVisible(true);
