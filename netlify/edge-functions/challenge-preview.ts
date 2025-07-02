@@ -137,11 +137,10 @@ export default async (request: Request, context: Context) => {
           // Screenshots are JPG, fallback og-image is PNG
           imageType = testUrl.endsWith(".png") ? "image/png" : "image/jpeg";
 
-          // Try to get image dimensions from content-length and assume standard screenshot aspect ratio
-          // Most mobile screenshots are roughly 9:16 or 10:16 aspect ratio
-          // We'll use conservative estimates: assume 390x844 (iPhone 14 screenshot size)
-          imageWidth = 390;
-          imageHeight = 844;
+          // Use approximate game screenshot dimensions - these are wide landscape images
+          // Based on typical Synapse game interface screenshots, accounting for slight variations
+          imageWidth = 660;
+          imageHeight = 250;
 
           console.log(
             "🔥 EDGE DEBUG: Using screenshot dimensions:",
