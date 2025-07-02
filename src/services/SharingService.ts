@@ -86,12 +86,12 @@ interface ShareDailyChallengeOptions {
 }
 
 /**
- * Upload screenshot to Supabase Storage with spam protection
+ * Upload a screenshot to Supabase Storage for social media previews
  */
 export const uploadScreenshotToStorage = async (
   screenshotUri: string,
   challengeId: string,
-): Promise<{ publicUrl: string | null; error: string | null }> => {
+): Promise<{ publicUrl: string | null; error?: string }> => {
   try {
     console.log("🔥 DEBUG: Upload starting", {
       screenshotUriLength: screenshotUri.length,
@@ -104,12 +104,20 @@ export const uploadScreenshotToStorage = async (
     const supabaseService = SupabaseService.getInstance();
     const supabase = supabaseService.getSupabaseClient();
 
+    // Generate challenge hash for consistent filename
+    const data = challengeId.toLowerCase();
+    const challengeHash = generateUrlHash(data);
+    
     // Get user info for rate limiting
-    const user = supabaseService.getUser();
-    const userId = user?.id || "anonymous";
+    const currentUser = supabaseService.getUser();
+    const userId = currentUser?.id || "anonymous";
 
-    // Create consistent filename (replaces previous uploads)
-    const filename = `${userId}/${challengeId}/preview.jpg`;
+    // Use hash-based filename for shorter URLs
+    const timestamp = Date.now();
+    const fileName = `${challengeHash}.jpg`;
+    const filePath = userId === "anonymous" 
+      ? `anonymous/${challengeHash}/${fileName}`
+      : `${userId}/${challengeHash}/${fileName}`;
 
     // Convert data URI to blob if needed
     let blob: Blob;
@@ -144,7 +152,7 @@ export const uploadScreenshotToStorage = async (
     // Upload to Supabase Storage
     const { error } = await supabase.storage
       .from("preview-images")
-      .upload(filename, blob, {
+      .upload(filePath, blob, {
         cacheControl: "3600",
         upsert: true, // Replace existing file
       });
@@ -159,7 +167,7 @@ export const uploadScreenshotToStorage = async (
     // Get public URL
     const { data: publicUrlData } = supabase.storage
       .from("preview-images")
-      .getPublicUrl(filename);
+      .getPublicUrl(filePath);
 
     const publicUrl = publicUrlData.publicUrl;
     console.log("🔥 DEBUG: Public URL obtained:", publicUrl);
@@ -169,9 +177,9 @@ export const uploadScreenshotToStorage = async (
 
     // Schedule cleanup after 7 days
     const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
-    await scheduleImageCleanup(filename, expiresAt);
+    await scheduleImageCleanup(filePath, expiresAt);
 
-    return { publicUrl, error: null };
+    return { publicUrl, error: undefined };
   } catch (error) {
     console.error("🔥 DEBUG: Upload failed with error:", error);
     return {
@@ -774,7 +782,7 @@ export const generateSecureGameDeepLink = (
   targetWord: string,
   theme?: string,
   challengeId?: string, // For daily challenges
-  previewImageUrl?: string, // For uploaded images
+  previewImageUrl?: string, // For uploaded images (now unused - using hash lookup)
 ): string => {
   // Generate security hash
   const data = challengeId
@@ -782,7 +790,7 @@ export const generateSecureGameDeepLink = (
     : `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
   const hash = generateUrlHash(data);
 
-  // Build clean parameters
+  // Build clean parameters (no preview parameter for shorter URLs)
   const params = new URLSearchParams();
   params.set("type", type);
   params.set("start", startWord);
@@ -791,7 +799,7 @@ export const generateSecureGameDeepLink = (
 
   if (theme) params.set("theme", theme);
   if (challengeId) params.set("id", challengeId);
-  if (previewImageUrl) params.set("preview", previewImageUrl);
+  // Note: No longer including preview parameter - using hash-based lookup instead
 
   // Use the app's scheme for deep linking
   if (typeof window !== "undefined") {

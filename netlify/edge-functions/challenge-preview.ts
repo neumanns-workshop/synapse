@@ -16,19 +16,53 @@ export default async (request: Request, _context: Context) => {
   const targetWord = url.searchParams.get("target") || "challenge";
   const type = url.searchParams.get("type") || "challenge";
   const date = url.searchParams.get("date");
-  const previewImageUrl = url.searchParams.get("preview"); // Get uploaded preview image URL
+  const challengeId = url.searchParams.get("id");
+  const hash = url.searchParams.get("hash");
 
-  // Check if preview image is still available
+  // Generate challenge hash for preview image lookup
+  const challengeData = challengeId
+    ? `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
+    : `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+  
+  // Simple hash function matching SharingService.ts
+  function generateUrlHash(data: string): string {
+    let hash = 0;
+    const secret = "synapse_challenge_2025";
+    const combined = data + secret;
+    for (let i = 0; i < combined.length; i++) {
+      const char = combined.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash).toString(36).substring(0, 8);
+  }
+
+  const expectedHash = generateUrlHash(challengeData);
+
+  // Try to find preview image using hash-based lookup
   let validPreviewUrl: string | null = null;
-  if (previewImageUrl) {
-    try {
-      const response = await fetch(previewImageUrl, { method: "HEAD" });
-      if (response.ok) {
-        validPreviewUrl = previewImageUrl;
+  if (hash === expectedHash) {
+    // Use the same domain as the current request for Supabase storage
+    // This assumes your Supabase project is consistently configured
+    const baseStorageUrl = "https://dvihvgdmmqdixmuuttve.supabase.co/storage/v1/object/public/preview-images";
+    
+    // Try different possible locations for the preview image
+    const possibleUrls = [
+      `${baseStorageUrl}/anonymous/${expectedHash}/${expectedHash}.jpg`,
+      // Could add user-specific paths if we had user context in the URL
+    ];
+
+    for (const testUrl of possibleUrls) {
+      try {
+        const response = await fetch(testUrl, { method: "HEAD" });
+        if (response.ok) {
+          validPreviewUrl = testUrl;
+          break;
+        }
+      } catch (error) {
+        // Try next URL
+        continue;
       }
-    } catch (error) {
-      // Image no longer exists or network error, use fallback
-      console.log("Preview image not available:", previewImageUrl);
     }
   }
 
@@ -47,6 +81,12 @@ export default async (request: Request, _context: Context) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Favicon links for proper branding -->
+  <link rel="icon" type="image/x-icon" href="https://synapsegame.ai/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="https://synapsegame.ai/favicon.png" />
+  <link rel="icon" type="image/svg+xml" href="https://synapsegame.ai/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="https://synapsegame.ai/favicon.png" />
   
   <!-- Open Graph meta tags for social media -->
   <meta property="og:title" content="${title}" />
