@@ -19,6 +19,14 @@ export default async (request: Request, _context: Context) => {
   const challengeId = url.searchParams.get("id");
   const hash = url.searchParams.get("hash");
 
+  console.log("🔥 EDGE DEBUG: Preview request parameters:", {
+    startWord,
+    targetWord,
+    type,
+    hash,
+    challengeId
+  });
+
   // Generate challenge hash for preview image lookup
   const challengeData = challengeId
     ? `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
@@ -38,33 +46,50 @@ export default async (request: Request, _context: Context) => {
   }
 
   const expectedHash = generateUrlHash(challengeData);
+  console.log("🔥 EDGE DEBUG: Hash comparison - expected:", expectedHash, "provided:", hash);
 
   // Try to find preview image using hash-based lookup
   let validPreviewUrl: string | null = null;
   if (hash === expectedHash) {
-    // Use the same domain as the current request for Supabase storage
-    // This assumes your Supabase project is consistently configured
     const baseStorageUrl =
       "https://dvihvgdmmqdixmuuttve.supabase.co/storage/v1/object/public/preview-images";
 
-    // Try different possible locations for the preview image
+    // Try common paths where images might be stored
+    console.log("🔥 EDGE DEBUG: Trying to find preview image for hash:", hash);
+    
     const possibleUrls = [
-      `${baseStorageUrl}/anonymous/${expectedHash}/${expectedHash}.jpg`,
-      // Could add user-specific paths if we had user context in the URL
+      // Anonymous users
+      `${baseStorageUrl}/anonymous/${hash}/${hash}.jpg`,
+      // Common user patterns - we'll add known user IDs as we encounter them
+      `${baseStorageUrl}/5ac6ead3-b47f-4480-b728-ad8385c27834/${hash}/${hash}.jpg`,
+      // Try with different file extensions
+      `${baseStorageUrl}/anonymous/${hash}/${hash}.png`,
+      `${baseStorageUrl}/5ac6ead3-b47f-4480-b728-ad8385c27834/${hash}/${hash}.png`,
     ];
 
     for (const testUrl of possibleUrls) {
+      console.log("🔥 EDGE DEBUG: Trying URL:", testUrl);
       try {
-        const response = await fetch(testUrl, { method: "HEAD" });
+        const response = await fetch(testUrl, { 
+          method: "HEAD",
+          // Add headers to handle potential CORS issues
+          headers: {
+            'User-Agent': 'Netlify-Edge-Function'
+          }
+        });
         if (response.ok) {
           validPreviewUrl = testUrl;
+          console.log("🔥 EDGE DEBUG: Found image at:", testUrl);
           break;
+        } else {
+          console.log("🔥 EDGE DEBUG: URL failed with status:", response.status, testUrl);
         }
       } catch (error) {
-        // Try next URL
-        continue;
+        console.log("🔥 EDGE DEBUG: URL failed with error:", testUrl, error);
       }
     }
+  } else {
+    console.log("🔥 EDGE DEBUG: Hash mismatch - skipping image lookup");
   }
 
   // Create title
@@ -75,6 +100,8 @@ export default async (request: Request, _context: Context) => {
 
   // Use valid preview image or fallback to default
   const ogImageUrl = validPreviewUrl || "https://synapsegame.ai/og-image.png";
+  
+  console.log("🔥 EDGE DEBUG: Final preview image URL:", ogImageUrl);
 
   // Generate HTML with Open Graph meta tags
   const html = `<!DOCTYPE html>
