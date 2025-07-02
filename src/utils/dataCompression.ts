@@ -164,6 +164,7 @@ export class GameReportCompressor {
     // Pack status flags
     if (report.status === "won") flags |= GAME_FLAGS.WON;
     if (report.status === "given_up") flags |= GAME_FLAGS.GAVE_UP;
+    if (report.isChallenge) flags |= GAME_FLAGS.IS_CHALLENGE;
     if (report.isDailyChallenge) flags |= GAME_FLAGS.IS_DAILY;
 
     return {
@@ -212,6 +213,7 @@ export class GameReportCompressor {
       totalMoves: compressed.moves,
       moveAccuracy: compressed.accuracy,
       status,
+      isChallenge: !!(compressed.flags & GAME_FLAGS.IS_CHALLENGE),
       isDailyChallenge: !!(compressed.flags & GAME_FLAGS.IS_DAILY),
       // Restore preserved data instead of using empty defaults
       optimalPath: compressed.optimalPath || [],

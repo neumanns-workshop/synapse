@@ -96,14 +96,24 @@ export const recordEndedGame = async (
   isDailyChallenge = false,
 ): Promise<void> => {
   try {
-    // Ensure gameReport has an id and timestamp
+    // Generate a truly unique ID to prevent sync conflicts
+    const uniqueId =
+      gameReport.id ||
+      `game_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const timestamp = gameReport.timestamp || Date.now();
+
+    // Ensure gameReport has a unique id and timestamp
     const reportToSave = {
       ...gameReport,
-      id: gameReport.id || Date.now().toString(),
-      timestamp: gameReport.timestamp || Date.now(),
+      id: uniqueId,
+      timestamp: timestamp,
       isChallenge: isChallenge,
       isDailyChallenge: isDailyChallenge,
     };
+
+    console.log(
+      `🎮 Recording game: ${reportToSave.id} (${reportToSave.startWord} → ${reportToSave.targetWord})`,
+    );
 
     await unifiedDataStore.addGameToHistory(reportToSave);
     await unifiedDataStore.updateStatsOnGameEnd(reportToSave);

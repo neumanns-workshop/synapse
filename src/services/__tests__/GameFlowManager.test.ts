@@ -444,7 +444,7 @@ describe("GameFlowManager", () => {
         expect(decision).toEqual({ action: "restoreGame" });
       });
 
-      it("should start daily challenge when available", async () => {
+      it("should start daily challenge when available and not completed", async () => {
         (mockedUseGameStore as any).getState.mockReturnValue(
           createMockGameState({
             currentDailyChallenge: {
@@ -458,6 +458,11 @@ describe("GameFlowManager", () => {
           }),
         );
 
+        // Mock persistent storage showing challenge is NOT completed
+        mockedDailyChallengesService.hasCompletedTodaysChallenge.mockResolvedValue(
+          false,
+        );
+
         const decision = await manager.determineGameFlow("landing");
 
         expect(decision).toEqual({
@@ -466,6 +471,31 @@ describe("GameFlowManager", () => {
           startWord: "start",
           targetWord: "target",
         });
+      });
+
+      it("should skip daily challenge when completed in persistent storage", async () => {
+        (mockedUseGameStore as any).getState.mockReturnValue(
+          createMockGameState({
+            currentDailyChallenge: {
+              id: "daily-123",
+              date: "2024-01-01",
+              startWord: "start",
+              targetWord: "target",
+              optimalPathLength: 3,
+            },
+            hasPlayedTodaysChallenge: false, // Store state says not completed
+          }),
+        );
+
+        // Mock persistent storage showing challenge IS completed (authoritative)
+        mockedDailyChallengesService.hasCompletedTodaysChallenge.mockResolvedValue(
+          true,
+        );
+
+        const decision = await manager.determineGameFlow("landing");
+
+        // Should skip daily challenge and go to random game
+        expect(decision).toEqual({ action: "randomGame" });
       });
 
       it("should start random game for premium user", async () => {

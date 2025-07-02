@@ -1234,6 +1234,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         get().currentDailyChallenge?.id, // Add daily challenge ID
         get().aiPath, // Add AI path
         get().aiModel, // Add AI model
+        isChallenge, // Add challenge flag
       );
 
       const earnedAchievements = evaluateAchievements(report, "won");
@@ -1345,6 +1346,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       currentDailyChallenge?.id, // Add daily challenge ID
       get().aiPath,
       get().aiModel,
+      isChallenge, // Add challenge flag
     );
 
     const earnedAchievements = evaluateAchievements(report, "given_up");

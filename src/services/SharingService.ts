@@ -150,7 +150,7 @@ export const uploadScreenshotToStorage = async (
 
     console.log("🔥 DEBUG: Rate limit passed, uploading to storage");
 
-    // Upload to Supabase Storage with timeout protection
+    // Upload to Supabase Storage with aggressive timeout protection
     console.log(
       "🔥 DEBUG: Starting Supabase storage upload, filePath:",
       filePath,
@@ -163,8 +163,12 @@ export const uploadScreenshotToStorage = async (
         upsert: true, // Replace existing file
       });
 
+    // Upload timeout of 10 seconds should be sufficient now that rate limit is fast
     const uploadTimeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Storage upload timeout")), 15000),
+      setTimeout(
+        () => reject(new Error("Storage upload timeout (10s)")),
+        10000,
+      ),
     );
 
     const { error } = (await Promise.race([
@@ -175,12 +179,12 @@ export const uploadScreenshotToStorage = async (
     console.log("🔥 DEBUG: Supabase storage upload completed, error:", error);
     if (error) {
       console.error("🔥 DEBUG: Storage upload failed:", error);
-      return { publicUrl: null, error: error.message };
+      return { publicUrl: null, error: `Upload failed: ${error.message}` };
     }
 
     console.log("🔥 DEBUG: Storage upload succeeded, getting public URL");
 
-    // Get public URL
+    // Get public URL - this should be fast since it's just a URL generation
     const { data: publicUrlData } = supabase.storage
       .from("preview-images")
       .getPublicUrl(filePath);
@@ -188,12 +192,16 @@ export const uploadScreenshotToStorage = async (
     const publicUrl = publicUrlData.publicUrl;
     console.log("🔥 DEBUG: Public URL obtained:", publicUrl);
 
-    // Record the upload for rate limiting
-    await recordUpload(userId);
+    // Record the upload for rate limiting (fire and forget - don't wait)
+    recordUpload(userId).catch((err) =>
+      console.warn("🔥 DEBUG: Failed to record upload:", err),
+    );
 
-    // Schedule cleanup after 7 days
+    // Schedule cleanup after 7 days (fire and forget - don't wait)
     const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
-    await scheduleImageCleanup(filePath, expiresAt);
+    scheduleImageCleanup(filePath, expiresAt).catch((err) =>
+      console.warn("🔥 DEBUG: Failed to schedule cleanup:", err),
+    );
 
     return { publicUrl, error: undefined };
   } catch (error) {
@@ -219,63 +227,58 @@ const checkUploadRateLimit = async (
     const supabaseService = SupabaseService.getInstance();
     const supabase = supabaseService.getSupabaseClient();
 
-    const oneHourAgo = Date.now() - 60 * 60 * 1000;
-    console.log("🔥 DEBUG: oneHourAgo timestamp:", oneHourAgo);
+    console.log("🔥 DEBUG: Calling optimized database function");
 
-    // Optimized query - just count instead of selecting all data
-    console.log("🔥 DEBUG: About to query upload_rate_limits table");
+    // Use the optimized database function that bypasses RLS
+    const rpcPromise = supabase.rpc("check_upload_rate_limit", {
+      p_user_id: userId,
+      p_limit: 5,
+    });
 
-    // Add timeout to prevent hanging queries (increased to 10 seconds)
-    const queryPromise = supabase
-      .from("upload_rate_limits")
-      .select("id, created_at", { count: "exact" })
-      .eq("user_id", userId)
-      .gte("created_at", new Date(oneHourAgo).toISOString())
-      .order("created_at", { ascending: false })
-      .limit(10); // Only get the most recent 10 to check limit
-
+    // Add timeout but make it longer since the function should be fast
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Rate limit query timeout")), 10000),
+      setTimeout(
+        () => reject(new Error("Database function timeout (8s)")),
+        8000,
+      ),
     );
 
-    const result = (await Promise.race([queryPromise, timeoutPromise])) as any;
+    const { data, error } = (await Promise.race([
+      rpcPromise,
+      timeoutPromise,
+    ])) as any;
 
-    console.log(
-      "🔥 DEBUG: upload_rate_limits query completed, count:",
-      result?.count,
-      "error:",
-      result?.error,
-    );
+    console.log("🔥 DEBUG: Database function result:", { data, error });
 
-    if (result?.error) {
-      console.error("Rate limit check error:", result.error);
+    if (error) {
+      console.error("Rate limit check error:", error);
       // If we can't check, allow it but log the error
       return { allowed: true, retryAfter: 0 };
     }
 
-    const uploadCount = result?.count || result?.data?.length || 0;
-    const maxUploads = 10; // 10 uploads per hour
-    console.log(
-      "🔥 DEBUG: uploadCount:",
+    if (!data || data.length === 0) {
+      console.log("🔥 DEBUG: No data returned, allowing upload");
+      return { allowed: true, retryAfter: 0 };
+    }
+
+    const result = data[0];
+    const allowed = result.allowed;
+    const uploadCount = result.upload_count;
+
+    console.log("🔥 DEBUG: Function result:", {
       uploadCount,
-      "maxUploads:",
-      maxUploads,
-    );
+      allowed,
+      oldestUpload: result.oldest_upload,
+    });
 
-    if (uploadCount >= maxUploads) {
-      // If we have data, find oldest upload to calculate retry time
-      const oldestUpload =
-        result?.data?.length > 0
-          ? result.data[result.data.length - 1] // Last item in desc order
-          : null;
-
+    if (!allowed) {
+      console.log("🔥 DEBUG: Rate limit exceeded by database function");
+      // Calculate retry time based on oldest upload + 1 hour
+      const oldestUpload = result.oldest_upload;
       const retryAfter = oldestUpload
-        ? new Date(oldestUpload.created_at).getTime() +
-          60 * 60 * 1000 -
-          Date.now()
-        : 60 * 60 * 1000; // Default to 1 hour
+        ? new Date(oldestUpload).getTime() + 60 * 60 * 1000 - Date.now()
+        : 30 * 60 * 1000; // 30 minutes default
 
-      console.log("🔥 DEBUG: Rate limit exceeded, retryAfter:", retryAfter);
       return { allowed: false, retryAfter: Math.max(0, retryAfter) };
     }
 
@@ -283,8 +286,8 @@ const checkUploadRateLimit = async (
     return { allowed: true, retryAfter: 0 };
   } catch (error) {
     console.error("Rate limit check failed:", error);
-    // If rate limit check fails, allow the upload but log the issue
-    return { allowed: true, retryAfter: 0 };
+    // If rate limit check fails, DENY the upload to prevent abuse
+    return { allowed: false, retryAfter: 60 * 1000 }; // 1 minute retry
   }
 };
 
@@ -296,10 +299,17 @@ const recordUpload = async (userId: string): Promise<void> => {
     const supabaseService = SupabaseService.getInstance();
     const supabase = supabaseService.getSupabaseClient();
 
-    await supabase.from("upload_rate_limits").insert({
+    // Simple insert with timeout to prevent hanging
+    const insertPromise = supabase.from("upload_rate_limits").insert({
       user_id: userId,
       created_at: new Date().toISOString(),
     });
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Record upload timeout (3s)")), 3000),
+    );
+
+    await Promise.race([insertPromise, timeoutPromise]);
   } catch (error) {
     console.error("Error recording upload:", error);
     // Non-critical error, don't fail the upload
@@ -361,31 +371,52 @@ export const shareChallenge = async ({
     if (includeScreenshot && screenshotRef && screenshotRef.current) {
       console.log("🎯 Starting screenshot capture and upload...");
       try {
-        const screenshotUri = await captureGameScreen(screenshotRef);
-        if (screenshotUri) {
-          console.log("🎯 Screenshot captured, uploading to storage...");
-          // Use the same format as URL generation for consistent hashing
-          const challengeId = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
-          const uploadResult = await uploadScreenshotToStorage(
-            screenshotUri,
-            challengeId,
-          );
-          if (uploadResult.error) {
-            console.warn("🎯 Failed to upload screenshot:", uploadResult.error);
-            // Continue without preview image - sharing will still work
-          } else {
-            console.log(
-              "🎯 Screenshot uploaded successfully, URL:",
-              uploadResult.publicUrl,
+        // Wrap entire screenshot process in timeout to prevent hanging
+        const screenshotProcess = async () => {
+          const screenshotUri = await captureGameScreen(screenshotRef);
+          if (screenshotUri) {
+            console.log("🎯 Screenshot captured, uploading to storage...");
+            // Use the same format as URL generation for consistent hashing
+            const challengeId = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+            const uploadResult = await uploadScreenshotToStorage(
+              screenshotUri,
+              challengeId,
             );
-            previewImageUrl = uploadResult.publicUrl;
+            if (uploadResult.error) {
+              console.warn(
+                "🎯 Failed to upload screenshot:",
+                uploadResult.error,
+              );
+              return null;
+            } else {
+              console.log(
+                "🎯 Screenshot uploaded successfully, URL:",
+                uploadResult.publicUrl,
+              );
+              return uploadResult.publicUrl;
+            }
+          } else {
+            console.warn("🎯 Screenshot capture failed");
+            return null;
           }
-        } else {
-          console.warn("🎯 Screenshot capture failed");
-        }
+        };
+
+        // Maximum 10 seconds for entire screenshot process
+        const screenshotTimeout = new Promise<null>((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Screenshot process timeout (10s)")),
+            10000,
+          ),
+        );
+
+        previewImageUrl = await Promise.race([
+          screenshotProcess(),
+          screenshotTimeout,
+        ]);
       } catch (error) {
         console.error("🎯 Screenshot process failed:", error);
         // Don't fail the entire sharing flow if screenshot fails
+        previewImageUrl = null;
       }
     } else {
       console.log("🎯 Skipping screenshot capture:", {
