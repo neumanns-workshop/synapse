@@ -5,7 +5,7 @@ interface Context {
 
 export default async (request: Request, _context: Context) => {
   const url = new URL(request.url);
-  
+
   console.log("🔥 EDGE DEBUG: Function called with URL:", url.href);
   console.log("🔥 EDGE DEBUG: Pathname:", url.pathname);
 
@@ -14,7 +14,7 @@ export default async (request: Request, _context: Context) => {
     console.log("🔥 EDGE DEBUG: Not a challenge URL, returning undefined");
     return;
   }
-  
+
   console.log("🔥 EDGE DEBUG: This IS a challenge URL, proceeding...");
 
   // Get challenge parameters
