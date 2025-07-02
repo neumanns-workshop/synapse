@@ -61,6 +61,7 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
   const [challengeLink, setChallengeLink] = useState("");
   const [challengeDialogVisible, setChallengeDialogVisible] = useState(false);
   const [tauntMessage, setTauntMessage] = useState("");
+  const [isGeneratingChallenge, setIsGeneratingChallenge] = useState(false);
 
   // Reset challenge dialog state when challenge or game report changes
   useEffect(() => {
@@ -69,6 +70,7 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
       setChallengeDialogVisible(false);
       setChallengeLink("");
       setTauntMessage("");
+      setIsGeneratingChallenge(false);
     }
   }, [challenge, gameReport]);
 
@@ -94,7 +96,15 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
       return;
     }
 
+    // Prevent multiple simultaneous calls
+    if (isGeneratingChallenge) {
+      console.log("🚀 Already generating daily challenge, skipping");
+      return;
+    }
+
     try {
+      setIsGeneratingChallenge(true);
+
       const aiSteps =
         challenge.aiSolution?.stepsTaken || challenge.optimalPathLength;
 
@@ -163,6 +173,7 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
         setChallengeLink(link);
         setTauntMessage(taunt);
         setChallengeDialogVisible(true);
+        setIsGeneratingChallenge(false);
         return;
       }
 
@@ -189,7 +200,17 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
     } catch (error) {
       setSnackbarMessage("Error sharing daily challenge");
       setSnackbarVisible(true);
+    } finally {
+      setIsGeneratingChallenge(false);
     }
+  };
+
+  // Function to handle challenge dialog dismissal
+  const handleChallengeDialogDismiss = () => {
+    setChallengeDialogVisible(false);
+    setChallengeLink("");
+    setTauntMessage("");
+    setIsGeneratingChallenge(false);
   };
 
   // If we have a game report, show the exact same layout as game history
@@ -230,13 +251,14 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
           report={gameReport}
           onAchievementPress={onAchievementPress}
           onChallengePress={handleDailyChallengeShare}
+          isGeneratingChallenge={isGeneratingChallenge}
         />
 
         {/* Challenge link dialog */}
         <Portal>
           <Dialog
             visible={challengeDialogVisible}
-            onDismiss={() => setChallengeDialogVisible(false)}
+            onDismiss={handleChallengeDialogDismiss}
             style={[styles.dialog, { backgroundColor: colors.surface }]}
           >
             <Dialog.Title style={{ color: colors.primary }}>
@@ -317,7 +339,7 @@ const DailyChallengeReport: React.FC<DailyChallengeReportProps> = ({
                 Copy Challenge
               </Button>
               <Button
-                onPress={() => setChallengeDialogVisible(false)}
+                onPress={handleChallengeDialogDismiss}
                 mode="text"
                 textColor={colors.primary}
               >

@@ -47,6 +47,7 @@ const GameReportModal = () => {
   const [challengeLink, setChallengeLink] = useState("");
   const [challengeDialogVisible, setChallengeDialogVisible] = useState(false);
   const [challengeMessage, setChallengeMessage] = useState("");
+  const [isGeneratingChallenge, setIsGeneratingChallenge] = useState(false);
 
   // Get modal state from store
   const gameReportModalVisible = useGameStore(
@@ -98,6 +99,7 @@ const GameReportModal = () => {
       setChallengeDialogVisible(false);
       setChallengeLink("");
       setChallengeMessage("");
+      setIsGeneratingChallenge(false);
     }
   }, [gameReportModalVisible, gameReportModalReport]);
 
@@ -136,7 +138,15 @@ const GameReportModal = () => {
       return;
     }
 
+    // Prevent multiple simultaneous calls
+    if (isGeneratingChallenge) {
+      console.log("🚀 Already generating challenge, skipping");
+      return;
+    }
+
     try {
+      setIsGeneratingChallenge(true);
+
       const { startWord, targetWord, playerPath } = gameReportModalReport;
       console.log("🚀 Challenge data:", {
         startWord,
@@ -149,6 +159,9 @@ const GameReportModal = () => {
       // Prepare graph view for preview (player path only)
       prepareGraphPreview();
       console.log("🚀 Graph preview prepared");
+
+      // Give graph time to update before screenshot
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // For web, show custom dialog (skip native sharing entirely)
       if (Platform.OS === "web") {
@@ -257,6 +270,7 @@ const GameReportModal = () => {
         setChallengeLink(link);
         setChallengeMessage(message);
         setChallengeDialogVisible(true);
+        setIsGeneratingChallenge(false);
         return;
       }
 
@@ -279,7 +293,17 @@ const GameReportModal = () => {
     } catch (error) {
       setSnackbarMessage("Error sharing challenge");
       setSnackbarVisible(true);
+    } finally {
+      setIsGeneratingChallenge(false);
     }
+  };
+
+  // Function to handle challenge dialog dismissal
+  const handleChallengeDialogDismiss = () => {
+    setChallengeDialogVisible(false);
+    setChallengeLink("");
+    setChallengeMessage("");
+    setIsGeneratingChallenge(false);
   };
 
   return (
@@ -340,6 +364,7 @@ const GameReportModal = () => {
                   onChallengePress={handleChallengeShare}
                   onAchievementPress={showAchievementDetail}
                   screenshotRef={reportSectionRef}
+                  isGeneratingChallenge={isGeneratingChallenge}
                 />
               </View>
             )}
@@ -349,7 +374,7 @@ const GameReportModal = () => {
           <Portal>
             <Dialog
               visible={challengeDialogVisible}
-              onDismiss={() => setChallengeDialogVisible(false)}
+              onDismiss={handleChallengeDialogDismiss}
               style={[styles.dialog, { backgroundColor: colors.surface }]}
             >
               <Dialog.Title style={{ color: colors.primary }}>
@@ -434,7 +459,7 @@ const GameReportModal = () => {
                   Copy Challenge
                 </Button>
                 <Button
-                  onPress={() => setChallengeDialogVisible(false)}
+                  onPress={handleChallengeDialogDismiss}
                   mode="outlined"
                   textColor={colors.primary}
                 >
