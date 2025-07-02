@@ -1080,11 +1080,28 @@ export class SupabaseService {
 
   public async syncLocalDataToCloud() {
     try {
+      console.log("🔄 Starting sync to cloud...");
+
       const userId = this.currentAuthState.user?.id;
-      if (!userId) return;
+      if (!userId) {
+        throw new Error("Cannot sync to cloud: No authenticated user");
+      }
+
+      Logger.debug("Syncing local data to cloud for user:", userId);
 
       // Get local data (uncompressed for processing)
       const localData = await this.unifiedStore.exportData();
+
+      // Log current state before upload
+      console.log(
+        `📤 Uploading to cloud: ${localData.gameHistory.length} games in history`,
+      );
+      if (localData.gameHistory.length > 0) {
+        const latestGame = localData.gameHistory[0];
+        console.log(
+          `   Latest game: ${latestGame.id} (${latestGame.startWord} → ${latestGame.targetWord})`,
+        );
+      }
 
       // Compress data for efficient cloud storage
       const compressedCloudData =
@@ -1210,6 +1227,16 @@ export class SupabaseService {
           cloudData = userData.data as UnifiedAppData;
         }
 
+        console.log(
+          `📥 Downloaded from cloud: ${cloudData.gameHistory?.length || 0} games in history`,
+        );
+        if (cloudData.gameHistory && cloudData.gameHistory.length > 0) {
+          const latestCloudGame = cloudData.gameHistory[0];
+          console.log(
+            `   Latest cloud game: ${latestCloudGame.id} (${latestCloudGame.startWord} → ${latestCloudGame.targetWord})`,
+          );
+        }
+
         // Merge in profile data if available (profile data takes precedence)
         if (profileData) {
           cloudData = {
@@ -1244,6 +1271,31 @@ export class SupabaseService {
 
         // Get current local data to preserve local-only progress
         const localData = await this.unifiedStore.getData();
+
+        console.log(
+          `💾 Current local data: ${localData.gameHistory?.length || 0} games in history`,
+        );
+        if (localData.gameHistory && localData.gameHistory.length > 0) {
+          const latestLocalGame = localData.gameHistory[0];
+          console.log(
+            `   Latest local game: ${latestLocalGame.id} (${latestLocalGame.startWord} → ${latestLocalGame.targetWord})`,
+          );
+        }
+
+        // Safety check: if cloud data is empty but local has games, log warning and investigate
+        if (
+          (!cloudData.gameHistory || cloudData.gameHistory.length === 0) &&
+          localData.gameHistory &&
+          localData.gameHistory.length > 0
+        ) {
+          console.warn(
+            `⚠️  WARNING: Cloud data has no games but local has ${localData.gameHistory.length} games!`,
+          );
+          console.warn(
+            "   This might indicate a sync issue. Preserving local data.",
+          );
+          // Don't completely lose local data - let the merge happen normally but log the issue
+        }
 
         // For daily challenges, prioritize cloud data (user-specific, account-bound)
         // Only merge in local progress if cloud has no data for that specific challenge
@@ -1378,23 +1430,60 @@ export class SupabaseService {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private mergeGameHistory(cloudHistory: any[], localHistory: any[]): any[] {
-    // Combine both arrays and deduplicate by ID or timestamp
+    console.log(
+      `🔄 Merging game history: ${cloudHistory.length} cloud + ${localHistory.length} local games`,
+    );
+
+    // Combine both arrays
     const combined = [...cloudHistory, ...localHistory];
-    const deduped = combined.reduce((acc, game) => {
-      const key = game.id || game.timestamp;
-      if (!acc.has(key) || game.timestamp > acc.get(key)?.timestamp) {
-        acc.set(key, game);
+
+    // Create a map to deduplicate while being conservative about data loss
+    const gameMap = new Map();
+
+    for (const game of combined) {
+      // Create a composite key using multiple identifiers to be more precise
+      const id = game.id;
+      const timestamp = game.timestamp;
+      const gameSignature = `${game.startWord}_${game.targetWord}_${game.status}_${game.totalMoves}`;
+
+      // Use ID as primary key, but fall back to timestamp + signature for legacy games
+      const primaryKey = id || `${timestamp}_${gameSignature}`;
+
+      if (!gameMap.has(primaryKey)) {
+        // New game, add it
+        gameMap.set(primaryKey, game);
+        console.log(
+          `🎮 Added game: ${primaryKey} (${game.startWord} → ${game.targetWord})`,
+        );
+      } else {
+        // Potential duplicate - keep the one with more complete data or newer timestamp
+        const existing = gameMap.get(primaryKey);
+
+        // Prefer games with more fields (more complete data)
+        const existingFields = Object.keys(existing).length;
+        const newFields = Object.keys(game).length;
+
+        if (
+          newFields > existingFields ||
+          (newFields === existingFields && game.timestamp > existing.timestamp)
+        ) {
+          gameMap.set(primaryKey, game);
+          console.log(
+            `🔄 Updated game: ${primaryKey} (more complete or newer)`,
+          );
+        } else {
+          console.log(`⏭️ Kept existing game: ${primaryKey} (already better)`);
+        }
       }
-      return acc;
-    }, new Map());
+    }
 
     // Sort by timestamp (most recent first) and keep only the last 100
-    return (
-      Array.from(deduped.values())
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0))
-        .slice(0, 100)
-    );
+    const mergedHistory = Array.from(gameMap.values())
+      .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0))
+      .slice(0, 100);
+
+    console.log(`✅ Final merged history: ${mergedHistory.length} games`);
+    return mergedHistory;
   }
 
   private mergeAchievements(

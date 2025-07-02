@@ -589,6 +589,11 @@ describe("gameReportUtils", () => {
         findShortestPath, // findShortestPathBySemanticDistanceFn
         mockBacktrackEvents,
         mockPotentialRarestMoves,
+        false, // isDailyChallenge
+        undefined, // dailyChallengeId
+        undefined, // aiPath
+        null, // aiModel
+        false, // isChallenge
       );
 
       expect(report.status).toBe("won");
@@ -636,6 +641,11 @@ describe("gameReportUtils", () => {
         findShortestPath,
         mockBacktrackEvents,
         mockPotentialRarestMoves,
+        false, // isDailyChallenge
+        undefined, // dailyChallengeId
+        undefined, // aiPath
+        null, // aiModel
+        false, // isChallenge
       );
 
       expect(report.status).toBe("given_up");
@@ -672,6 +682,11 @@ describe("gameReportUtils", () => {
         findShortestPath,
         [],
         [],
+        false, // isDailyChallenge
+        undefined, // dailyChallengeId
+        undefined, // aiPath
+        null, // aiModel
+        false, // isChallenge
       );
       expect(report.status).toBe("won");
     });
@@ -689,6 +704,11 @@ describe("gameReportUtils", () => {
         findShortestPath,
         [],
         [],
+        false, // isDailyChallenge
+        undefined, // dailyChallengeId
+        undefined, // aiPath
+        null, // aiModel
+        false, // isChallenge
       );
       expect(report.status).toBe("given_up");
     });

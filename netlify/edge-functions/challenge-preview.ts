@@ -174,6 +174,7 @@ export default async (request: Request, context: Context) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <!-- Favicon links for proper branding -->
+  <link rel="shortcut icon" href="https://synapsegame.ai/favicon.ico" />
   <link rel="icon" type="image/x-icon" href="https://synapsegame.ai/favicon.ico" />
   <link rel="icon" type="image/png" sizes="32x32" href="https://synapsegame.ai/favicon.png" />
   <link rel="icon" type="image/svg+xml" href="https://synapsegame.ai/favicon.svg" />

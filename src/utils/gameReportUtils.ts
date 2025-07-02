@@ -50,7 +50,8 @@ export interface GameReport {
   targetWord: string; // Changed from targetWord to targetWord for consistency
   status: "won" | "given_up";
   pathEfficiency: number;
-  // Daily challenge fields
+  // Challenge flags
+  isChallenge?: boolean; // Flag to identify regular challenge games (shared links)
   isDailyChallenge?: boolean; // Flag to identify daily challenge games
   dailyChallengeId?: string; // Store the daily challenge ID directly
   aiPath?: string[]; // AI solution path for daily challenges
@@ -229,11 +230,12 @@ export const generateGameReport = (
   ) => string[],
   backtrackEvents: BacktrackReportEntry[],
   potentialRarestMovesInput?: PotentialRarestMove[], // Added parameter
-  // New daily challenge parameters
+  // Challenge flags
   isDailyChallenge?: boolean,
   dailyChallengeId?: string, // Add dailyChallengeId parameter
   aiPath?: string[],
   aiModel?: string | null,
+  isChallenge?: boolean, // Add isChallenge parameter
 ): GameReport => {
   const playerSemanticDistanceTotal = calculatePathDistance(
     graphData,
@@ -305,6 +307,7 @@ export const generateGameReport = (
     earnedAchievements: [],
     pathEfficiency: pathEfficiency,
     potentialRarestMoves: potentialRarestMovesInput, // Assign to report
+    isChallenge, // Include challenge flag
     isDailyChallenge,
     dailyChallengeId,
     aiPath,
