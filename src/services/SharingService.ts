@@ -813,11 +813,16 @@ export const generateSecureGameDeepLink = (
   _previewImageUrl?: string, // For uploaded images (now unused - using hash lookup)
   userId?: string, // For user-specific image lookup
 ): string => {
-  // Generate security hash
-  const data = challengeId
+  // Generate security hash that includes userId (must match upload and edge function logic)
+  const challengeData = challengeId
     ? `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
     : `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
-  const hash = generateUrlHash(data);
+
+  // Include userId in hash calculation to match upload storage and edge function
+  const currentUserId =
+    userId || SupabaseService.getInstance().getUser()?.id || "anonymous";
+  const hashData = `${currentUserId}:${challengeData}`;
+  const hash = generateUrlHash(hashData);
 
   // Build clean parameters (no preview parameter for shorter URLs)
   const params = new URLSearchParams();
@@ -825,10 +830,10 @@ export const generateSecureGameDeepLink = (
   params.set("start", startWord);
   params.set("target", targetWord);
   params.set("hash", hash);
+  params.set("uid", currentUserId); // Always include userId for hash validation
 
   if (theme) params.set("theme", theme);
   if (challengeId) params.set("id", challengeId);
-  if (userId) params.set("uid", userId);
   // Note: No longer including preview parameter - using hash-based lookup instead
 
   // Use the app's scheme for deep linking
