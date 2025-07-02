@@ -164,7 +164,7 @@ export const uploadScreenshotToStorage = async (
       });
 
     const uploadTimeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Storage upload timeout")), 15000),
+      setTimeout(() => reject(new Error("Storage upload timeout")), 5000),
     );
 
     const { error } = (await Promise.race([
@@ -233,7 +233,7 @@ const checkUploadRateLimit = async (
       .gte("created_at", new Date(oneHourAgo).toISOString());
 
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Rate limit query timeout")), 10000),
+      setTimeout(() => reject(new Error("Rate limit query timeout")), 3000),
     );
 
     const { data, error } = (await Promise.race([
