@@ -24,9 +24,8 @@ import {
   generateDailyChallengeTaunt,
   generateSecureGameDeepLink,
   captureGameScreen,
-  uploadScreenshotToStorage,
+  copyChallengeToClipboard,
 } from "../services/SharingService";
-import { SupabaseService } from "../services/SupabaseService";
 import { useGameStore } from "../stores/useGameStore";
 import type { ExtendedTheme } from "../theme/SynapseTheme";
 import AchievementDetailDialog from "./AchievementDetailDialog";
@@ -163,127 +162,92 @@ const GameReportModal = () => {
       // Give graph time to update before screenshot
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // For web, show custom dialog (skip native sharing entirely)
+      // For web, use the new clipboard flow
       if (Platform.OS === "web") {
-        console.log("🚀 Web platform detected - showing custom dialog");
-        // Skip native sharing and go straight to our custom dialog
-        // The shareChallenge functions trigger native sharing which we don't want
+        console.log("🚀 Web platform detected - using clipboard sharing");
 
-        // Main web flow: Generate enhanced link with screenshot for custom dialog
-        let link: string;
         let message: string;
-        let previewImageUrl: string | undefined;
+        let link: string;
 
-        // Get current user ID for image lookup
-        const supabaseService = SupabaseService.getInstance();
-        const currentUser = supabaseService.getUser();
-        const userId = currentUser?.id || "anonymous";
-
-        // Try to capture screenshot and upload it
         try {
           if (mainGraphRef?.current) {
-            console.log("🚀 Attempting screenshot capture of graph...");
-
             const screenshotUri = await captureGameScreen(mainGraphRef);
-            if (screenshotUri) {
-              console.log("🚀 Screenshot captured successfully, uploading...");
+            if (!screenshotUri) {
+              throw new Error("Screenshot capture failed.");
+            }
 
-              // Use consistent format with URL generation
-              const challengeId =
-                gameReportModalReport.isDailyChallenge &&
-                gameReportModalReport.dailyChallengeId
-                  ? `${gameReportModalReport.dailyChallengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
-                  : `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
-              const uploadResult = await uploadScreenshotToStorage(
-                screenshotUri,
-                challengeId,
+            console.log("🚀 Screenshot captured, preparing for clipboard...");
+
+            if (
+              gameReportModalReport.isDailyChallenge &&
+              gameReportModalReport.dailyChallengeId
+            ) {
+              const { dailyChallengeId, aiPath, optimalPath, totalMoves } =
+                gameReportModalReport;
+              const aiSteps = aiPath
+                ? aiPath.length - 1
+                : optimalPath.length - 1;
+
+              message = generateDailyChallengeTaunt({
+                startWord,
+                targetWord,
+                aiSteps,
+                userSteps: totalMoves,
+                userCompleted: gameReportModalReport.status === "won",
+                userGaveUp: gameReportModalReport.status === "given_up",
+                challengeDate: dailyChallengeId,
+              });
+              link = generateSecureGameDeepLink(
+                "dailychallenge",
+                startWord,
+                targetWord,
+                undefined,
+                dailyChallengeId,
               );
-
-              if (uploadResult.error) {
-                console.warn(
-                  "🚀 Screenshot upload failed:",
-                  uploadResult.error,
-                );
-                // Show user-friendly error message
-                setSnackbarMessage(uploadResult.error);
-                setSnackbarVisible(true);
-              } else if (uploadResult.publicUrl) {
-                console.log(
-                  "🚀 Screenshot uploaded successfully!",
-                  uploadResult.publicUrl,
-                );
-                previewImageUrl = uploadResult.publicUrl;
-              }
             } else {
-              console.warn("🚀 Screenshot capture returned null");
+              message = generateChallengeMessage({
+                startWord,
+                targetWord,
+                playerPath,
+                steps: pathLength,
+                gameStatus: gameReportModalReport.status,
+                optimalPathLength: gameReportModalReport.optimalPath.length - 1,
+              });
+              link = generateSecureGameDeepLink(
+                "challenge",
+                startWord,
+                targetWord,
+                undefined,
+              );
+            }
+
+            const result = await copyChallengeToClipboard(
+              screenshotUri,
+              message,
+              link,
+            );
+
+            if (result.success) {
+              setSnackbarMessage("Challenge copied to clipboard!");
+            } else {
+              throw new Error(result.error || "Failed to copy to clipboard.");
             }
           } else {
-            console.warn("🚀 No mainGraphRef available");
+            throw new Error("Game report view is not available for capture.");
           }
         } catch (error) {
-          console.warn("🚀 Screenshot capture failed:", error);
+          console.warn("🚀 Clipboard sharing failed:", error);
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "An unknown error occurred";
+          setSnackbarMessage(`Error: ${errorMessage}`);
+        } finally {
+          setIsGeneratingChallenge(false);
+          setSnackbarVisible(true);
         }
 
-        if (
-          gameReportModalReport.isDailyChallenge &&
-          gameReportModalReport.dailyChallengeId
-        ) {
-          link = generateSecureGameDeepLink(
-            "dailychallenge",
-            startWord,
-            targetWord,
-            undefined, // no theme for daily challenges
-            gameReportModalReport.dailyChallengeId, // challengeId
-            previewImageUrl, // Now includes the uploaded screenshot URL!
-            userId, // For user-specific image lookup
-          );
-
-          const aiSteps = gameReportModalReport.aiPath
-            ? gameReportModalReport.aiPath.length - 1
-            : gameReportModalReport.optimalPath.length - 1;
-          const userSteps = gameReportModalReport.totalMoves;
-          const userCompleted = gameReportModalReport.status === "won";
-          const userGaveUp = gameReportModalReport.status === "given_up";
-          const challengeDate = gameReportModalReport.dailyChallengeId;
-
-          message = generateDailyChallengeTaunt({
-            startWord,
-            targetWord,
-            aiSteps,
-            userSteps,
-            userCompleted,
-            userGaveUp,
-            challengeDate,
-            optimalPathLength: gameReportModalReport.optimalPath.length - 1,
-          });
-        } else {
-          link = generateSecureGameDeepLink(
-            "challenge",
-            startWord,
-            targetWord,
-            undefined, // no theme
-            undefined, // no challengeId for regular challenges
-            previewImageUrl, // Now includes the uploaded screenshot URL!
-            userId, // For user-specific image lookup
-          );
-
-          message = generateChallengeMessage({
-            startWord,
-            targetWord,
-            playerPath,
-            steps: pathLength,
-            gameStatus: gameReportModalReport.status,
-            optimalPathLength: gameReportModalReport.optimalPath.length - 1,
-          });
-        }
-
-        setChallengeLink(link);
-        setChallengeMessage(message);
-        setChallengeDialogVisible(true);
-
-        // Keep generating flag set to prevent concurrent calls
-        // It will be reset when dialog is dismissed
-        return;
+        return; // End web flow here
       }
 
       // For native platforms, use the sharing APIs
