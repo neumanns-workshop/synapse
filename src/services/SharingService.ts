@@ -29,9 +29,6 @@ if (Platform.OS !== "web") {
   });
 }
 
-// Add Supabase import for storage
-import { SupabaseService } from "./SupabaseService";
-
 // Import html2canvas conditionally for web screenshot fallback
 interface Html2CanvasOptions {
   useCORS?: boolean;
@@ -60,6 +57,56 @@ if (typeof window !== "undefined") {
     });
 }
 
+/**
+ * Copies a challenge screenshot and text to the clipboard (Web only).
+ * Provides multiple formats (image, text, html) for best paste results.
+ */
+export const copyChallengeToClipboard = async (
+  screenshotUri: string,
+  message: string,
+  link: string,
+): Promise<{ success: boolean; error?: string }> => {
+  if (Platform.OS !== "web" || !navigator.clipboard) {
+    return { success: false, error: "Clipboard API not available" };
+  }
+
+  try {
+    // 1. Fetch the screenshot data as a blob
+    const response = await fetch(screenshotUri);
+    const imageBlob = await response.blob();
+
+    // 2. Create the HTML content with the embedded image and text
+    const htmlContent = `
+      <div>
+        <p>${message}</p>
+        <img src="${screenshotUri}" alt="Synapse Challenge" />
+        <p>Play here: <a href="${link}">${link}</a></p>
+      </div>
+    `;
+    const htmlBlob = new Blob([htmlContent], { type: "text/html" });
+
+    // 3. Create a plain text version
+    const textContent = `${message}\n\nPlay here: ${link}`;
+    const textBlob = new Blob([textContent], { type: "text/plain" });
+
+    // 4. Use the Clipboard API to write all formats
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        [imageBlob.type]: imageBlob,
+        [textBlob.type]: textBlob,
+        [htmlBlob.type]: htmlBlob,
+      }),
+    ]);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error copying to clipboard:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred";
+    return { success: false, error: errorMessage };
+  }
+};
+
 interface ShareChallengeOptions {
   startWord: string;
   targetWord: string;
@@ -86,267 +133,6 @@ interface ShareDailyChallengeOptions {
 }
 
 /**
- * Upload a screenshot to Supabase Storage for social media previews
- */
-export const uploadScreenshotToStorage = async (
-  screenshotUri: string,
-  challengeId: string,
-): Promise<{ publicUrl: string | null; error?: string }> => {
-  try {
-    console.log("🔥 DEBUG: Upload starting", {
-      screenshotUriLength: screenshotUri.length,
-      screenshotUriType: screenshotUri.startsWith("data:")
-        ? "data-uri"
-        : "other",
-      challengeId,
-    });
-
-    const supabaseService = SupabaseService.getInstance();
-    const supabase = supabaseService.getSupabaseClient();
-
-    // Get user info for rate limiting
-    const currentUser = supabaseService.getUser();
-    const userId = currentUser?.id || "anonymous";
-
-    // Generate challenge hash for consistent filename (unique per user)
-    const data = `${userId}:${challengeId.toLowerCase()}`;
-    const challengeHash = generateUrlHash(data);
-
-    // Use hash-based filename for shorter URLs
-    const fileName = `${challengeHash}.jpg`;
-    // Store in user-specific path to prevent overwrites
-    const filePath = `${userId}/${challengeHash}/${fileName}`;
-
-    // Convert data URI to blob if needed
-    let blob: Blob;
-    if (screenshotUri.startsWith("data:")) {
-      const response = await fetch(screenshotUri);
-      blob = await response.blob();
-      console.log("🔥 DEBUG: Converted data URI to blob, size:", blob.size);
-    } else {
-      // For native platforms, we might get a file URI
-      const response = await fetch(screenshotUri);
-      blob = await response.blob();
-      console.log("🔥 DEBUG: Fetched blob from URI, size:", blob.size);
-    }
-
-    if (blob.size > 5 * 1024 * 1024) {
-      // 5MB limit
-      return { publicUrl: null, error: "Image too large (max 5MB)" };
-    }
-
-    // Check upload rate limit
-    console.log("🔥 DEBUG: About to check rate limit for userId:", userId);
-    const rateLimit = await checkUploadRateLimit(userId);
-    console.log("🔥 DEBUG: Rate limit check result:", rateLimit);
-    if (!rateLimit.allowed) {
-      const retryAfter = Math.ceil(rateLimit.retryAfter / 60000); // Convert to minutes
-      console.log("🔥 DEBUG: Rate limit exceeded, retryAfter:", retryAfter);
-      return {
-        publicUrl: null,
-        error: `Upload rate limit exceeded. Try again in ${retryAfter} minutes.`,
-      };
-    }
-
-    console.log("🔥 DEBUG: Rate limit passed, uploading to storage");
-
-    // Upload to Supabase Storage with aggressive timeout protection
-    console.log(
-      "🔥 DEBUG: Starting Supabase storage upload, filePath:",
-      filePath,
-    );
-
-    const uploadPromise = supabase.storage
-      .from("preview-images")
-      .upload(filePath, blob, {
-        cacheControl: "3600",
-        upsert: true, // Replace existing file
-      });
-
-    // Upload timeout of 10 seconds should be sufficient now that rate limit is fast
-    const uploadTimeoutPromise = new Promise((_, reject) =>
-      setTimeout(
-        () => reject(new Error("Storage upload timeout (10s)")),
-        10000,
-      ),
-    );
-
-    const { error } = (await Promise.race([
-      uploadPromise,
-      uploadTimeoutPromise,
-    ])) as any;
-
-    console.log("🔥 DEBUG: Supabase storage upload completed, error:", error);
-    if (error) {
-      console.error("🔥 DEBUG: Storage upload failed:", error);
-      return { publicUrl: null, error: `Upload failed: ${error.message}` };
-    }
-
-    console.log("🔥 DEBUG: Storage upload succeeded, getting public URL");
-
-    // Get public URL - this should be fast since it's just a URL generation
-    const { data: publicUrlData } = supabase.storage
-      .from("preview-images")
-      .getPublicUrl(filePath);
-
-    const publicUrl = publicUrlData.publicUrl;
-    console.log("🔥 DEBUG: Public URL obtained:", publicUrl);
-
-    // Record the upload for rate limiting (fire and forget - don't wait)
-    recordUpload(userId).catch((err) =>
-      console.warn("🔥 DEBUG: Failed to record upload:", err),
-    );
-
-    // Schedule cleanup after 7 days (fire and forget - don't wait)
-    const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
-    scheduleImageCleanup(filePath, expiresAt).catch((err) =>
-      console.warn("🔥 DEBUG: Failed to schedule cleanup:", err),
-    );
-
-    return { publicUrl, error: undefined };
-  } catch (error) {
-    console.error("🔥 DEBUG: Upload failed with error:", error);
-    return {
-      publicUrl: null,
-      error: error instanceof Error ? error.message : String(error),
-    };
-  }
-};
-
-/**
- * Check if user has exceeded upload rate limit
- */
-const checkUploadRateLimit = async (
-  userId: string,
-): Promise<{
-  allowed: boolean;
-  retryAfter: number;
-}> => {
-  try {
-    console.log("🔥 DEBUG: checkUploadRateLimit starting for userId:", userId);
-    const supabaseService = SupabaseService.getInstance();
-    const supabase = supabaseService.getSupabaseClient();
-
-    console.log("🔥 DEBUG: Calling optimized database function");
-
-    // Use the optimized database function that bypasses RLS
-    const rpcPromise = supabase.rpc("check_upload_rate_limit", {
-      p_user_id: userId,
-      p_limit: 5,
-    });
-
-    // Add timeout but make it longer since the function should be fast
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(
-        () => reject(new Error("Database function timeout (8s)")),
-        8000,
-      ),
-    );
-
-    const { data, error } = (await Promise.race([
-      rpcPromise,
-      timeoutPromise,
-    ])) as any;
-
-    console.log("🔥 DEBUG: Database function result:", { data, error });
-
-    if (error) {
-      console.error("Rate limit check error:", error);
-      // If we can't check, allow it but log the error
-      return { allowed: true, retryAfter: 0 };
-    }
-
-    if (!data || data.length === 0) {
-      console.log("🔥 DEBUG: No data returned, allowing upload");
-      return { allowed: true, retryAfter: 0 };
-    }
-
-    const result = data[0];
-    const allowed = result.allowed;
-    const uploadCount = result.upload_count;
-
-    console.log("🔥 DEBUG: Function result:", {
-      uploadCount,
-      allowed,
-      oldestUpload: result.oldest_upload,
-    });
-
-    if (!allowed) {
-      console.log("🔥 DEBUG: Rate limit exceeded by database function");
-      // Calculate retry time based on oldest upload + 1 hour
-      const oldestUpload = result.oldest_upload;
-      const retryAfter = oldestUpload
-        ? new Date(oldestUpload).getTime() + 60 * 60 * 1000 - Date.now()
-        : 30 * 60 * 1000; // 30 minutes default
-
-      return { allowed: false, retryAfter: Math.max(0, retryAfter) };
-    }
-
-    console.log("🔥 DEBUG: Rate limit check passed");
-    return { allowed: true, retryAfter: 0 };
-  } catch (error) {
-    console.error("Rate limit check failed:", error);
-    // If rate limit check fails, DENY the upload to prevent abuse
-    return { allowed: false, retryAfter: 60 * 1000 }; // 1 minute retry
-  }
-};
-
-/**
- * Record upload for rate limiting
- */
-const recordUpload = async (userId: string): Promise<void> => {
-  try {
-    const supabaseService = SupabaseService.getInstance();
-    const supabase = supabaseService.getSupabaseClient();
-
-    // Simple insert with timeout to prevent hanging
-    const insertPromise = supabase.from("upload_rate_limits").insert({
-      user_id: userId,
-      created_at: new Date().toISOString(),
-    });
-
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Record upload timeout (3s)")), 3000),
-    );
-
-    await Promise.race([insertPromise, timeoutPromise]);
-  } catch (error) {
-    console.error("Error recording upload:", error);
-    // Non-critical error, don't fail the upload
-  }
-};
-
-/**
- * Schedule image cleanup (delete after expiration)
- */
-const scheduleImageCleanup = async (
-  filename: string,
-  expiresAt: number,
-): Promise<void> => {
-  try {
-    const supabaseService = SupabaseService.getInstance();
-    const supabase = supabaseService.getSupabaseClient();
-
-    // Use upsert to handle duplicate filenames gracefully
-    await supabase.from("image_cleanup_queue").upsert(
-      {
-        filename,
-        expires_at: new Date(expiresAt).toISOString(),
-        created_at: new Date().toISOString(),
-        processed: false,
-      },
-      {
-        onConflict: "filename",
-        ignoreDuplicates: false,
-      },
-    );
-  } catch (error) {
-    console.error("Error scheduling cleanup:", error);
-    // Non-critical error, don't fail the upload
-  }
-};
-
-/**
  * Share a challenge with friends
  */
 export const shareChallenge = async ({
@@ -366,73 +152,12 @@ export const shareChallenge = async ({
       includeScreenshot,
     });
 
-    // Upload screenshot to get public URL for social media previews
-    let previewImageUrl: string | null = null;
-    if (includeScreenshot && screenshotRef && screenshotRef.current) {
-      console.log("🎯 Starting screenshot capture and upload...");
-      try {
-        // Wrap entire screenshot process in timeout to prevent hanging
-        const screenshotProcess = async () => {
-          const screenshotUri = await captureGameScreen(screenshotRef);
-          if (screenshotUri) {
-            console.log("🎯 Screenshot captured, uploading to storage...");
-            // Use the same format as URL generation for consistent hashing
-            const challengeId = `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
-            const uploadResult = await uploadScreenshotToStorage(
-              screenshotUri,
-              challengeId,
-            );
-            if (uploadResult.error) {
-              console.warn(
-                "🎯 Failed to upload screenshot:",
-                uploadResult.error,
-              );
-              return null;
-            } else {
-              console.log(
-                "🎯 Screenshot uploaded successfully, URL:",
-                uploadResult.publicUrl,
-              );
-              return uploadResult.publicUrl;
-            }
-          } else {
-            console.warn("🎯 Screenshot capture failed");
-            return null;
-          }
-        };
-
-        // Maximum 10 seconds for entire screenshot process
-        const screenshotTimeout = new Promise<null>((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Screenshot process timeout (10s)")),
-            10000,
-          ),
-        );
-
-        previewImageUrl = await Promise.race([
-          screenshotProcess(),
-          screenshotTimeout,
-        ]);
-      } catch (error) {
-        console.error("🎯 Screenshot process failed:", error);
-        // Don't fail the entire sharing flow if screenshot fails
-        previewImageUrl = null;
-      }
-    } else {
-      console.log("🎯 Skipping screenshot capture:", {
-        includeScreenshot,
-        hasRef: !!screenshotRef?.current,
-      });
-    }
-
     // Generate the secure deep link
     const deepLink = generateSecureGameDeepLink(
       "challenge",
       startWord,
       targetWord,
       theme,
-      undefined, // no challengeId for regular challenges
-      previewImageUrl || undefined,
     );
 
     // Generate challenge message
@@ -543,35 +268,6 @@ export const shareDailyChallenge = async ({
   gameReport,
 }: ShareDailyChallengeOptions): Promise<boolean> => {
   try {
-    // Upload screenshot to get public URL for social media previews
-    let previewImageUrl: string | null = null;
-    if (includeScreenshot && screenshotRef && screenshotRef.current) {
-      try {
-        const screenshotUri = await captureGameScreen(screenshotRef);
-        if (screenshotUri) {
-          // Use the same format as URL generation for consistent hashing
-          const challengeIdForUpload = `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
-          const uploadResult = await uploadScreenshotToStorage(
-            screenshotUri,
-            challengeIdForUpload,
-          );
-          if (uploadResult.error) {
-            console.warn(
-              "🎯 Failed to upload daily challenge screenshot:",
-              uploadResult.error,
-            );
-            // Continue without preview image - sharing will still work
-          } else {
-            console.log("🎯 Daily challenge screenshot uploaded successfully");
-            previewImageUrl = uploadResult.publicUrl;
-          }
-        }
-      } catch (error) {
-        console.error("🎯 Daily challenge screenshot process failed:", error);
-        // Don't fail the entire sharing flow if screenshot fails
-      }
-    }
-
     // Generate the secure daily challenge deep link
     const deepLink = generateSecureGameDeepLink(
       "dailychallenge",
@@ -579,7 +275,6 @@ export const shareDailyChallenge = async ({
       targetWord,
       undefined, // no theme for daily challenges
       challengeId,
-      previewImageUrl || undefined,
     );
 
     // Generate taunting message
@@ -861,7 +556,7 @@ export const generateDailyChallengeTaunt = ({
 /**
  * Generate URL hash for security validation
  */
-const generateUrlHash = (data: string): string => {
+export const generateUrlHash = (data: string): string => {
   // Simple hash function for URL validation (matches edge function)
   let hashValue = 0;
   const secret = "synapse_challenge_2025";
@@ -883,31 +578,24 @@ export const generateSecureGameDeepLink = (
   targetWord: string,
   theme?: string,
   challengeId?: string, // For daily challenges
-  _previewImageUrl?: string, // For uploaded images (now unused - using hash lookup)
-  userId?: string, // For user-specific image lookup
 ): string => {
-  // Generate security hash that includes userId (must match upload and edge function logic)
+  // Generate security hash (must match upload and edge function logic)
   const challengeData = challengeId
     ? `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
     : `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
 
-  // Include userId in hash calculation to match upload storage and edge function
-  const currentUserId =
-    userId || SupabaseService.getInstance().getUser()?.id || "anonymous";
-  const hashData = `${currentUserId}:${challengeData}`;
-  const hash = generateUrlHash(hashData);
+  // Hashing no longer includes userId, it's based on challenge data only
+  const hash = generateUrlHash(challengeData);
 
-  // Build clean parameters (no preview parameter for shorter URLs)
+  // Build clean parameters (no preview or uid parameter for shorter URLs)
   const params = new URLSearchParams();
   params.set("type", type);
   params.set("start", startWord);
   params.set("target", targetWord);
   params.set("hash", hash);
-  params.set("uid", currentUserId); // Always include userId for hash validation
 
   if (theme) params.set("theme", theme);
   if (challengeId) params.set("id", challengeId);
-  // Note: No longer including preview parameter - using hash-based lookup instead
 
   // Use the app's scheme for deep linking
   if (typeof window !== "undefined") {
@@ -935,6 +623,7 @@ export const parseEnhancedGameLink = (
   challengeId?: string;
   theme?: string;
   hash?: string;
+  uid?: string; // Keep for parsing old links
   previewImageUrl?: string;
 } | null => {
   try {
@@ -948,6 +637,7 @@ export const parseEnhancedGameLink = (
       challengeId: params.get("id") || undefined,
       theme: params.get("theme") || undefined,
       hash: params.get("hash") || undefined,
+      uid: params.get("uid") || undefined, // Keep for old links
       previewImageUrl: params.get("preview") || undefined,
     };
   } catch (error) {

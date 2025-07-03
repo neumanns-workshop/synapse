@@ -2,7 +2,7 @@ import { useGameStore } from "../stores/useGameStore";
 import { Logger } from "../utils/logger";
 import { unifiedDataStore } from "../services/UnifiedDataStore";
 import { dailyChallengesService } from "./DailyChallengesService";
-import { parseEnhancedGameLink } from "./SharingService";
+import { parseEnhancedGameLink, generateUrlHash } from "./SharingService";
 import {
   loadGameHistory,
   loadCurrentGame,
@@ -129,6 +129,19 @@ export class GameFlowManager {
       challengeData?.startWord &&
       challengeData?.targetWord
     ) {
+      // --- HASH VALIDATION ---
+      if (challengeData.isValid === false) {
+        Logger.warn(
+          "GameFlowManager: Player challenge link has invalid hash. Aborting.",
+        );
+        return {
+          action: "showMessage",
+          message:
+            "This challenge link is invalid or has been tampered with. Please ask your friend to send a new one.",
+        };
+      }
+      // --- END HASH VALIDATION ---
+
       // Check if this challenge has already been played
       const hasPlayedBefore = await this.hasPlayedChallenge(
         challengeData.startWord,
@@ -154,6 +167,19 @@ export class GameFlowManager {
 
     // Handle daily challenge entry (high priority but respects tutorial/news)
     if (entryPoint === "dailyChallenge" && challengeData?.challengeId) {
+      // --- HASH VALIDATION ---
+      if (challengeData.isValid === false) {
+        Logger.warn(
+          "GameFlowManager: Daily challenge link has invalid hash. Aborting.",
+        );
+        return {
+          action: "showMessage",
+          message:
+            "This daily challenge link is invalid or has been tampered with. Please try the link from the main site.",
+        };
+      }
+      // --- END HASH VALIDATION ---
+
       if (state.shouldShowTutorial) {
         Logger.debug(" Daily challenge entry but showing tutorial first");
         return { action: "tutorial" };
@@ -280,9 +306,29 @@ export class GameFlowManager {
         enhancedData &&
         enhancedData.type &&
         enhancedData.startWord &&
-        enhancedData.targetWord
+        enhancedData.targetWord &&
+        enhancedData.hash
       ) {
         Logger.debug("🎮 GameFlowManager: Using enhanced URL format");
+
+        // --- HASH VALIDATION ---
+        const { type, startWord, targetWord, challengeId, hash } = enhancedData;
+        const challengeData =
+          type === "dailychallenge" && challengeId
+            ? `${challengeId}:${startWord.toLowerCase()}:${targetWord.toLowerCase()}`
+            : `${startWord.toLowerCase()}:${targetWord.toLowerCase()}`;
+
+        const expectedHash = generateUrlHash(challengeData);
+        const isValid = expectedHash === hash;
+
+        if (!isValid) {
+          Logger.warn("🎮 GameFlowManager: Invalid hash detected!", {
+            received: hash,
+            expected: expectedHash,
+            data: challengeData,
+          });
+        }
+        // --- END HASH VALIDATION ---
 
         return {
           type: enhancedData.type as "challenge" | "dailychallenge",
@@ -290,7 +336,7 @@ export class GameFlowManager {
           targetWord: enhancedData.targetWord,
           challengeId: enhancedData.challengeId,
           theme: enhancedData.theme,
-          isValid: true,
+          isValid,
         };
       }
 
